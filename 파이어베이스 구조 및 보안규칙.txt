@@ -1,0 +1,345 @@
+퍼스트펭귄 Firebase 데이터베이스 구조
+
+파이어베이스는 v9버전을 사용하도록 합니다. 
+
+파이어베이스 데이터 구조 설명
+컬렉션 개요
+시스템은 다음 5가지 주요 컬렉션을 사용합니다:
+
+questionSets - 문제 데이터 저장(문제풀이기록 세트와 연동)
+attempts - 사용자 문제 풀이 기록
+sessions - 풀이 세션 정보
+userProgress - 사용자별 진행 상황
+userStatistics - 사용자별 통계 데이터
+
+컬렉션별 상세 설명
+1. questionSets
+
+모든 문제 및 정답 데이터를 저장
+문서 ID 형식: "연도_과목" (예: "2024_운동생리학")
+포함 정보: 문제, 정답, 해설, 이미지 경로 등
+이미 구성되어 있는 기본 데이터
+
+2. attempts
+
+사용자가 문제를 풀 때마다 기록되는 개별 풀이 시도
+세션 ID를 통해 같은 시간대 풀이를 그룹화
+문제 식별 정보(연도, 과목, 번호)를 명확하게 저장
+정답/오답 여부, 사용자 답변, 정답 정보 포함
+일반 문제/모의고사 구분 가능
+
+3. sessions
+
+하나의 문제풀이기록 세트 또는 모의고사 풀이 세션 정보
+세션 시작/종료 시간, 총 문제 수, 정답 수 등 요약 정보
+모의고사의 경우 과목별 성적 통계 포함
+여러 번 시도해도 각 시도를 별도 세션으로 구분 가능
+
+4. userProgress
+
+사용자별 학습 진행 상황을 통합적으로 저장
+과목별 진행도(총 문제 수, 푼 문제 수, 정답률 등)
+모의고사 진행 상황 및 결과
+최근 세션 정보를 저장하여 빠른 접근 가능
+
+5. userStatistics
+
+사용자별 종합 통계 정보
+전체, 과목별, 연도별 정답률 및 성과 데이터
+사용 패턴 분석을 위한 메타데이터
+시간에 따른 성적 추이 파악 가능
+
+주요 기능 지원
+이 데이터 구조는 다음 기능을 효과적으로 지원합니다:
+
+개인별 정오표: 사용자가 푼 문제의 정답/오답 기록을 세션별로 확인 가능
+반복 학습 관리: 같은 문제풀이기록 세트를 여러 번 풀어도 각 시도를 구분하여 기록
+모의고사 분석: 모의고사 결과를 과목별로 세분화하여 분석 가능
+학습 추이 분석: 시간에 따른 성적 변화를 추적 가능
+관리자 통계: 문제별 정답률, 많이 틀리는 문제 등 빅데이터 분석 가능
+
+이 구조는 사용자의 학습 경험을 향상시키고, 관리자에게 유용한 분석 데이터를 제공하도록 최적화되었습니다.
+
+파이어베이스 보안규칙
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 관리자 확인 함수 (admins 컬렉션 활용)
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    // adminUsers 컬렉션도 확인 (코드 호환성)
+    function isAdminUser() {
+      return request.auth != null && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+    
+    // 관리자 이메일 직접 체크 (대체 방법)
+    function isAdminEmail() {
+      let adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+      return request.auth != null && adminEmails.hasAny([request.auth.token.email]);
+    }
+    
+    // exams 컬렉션 규칙 추가
+    match /exams/{examId} {
+      allow read: if request.auth != null;  // 로그인한 사용자는 모두 읽기 가능
+      allow write: if isAdmin() || isAdminEmail() || isAdminUser();  // 관리자만 쓰기 가능
+    }
+    
+    // mockexams 컬렉션에 대한 접근 권한 추가 (소문자 버전)
+    match /mockexams/{mockExamId} {
+      allow read: if request.auth != null;  // 로그인한 사용자는 모두 읽기 가능
+      allow write: if isAdmin() || isAdminEmail() || isAdminUser();  // 관리자만 쓰기 가능
+      
+      // 하위 컬렉션에 대한 접근 권한 (answers 등)
+      match /{subcollection}/{docId} {
+        allow read: if request.auth != null;
+        allow write: if isAdmin() || isAdminEmail() || isAdminUser();
+      }
+    }
+    
+    // mockExams 컬렉션에 대한 접근 권한 추가 (대문자 E 버전)
+    match /mockExams/{mockExamId} {
+      allow read: if request.auth != null;  // 로그인한 사용자는 모두 읽기 가능
+      allow write: if isAdmin() || isAdminEmail() || isAdminUser();  // 관리자만 쓰기 가능
+      
+      // 하위 컬렉션에 대한 접근 권한 (answers 등)
+      match /{subcollection}/{docId} {
+        allow read: if request.auth != null;
+        allow write: if isAdmin() || isAdminEmail() || isAdminUser();
+      }
+    }
+    
+    // 모든 중첩 컬렉션에 대한 접근 허용 (소문자 버전)
+    match /mockexams/{mockExamId}/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // 모든 중첩 컬렉션에 대한 접근 허용 (대문자 E 버전)
+    match /mockExams/{mockExamId}/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // adminUsers 컬렉션 규칙 추가
+    match /adminUsers/{userId} {
+      // 자신의 문서는 읽을 수 있음
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // 관리자는 모든 문서 접근 가능
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+    
+    // 기존 규칙들 유지...
+    // 공지사항 컬렉션 규칙
+    match /notices/{noticeId} {
+      allow get, list: if !resource.data.isDraft;
+      allow get, list: if request.auth != null;
+      allow create, update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // 관리자 컬렉션
+    match /admins/{adminId} {
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // 사용자 데이터 컬렉션 규칙
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    match /mockExamResults/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    // userStatistics 컬렉션 규칙
+    match /userStatistics/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // 문제 통계 컬렉션 규칙
+    match /questionStats/{questionId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // attempts 컬렉션 규칙 추가 (필요시)
+    match /attempts/{attemptId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // 다른 컬렉션에 대한 기본 규칙
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+
+
+작업 요약 및 다음 Claude 전달 사항
+1. 기존 데이터 구조
+기존 파이어베이스 컬렉션
+
+questionSets: 문제 데이터 저장 (유지됨)
+attempts: 사용자 문제 풀이 시도 기록
+mockExams: 모의고사 정보 (유지됨)
+userProgress: 사용자별 진행 상황
+기타: admins, notices, userStatistics, mockExamResults 등
+
+기존 쿼리빌더 구조
+/attempts
+- Document ID
+- device
+- isCorrect
+- questionData (year, isFromMockExam, number, subject(URL인코딩됨), mockExamPart)
+- setId
+- setType
+- source
+- timestamp
+- userAnswer
+- userEmail
+- userId
+- userName
+
+/userProgress
+- Document ID (userId와 동일)
+- createdAt
+- lastUpdated
+- subjectProgress (과목별 진행 상황)
+- yearlyMockExams (연도별, 교시별 모의고사 진행 상황)
+2. 새로운 데이터 구조
+개선된 컬렉션 구조
+
+questionSets: 기존 구조 유지 (문제 데이터)
+attempts: 개선된 구조 (sessionId 추가, URL 인코딩 제거)
+sessions: 새로 추가 (풀이 세션 정보)
+userProgress: 개선된 구조 (세션 기록 포함)
+userStatistics: 개선된 구조 (세션 기반 통계)
+기존 mockExams, admins, notices 유지
+
+새 컬렉션 세부 구조
+javascript// attempts 컬렉션
+{
+  userId: "사용자ID",
+  userEmail: "이메일",
+  userName: "이름",
+  timestamp: serverTimestamp(),
+  device: "기기정보",
+  
+  sessionId: "20240413_175530", // 세션 ID (YYYYMMDD_HHMMSS)
+  
+  questionData: {
+    year: "2024", 
+    subject: "운동생리학", // 원본 텍스트
+    number: 1,
+    isFromMockExam: false,
+    mockExamPart: null
+  },
+  
+  userAnswer: 2, // 0-3은 1-4번 의미
+  correctAnswer: 1,
+  isCorrect: false,
+  
+  setId: "2024_운동생리학",
+  mockExamId: null,
+  source: "/analytics"
+}
+
+// sessions 컬렉션
+{
+  sessionId: "20240413_175530",
+  userId: "사용자ID",
+  startTime: serverTimestamp(),
+  endTime: serverTimestamp(),
+  
+  type: "regular", // "regular" 또는 "mockexam"
+  year: "2024",
+  subject: "운동생리학",
+  mockExamId: null,
+  mockExamPart: null,
+  
+  totalQuestions: 20,
+  attemptedQuestions: 20,
+  correctAnswers: 15,
+  accuracy: 75,
+  
+  subjectStats: {} // 모의고사일 경우 과목별 통계
+}
+
+// userProgress 컬렉션
+{
+  userId: "사용자ID",
+  createdAt: serverTimestamp(),
+  lastUpdated: serverTimestamp(),
+  
+  subjectProgress: {
+    "운동생리학": {
+      total: 20,
+      completed: 20,
+      correctCount: 15,
+      lastExamId: "2024_운동생리학",
+      lastAccessed: timestamp,
+      recentSessions: [] // 최근 세션 정보
+    }
+  },
+  
+  yearlyMockExams: {
+    "2024": {
+      "교시1": {
+        totalQuestions: 80,
+        completed: 80,
+        correctCount: 65,
+        accuracy: 81.25,
+        lastAttempted: timestamp,
+        recentSessions: [],
+        subjects: {}
+      }
+    }
+  }
+}
+3. 주요 개선 사항
+
+세션 기반 설계:
+
+동일 문제풀이기록 세트의 여러 시도를 sessionId로 구분
+각 시도마다 별도의 정오표 생성 가능
+
+
+데이터 구조 일관성:
+
+과목명을 원본 텍스트로 저장(URL 인코딩 제거)
+모든 컬렉션에서 일관된 형식 사용
+
+
+모의고사와 일반 문제 통합:
+
+동일한 문제(예: 2024년 운동생리학 4번)를 어디서 풀든 일관되게 관리
+동시에 출처(일반/모의고사) 구분 유지
+
+
+
+4. 다음 작업 방향
+
+JavaScript 파일 수정:
+
+문제 풀이 시 세션 생성/관리 코드 구현
+attempts 저장 로직 수정
+userProgress, userStatistics 업데이트 로직 수정
+
+
+정오표 표시 구현:
+
+세션별 정오표 선택 UI
+모의고사 과목별 탭 UI
+상세 정오표 데이터 표시
+
+
+
+파이어베이스 구성은 이미 완료되었으며, 이제 애플리케이션 코드를 수정하여 새 데이터 구조를 활용할 차례입니다.

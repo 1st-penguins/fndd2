@@ -1,0 +1,20 @@
+/* 과목별 색상 설정 */
+.subject-tab[data-subject="운동생리학/운동상해"] {
+  background-color: rgba(54, 129, 171, 0.2);
+  border-color: rgba(54, 129, 171, 0.5);
+}
+
+.subject-tab[data-subject="건강체력평가/기능해부학"] {
+  background-color: rgba(174, 215, 237, 0.2);
+  border-color: rgba(174, 215, 237, 0.5);
+}
+
+.subject-tab[data-subject="운동처방론/병태생리학"] {
+  background-color: rgba(152, 155, 190, 0.2);
+  border-color: rgba(152, 155, 190, 0.5);
+}
+
+.subject-tab[data-subject="운동부하검사/스포츠심리학"] {
+  background-color: rgba(205, 198, 231, 0.2);
+  border-color: rgba(205, 198, 231, 0.5);
+} 

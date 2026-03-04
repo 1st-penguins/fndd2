@@ -1,0 +1,236 @@
+/* 기본 변수 설정 - 새로운 색상 팔레트 */
+:root {
+    /* 🐧 퍼스트펭귄 메인 컬러 */
+    --penguin-navy: #1D2F4E;
+    /* 메인 남색 */
+    --penguin-skyblue: #5FB2C9;
+    /* 메인 하늘색 */
+
+    /* 서브 컬러 */
+    --iceberg-blue: #A3D5E0;
+    /* 연한 파랑 */
+    --frost-white: #FFFFFF;
+    /* 흰색 */
+    --aqua-accent: #5FB2C9;
+    /* 강조색 (하늘색과 동일) */
+    --deep-sea-gray: #6F7C8B;
+    /* 회색 */
+
+    /* 🎯 프리미엄 디자인 토큰 */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-blur: blur(12px);
+
+    --shadow-premium: 0 10px 40px rgba(29, 47, 78, 0.08);
+    --shadow-sm: 0 2px 8px rgba(29, 47, 78, 0.05);
+    --shadow-lg: 0 20px 60px rgba(29, 47, 78, 0.12);
+
+    --radius-premium: 20px;
+    --radius-sm: 12px;
+    --radius-full: 9999px;
+
+    /* 🎯 자격증별 테마 색상 (기본값: 건강운동관리사) */
+    --cert-primary: #1D2F4E;
+    --cert-primary-dark: #162740;
+    --cert-primary-light: #2a4570;
+    --cert-gradient-start: #1D2F4E;
+    --cert-gradient-end: #2a4570;
+
+    /* 기존 변수 재정의 */
+    --primary-color: var(--penguin-navy);
+    --secondary-color: var(--penguin-skyblue);
+    --accent-color: var(--penguin-skyblue);
+    --light-blue: var(--iceberg-blue);
+    --dark-blue: var(--penguin-navy);
+    --light-gray: #F5F7FA;
+    --dark-gray: var(--deep-sea-gray);
+    --white: var(--frost-white);
+    --shadow: var(--shadow-premium);
+}
+
+/* 관리자 전용 요소 기본 스타일 (JavaScript에서 관리자일 때 표시) */
+.admin-only {
+  display: none;
+}
+
+/* 리셋 및 기본 스타일 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", 'Apple SD Gothic Neo', 'Pretendard', 'Malgun Gothic', '맑은 고딕', sans-serif;
+}
+
+html {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+body {
+    background-color: var(--light-gray);
+    color: var(--deep-sea-gray);
+    line-height: 1.6;
+    /* 웹/앱 폰트 통일 - Inter Variable 우선 사용 */
+    font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", 'Apple SD Gothic Neo', 'Pretendard', 'Malgun Gothic', '맑은 고딕', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 타이포그래피 기본 설정 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--penguin-navy);
+}
+
+a {
+    text-decoration: none;
+    color: var(--aqua-accent);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--penguin-navy);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 접근성: 스킵 링크 */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--penguin-navy);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    z-index: 1000;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+    left: 16px;
+    top: 8px;
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* 포커스 가시성 */
+:focus-visible {
+    outline: 2px solid var(--penguin-skyblue);
+    outline-offset: 3px;
+}
+
+/* 유틸리티 클래스 */
+.text-center {
+    text-align: center;
+}
+
+.mb-1 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+    margin-bottom: 1rem;
+}
+
+.mb-3 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 2rem;
+}
+
+.mt-1 {
+    margin-top: 0.5rem;
+}
+
+.mt-2 {
+    margin-top: 1rem;
+}
+
+.mt-3 {
+    margin-top: 1.5rem;
+}
+
+.mt-4 {
+    margin-top: 2rem;
+}
+
+/* 색상 유틸리티 클래스 추가 */
+.text-primary {
+    color: var(--penguin-navy);
+}
+
+.text-secondary {
+    color: var(--aqua-accent);
+}
+
+.text-light {
+    color: var(--iceberg-blue);
+}
+
+.text-dark {
+    color: var(--deep-sea-gray);
+}
+
+.bg-primary {
+    background-color: var(--penguin-navy);
+}
+
+.bg-secondary {
+    background-color: var(--aqua-accent);
+}
+
+.bg-light {
+    background-color: var(--iceberg-blue);
+}
+
+.bg-white {
+    background-color: var(--frost-white);
+}
+
+/* 반응형 미디어 쿼리 기본 설정 */
+@media (max-width: 1200px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+@media (max-width: 992px) {
+    .container {
+        max-width: 720px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        max-width: 540px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+}

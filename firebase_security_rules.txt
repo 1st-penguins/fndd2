@@ -1,0 +1,158 @@
+==============================================
+퍼스트펭귄 - Firebase 보안 규칙 (업데이트)
+==============================================
+
+아래 규칙을 Firebase 콘솔의 Firestore Database > 규칙 탭에 추가하세요.
+
+기존 규칙에 다음 섹션을 추가:
+
+```
+// users 컬렉션 - 구독 정보 관리
+match /users/{userId} {
+  // 본인 데이터만 읽기/쓰기 가능
+  allow read, write: if request.auth != null && request.auth.uid == userId;
+  
+  // 관리자는 모든 사용자 데이터 접근 가능
+  allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+  
+  // 구독 정보는 본인만 읽기 가능, 쓰기는 서버에서만
+  match /subscription/{document} {
+    allow read: if request.auth != null && request.auth.uid == userId;
+    allow write: if false; // 서버에서만 쓰기 가능 (보안)
+  }
+}
+
+// 결제 기록 컬렉션 (선택사항)
+match /payments/{paymentId} {
+  // 본인 결제 기록만 읽기 가능
+  allow read: if request.auth != null && 
+              resource.data.userId == request.auth.uid;
+  
+  // 쓰기는 서버에서만 (보안을 위해)
+  allow write: if false;
+  
+  // 관리자는 모든 결제 기록 확인 가능
+  allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+}
+```
+
+전체 규칙 예시:
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 관리자 확인 함수
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    function isAdminUser() {
+      return request.auth != null && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+    
+    function isAdminEmail() {
+      let adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+      return request.auth != null && adminEmails.hasAny([request.auth.token.email]);
+    }
+    
+    // users 컬렉션 - 구독 정보
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // payments 컬렉션 (선택사항)
+    match /payments/{paymentId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // 기존 규칙들...
+    match /notices/{noticeId} {
+      allow get, list: if !resource.data.isDraft;
+      allow get, list: if request.auth != null;
+      allow create, update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+      
+      // 좋아요 기능: 로그인한 사용자는 likes 필드만 업데이트 가능
+      allow update: if request.auth != null 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+                    && request.resource.data.likes.users.size() <= resource.data.get('likes', {users: []}).users.size() + 1;
+    }
+    
+    match /admins/{adminId} {
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    match /adminUsers/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+    
+    match /attempts/{attemptId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    match /sessions/{sessionId} {
+      allow read, write: if request.auth != null;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    match /userStatistics/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    match /questionStats/{questionId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // purchases 컬렉션 (강의/PDF 구매 내역)
+    match /purchases/{purchaseId} {
+      // 본인 구매 내역만 읽기 가능
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      // 관리자는 모든 구매 내역 읽기 가능
+      allow read: if isAdmin() || isAdminEmail() || isAdminUser();
+      // 쓰기는 로그인한 사용자만 (구매 시)
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // 관리자는 수정/삭제 가능
+      allow update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // coupons 컬렉션 (쿠폰 관리)
+    match /coupons/{couponId} {
+      // 모든 로그인 사용자 읽기 가능 (쿠폰 검증용)
+      allow read: if request.auth != null;
+      // 관리자만 쿠폰 생성/수정/삭제 가능
+      allow create, update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // couponUsage 컬렉션 (쿠폰 사용 내역)
+    match /couponUsage/{usageId} {
+      // 본인 사용 내역만 읽기 가능
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      // 관리자는 모든 사용 내역 읽기 가능
+      allow read: if isAdmin() || isAdminEmail() || isAdminUser();
+      // 쓰기는 로그인한 사용자만
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // 관리자는 수정/삭제 가능
+      allow update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+```
+
+==============================================
+주의사항:
+1. 위 규칙을 적용하기 전에 기존 규칙을 백업하세요.
+2. 규칙 적용 후 테스트 환경에서 충분히 테스트하세요.
+3. 보안을 위해 payments 컬렉션 쓰기는 서버에서만 가능하도록 설정했습니다.
+==============================================
+

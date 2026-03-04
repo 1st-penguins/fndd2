@@ -1,0 +1,113 @@
+/* ============================================
+   Floating Action Buttons (FAB) Styles
+   ============================================ */
+
+.fab-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1000;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.fab-button {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--penguin-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-premium);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    font-size: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.fab-button.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.fab-button:hover {
+    transform: translateY(-5px);
+    background: var(--frost-white);
+    box-shadow: var(--shadow-lg);
+    color: var(--penguin-skyblue);
+}
+
+.fab-button:active {
+    transform: scale(0.95);
+}
+
+/* Admin Notice Button - Distinctive Style */
+.fab-button--admin {
+    background: rgba(29, 47, 78, 0.9);
+    color: var(--frost-white);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.fab-button--admin:hover {
+    background: var(--penguin-navy);
+    color: var(--penguin-skyblue);
+}
+
+/* Tooltip style */
+.fab-button::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 70px;
+    background: rgba(29, 47, 78, 0.8);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.fab-button:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .fab-container {
+        bottom: 20px;
+        right: 20px;
+        gap: 10px;
+    }
+
+    .fab-button {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+
+    .fab-button::after {
+        display: none;
+        /* Hide tooltips on mobile */
+    }
+}
+
+/* Home Page Specific Adjustment (if mobile footer exists) */
+body.home-page .fab-container {
+    /* Potential adjustment if there's a floating bottom nav on mobile index */
+}

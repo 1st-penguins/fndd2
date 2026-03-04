@@ -1,0 +1,206 @@
+/* analytics-tab.css - 홈 화면 학습 분석 탭 스타일 (미니멀 & 프리미엄) */
+
+/* 대시보드 그리드 레이아웃 */
+.analytics-dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 10px 0 40px;
+}
+
+/* 1. 요약 통계 카드 (Overview Stats) */
+.stats-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.stats-card.stat-item {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-card.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.stats-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--penguin-navy);
+    margin-bottom: 4px;
+}
+
+.stats-label {
+    font-size: 0.85rem;
+    color: #868e96;
+    font-weight: 500;
+}
+
+/* 2. 섹션 공통 스타일 */
+.analytics-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    /* 부드러운 그림자 */
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--penguin-navy);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 16px;
+    background: var(--aqua-accent);
+    border-radius: 2px;
+}
+
+/* 3. 차트 영역 */
+.chart-container {
+    position: relative;
+    height: 240px;
+    width: 100%;
+}
+
+/* 4. 취약 문제 & 복습 추천 카드 리스트 */
+.recommendation-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.question-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    border-left: 4px solid var(--penguin-skyblue);
+    transition: background-color 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+}
+
+.question-card:hover {
+    background: #edf2ff;
+}
+
+.question-card.priority-high {
+    border-left-color: #ff6b6b;
+    /* 빨강 (오답) */
+    background: #fff5f5;
+}
+
+.question-card.priority-high:hover {
+    background: #ffe3e3;
+}
+
+.q-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    color: #adb5bd;
+}
+
+.q-title {
+    font-weight: 600;
+    color: var(--penguin-navy);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.q-badges {
+    display: flex;
+    gap: 6px;
+}
+
+.q-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.badge-wrong {
+    background: #ff6b6b;
+    color: white;
+}
+
+.badge-review {
+    background: #51cf66;
+    color: white;
+}
+
+/* 5. 데이터 없음 상태 (Empty State) */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #adb5bd;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.btn-cta {
+    display: inline-block;
+    padding: 10px 24px;
+    background: var(--penguin-navy);
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-cta:hover {
+    background: #142036;
+    transform: translateY(-2px);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .stats-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .analytics-section {
+        padding: 20px;
+    }
+
+    .recommendation-list {
+        grid-template-columns: 1fr;
+        /* 모바일은 1열 */
+    }
+}

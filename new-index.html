@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>퍼스트펭귄 | 건강운동관리사 | 기출문제모음</title>
+  
+  <!-- Linear Design System CSS -->
+  <link rel="stylesheet" href="src/components/Button/Button.css" />
+  <link rel="stylesheet" href="src/components/Card/Card.css" />
+  <link rel="stylesheet" href="src/components/Navigation/Navigation.css" />
+  <link rel="stylesheet" href="src/components/Navigation/NavigationItem.css" />
+  <link rel="stylesheet" href="src/components/Typography/Typography.css" />
+  <link rel="stylesheet" href="src/App.css" />
+  
+  <!-- Custom Homepage Styles -->
+  <link rel="stylesheet" href="css/linear-home.css" />
+  
+  <!-- Firebase SDK -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  
+  <!-- Core Modules -->
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  <script type="module" src="js/utils/date-utils.js"></script>
+  <script type="module" src="js/utils/ui-utils.js"></script>
+  <script type="module" src="js/auth/auth-utils.js"></script>
+  <script type="module" src="js/data/firestore-utils.js"></script>
+  <script type="module" src="js/data/notice-repository.js"></script>
+  <script type="module" src="js/auth/auth-ui.js"></script>
+  <script type="module" src="js/login-page.js"></script>
+  <script type="module" src="js/years/year-page.js"></script>
+  
+  <!-- Main App Script -->
+  <script type="module">
+    import { initApp } from './js/app.js';
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+  
+  <!-- Browser Redirect -->
+  <script type="module">
+    import { initBrowserRedirect } from "/js/utils/browser-redirect.js";
+    initBrowserRedirect();
+  </script>
+  
+  <!-- Tab Handler -->
+  <script type="module" src="js/tab-handler.js"></script>
+</head>
+<body>
+  <!-- Navigation Header -->
+  <nav class="linear-navigation linear-navigation--header">
+    <div class="linear-navigation__brand">
+      <img src="images/firstpenguin-logo.png" alt="퍼스트펭귄" class="linear-navigation__logo" />
+      <span class="linear-typography linear-typography--body linear-typography--semibold">퍼스트펭귄</span>
+    </div>
+    
+    <ul class="linear-navigation__list">
+      <li class="linear-navigation__item">
+        <a href="#home" class="linear-navigation__link linear-navigation__link--active">홈</a>
+      </li>
+      <li class="linear-navigation__item">
+        <a href="#quiz" class="linear-navigation__link">문제풀기</a>
+      </li>
+      <li class="linear-navigation__item">
+        <a href="#lecture" class="linear-navigation__link">강의</a>
+      </li>
+      <li class="linear-navigation__item">
+        <a href="#analytics" class="linear-navigation__link">학습분석</a>
+      </li>
+    </ul>
+    
+    <div class="linear-navigation__actions">
+      <!-- 로그인 버튼 (로그인 전) -->
+      <div id="login-button-container">
+        <button class="linear-button linear-button--ghost linear-button--small" data-action="show-login">
+          로그인
+        </button>
+      </div>
+      
+      <!-- 사용자 프로필 (로그인 후) -->
+      <div id="user-profile-container" style="display:none;">
+        <div class="user-info">
+          <span id="user-name" class="linear-typography linear-typography--body linear-typography--medium" data-action="go-to-mypage">사용자</span>
+        </div>
+        <button class="linear-button linear-button--secondary linear-button--small" data-action="logout">
+          로그아웃
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-logo">
+          <img src="images/firstpenguin-logo2.png" alt="퍼스트펭귄" />
+        </div>
+        
+        <div class="hero-text">
+          <h1 class="linear-typography linear-typography--h1 hero-title">
+            Fear Not, Deep Dive
+          </h1>
+          <p class="linear-typography linear-typography--body linear-typography--large hero-subtitle">
+            두려움을 넘어, 더 깊은 곳으로.
+          </p>
+          <p class="linear-typography linear-typography--body linear-typography--secondary hero-description">
+            두렵고, 망설여지지만 괜찮아요.<br />
+            도전하고, 배우고, 성장하는<br />
+            과정 자체가 의미 있으니까요.
+          </p>
+          <div class="hero-promise">
+            <p class="linear-typography linear-typography--body linear-typography--medium linear-typography--accent">
+              우리와 함께라면, 더 깊은 바다도 두렵지 않을 거예요.
+            </p>
+          </div>
+        </div>
+        
+        <div class="hero-actions">
+          <button class="linear-button linear-button--primary linear-button--large" data-action="start-learning">
+            학습 시작하기
+          </button>
+          <button class="linear-button linear-button--outline linear-button--large" data-action="learn-more">
+            더 알아보기
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Tab Navigation -->
+      <div class="tab-navigation">
+        <button class="tab-button active" data-tab="notice-tab">
+          <span class="linear-typography linear-typography--body linear-typography--medium">공지</span>
+        </button>
+        <button class="tab-button" data-tab="quiz-tab">
+          <span class="linear-typography linear-typography--body linear-typography--medium">문제풀기</span>
+        </button>
+        <button class="tab-button" data-tab="lecture-tab">
+          <span class="linear-typography linear-typography--body linear-typography--medium">강의</span>
+        </button>
+        <button class="tab-button" data-action="go-to-analytics">
+          <span class="linear-typography linear-typography--body linear-typography--medium">학습분석</span>
+        </button>
+      </div>
+
+      <!-- Notice Tab -->
+      <div id="notice-tab" class="tab-content active">
+        <section class="notice-section">
+          <div class="section-header">
+            <h2 class="linear-typography linear-typography--h2">공지사항</h2>
+            <p class="linear-typography linear-typography--body linear-typography--secondary">
+              퍼스트펭귄 건강운동관리사 사이트의 소식과 업데이트 정보를 확인하세요.
+            </p>
+          </div>
+          
+          <div class="notice-list" id="notice-list">
+            <div class="notice-loading">
+              <div class="linear-typography linear-typography--body linear-typography--secondary">
+                공지사항을 불러오는 중입니다...
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Quiz Tab -->
+      <div id="quiz-tab" class="tab-content restricted-content">
+        <!-- Sub Navigation -->
+        <div class="sub-navigation">
+          <button class="sub-tab-button active" data-subtab="subject-view">
+            <span class="linear-typography linear-typography--body linear-typography--medium">과목별</span>
+          </button>
+          <button class="sub-tab-button" data-subtab="year-view">
+            <span class="linear-typography linear-typography--body linear-typography--medium">연도별</span>
+          </button>
+          <button class="sub-tab-button" data-subtab="mockexam-view">
+            <span class="linear-typography linear-typography--body linear-typography--medium">모의고사</span>
+          </button>
+        </div>
+
+        <!-- Login Required Overlay -->
+        <div class="login-required-overlay" id="quiz-login-overlay">
+          <div class="linear-card linear-card--feature login-required-card">
+            <div class="login-icon">
+              <span class="linear-typography linear-typography--title1">🔐</span>
+            </div>
+            <h3 class="linear-typography linear-typography--h3">로그인이 필요한 서비스입니다</h3>
+            <p class="linear-typography linear-typography--body linear-typography--secondary">
+              퍼스트펭귄의 모든 기출문제와 학습 기능을 이용하려면<br />
+              무료 회원가입 후 로그인해주세요.
+            </p>
+            <div class="feature-list">
+              <div class="feature-item">
+                <span class="linear-typography linear-typography--body">✓ 2019~2025년 모든 기출문제</span>
+              </div>
+              <div class="feature-item">
+                <span class="linear-typography linear-typography--body">✓ 과목별/연도별 문제 풀이</span>
+              </div>
+              <div class="feature-item">
+                <span class="linear-typography linear-typography--body">✓ 모의고사 및 학습 분석</span>
+              </div>
+              <div class="feature-item">
+                <span class="linear-typography linear-typography--body">✓ 개인별 학습 진도 관리</span>
+              </div>
+            </div>
+            <div class="login-actions">
+              <button class="linear-button linear-button--primary" onclick="window.showLoginModal()">
+                로그인 / 회원가입
+              </button>
+              <button class="linear-button linear-button--outline" onclick="showPreviewContent()">
+                미리보기
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subject View -->
+        <div id="subject-view" class="sub-tab-content active">
+          <div class="exam-sections">
+            <!-- 1교시 과목 -->
+            <section class="exam-section">
+              <div class="linear-card linear-card--outlined">
+                <div class="section-header">
+                  <h3 class="linear-typography linear-typography--h3">1교시 과목</h3>
+                  <p class="linear-typography linear-typography--body linear-typography--secondary">
+                    건강운동관리사 자격증 시험 1교시 과목의 기출문제 모음입니다.
+                  </p>
+                </div>
+                
+                <div class="subjects-grid">
+                  <div class="linear-card linear-card--default subject-card restricted-link" data-href="subjects/subject_운동생리학.html">
+                    <div class="subject-icon">🧬</div>
+                    <h4 class="linear-typography linear-typography--h4">운동생리학</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 70</p>
+                  </div>
+                  
+                  <div class="linear-card linear-card--default subject-card restricted-link" data-href="subjects/subject_건강체력평가.html">
+                    <div class="subject-icon">💪</div>
+                    <h4 class="linear-typography linear-typography--h4">건강체력평가</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 71</p>
+                  </div>
+                  
+                  <div class="linear-card linear-card--default subject-card restricted-link" data-href="subjects/subject_운동처방론.html">
+                    <div class="subject-icon">📋</div>
+                    <h4 class="linear-typography linear-typography--h4">운동처방론</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 72</p>
+                  </div>
+                  
+                  <div class="linear-card linear-card--default subject-card restricted-link" data-href="subjects/subject_운동부하검사.html">
+                    <div class="subject-icon">🏃</div>
+                    <h4 class="linear-typography linear-typography--h4">운동부하검사</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 73</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 2교시 과목 -->
+            <section class="exam-section">
+              <div class="linear-card linear-card--outlined">
+                <div class="section-header">
+                  <h3 class="linear-typography linear-typography--h3">2교시 과목</h3>
+                  <p class="linear-typography linear-typography--body linear-typography--secondary">
+                    건강운동관리사 자격증 시험 2교시 과목의 기출문제 모음입니다.
+                  </p>
+                </div>
+                
+                <div class="subjects-grid">
+                  <div class="linear-card linear-card--default subject-card restricted-link" data-href="subjects/subject_운동상해.html">
+                    <div class="subject-icon">🩹</div>
+                    <h4 class="linear-typography linear-typography--h4">운동상해</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 74</p>
+                  </div>
+                  
+                  <div class="linear-card linear-card--default subject-card restricted-link" data-href="subjects/subject_기능해부학.html">
+                    <div class="subject-icon">🦴</div>
+                    <h4 class="linear-typography linear-typography--h4">기능해부학</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 75</p>
+                  </div>
+                  
+                  <div class="linear-card linear-card--default subject-card restricted-link" data-href="subjects/subject_병태생리학.html">
+                    <div class="subject-icon">🔬</div>
+                    <h4 class="linear-typography linear-typography--h4">병태생리학</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 76</p>
+                  </div>
+                  
+                  <div class="linear-card linear-card--default subject-card restricted-link" data-href="subjects/subject_스포츠심리학.html">
+                    <div class="subject-icon">🧠</div>
+                    <h4 class="linear-typography linear-typography--h4">스포츠심리학</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 77</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Year View -->
+        <div id="year-view" class="sub-tab-content">
+          <section class="exam-section">
+            <div class="linear-card linear-card--outlined">
+              <div class="section-header">
+                <h3 class="linear-typography linear-typography--h3">연도별 기출문제</h3>
+                <p class="linear-typography linear-typography--body linear-typography--secondary">
+                  연도별 건강운동관리사 자격증 시험 기출문제입니다.
+                </p>
+              </div>
+              
+              <div class="years-grid">
+                <div class="linear-card linear-card--default year-card restricted-link" data-href="years/year_2025.html">
+                  <div class="year-badge">최신</div>
+                  <h4 class="linear-typography linear-typography--h4">2025년 기출문제</h4>
+                  <div class="year-info">
+                    <span class="linear-typography linear-typography--caption">8개 과목</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: -</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default year-card restricted-link" data-href="years/year_2024.html">
+                  <h4 class="linear-typography linear-typography--h4">2024년 기출문제</h4>
+                  <div class="year-info">
+                    <span class="linear-typography linear-typography--caption">8개 과목</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 9.98%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default year-card restricted-link" data-href="years/year_2023.html">
+                  <h4 class="linear-typography linear-typography--h4">2023년 기출문제</h4>
+                  <div class="year-info">
+                    <span class="linear-typography linear-typography--caption">8개 과목</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 30.08%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default year-card restricted-link" data-href="years/year_2022.html">
+                  <h4 class="linear-typography linear-typography--h4">2022년 기출문제</h4>
+                  <div class="year-info">
+                    <span class="linear-typography linear-typography--caption">8개 과목</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 10.72%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default year-card restricted-link" data-href="years/year_2021.html">
+                  <h4 class="linear-typography linear-typography--h4">2021년 기출문제</h4>
+                  <div class="year-info">
+                    <span class="linear-typography linear-typography--caption">8개 과목</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 23.67%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default year-card restricted-link" data-href="years/year_2020.html">
+                  <h4 class="linear-typography linear-typography--h4">2020년 기출문제</h4>
+                  <div class="year-info">
+                    <span class="linear-typography linear-typography--caption">8개 과목</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 15.74%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default year-card restricted-link" data-href="years/year_2019.html">
+                  <h4 class="linear-typography linear-typography--h4">2019년 기출문제</h4>
+                  <div class="year-info">
+                    <span class="linear-typography linear-typography--caption">8개 과목</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 26.32%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Mock Exam View -->
+        <div id="mockexam-view" class="sub-tab-content">
+          <section class="exam-section">
+            <div class="linear-card linear-card--outlined">
+              <div class="section-header">
+                <h3 class="linear-typography linear-typography--h3">모의고사</h3>
+                <p class="linear-typography linear-typography--body linear-typography--secondary">
+                  연도별 모의고사로 실전 감각을 익히세요. 각 교시는 80문제로 구성되어 있습니다.
+                </p>
+              </div>
+              
+              <div class="mockexam-grid">
+                <div class="linear-card linear-card--default mockexam-card restricted-link" data-href="years/year_2025.html">
+                  <div class="mockexam-icon">📝</div>
+                  <div class="year-badge">최신</div>
+                  <h4 class="linear-typography linear-typography--h4">2025년 모의고사</h4>
+                  <div class="mockexam-info">
+                    <span class="linear-typography linear-typography--caption">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: -</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default mockexam-card restricted-link" data-href="years/year_2024.html">
+                  <div class="mockexam-icon">📝</div>
+                  <h4 class="linear-typography linear-typography--h4">2024년 모의고사</h4>
+                  <div class="mockexam-info">
+                    <span class="linear-typography linear-typography--caption">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 9.98%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default mockexam-card restricted-link" data-href="years/year_2023.html">
+                  <div class="mockexam-icon">📝</div>
+                  <h4 class="linear-typography linear-typography--h4">2023년 모의고사</h4>
+                  <div class="mockexam-info">
+                    <span class="linear-typography linear-typography--caption">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 30.08%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default mockexam-card restricted-link" data-href="years/year_2022.html">
+                  <div class="mockexam-icon">📝</div>
+                  <h4 class="linear-typography linear-typography--h4">2022년 모의고사</h4>
+                  <div class="mockexam-info">
+                    <span class="linear-typography linear-typography--caption">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 10.72%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default mockexam-card restricted-link" data-href="years/year_2021.html">
+                  <div class="mockexam-icon">📝</div>
+                  <h4 class="linear-typography linear-typography--h4">2021년 모의고사</h4>
+                  <div class="mockexam-info">
+                    <span class="linear-typography linear-typography--caption">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 23.67%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default mockexam-card restricted-link" data-href="years/year_2020.html">
+                  <div class="mockexam-icon">📝</div>
+                  <h4 class="linear-typography linear-typography--h4">2020년 모의고사</h4>
+                  <div class="mockexam-info">
+                    <span class="linear-typography linear-typography--caption">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 15.74%</span>
+                  </div>
+                </div>
+                
+                <div class="linear-card linear-card--default mockexam-card restricted-link" data-href="years/year_2019.html">
+                  <div class="mockexam-icon">📝</div>
+                  <h4 class="linear-typography linear-typography--h4">2019년 모의고사</h4>
+                  <div class="mockexam-info">
+                    <span class="linear-typography linear-typography--caption">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="linear-typography linear-typography--caption linear-typography--secondary">합격률: 26.32%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Lecture Tab -->
+      <div id="lecture-tab" class="tab-content">
+        <section class="lecture-section">
+          <div class="linear-card linear-card--feature lecture-coming-soon">
+            <div class="lecture-icon">
+              <span class="linear-typography linear-typography--title1">🚧</span>
+            </div>
+            <h2 class="linear-typography linear-typography--h2">준비중입니다</h2>
+            <p class="linear-typography linear-typography--body linear-typography--large">
+              더 나은 강의 서비스를 준비하고 있습니다
+            </p>
+            <p class="linear-typography linear-typography--body linear-typography--secondary">
+              곧 만나요! 🐧
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="linear-navigation linear-navigation--footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="index.html" class="linear-navigation__brand">
+            <img src="images/firstpenguin-logo.png" alt="퍼스트펭귄" class="linear-navigation__logo" />
+            <span class="linear-typography linear-typography--body linear-typography--semibold">퍼스트펭귄</span>
+          </a>
+        </div>
+        
+        <div class="footer-nav">
+          <ul class="linear-navigation__list">
+            <li class="linear-navigation__item">
+              <a href="index.html" class="linear-navigation__link">홈</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="lectures.html" class="linear-navigation__link">강의</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="company-info.html" class="linear-navigation__link">사업자정보</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="refund-policy.html" class="linear-navigation__link">환불규정</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="contact.html" class="linear-navigation__link">문의하기</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="admin/dashboard.html" class="linear-navigation__link">관리자</a>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="footer-copyright">
+          <p class="linear-typography linear-typography--caption linear-typography--tertiary">
+            &copy; 2025 퍼스트펭귄. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Tab Handler -->
+  <script type="module" src="js/tab-handler.js"></script>
+  
+  <!-- Linear Homepage Integration -->
+  <script src="js/linear-home.js"></script>
+  
+  <!-- Legacy Compatibility -->
+  <script>
+    // 기존 기능들과의 호환성을 위한 전역 함수들
+    window.showLoginModal = function() {
+      // 기존 로그인 모달 표시 로직과 통합
+      if (typeof window.authUI !== 'undefined' && window.authUI.showLoginModal) {
+        window.authUI.showLoginModal();
+      } else {
+        // 폴백: 로그인 버튼 클릭
+        const loginButton = document.querySelector('[data-action="show-login"]');
+        if (loginButton) {
+          loginButton.click();
+        }
+      }
+    };
+
+    window.goToAnalytics = function() {
+      // 분석 페이지로 이동
+      window.location.href = 'analytics.html';
+    };
+
+    // 기존 탭 핸들러와 통합
+    document.addEventListener('DOMContentLoaded', function() {
+      // 기존 탭 핸들러 초기화
+      if (typeof window.initTabHandler === 'function') {
+        window.initTabHandler();
+      }
+      
+      // Linear 홈페이지 초기화
+      if (window.linearHomePage) {
+        window.linearHomePage.updateRestrictedContentVisibility();
+        window.linearHomePage.updateAuthUI();
+      }
+    });
+
+    // 인증 상태 변경 시 UI 업데이트
+    if (typeof window.authStateChanged === 'undefined') {
+      window.authStateChanged = function() {
+        if (window.linearHomePage) {
+          window.linearHomePage.updateRestrictedContentVisibility();
+          window.linearHomePage.updateAuthUI();
+        }
+      };
+    }
+  </script>
+</body>
+</html>

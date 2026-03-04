@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>태그 관리 - 퍼스트펭귄</title>
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <style>
+    .tag-manager-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .tag-manager-header {
+      margin-bottom: 30px;
+    }
+    
+    .tag-manager-header h1 {
+      font-size: 28px;
+      color: #1D2F4E;
+      margin-bottom: 10px;
+    }
+    
+    .filter-section {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .filter-group {
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .filter-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .filter-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .question-list {
+      display: grid;
+      gap: 20px;
+    }
+    
+    .question-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+    
+    .question-info {
+      flex: 1;
+    }
+    
+    .question-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .question-meta {
+      font-size: 14px;
+      color: #666;
+      display: flex;
+      gap: 15px;
+    }
+    
+    .question-image-preview {
+      width: 200px;
+      height: 150px;
+      object-fit: contain;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f5f5f5;
+    }
+    
+    .tags-section {
+      margin-top: 15px;
+    }
+    
+    .tags-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    
+    .current-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .tag-item {
+      display: inline-flex;
+      align-items: center;
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      gap: 6px;
+    }
+    
+    .tag-remove {
+      background: rgba(25, 118, 210, 0.2);
+      border: none;
+      color: #1976d2;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    
+    .tag-input-section {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .tag-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .tag-add-button {
+      padding: 8px 20px;
+      background: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .tag-add-button:hover {
+      background: #3367d6;
+    }
+    
+    .save-button {
+      padding: 10px 24px;
+      background: #34a853;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 15px;
+    }
+    
+    .save-button:hover {
+      background: #2d8f47;
+    }
+    
+    .auto-extract-button {
+      padding: 8px 16px;
+      background: #fbbc04;
+      color: #333;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 10px;
+    }
+    
+    .auto-extract-button:hover {
+      background: #f9ab00;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .log-area {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    
+    .log-item {
+      margin-bottom: 5px;
+      padding: 5px;
+    }
+    
+    .log-success { color: #34a853; }
+    .log-error { color: #ea4335; }
+    .log-info { color: #4285f4; }
+  </style>
+</head>
+<body>
+  <div class="tag-manager-container">
+    <div class="tag-manager-header">
+      <h1>🏷️ 문제 태그 관리</h1>
+      <p>각 문제에 태그를 추가하거나 수정할 수 있습니다.</p>
+    </div>
+    
+    <div class="filter-section">
+      <div class="filter-group">
+        <label>년도</label>
+        <select id="year-filter" class="filter-select">
+          <option value="all">전체</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>과목</label>
+        <select id="subject-filter" class="filter-select">
+          <option value="all">전체</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>문제 번호</label>
+        <input type="number" id="question-number-filter" class="filter-select" placeholder="문제 번호" min="1">
+      </div>
+      <div class="filter-group">
+        <label>검색</label>
+        <input type="text" id="search-filter" class="filter-select" placeholder="태그 또는 키워드 검색">
+      </div>
+    </div>
+    
+    <div id="question-list" class="question-list">
+      <div class="loading">문제를 불러오는 중...</div>
+    </div>
+    
+    <div class="log-area" id="log-area" style="display: none;">
+      <strong>작업 로그:</strong>
+      <div id="log-content"></div>
+    </div>
+  </div>
+  
+  <!-- Tesseract.js OCR 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <script type="module" src="../js/admin/tag-manager.js"></script>
+</body>
+</html>
+

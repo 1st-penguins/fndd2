@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지사항 목록 - 퍼스트펭귄</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1D2F4E">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+
+  <!-- 외부 CSS 파일 연결 -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/linear-header.css">
+  <link rel="stylesheet" href="css/linear-footer.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/premium-ui.css">
+  <link rel="stylesheet" href="css/pages/notice.css">
+
+  <!-- 로거 스크립트: 모든 JS 파일보다 먼저 로드 -->
+  <script src="js/logger.js"></script>
+
+  <!-- Firebase SDK v9 모듈식 임포트를 위한 type="module" 설정 -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+
+  <!-- Firebase Core -->
+  <script type="module" src="js/core/firebase-core.js"></script>
+
+  <!-- 유틸리티 모듈 -->
+  <script type="module" src="js/utils/date-utils.js"></script>
+  <script type="module" src="js/utils/ui-utils.js"></script>
+  <script type="module" src="js/auth/auth-utils.js"></script>
+  <script type="module" src="js/data/firestore-utils.js"></script>
+
+  <!-- 데이터 접근 모듈 -->
+  <script type="module" src="js/data/notice-repository.js"></script>
+
+  <!-- 인증 관련 스크립트 -->
+  <script type="module" src="js/auth/auth-core.js"></script>
+  <script type="module" src="js/auth/auth-ui.js"></script>
+
+  <!-- 페이지 전용 스크립트 -->
+  <script type="module" src="js/notice/notice-ui.js"></script>
+
+  <!-- Linear Header 스크립트 -->
+  <script src="js/linear-header.js"></script>
+
+  <style>
+    :root {
+      --penguin-navy: #1D2F4E;
+      --penguin-skyblue: #5FB2C9;
+      --frost-white: #ffffff;
+      --deep-sea-gray: #64748b;
+      --radius-8: 8px;
+      --radius-12: 12px;
+      --radius-16: 16px;
+      --page-padding-inline: 24px;
+      --page-padding-block: 64px;
+    }
+
+    body {
+      font-family: "Inter Variable", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: var(--page-padding-block) var(--page-padding-inline);
+      background: #f8f9fa;
+    }
+
+    .notices-container {
+      max-width: 1024px;
+      width: 100%;
+      padding: 32px 24px;
+      margin: 0 auto;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    .notices-header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid rgba(95, 178, 201, 0.1);
+    }
+
+    .notices-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--penguin-navy);
+    }
+
+    .notices-header p {
+      font-size: 1.125rem;
+      color: var(--deep-sea-gray);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .notices-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 48px 24px;
+      color: rgba(29, 47, 78, 0.6);
+      font-size: 1rem;
+    }
+
+    .loading-spinner {
+      border: 2px solid rgba(95, 178, 201, 0.1);
+      border-top: 2px solid var(--penguin-skyblue);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .notices-empty {
+      text-align: center;
+      padding: 64px 24px;
+      color: rgba(29, 47, 78, 0.5);
+      font-size: 1rem;
+      background: linear-gradient(135deg,
+          rgba(95, 178, 201, 0.02) 0%,
+          rgba(29, 47, 78, 0.02) 100%);
+      border-radius: var(--radius-12);
+      border: 1px dashed rgba(29, 47, 78, 0.1);
+    }
+
+    .notices-empty::before {
+      content: '📭';
+      display: block;
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .notice-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #notice-pagination {
+      margin-top: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 32px 16px;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+      }
+
+      .notices-container {
+        padding: 32px 20px;
+        border-radius: var(--radius-12);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .notices-title {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 24px 12px;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+      }
+
+      .notices-container {
+        padding: 24px 16px;
+        border-radius: var(--radius-8);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .notices-title {
+        font-size: 1.75rem;
+      }
+
+      .notices-header {
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+      }
+
+      .notices-header p {
+        font-size: 1rem;
+      }
+    }
+
+    /* 로그인 관련 UI 정리 - Linear 테마에 맞게 */
+    .login-container {
+      display: none !important;
+    }
+
+    .login-modal {
+      display: none !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 2000 !important;
+      background-color: rgba(0, 0, 0, 0.5) !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    .login-modal.show {
+      display: flex !important;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Linear Header -->
+  <header class="linear-header" id="linear-header">
+    <div class="linear-header__container">
+      <a href="index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+        <span class="cert-badge" id="header-cert-badge">건강운동관리사</span>
+      </a>
+
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="notices.html" class="linear-header__nav-link linear-header__nav-link--active">공지사항</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="contact.html" class="linear-header__nav-link">문의</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 로그인/로그아웃을 별도 영역으로 분리 -->
+      <div class="linear-header__auth">
+        <!-- 로그인 전 상태 -->
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">
+          로그인
+        </a>
+
+        <!-- 로그인 후 상태 (JavaScript로 동적 생성) -->
+        <div id="user-profile-container" style="display: none;">
+          <div class="linear-header__user-profile">
+            <div class="linear-header__user-avatar" id="user-avatar">U</div>
+            <span class="linear-header__user-name" id="user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout">
+            로그아웃
+          </a>
+        </div>
+      </div>
+
+      <div class="linear-header__actions">
+        <!-- 개발 모드 토글 (개발 환경에서만 표시) -->
+        <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
+          <button id="dev-mode-btn" class="dev-mode-btn">
+            <span class="dev-mode-indicator"></span>
+            DEV
+          </button>
+        </div>
+
+        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
+          aria-expanded="false">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <div class="mobile-cert-badge" id="mobile-cert-badge">
+        <span class="mobile-cert-badge__label">현재 선택</span>
+        <span class="mobile-cert-badge__name">건강운동관리사</span>
+      </div>
+      <a href="index.html" class="linear-header__nav-link">홈</a>
+      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+      <a href="contact.html" class="linear-header__nav-link">문의</a>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="notices-container glass-card animate-premium">
+      <div class="notices-header">
+        <h2 class="notices-title">공지사항</h2>
+        <p>퍼스트펭귄의 주요 공지사항과 업데이트 내용을 확인하세요.</p>
+      </div>
+
+      <div id="notices-loading" class="notices-loading">
+        <div class="loading-spinner"></div>
+        <span>공지사항을 불러오는 중...</span>
+      </div>
+
+      <ul id="notice-list" class="notice-list" style="display: none;">
+        <!-- 공지사항이 여기에 동적으로 채워집니다 -->
+      </ul>
+      <div id="notice-pagination"></div>
+
+      <div id="notices-empty" class="notices-empty" style="display: none;">
+        등록된 공지사항이 없습니다.
+      </div>
+    </div>
+  </main>
+
+  <footer class="linear-footer">
+    <!-- 배경 장식 요소들 -->
+    <div class="linear-footer__decoration linear-footer__decoration--1"></div>
+    <div class="linear-footer__decoration linear-footer__decoration--2"></div>
+    <div class="linear-footer__decoration linear-footer__decoration--3"></div>
+
+    <div class="linear-footer__container">
+      <div class="linear-footer__content">
+        <!-- 브랜드 섹션 -->
+        <div class="linear-footer__brand">
+          <a href="index.html" class="linear-footer__brand-logo">
+            <div class="linear-footer__brand-icon">
+              <img src="images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" />
+            </div>
+            <span class="linear-footer__brand-text">퍼스트펭귄</span>
+          </a>
+          <p class="linear-footer__brand-description">
+            체육지도자 자격증을 위한<br />
+            KSPO 기출문제 모음과 학습플랫폼입니다.
+          </p>
+        </div>
+
+        <!-- 서비스 섹션 -->
+        <div class="linear-footer__section">
+          <h3 class="linear-footer__section-title">서비스</h3>
+          <ul class="linear-footer__nav-list">
+            <li class="linear-footer__nav-item">
+              <a href="notices.html" class="linear-footer__nav-link">공지사항</a>
+            </li>
+            <li class="linear-footer__nav-item">
+              <a href="index.html" class="linear-footer__nav-link">문제풀기</a>
+            </li>
+            <li class="linear-footer__nav-item">
+              <a href="#" class="linear-footer__nav-link">학습분석</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 지원 섹션 -->
+        <div class="linear-footer__section">
+          <h3 class="linear-footer__section-title">지원</h3>
+          <ul class="linear-footer__nav-list">
+            <li class="linear-footer__nav-item">
+              <a href="contact.html" class="linear-footer__nav-link">문의하기</a>
+            </li>
+            <li class="linear-footer__nav-item">
+              <a href="refund-policy.html" class="linear-footer__nav-link">환불정책</a>
+            </li>
+            <li class="linear-footer__nav-item">
+              <a href="company-info.html" class="linear-footer__nav-link">사업자정보</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 소셜 섹션 -->
+        <div class="linear-footer__section">
+          <h3 class="linear-footer__section-title">소셜</h3>
+          <div class="linear-footer__social">
+            <a href="https://instagram.com/1st_penguins" target="_blank" class="linear-footer__social-link"
+              aria-label="인스타그램">
+              <img src="images/instagram_logo.svg" alt="인스타그램" style="width: 24px; height: 24px;">
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="linear-footer__divider"></div>
+
+      <div class="linear-footer__bottom">
+        <p class="linear-footer__copyright">
+          © 2025 퍼스트펭귄. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    // 공지사항 로딩 상태 초기화
+    // notice-ui.js의 DOMContentLoaded 이벤트가 자동으로 공지사항을 로드하므로
+    // 여기서는 초기 상태만 설정
+    document.addEventListener('DOMContentLoaded', () => {
+      const loadingEl = document.getElementById('notices-loading');
+      const listEl = document.getElementById('notice-list');
+      const emptyEl = document.getElementById('notices-empty');
+
+      // 초기 상태 설정
+      if (loadingEl) loadingEl.style.display = 'flex';
+      if (listEl) listEl.style.display = 'none';
+      if (emptyEl) emptyEl.style.display = 'none';
+
+      // 로그인 모달이 생성되거나 표시되는 것을 방지
+      const preventLoginModal = () => {
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) {
+          loginModal.style.display = 'none !important';
+          loginModal.remove();
+        }
+
+        // 로그인 컨테이너도 제거
+        const loginContainer = document.querySelector('.login-container');
+        if (loginContainer) {
+          loginContainer.style.display = 'none !important';
+          loginContainer.remove();
+        }
+      };
+
+      // 초기 실행
+      preventLoginModal();
+
+      // MutationObserver로 DOM 변경 감지하여 로그인 모달이 추가되면 즉시 제거
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) { // Element node
+              if (node.id === 'login-modal' || node.classList?.contains('login-modal')) {
+                preventLoginModal();
+              }
+              // 자식 요소도 확인
+              const modalInChildren = node.querySelector?.('#login-modal, .login-modal');
+              if (modalInChildren) {
+                preventLoginModal();
+              }
+            }
+          });
+        });
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      // showLoginModal 함수 오버라이드하여 notices 페이지에서는 작동하지 않도록
+      const originalShowLoginModal = window.showLoginModal;
+      window.showLoginModal = function () {
+        console.log('notices 페이지에서는 로그인 모달을 표시하지 않습니다.');
+        preventLoginModal();
+        // 원래 함수는 호출하지 않음
+      };
+    });
+  </script>
+</body>
+
+</html>

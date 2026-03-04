@@ -1,0 +1,628 @@
+﻿/* Linear Design System - Hero Component */
+/* BEM 방법론: .linear-hero__element--modifier */
+
+.linear-hero {
+  position: relative;
+  /* iOS Safari viewport 변화 대응: CSS 변수 사용 */
+  min-height: 100vh;
+  min-height: calc(var(--vh, 1vh) * 100);
+  /* 초기에는 그라디언트만 표시 (빠른 렌더링) */
+  background:
+    linear-gradient(135deg,
+      rgba(10, 18, 30, 0.7) 0%,
+      rgba(15, 27, 46, 0.6) 20%,
+      rgba(20, 35, 55, 0.5) 40%,
+      rgba(25, 42, 65, 0.4) 60%,
+      rgba(30, 50, 75, 0.3) 80%,
+      rgba(35, 58, 85, 0.2) 100%),
+    /* 저해상도 placeholder 색상 (이미지 로드 전) */
+    linear-gradient(135deg, #1a2a3f 0%, #2d3e50 100%);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  /* 모바일 성능 개선: fixed attachment 제거 */
+  background-attachment: scroll;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 60px 0 20px;
+  /* GPU 가속 활성화 (iOS Safari 성능 향상) */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 배경 이미지를 점진적으로 로드 (데스크톱: WebP) */
+.linear-hero.bg-loaded {
+  background:
+    linear-gradient(135deg,
+      rgba(10, 18, 30, 0.7) 0%,
+      rgba(15, 27, 46, 0.6) 20%,
+      rgba(20, 35, 55, 0.5) 40%,
+      rgba(25, 42, 65, 0.4) 60%,
+      rgba(30, 50, 75, 0.3) 80%,
+      rgba(35, 58, 85, 0.2) 100%),
+    url('../images/background_hero.webp');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  transition: background 0.5s ease-in;
+}
+
+.linear-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 70%),
+    radial-gradient(circle at 80% 80%, rgba(95, 178, 201, 0.03) 0%, transparent 70%),
+    radial-gradient(circle at 40% 60%, rgba(163, 213, 224, 0.02) 0%, transparent 80%),
+    radial-gradient(circle at 60% 30%, rgba(29, 47, 78, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.linear-hero__container {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--page-padding-inline, 24px);
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.linear-hero__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: slideInLeft 1s ease-out;
+}
+
+.linear-hero__logo {
+  width: 350px;
+  max-width: 100%;
+  /* 반응형 개선: 뷰포트보다 크지 않도록 제한 */
+  height: 350px;
+  margin-bottom: 0;
+  filter: drop-shadow(0 12px 40px rgba(29, 47, 78, 0.3));
+  object-fit: contain;
+  position: relative;
+  z-index: 10;
+}
+
+.linear-hero__logo:hover {
+  cursor: default;
+  /* Changed from empty ruleset to satisfy lint */
+}
+
+.linear-hero__brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 280px;
+  gap: 8px;
+}
+
+.linear-hero__brand-title {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 680;
+  font-size: 36px;
+  color: white;
+  margin: 0;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.linear-hero__brand-subtitle {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 16px;
+}
+
+.linear-hero__brand-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-8, 8px);
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 510;
+  font-size: 14px;
+  color: white;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.linear-hero__content {
+  color: white;
+  animation: slideInRight 1s ease-out 0.2s both;
+}
+
+.linear-hero__title {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 800;
+  font-size: 56px;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #E8F4F8 30%, #5FB2C9 70%, #A3D5E0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -2px;
+  animation: slideInRight 1s ease-out 0.4s both;
+  text-shadow: 0 4px 20px rgba(255, 255, 255, 0.3), 0 2px 10px rgba(95, 178, 201, 0.2), 0 1px 5px rgba(0, 0, 0, 0.2);
+  filter: drop-shadow(0 3px 6px rgba(255, 255, 255, 0.15));
+}
+
+.linear-hero__subtitle {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 590;
+  font-size: 24px;
+  margin-bottom: 32px;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  animation: slideInRight 1s ease-out 0.6s both;
+  text-shadow: 0 4px 20px rgba(255, 255, 255, 0.5), 0 2px 10px rgba(95, 178, 201, 0.3), 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+.linear-hero__description {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.7;
+  margin-bottom: 32px;
+  color: rgba(255, 255, 255, 0.95);
+  animation: slideInRight 1s ease-out 0.8s both;
+  text-shadow: 0 3px 15px rgba(255, 255, 255, 0.4), 0 1px 5px rgba(95, 178, 201, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.linear-hero__highlight {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 590;
+  font-size: 20px;
+  color: #FFFFFF;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-premium);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 40px;
+  animation: premium-fade-in-up 1s ease-out 1s both;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.linear-hero__actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .linear-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+.linear-hero__scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  /* Increased from 32px */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: bounce 2s infinite;
+  z-index: 10;
+  /* Ensure it stays above decoration */
+}
+
+.linear-hero__scroll-hint:hover {
+  color: white;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.linear-hero__scroll-icon {
+  width: 24px;
+  height: 24px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+/* 배경 장식 요소 */
+.linear-hero__decoration {
+  position: absolute;
+  opacity: 0.1;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.linear-hero__decoration--1 {
+  top: 10%;
+  left: 5%;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, white 0%, transparent 70%);
+  animation: float 4s ease-in-out infinite;
+}
+
+.linear-hero__decoration--2 {
+  top: 20%;
+  right: 10%;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, var(--penguin-skyblue) 0%, transparent 70%);
+  animation: float 3s ease-in-out infinite reverse;
+}
+
+.linear-hero__decoration--3 {
+  bottom: 30%;
+  left: 15%;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, var(--iceberg-blue) 0%, transparent 70%);
+  animation: float 5s ease-in-out infinite;
+}
+
+.linear-hero__decoration--4 {
+  bottom: 20%;
+  right: 20%;
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle, white 0%, transparent 70%);
+  animation: float 3.5s ease-in-out infinite reverse;
+}
+
+/* 애니메이션 */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  40% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+
+  60% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .linear-hero__container {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    text-align: center;
+  }
+
+  .linear-hero__content {
+    text-align: center;
+  }
+
+  .linear-hero__logo {
+    width: 300px;
+    height: 300px;
+  }
+
+  .linear-hero__title {
+    font-size: 48px;
+  }
+
+  .linear-hero__subtitle {
+    font-size: 20px;
+  }
+
+  .linear-hero__description {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .linear-hero {
+    /* 모바일 브라우저 viewport 변화 대응: CSS 변수 사용 */
+    min-height: 110vh;
+    min-height: calc(var(--vh, 1vh) * 110);
+    /* 버튼들이 잘리지 않도록 높이 증가 */
+    padding: 80px 0 60px;
+    /* 하단 패딩 증가 */
+    /* 모바일 브라우저 viewport 변경 문제 해결 */
+    background-position: center 70%;
+    background-attachment: scroll;
+    /* 모바일에서 배경 크기 고정하여 확대 방지 (iOS Safari & Android Chrome) */
+    background-size: auto 100%;
+    align-items: flex-start;
+    padding-top: 80px;
+    /* 상단 패딩 줄임 */
+    margin-top: 0;
+    /* 마진 제거 */
+    /* GPU 가속 및 레이어 분리 (성능 최적화) */
+    will-change: scroll-position;
+    /* Android Chrome 추가 최적화 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* 모바일용 배경 이미지 */
+  .linear-hero.bg-loaded {
+    background:
+      linear-gradient(135deg,
+        rgba(10, 18, 30, 0.7) 0%,
+        rgba(15, 27, 46, 0.6) 20%,
+        rgba(20, 35, 55, 0.5) 40%,
+        rgba(25, 42, 65, 0.4) 60%,
+        rgba(30, 50, 75, 0.3) 80%,
+        rgba(35, 58, 85, 0.2) 100%),
+      url('../images/background hero3.jpg');
+    background-size: auto 100%;
+    background-position: center 70%;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+  }
+
+  .linear-hero__container {
+    padding: 0 16px;
+    gap: 32px;
+  }
+
+  .linear-hero__logo {
+    width: 250px;
+    height: 250px;
+  }
+
+  .linear-hero__brand-title {
+    font-size: 24px;
+  }
+
+  .linear-hero__brand-subtitle {
+    font-size: 16px;
+  }
+
+  .linear-hero__title {
+    font-size: 36px;
+  }
+
+  .linear-hero__subtitle {
+    font-size: 18px;
+  }
+
+  .linear-hero__description {
+    font-size: 15px;
+  }
+
+  .linear-hero__highlight {
+    font-size: 16px;
+    padding: 20px;
+  }
+
+  .linear-hero__actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .linear-hero__button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .linear-hero {
+    /* 모바일 브라우저 viewport 변화 대응: CSS 변수 사용 */
+    min-height: 110vh;
+    min-height: calc(var(--vh, 1vh) * 110);
+    /* 버튼들이 잘리지 않도록 높이 증가 */
+    padding: 80px 0 60px;
+    /* 하단 패딩 증가 */
+    align-items: flex-start;
+    padding-top: 80px;
+    /* 상단 패딩 줄임 */
+    margin-top: 0;
+    /* 마진 제거 */
+    /* 모바일: 배경 설정 */
+    background-attachment: scroll;
+    /* 모바일 브라우저 확대 방지: 배경 크기 고정 (iOS Safari & Android Chrome) */
+    background-size: auto 100%;
+    /* 스크롤 성능 최적화 */
+    -webkit-overflow-scrolling: touch;
+    /* Android Chrome 최적화 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* 모바일용 배경 이미지 */
+  .linear-hero.bg-loaded {
+    background:
+      linear-gradient(135deg,
+        rgba(10, 18, 30, 0.7) 0%,
+        rgba(15, 27, 46, 0.6) 20%,
+        rgba(20, 35, 55, 0.5) 40%,
+        rgba(25, 42, 65, 0.4) 60%,
+        rgba(30, 50, 75, 0.3) 80%,
+        rgba(35, 58, 85, 0.2) 100%),
+      url('../images/background hero3.jpg');
+    /* iOS Safari 확대 방지: 배경 크기 고정 */
+    background-size: auto 100%;
+    background-position: center 70%;
+    background-attachment: scroll;
+  }
+
+  .linear-hero__container {
+    padding: 0 12px;
+    gap: 16px;
+  }
+
+  .linear-hero__logo {
+    width: 200px;
+    height: 200px;
+  }
+
+  .linear-hero__brand-title {
+    font-size: 20px;
+  }
+
+  .linear-hero__brand-subtitle {
+    font-size: 14px;
+  }
+
+  .linear-hero__title {
+    font-size: 28px;
+  }
+
+  .linear-hero__subtitle {
+    font-size: 16px;
+  }
+
+  .linear-hero__description {
+    font-size: 14px;
+  }
+
+  .linear-hero__highlight {
+    font-size: 14px;
+    padding: 16px;
+  }
+
+  .linear-hero__button {
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .linear-hero {
+    /* iOS Safari viewport 변화 대응: CSS 변수 사용 */
+    min-height: 110vh;
+    min-height: calc(var(--vh, 1vh) * 110);
+    /* 버튼들이 잘리지 않도록 높이 증가 */
+    padding: 80px 0 60px;
+    /* 하단 패딩 증가 */
+    align-items: flex-start;
+    padding-top: 80px;
+    /* 상단 패딩 줄임 */
+    margin-top: 0;
+    /* 마진 제거 */
+    /* iOS Safari 확대 방지: 배경 크기 고정 */
+    background-size: auto 100%;
+  }
+
+  .linear-hero__container {
+    padding: 0 8px;
+    gap: 12px;
+  }
+
+  .linear-hero__logo {
+    width: 160px;
+    height: 160px;
+  }
+
+  .linear-hero__brand-title {
+    font-size: 18px;
+  }
+
+  .linear-hero__brand-subtitle {
+    font-size: 13px;
+  }
+
+  .linear-hero__title {
+    font-size: 24px;
+  }
+
+  .linear-hero__subtitle {
+    font-size: 14px;
+  }
+
+  .linear-hero__description {
+    font-size: 13px;
+  }
+
+  .linear-hero__highlight {
+    font-size: 13px;
+    padding: 12px;
+  }
+
+  .linear-hero__button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}

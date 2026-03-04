@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>퍼스트펭귄 | 건강운동관리사 | 기출문제모음 (개발용)</title>
+  
+  <!-- Linear Design System CSS -->
+  <link rel="stylesheet" href="css/linear-themes.css" />
+  <link rel="stylesheet" href="src/components/Button/Button.css" />
+  <link rel="stylesheet" href="src/components/Card/Card.css" />
+  <link rel="stylesheet" href="src/components/Navigation/Navigation.css" />
+  <link rel="stylesheet" href="src/components/Navigation/NavigationItem.css" />
+  <link rel="stylesheet" href="src/components/Typography/Typography.css" />
+  <link rel="stylesheet" href="src/components/ThemeSwitcher/ThemeSwitcher.css" />
+  <link rel="stylesheet" href="src/App.css" />
+  
+  <!-- Custom Homepage Styles -->
+  <link rel="stylesheet" href="css/linear-home.css" />
+  
+  <!-- 개발용 스타일 -->
+  <style>
+    .dev-banner {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      color: white;
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .dev-banner a {
+      color: white;
+      text-decoration: underline;
+    }
+    
+    body {
+      margin-top: 40px; /* 개발 배너 공간 확보 */
+    }
+    
+    .mock-login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .mock-login-modal {
+      background: var(--color-bg-level-1);
+      border: 1px solid var(--color-border-primary);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    
+    .mock-login-modal h3 {
+      margin-bottom: 16px;
+      color: var(--color-text-primary);
+    }
+    
+    .mock-login-modal p {
+      margin-bottom: 20px;
+      color: var(--color-text-secondary);
+    }
+    
+    .mock-login-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- 개발용 배너 -->
+  <div class="dev-banner">
+    🛠️ 개발용 페이지 - Mock 데이터 사용 중 | 
+    <a href="index.html">실제 홈페이지</a> | 
+    <a href="theme-test.html">테마 테스트</a>
+  </div>
+
+  <!-- Navigation Header -->
+  <nav class="linear-navigation linear-navigation--header">
+    <div class="linear-navigation__brand">
+      <img src="images/firstpenguin-logo.png" alt="퍼스트펭귄" class="linear-navigation__logo" />
+      <span class="linear-typography linear-typography--body linear-typography--semibold">퍼스트펭귄</span>
+    </div>
+    
+    <ul class="linear-navigation__list">
+      <li class="linear-navigation__item">
+        <a href="#home" class="linear-navigation__link linear-navigation__link--active">홈</a>
+      </li>
+      <li class="linear-navigation__item">
+        <a href="#quiz" class="linear-navigation__link">문제풀기</a>
+      </li>
+      <li class="linear-navigation__item">
+        <a href="#lecture" class="linear-navigation__link">강의</a>
+      </li>
+      <li class="linear-navigation__item">
+        <a href="#analytics" class="linear-navigation__link">학습분석</a>
+      </li>
+    </ul>
+    
+    <div class="linear-navigation__actions">
+      <!-- Theme Switcher -->
+      <button class="linear-theme-switcher linear-theme-switcher--ghost linear-theme-switcher--small" id="theme-switcher">
+        <div class="linear-theme-switcher__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </div>
+      </button>
+      
+      <!-- 로그인 버튼 (로그인 전) -->
+      <div id="login-button-container">
+        <button class="linear-button linear-button--ghost linear-button--small" data-action="show-login">
+          로그인
+        </button>
+      </div>
+      
+      <!-- 사용자 프로필 (로그인 후) -->
+      <div id="user-profile-container" style="display:none;">
+        <div class="user-info">
+          <span id="user-name" class="linear-typography linear-typography--body linear-typography--medium" data-action="go-to-mypage">사용자</span>
+        </div>
+        <button class="linear-button linear-button--secondary linear-button--small" data-action="logout">
+          로그아웃
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section theme-gradient">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-logo">
+          <img src="images/firstpenguin-logo2.png" alt="퍼스트펭귄" />
+        </div>
+        
+        <div class="hero-text">
+          <h1 class="linear-typography linear-typography--h1 hero-title">
+            Fear Not, Deep Dive
+          </h1>
+          <p class="linear-typography linear-typography--body linear-typography--large hero-subtitle">
+            두려움을 넘어, 더 깊은 곳으로.
+          </p>
+          <p class="linear-typography linear-typography--body linear-typography--secondary hero-description">
+            두렵고, 망설여지지만 괜찮아요.<br />
+            도전하고, 배우고, 성장하는<br />
+            과정 자체가 의미 있으니까요.
+          </p>
+          <div class="hero-promise theme-border">
+            <p class="linear-typography linear-typography--body linear-typography--medium linear-typography--accent">
+              우리와 함께라면, 더 깊은 바다도 두렵지 않을 거예요.
+            </p>
+          </div>
+        </div>
+        
+        <div class="hero-actions">
+          <button class="linear-button linear-button--primary linear-button--large" data-action="start-learning">
+            학습 시작하기
+          </button>
+          <button class="linear-button linear-button--outline linear-button--large" data-action="learn-more">
+            더 알아보기
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Tab Navigation -->
+      <div class="tab-navigation theme-border">
+        <button class="tab-button active" data-tab="notice-tab">
+          <span class="linear-typography linear-typography--body linear-typography--medium">공지</span>
+        </button>
+        <button class="tab-button" data-tab="quiz-tab">
+          <span class="linear-typography linear-typography--body linear-typography--medium">문제풀기</span>
+        </button>
+        <button class="tab-button" data-tab="lecture-tab">
+          <span class="linear-typography linear-typography--body linear-typography--medium">강의</span>
+        </button>
+        <button class="tab-button" data-action="go-to-analytics">
+          <span class="linear-typography linear-typography--body linear-typography--medium">학습분석</span>
+        </button>
+      </div>
+
+      <!-- Notice Tab -->
+      <div id="notice-tab" class="tab-content active">
+        <section class="notice-section">
+          <div class="section-header">
+            <h2 class="linear-typography linear-typography--h2">공지사항</h2>
+            <p class="linear-typography linear-typography--body linear-typography--secondary">
+              퍼스트펭귄 건강운동관리사 사이트의 소식과 업데이트 정보를 확인하세요.
+            </p>
+          </div>
+          
+          <div class="notice-list" id="notice-list">
+            <div class="notice-loading theme-border">
+              <div class="linear-typography linear-typography--body linear-typography--secondary">
+                공지사항을 불러오는 중입니다...
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Quiz Tab -->
+      <div id="quiz-tab" class="tab-content restricted-content">
+        <!-- Sub Navigation -->
+        <div class="sub-navigation theme-border">
+          <button class="sub-tab-button active" data-subtab="subject-view">
+            <span class="linear-typography linear-typography--body linear-typography--medium">과목별</span>
+          </button>
+          <button class="sub-tab-button" data-subtab="year-view">
+            <span class="linear-typography linear-typography--body linear-typography--medium">연도별</span>
+          </button>
+          <button class="sub-tab-button" data-subtab="mockexam-view">
+            <span class="linear-typography linear-typography--body linear-typography--medium">모의고사</span>
+          </button>
+        </div>
+
+        <!-- Login Required Overlay -->
+        <div class="login-required-overlay" id="quiz-login-overlay">
+          <div class="linear-card linear-card--feature login-required-card theme-border">
+            <div class="login-icon">
+              <span class="linear-typography linear-typography--title1">🔐</span>
+            </div>
+            <h3 class="linear-typography linear-typography--h3">로그인이 필요한 서비스입니다</h3>
+            <p class="linear-typography linear-typography--body linear-typography--secondary">
+              퍼스트펭귄의 모든 기출문제와 학습 기능을 이용하려면<br />
+              무료 회원가입 후 로그인해주세요.
+            </p>
+            <div class="feature-list">
+              <div class="feature-item theme-border-secondary">
+                <span class="linear-typography linear-typography--body">✓ 2019~2025년 모든 기출문제</span>
+              </div>
+              <div class="feature-item theme-border-secondary">
+                <span class="linear-typography linear-typography--body">✓ 과목별/연도별 문제 풀이</span>
+              </div>
+              <div class="feature-item theme-border-secondary">
+                <span class="linear-typography linear-typography--body">✓ 모의고사 및 학습 분석</span>
+              </div>
+              <div class="feature-item">
+                <span class="linear-typography linear-typography--body">✓ 개인별 학습 진도 관리</span>
+              </div>
+            </div>
+            <div class="login-actions">
+              <button class="linear-button linear-button--primary" onclick="showMockLogin()">
+                Mock 로그인
+              </button>
+              <button class="linear-button linear-button--outline" onclick="showPreviewContent()">
+                미리보기
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subject View -->
+        <div id="subject-view" class="sub-tab-content active">
+          <div class="exam-sections" id="subject-sections">
+            <!-- Mock 데이터로 동적 생성 -->
+          </div>
+        </div>
+
+        <!-- Year View -->
+        <div id="year-view" class="sub-tab-content">
+          <section class="exam-section">
+            <div class="linear-card linear-card--outlined">
+              <div class="section-header">
+                <h3 class="linear-typography linear-typography--h3">연도별 기출문제</h3>
+                <p class="linear-typography linear-typography--body linear-typography--secondary">
+                  연도별 건강운동관리사 자격증 시험 기출문제입니다.
+                </p>
+              </div>
+              
+              <div class="years-grid" id="years-grid">
+                <!-- Mock 데이터로 동적 생성 -->
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Mock Exam View -->
+        <div id="mockexam-view" class="sub-tab-content">
+          <section class="exam-section">
+            <div class="linear-card linear-card--outlined">
+              <div class="section-header">
+                <h3 class="linear-typography linear-typography--h3">모의고사</h3>
+                <p class="linear-typography linear-typography--body linear-typography--secondary">
+                  연도별 모의고사로 실전 감각을 익히세요. 각 교시는 80문제로 구성되어 있습니다.
+                </p>
+              </div>
+              
+              <div class="mockexam-grid" id="mockexam-grid">
+                <!-- Mock 데이터로 동적 생성 -->
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Lecture Tab -->
+      <div id="lecture-tab" class="tab-content">
+        <section class="lecture-section">
+          <div class="linear-card linear-card--feature lecture-coming-soon theme-gradient-brand">
+            <div class="lecture-icon">
+              <span class="linear-typography linear-typography--title1">🚧</span>
+            </div>
+            <h2 class="linear-typography linear-typography--h2">준비중입니다</h2>
+            <p class="linear-typography linear-typography--body linear-typography--large">
+              더 나은 강의 서비스를 준비하고 있습니다
+            </p>
+            <p class="linear-typography linear-typography--body linear-typography--secondary">
+              곧 만나요! 🐧
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="linear-navigation linear-navigation--footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="index.html" class="linear-navigation__brand">
+            <img src="images/firstpenguin-logo.png" alt="퍼스트펭귄" class="linear-navigation__logo" />
+            <span class="linear-typography linear-typography--body linear-typography--semibold">퍼스트펭귄</span>
+          </a>
+        </div>
+        
+        <div class="footer-nav">
+          <ul class="linear-navigation__list">
+            <li class="linear-navigation__item">
+              <a href="index.html" class="linear-navigation__link">홈</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="lectures.html" class="linear-navigation__link">강의</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="company-info.html" class="linear-navigation__link">사업자정보</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="refund-policy.html" class="linear-navigation__link">환불규정</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="contact.html" class="linear-navigation__link">문의하기</a>
+            </li>
+            <li class="linear-navigation__item">
+              <a href="admin/dashboard.html" class="linear-navigation__link">관리자</a>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="footer-copyright">
+          <p class="linear-typography linear-typography--caption linear-typography--tertiary">
+            &copy; 2025 퍼스트펭귄. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Mock Login Modal -->
+  <div id="mock-login-modal" class="mock-login-overlay" style="display: none;">
+    <div class="mock-login-modal">
+      <h3 class="linear-typography linear-typography--h3">🎭 Mock 로그인</h3>
+      <p class="linear-typography linear-typography--body linear-typography--secondary">
+        개발용 로그인입니다. 실제 데이터베이스 연결 없이 테스트할 수 있습니다.
+      </p>
+      <div class="mock-login-buttons">
+        <button class="linear-button linear-button--primary" onclick="performMockLogin()">
+          로그인 (테스트용)
+        </button>
+        <button class="linear-button linear-button--ghost" onclick="closeMockLogin()">
+          취소
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mock Data Script -->
+  <script src="js/mock-data.js"></script>
+  
+  <!-- Theme Manager Script -->
+  <script src="js/utils/theme-manager.js"></script>
+  
+  <!-- Development Script -->
+  <script>
+    // Mock 로그인 관련 함수들
+    function showMockLogin() {
+      document.getElementById('mock-login-modal').style.display = 'flex';
+    }
+    
+    function closeMockLogin() {
+      document.getElementById('mock-login-modal').style.display = 'none';
+    }
+    
+    function performMockLogin() {
+      closeMockLogin();
+      
+      // Mock 로그인 실행
+      window.mockAPI.signIn('test@example.com', 'password').then(user => {
+        updateAuthUI(user);
+        updateRestrictedContentVisibility();
+        
+        // Mock Auth 상태 변경 이벤트 발생
+        window.dispatchEvent(new CustomEvent('mockAuthStateChange', {
+          detail: { user: user }
+        }));
+      });
+    }
+    
+    // Mock 로그아웃
+    function performMockLogout() {
+      window.mockAPI.signOut().then(() => {
+        updateAuthUI(null);
+        updateRestrictedContentVisibility();
+        
+        // Mock Auth 상태 변경 이벤트 발생
+        window.dispatchEvent(new CustomEvent('mockAuthStateChange', {
+          detail: { user: null }
+        }));
+      });
+    }
+    
+    // 인증 UI 업데이트
+    function updateAuthUI(user) {
+      const loginContainer = document.getElementById('login-button-container');
+      const profileContainer = document.getElementById('user-profile-container');
+      const userName = document.getElementById('user-name');
+      
+      if (user && user.isLoggedIn) {
+        loginContainer.style.display = 'none';
+        profileContainer.style.display = 'flex';
+        userName.textContent = user.displayName || '테스트 사용자';
+      } else {
+        loginContainer.style.display = 'block';
+        profileContainer.style.display = 'none';
+      }
+    }
+    
+    // 제한된 콘텐츠 가시성 업데이트
+    function updateRestrictedContentVisibility() {
+      const user = window.mockData.user;
+      const restrictedElements = document.querySelectorAll('.restricted-content');
+      const loginOverlays = document.querySelectorAll('.login-required-overlay');
+      
+      if (user && user.isLoggedIn) {
+        restrictedElements.forEach(el => el.classList.remove('content-locked'));
+        loginOverlays.forEach(el => el.style.display = 'none');
+      } else {
+        restrictedElements.forEach(el => el.classList.add('content-locked'));
+        loginOverlays.forEach(el => el.style.display = 'flex');
+      }
+    }
+    
+    // 공지사항 로드
+    function loadNotices() {
+      const noticeList = document.getElementById('notice-list');
+      if (!noticeList) return;
+      
+      window.mockAPI.getNotices().then(notices => {
+        noticeList.innerHTML = '';
+        
+        notices.forEach(notice => {
+          const noticeItem = document.createElement('div');
+          noticeItem.className = `linear-card linear-card--default notice-item ${notice.isPinned ? 'pinned' : ''}`;
+          
+          noticeItem.innerHTML = `
+            <div class="notice-header">
+              ${notice.isPinned ? '<span class="pin-badge">📌</span>' : ''}
+              <h3 class="linear-typography linear-typography--h4">${notice.title}</h3>
+              <span class="notice-date">${new Date(notice.createdAt).toLocaleDateString()}</span>
+            </div>
+            <p class="linear-typography linear-typography--body linear-typography--secondary">${notice.content}</p>
+            <div class="notice-meta">
+              <span class="linear-typography linear-typography--caption">작성자: ${notice.author}</span>
+            </div>
+          `;
+          
+          noticeList.appendChild(noticeItem);
+        });
+      });
+    }
+    
+    // 과목 데이터 로드
+    function loadSubjects() {
+      const subjectSections = document.getElementById('subject-sections');
+      if (!subjectSections) return;
+      
+      window.mockAPI.getSubjects().then(subjects => {
+        // 1교시 과목들 (처음 4개)
+        const firstPeriod = subjects.slice(0, 4);
+        // 2교시 과목들 (나머지 4개)
+        const secondPeriod = subjects.slice(4, 8);
+        
+        subjectSections.innerHTML = `
+          <section class="exam-section">
+            <div class="linear-card linear-card--outlined">
+              <div class="section-header">
+                <h3 class="linear-typography linear-typography--h3">1교시 과목</h3>
+                <p class="linear-typography linear-typography--body linear-typography--secondary">
+                  건강운동관리사 자격증 시험 1교시 과목의 기출문제 모음입니다.
+                </p>
+              </div>
+              <div class="subjects-grid">
+                ${firstPeriod.map(subject => `
+                  <div class="linear-card linear-card--default subject-card restricted-link theme-shadow-low" data-href="subjects/subject_${subject.name}.html">
+                    <div class="subject-icon">${subject.icon}</div>
+                    <h4 class="linear-typography linear-typography--h4">${subject.name}</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 ${subject.code}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </section>
+          
+          <section class="exam-section">
+            <div class="linear-card linear-card--outlined">
+              <div class="section-header">
+                <h3 class="linear-typography linear-typography--h3">2교시 과목</h3>
+                <p class="linear-typography linear-typography--body linear-typography--secondary">
+                  건강운동관리사 자격증 시험 2교시 과목의 기출문제 모음입니다.
+                </p>
+              </div>
+              <div class="subjects-grid">
+                ${secondPeriod.map(subject => `
+                  <div class="linear-card linear-card--default subject-card restricted-link theme-shadow-low" data-href="subjects/subject_${subject.name}.html">
+                    <div class="subject-icon">${subject.icon}</div>
+                    <h4 class="linear-typography linear-typography--h4">${subject.name}</h4>
+                    <p class="linear-typography linear-typography--caption linear-typography--secondary">과목코드 ${subject.code}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </section>
+        `;
+      });
+    }
+    
+    // 연도별 데이터 로드
+    function loadYears() {
+      const yearsGrid = document.getElementById('years-grid');
+      if (!yearsGrid) return;
+      
+      window.mockAPI.getYears().then(years => {
+        yearsGrid.innerHTML = years.map(year => `
+          <div class="linear-card linear-card--default year-card restricted-link theme-shadow-low" data-href="years/year_${year.year}.html">
+            ${year.isLatest ? '<div class="year-badge">최신</div>' : ''}
+            <h4 class="linear-typography linear-typography--h4">${year.year}년 기출문제</h4>
+            <div class="year-info">
+              <span class="linear-typography linear-typography--caption">${year.subjectCount}개 과목</span>
+              <span class="linear-typography linear-typography--caption linear-typography--secondary">${year.description}</span>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+    
+    // 모의고사 데이터 로드
+    function loadMockExams() {
+      const mockExamGrid = document.getElementById('mockexam-grid');
+      if (!mockExamGrid) return;
+      
+      window.mockAPI.getMockExams().then(exams => {
+        mockExamGrid.innerHTML = exams.map(exam => `
+          <div class="linear-card linear-card--default mockexam-card restricted-link theme-shadow-low" data-href="years/year_${exam.year}.html">
+            <div class="mockexam-icon">${exam.icon}</div>
+            ${exam.isLatest ? '<div class="year-badge">최신</div>' : ''}
+            <h4 class="linear-typography linear-typography--h4">${exam.title}</h4>
+            <div class="mockexam-info">
+              <span class="linear-typography linear-typography--caption">${exam.description}</span>
+              <span class="linear-typography linear-typography--caption linear-typography--secondary">${exam.description}</span>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+    
+    // 탭 전환 기능
+    function initTabs() {
+      // 메인 탭
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          if (button.dataset.action) {
+            if (button.dataset.action === 'go-to-analytics') {
+              window.location.href = 'analytics.html';
+              return;
+            }
+          }
+          
+          document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          
+          document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+          const targetTab = button.dataset.tab;
+          if (targetTab) {
+            document.getElementById(targetTab).classList.add('active');
+          }
+        });
+      });
+      
+      // 서브 탭
+      document.querySelectorAll('.sub-tab-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          document.querySelectorAll('.sub-tab-button').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          
+          document.querySelectorAll('.sub-tab-content').forEach(content => content.style.display = 'none');
+          const targetTab = button.dataset.subtab;
+          if (targetTab) {
+            document.getElementById(targetTab).style.display = 'block';
+          }
+        });
+      });
+    }
+    
+    // 이벤트 리스너
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 개발용 홈페이지가 로드되었습니다.');
+      
+      // 초기 데이터 로드
+      loadNotices();
+      loadSubjects();
+      loadYears();
+      loadMockExams();
+      
+      // 탭 기능 초기화
+      initTabs();
+      
+      // 인증 상태 초기화
+      updateAuthUI(window.mockData.user);
+      updateRestrictedContentVisibility();
+      
+      // 로그인 버튼 이벤트
+      document.querySelector('[data-action="show-login"]')?.addEventListener('click', showMockLogin);
+      
+      // 로그아웃 버튼 이벤트
+      document.querySelector('[data-action="logout"]')?.addEventListener('click', performMockLogout);
+      
+      // Mock Auth 상태 변경 리스너
+      window.addEventListener('mockAuthStateChange', (e) => {
+        updateAuthUI(e.detail.user);
+        updateRestrictedContentVisibility();
+      });
+    });
+    
+    // 전역 함수들
+    window.showMockLogin = showMockLogin;
+    window.showPreviewContent = () => {
+      alert('🎭 Mock 미리보기: 실제 문제 페이지로 이동합니다.');
+    };
+  </script>
+</body>
+</html>

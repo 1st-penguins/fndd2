@@ -1,0 +1,9 @@
+# 퍼스트펭귄 - 검색엔진 크롤러 가이드
+User-agent: *
+Allow: /
+
+# 관리자·내부 도구는 색인 제외 (필요 시 경로 추가)
+# Disallow: /admin-notices.html
+# Disallow: /파이어베이스 임포트.html
+
+Sitemap: https://fndd.netlify.app/sitemap.xml

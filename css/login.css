@@ -1,0 +1,664 @@
+﻿/* ==============================
+   로그인 UI 스타일
+   ============================== */
+
+.login-container {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 1000;
+  max-width: 300px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 10px 15px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.login-container:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* 로그인 버튼 */
+#login-button-container {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 1000;
+}
+
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--penguin-navy);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(29, 47, 78, 0.2);
+  white-space: nowrap;
+}
+
+.login-button:hover {
+  background: var(--penguin-skyblue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(95, 178, 201, 0.3);
+}
+
+.login-icon {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+/* 사용자 프로필 */
+#user-profile-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  min-height: 40px;
+}
+
+.user-info:hover {
+  border-color: var(--penguin-skyblue);
+  background: rgba(95, 178, 201, 0.05);
+}
+
+#user-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--penguin-navy);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.user-info:hover #user-name {
+  color: var(--penguin-skyblue);
+}
+
+/* 로그아웃 버튼 */
+.logout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: var(--deep-sea-gray, #6F7C8B);
+  border: 1px solid rgba(29, 47, 78, 0.15);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.logout-button:hover {
+  background: var(--light-gray, #F5F7FA);
+  border-color: var(--deep-sea-gray, #6F7C8B);
+  color: var(--penguin-navy, #1D2F4E);
+}
+
+.logout-icon {
+  margin-right: 6px;
+}
+
+/* 제한된 콘텐츠 스타일 */
+.content-blurred {
+  filter: blur(4px);
+  opacity: 0.7;
+  pointer-events: auto;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.content-blurred:hover {
+  filter: blur(3px);
+  opacity: 0.8;
+}
+
+.content-blurred::before {
+  content: "🔒 로그인 필요";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(29, 47, 78, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.content-blurred:hover::before {
+  opacity: 1;
+}
+
+/* 로그인 필요 모달 - 불투명 막 제거 */
+.login-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.login-modal-content {
+  background-color: white;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: modalAppear 0.3s ease-out;
+  pointer-events: auto;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.5rem;
+  color: var(--deep-sea-gray, #6F7C8B);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.login-modal-close:hover {
+  color: var(--penguin-navy, #1D2F4E);
+}
+
+.login-modal-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  color: var(--penguin-navy, #1D2F4E);
+}
+
+.login-modal h3 {
+  color: var(--penguin-navy, #1D2F4E);
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.login-modal p {
+  color: var(--deep-sea-gray, #5A6C7F);
+  margin-bottom: 20px;
+}
+
+.login-now-button {
+  background-color: var(--aqua-accent, #5FB2C9);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-now-button:hover {
+  background-color: var(--penguin-navy, #1D2F4E);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(95, 178, 201, 0.3);
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+  .login-container {
+    top: 10px;
+    right: 10px;
+    max-width: 230px;
+  }
+
+  .login-button,
+  .logout-button {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+
+  #user-name {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    top: 5px;
+    right: 5px;
+    max-width: 190px;
+  }
+
+  .login-button,
+  .logout-button {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+
+  #user-name {
+    max-width: 120px;
+  }
+
+  .login-modal-content {
+    padding: 25px 20px;
+  }
+}
+
+/* 모바일 환경에서 로그인 컨테이너 스타일 (특정 페이지에서만 사용) */
+/* 주의: .login-container는 특정 페이지에서만 사용되며, Linear 테마에서는 헤더의 로그인 UI를 사용합니다 */
+@media (max-width: 768px) {
+
+  /* Linear 테마 페이지에서는 로그인 컨테이너 숨김 */
+  .notices-page .login-container,
+  .linear-header~.login-container {
+    display: none;
+  }
+
+  /* 로그인 버튼 스타일 조정 (기존 페이지 호환성) */
+  .login-button,
+  .logout-button {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    width: auto;
+  }
+
+  /* 아이콘 크기 조정 */
+  .login-icon,
+  .logout-icon {
+    font-size: 1rem;
+    margin-right: 4px;
+  }
+
+  /* 사용자 정보 컴팩트하게 */
+  .user-info {
+    padding: 4px 0;
+    margin-bottom: 6px;
+  }
+
+  #user-name {
+    max-width: 90px;
+    font-size: 0.85rem;
+  }
+}
+
+
+/* ==========================================================================
+   Modern Minimalist Login Modal Styles - Linear Theme
+   ========================================================================== */
+
+/* 기본 모달 컨테이너 (오버레이) */
+.login-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  /* 헤더보다 높게 */
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+
+/* 활성화 상태 (JS로 show 클래스 추가 시) */
+.login-modal.show {
+  display: flex !important;
+  opacity: 1;
+}
+
+/* 모달 콘텐츠 박스 */
+.login-modal-content {
+  background-color: var(--color-bg-primary, #ffffff);
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid var(--color-border-secondary, rgba(0, 0, 0, 0.05));
+}
+
+.login-modal.show .login-modal-content {
+  transform: translateY(0);
+}
+
+/* 모달 헤더 (닫기 버튼 등) */
+.modal-header {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.login-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-secondary, #f8f9fa);
+  border-radius: 50%;
+  font-size: 20px;
+  color: var(--color-text-tertiary, #6a6a6a);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  z-index: 10;
+}
+
+.login-modal-close:hover {
+  background-color: var(--color-bg-tertiary, #e8eaed);
+  color: var(--color-text-primary, #1a1a1a);
+  transform: rotate(90deg);
+}
+
+/* 아이콘 및 타이틀 */
+.login-modal-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: var(--penguin-navy, #1D2F4E);
+}
+
+.login-modal-icon img {
+  width: 64px;
+  height: auto;
+}
+
+.login-modal-icon .lock-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.login-modal h3 {
+  font-size: 1.5rem;
+  color: var(--color-text-primary, #1D2F4E);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.login-modal p {
+  color: var(--color-text-secondary, rgba(29, 47, 78, 0.7));
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+/* 로그인 폼 */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.login-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border-primary, #dadce0);
+  border-radius: 12px;
+  font-size: 1rem;
+  background-color: var(--color-bg-secondary, #f8f9fa);
+  color: var(--color-text-primary, #1a1a1a);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #5FB2C9;
+  background-color: var(--color-bg-primary, #ffffff);
+  box-shadow: 0 0 0 3px rgba(95, 178, 201, 0.15);
+}
+
+.login-input::placeholder {
+  color: var(--color-text-tertiary, #6a6a6a);
+}
+
+/* 버튼 스타일 (공통) */
+.btn-auth-primary,
+.auth-login-button,
+.login-now-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: #1D2F4E;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(29, 47, 78, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-auth-primary:hover,
+.auth-login-button:hover,
+.login-now-button:hover {
+  background-color: #0f1c33;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(29, 47, 78, 0.3);
+}
+
+.btn-auth-primary:active,
+.auth-login-button:active,
+.login-now-button:active {
+  transform: translateY(0);
+}
+
+.btn-auth-google,
+.modern-google-button,
+.login-with-google {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--color-border-primary, #dadce0);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-primary, #495057);
+  background-color: var(--color-bg-primary, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+  box-shadow: none;
+}
+
+.btn-auth-google:hover,
+.modern-google-button:hover,
+.login-with-google:hover {
+  background-color: var(--color-bg-secondary, #f8f9fa);
+  border-color: var(--color-border-secondary, #e8eaed);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-auth-google img {
+  width: 20px;
+  height: 20px;
+}
+
+/* 구분선 */
+.login-separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--deep-sea-gray, #6F7C8B);
+  font-size: 0.85rem;
+  margin: 16px 0;
+  opacity: 0.6;
+}
+
+.login-separator::before,
+.login-separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.login-separator::before {
+  margin-right: 10px;
+}
+
+.login-separator::after {
+  margin-left: 10px;
+}
+
+/* 푸터 링크 */
+.login-footer,
+.login-option-text {
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, rgba(29, 47, 78, 0.7));
+  text-align: center;
+}
+
+.login-footer a,
+.login-option-text a {
+  color: #1D2F4E;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.login-footer a:hover,
+.login-option-text a:hover {
+  color: #5FB2C9;
+  text-decoration: underline;
+}
+
+/* 에러 메시지 */
+.error-message {
+  color: #fa5252;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  text-align: left;
+}
+
+/* 제한된 콘텐츠 스타일 */
+.content-blurred {
+  filter: blur(4px);
+  opacity: 0.7;
+  pointer-events: auto;
+  /* 마우스 이벤트 허용 (오버레이 클릭 위해) */
+  position: relative;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.content-blurred .login-required-overlay {
+  cursor: pointer;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 480px) {
+  .login-modal {
+    padding: 16px;
+    align-items: flex-start;
+    /* 모바일에서 상단 정렬로 변경하여 바로 보이도록 */
+    padding-top: 68px;
+    /* 헤더 높이(48px) + 여백(20px) = 68px */
+  }
+
+  .login-modal-content {
+    padding: 32px 20px;
+    border-radius: 16px;
+    margin: 0;
+    max-height: calc(100vh - 100px);
+    /* 헤더와 여백을 고려한 최대 높이 */
+    margin-top: 0;
+    /* 상단 마진 제거 */
+    width: 100%;
+    /* 전체 너비 사용 */
+  }
+
+  .login-modal h3 {
+    font-size: 1.3rem;
+  }
+
+  .login-modal p {
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+  }
+
+  .login-input {
+    padding: 12px 14px;
+    font-size: 16px;
+    /* iOS 줌 방지 */
+  }
+}
+
+/* 태블릿 크기 모바일 (481px ~ 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .login-modal {
+    padding: 20px;
+    align-items: flex-start;
+    /* 태블릿에서도 상단 정렬 */
+    padding-top: 78px;
+    /* 헤더 높이(48px) + 여백(30px) = 78px */
+  }
+
+  .login-modal-content {
+    margin-top: 0;
+    max-height: calc(100vh - 120px);
+  }
+}

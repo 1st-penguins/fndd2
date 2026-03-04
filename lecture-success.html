@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>결제 완료 | 퍼스트펭귄</title>
+  
+  <link rel="stylesheet" href="css/base.css" />
+  
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .success-container {
+      background: white;
+      border-radius: 20px;
+      padding: 60px;
+      text-align: center;
+      max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .success-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #4caf50;
+      margin-bottom: 20px;
+    }
+    
+    .message {
+      color: #666;
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 30px;
+    }
+    
+    .btn {
+      padding: 15px 40px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: var(--penguin-navy);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--penguin-skyblue);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    #loadingMessage {
+      color: #999;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="success-container">
+    <div class="success-icon">✅</div>
+    <h1>결제가 완료되었습니다!</h1>
+    <div class="message" id="successMessage">
+      구매가 완료되었습니다.
+    </div>
+    
+    <div id="loadingMessage">결제 정보 저장 중...</div>
+    
+    <div id="actionButtons" style="display: none;">
+      <button class="btn btn-primary" id="mainActionButton" onclick="goToLecture()">
+        이용하기
+      </button>
+      <button class="btn btn-secondary" onclick="window.open('https://litt.ly/the1stpeng','_blank')">
+        📚 목록으로
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/core/firebase-core.js';
+    import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    import { applyCoupon } from './js/payment/coupon-manager.js';
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('productId');
+    const orderId = urlParams.get('orderId');
+    const productType = urlParams.get('type') || 'pdf';
+    const couponId = urlParams.get('couponId');
+    const discountAmount = parseInt(urlParams.get('discount')) || 0;
+    
+    let savedProductId = productId;
+    let savedProductType = productType;
+    
+    // 결제 정보 저장
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert('로그인이 필요합니다.');
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      try {
+        // Firebase에 구매 내역 저장
+        await setDoc(doc(db, 'purchases', `${user.uid}_${productId}`), {
+          userId: user.uid,
+          userName: user.displayName || user.email,
+          productId: productId,
+          productType: productType,
+          orderId: orderId,
+          couponId: couponId || null,
+          discountAmount: discountAmount,
+          purchasedAt: serverTimestamp(),
+          status: 'completed'
+        });
+        
+        console.log('✅ 구매 내역 저장 완료');
+        
+        // 쿠폰 사용 처리
+        if (couponId) {
+          await applyCoupon(couponId, user.uid, orderId, productId, discountAmount);
+          console.log('✅ 쿠폰 사용 처리 완료');
+        }
+        
+        // 버튼 표시
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('actionButtons').style.display = 'block';
+        
+        // 상품 유형에 따라 메시지 및 버튼 변경
+        const messageEl = document.getElementById('successMessage');
+        const buttonEl = document.getElementById('mainActionButton');
+        
+        if (productType === 'pdf') {
+          messageEl.innerHTML = 'PDF 구매가 완료되었습니다.<br>이제 다운로드하실 수 있습니다.';
+          buttonEl.textContent = '📥 PDF 다운로드';
+        } else {
+          messageEl.innerHTML = '강의 구매가 완료되었습니다.<br>이제 강의를 수강하실 수 있습니다.';
+          buttonEl.textContent = '▶️ 강의 수강하기';
+        }
+        
+      } catch (error) {
+        console.error('구매 내역 저장 오류:', error);
+        document.getElementById('loadingMessage').textContent = '저장 중 오류가 발생했습니다.';
+      }
+    });
+    
+    window.goToLecture = function() {
+      if (savedProductType === 'pdf') {
+        window.location.href = `pdf-download.html?id=${savedProductId}`;
+      } else {
+        window.location.href = `lecture-play.html?id=${savedProductId}`;
+      }
+    };
+  </script>
+</body>
+</html>
+

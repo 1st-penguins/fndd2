@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>퍼스트펭귄 파이어베이스 데이터 임포트</title>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1, h2 {
+      color: #333;
+    }
+    
+    .container {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    button {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    
+    button:hover {
+      background-color: #3367d6;
+    }
+    
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      background-color: #f5f5f5;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .success {
+      color: #4caf50;
+    }
+    
+    .error {
+      color: #f44336;
+    }
+    
+    .warning {
+      color: #ff9800;
+    }
+    
+    pre {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    
+    .action-group {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+    
+    .action-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    select, input[type="file"] {
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>퍼스트펭귄 파이어베이스 데이터 임포트</h1>
+  
+  <div class="container">
+    <h2>1. 상태</h2>
+    <p id="connection-status">파이어베이스에 연결 중...</p>
+    <button id="connect-btn">파이어베이스 연결</button>
+  </div>
+  
+  <div class="container">
+    <h2>2. 문제 임포트</h2>
+    
+    <div class="action-group">
+      <div class="action-title">과목 문제풀이기록 세트 임포트</div>
+      <select id="year-select">
+        <option value="2019">2019년</option>
+        <option value="2020">2020년</option>
+        <option value="2021">2021년</option>
+        <option value="2022">2022년</option>
+        <option value="2023">2023년</option>
+        <option value="2024">2024년</option>
+      </select>
+      <select id="subject-select">
+        <option value="건강체력평가">건강체력평가</option>
+        <option value="기능해부학">기능해부학</option>
+        <option value="운동생리학">운동생리학</option>
+        <option value="운동처방론">운동처방론</option>
+        <option value="운동부하검사">운동부하검사</option>
+        <option value="운동상해">운동상해</option>
+        <option value="병태생리학">병태생리학</option>
+        <option value="스포츠심리학">스포츠심리학</option>
+      </select>
+      <div>
+        <input type="file" id="json-file" accept=".json">
+        <button id="import-subject-btn" disabled>과목 문제 임포트</button>
+      </div>
+    </div>
+    
+    <div class="action-group">
+      <div class="action-title">모의고사 구성 임포트</div>
+      <select id="mock-year-select">
+        <option value="2019">2019년</option>
+        <option value="2020">2020년</option>
+        <option value="2021">2021년</option>
+        <option value="2022">2022년</option>
+        <option value="2023">2023년</option>
+        <option value="2024">2024년</option>
+      </select>
+      <select id="session-select">
+        <option value="1교시">1교시</option>
+        <option value="2교시">2교시</option>
+      </select>
+      <button id="create-mock-exam-btn" disabled>모의고사 구성 생성</button>
+    </div>
+    
+    <div class="action-group">
+      <div class="action-title">통계 데이터 구조 초기화</div>
+      <p>문제별 통계 데이터 구조를 초기화합니다. 샘플 통계 데이터가 생성됩니다.</p>
+      <button id="init-stats-btn" disabled>통계 데이터 구조 초기화</button>
+    </div>
+    
+    <div class="action-group">
+      <div class="action-title">통계 초기화 (모든 과목)</div>
+      <p>선택한 연도의 전체 과목에 대한 통계 구조를 한 번에 초기화합니다.</p>
+      <select id="stats-year-select">
+        <option value="2019">2019년</option>
+        <option value="2020">2020년</option>
+        <option value="2021">2021년</option>
+        <option value="2022">2022년</option>
+        <option value="2023">2023년</option>
+        <option value="2024">2024년</option>
+      </select>
+      <button id="init-all-stats-btn" disabled>전체 과목 통계 초기화</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <h2>3. 로그</h2>
+    <div id="status" class="status">
+      <!-- 여기에 작업 로그가 표시됩니다 -->
+      <p>파이어베이스에 연결하세요...</p>
+    </div>
+  </div>
+  
+  <script type="module">
+    // 파이어베이스 설정 (새 프로젝트 정보로 업데이트)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVEYHjLzbitnfpykUO7yjzT_Ye-Dix7pI",
+      authDomain: "first-penguins-new.firebaseapp.com",
+      projectId: "first-penguins-new",
+      storageBucket: "first-penguins-new.appspot.com",
+      messagingSenderId: "532317002827",
+      appId: "1:532317002827:web:d8ee3b15f269b2571381ce",
+      measurementId: "G-WZ34PK12P1"
+    };
+    
+    // 전역 변수
+    let firebaseApp;
+    let db;
+    
+    // DOM 요소
+    const connectBtn = document.getElementById('connect-btn');
+    const connectionStatus = document.getElementById('connection-status');
+    const importSubjectBtn = document.getElementById('import-subject-btn');
+    const createMockExamBtn = document.getElementById('create-mock-exam-btn');
+    const initStatsBtn = document.getElementById('init-stats-btn');
+    const initAllStatsBtn = document.getElementById('init-all-stats-btn');
+    const jsonFileInput = document.getElementById('json-file');
+    const yearSelect = document.getElementById('year-select');
+    const subjectSelect = document.getElementById('subject-select');
+    const mockYearSelect = document.getElementById('mock-year-select');
+    const sessionSelect = document.getElementById('session-select');
+    const statsYearSelect = document.getElementById('stats-year-select');
+    const statusDiv = document.getElementById('status');
+    
+    // 페이지 로드 시 자동 연결 시도
+    document.addEventListener('DOMContentLoaded', () => {
+      connectFirebase();
+    });
+    
+    // 연결 버튼 이벤트
+    connectBtn.addEventListener('click', connectFirebase);
+    
+    // 파이어베이스 연결 함수
+    function connectFirebase() {
+      try {
+        logMessage('파이어베이스에 연결 중...');
+        
+        // 기존 앱이 있으면 삭제
+        if (firebaseApp) {
+          firebase.app().delete().then(() => {
+            logMessage('기존 연결 초기화됨');
+          });
+        }
+        
+        firebaseApp = firebase.initializeApp(firebaseConfig);
+        db = firebaseApp.firestore();
+        
+        connectionStatus.textContent = '파이어베이스에 연결됨';
+        connectionStatus.style.color = '#4caf50';
+        
+        logMessage('파이어베이스에 성공적으로 연결되었습니다!', 'success');
+        
+        // 버튼 활성화
+        importSubjectBtn.disabled = false;
+        createMockExamBtn.disabled = false;
+        initStatsBtn.disabled = false;
+        initAllStatsBtn.disabled = false;
+        
+      } catch (error) {
+        connectionStatus.textContent = '연결 실패: ' + error.message;
+        connectionStatus.style.color = '#f44336';
+        
+        logMessage(`연결 오류: ${error.message}`, 'error');
+      }
+    }
+    
+    // 과목 문제 임포트 버튼 이벤트
+    importSubjectBtn.addEventListener('click', async () => {
+      if (!db) {
+        logMessage('먼저 파이어베이스에 연결하세요.', 'error');
+        return;
+      }
+      
+      const file = jsonFileInput.files[0];
+      if (!file) {
+        logMessage('JSON 파일을 선택해주세요.', 'error');
+        return;
+      }
+      
+      const year = yearSelect.value;
+      const subject = subjectSelect.value;
+      
+      logMessage(`${year}년 ${subject} 문제 데이터 임포트 시작...`);
+      
+      try {
+        const jsonData = await readFileAsJSON(file);
+        await importSubjectQuestions(year, subject, jsonData);
+      } catch (error) {
+        logMessage(`임포트 오류: ${error.message}`, 'error');
+      }
+    });
+    
+    // 모의고사 구성 생성 버튼 이벤트
+    createMockExamBtn.addEventListener('click', async () => {
+      if (!db) {
+        logMessage('먼저 파이어베이스에 연결하세요.', 'error');
+        return;
+      }
+      
+      const year = mockYearSelect.value;
+      const session = sessionSelect.value;
+      
+      logMessage(`${year}년 모의고사 ${session} 구성 생성 시작...`);
+      
+      try {
+        // 교시에 따른 과목 설정
+        let subjects;
+        if (session === '1교시') {
+          subjects = ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사'];
+        } else {
+          subjects = ['운동상해', '기능해부학', '병태생리학', '스포츠심리학'];
+        }
+        
+        logMessage(`모의고사 구성 과목: ${subjects.join(', ')}`);
+        
+        // 참조할 문제풀이기록 세트 ID 배열
+        const questionSets = subjects.map(subject => `${year}_${subject}`);
+        
+        // 각 문제풀이기록 세트 존재 확인
+        for (const setId of questionSets) {
+          const docRef = db.collection('questionSets').doc(setId);
+          const doc = await docRef.get();
+          
+          if (!doc.exists) {
+            logMessage(`경고: ${setId} 문제풀이기록 세트가 존재하지 않습니다. 먼저 세트를 임포트하세요.`, 'warning');
+          }
+        }
+        
+        // 모의고사 문서 ID
+        const mockExamId = `${year}_${session}`;
+        
+        // 파이어스토어에 저장
+        await db.collection('mockExams').doc(mockExamId).set({
+          title: `${year}년 모의고사 ${session}`,
+          year: year,
+          session: session,
+          subjects: subjects,
+          questionSets: questionSets,
+          totalQuestions: subjects.length * 20, // 과목당 20문제 가정
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        logMessage(`${year}년 모의고사 ${session}가 성공적으로 생성되었습니다.`, 'success');
+      } catch (error) {
+        logMessage(`모의고사 구성 오류: ${error.message}`, 'error');
+      }
+    });
+    
+    // 통계 데이터 구조 초기화 버튼 이벤트
+    initStatsBtn.addEventListener('click', async () => {
+      if (!db) {
+        logMessage('먼저 파이어베이스에 연결하세요.', 'error');
+        return;
+      }
+      
+      const year = yearSelect.value;
+      const subject = subjectSelect.value;
+      
+      logMessage(`${year}년 ${subject} 통계 데이터 구조 초기화 시작...`);
+      
+      try {
+        await initializeQuestionStats(year, subject);
+      } catch (error) {
+        logMessage(`통계 초기화 오류: ${error.message}`, 'error');
+      }
+    });
+    
+    // 전체 과목 통계 초기화 버튼 이벤트
+    initAllStatsBtn.addEventListener('click', async () => {
+      if (!db) {
+        logMessage('먼저 파이어베이스에 연결하세요.', 'error');
+        return;
+      }
+      
+      const year = statsYearSelect.value;
+      
+      logMessage(`${year}년 전체 과목 통계 데이터 구조 초기화 시작...`);
+      
+      try {
+        const subjects = [
+          '운동생리학', '건강체력평가', '운동처방론', '운동부하검사',
+          '운동상해', '기능해부학', '병태생리학', '스포츠심리학'
+        ];
+        
+        for (const subject of subjects) {
+          logMessage(`${subject} 통계 초기화 중...`);
+          await initializeQuestionStats(year, subject);
+        }
+        
+        logMessage(`${year}년 전체 과목 통계 초기화 완료!`, 'success');
+      } catch (error) {
+        logMessage(`전체 통계 초기화 오류: ${error.message}`, 'error');
+      }
+    });
+    
+    // 파일 읽기 함수
+    function readFileAsJSON(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+          try {
+            const data = JSON.parse(event.target.result);
+            resolve(data);
+          } catch (error) {
+            reject(new Error('JSON 파싱 오류: ' + error.message));
+          }
+        };
+        
+        reader.onerror = () => reject(new Error('파일 읽기 오류'));
+        
+        reader.readAsText(file);
+      });
+    }
+    
+    // 로그 메시지 추가 함수
+    function logMessage(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = document.createElement('p');
+      logEntry.className = type;
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      
+      statusDiv.appendChild(logEntry);
+      statusDiv.scrollTop = statusDiv.scrollHeight;
+    }
+    
+    // 과목별 문제 임포트 함수
+    async function importSubjectQuestions(year, subject, questionsData) {
+      try {
+        // questionSets 컬렉션에 문서 생성
+        const docId = `${year}_${subject}`;
+        
+        logMessage(`문제 데이터 검증 중... (${questionsData.length}개 문제)`);
+        
+        // 문제 데이터 유효성 검사
+        if (!Array.isArray(questionsData)) {
+          throw new Error('문제 데이터가 배열 형식이 아닙니다.');
+        }
+        
+        if (questionsData.length === 0) {
+          throw new Error('문제 데이터가 비어 있습니다.');
+        }
+        
+        // 문제 데이터 형식 변환 (0-based 인덱스로 변환)
+        const processedQuestions = questionsData.map(q => ({
+          id: q.id,
+          questionImage: q.questionImage,
+          correctAnswer: q.correctAnswer, // 이미 0-3 기반이라면 그대로 사용
+          explanation: q.explanation || ''
+        }));
+        
+        logMessage(`${processedQuestions.length}개 문제 데이터 처리 완료`);
+        
+        // 파이어스토어에 저장
+        await db.collection('questionSets').doc(docId).set({
+          title: `${year}년 ${subject} 기출문제`,
+          year: year,
+          subject: subject,
+          totalQuestions: processedQuestions.length,
+          questions: processedQuestions,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        logMessage(`${year}년 ${subject} 문제풀이기록 세트가 성공적으로 임포트되었습니다.`, 'success');
+        
+        // JSON 데이터 미리보기 표시
+        const previewData = processedQuestions.slice(0, 2);
+        logMessage(`문제 데이터 미리보기: ${JSON.stringify(previewData, null, 2)}`);
+        
+        return docId;
+      } catch (error) {
+        logMessage(`문제풀이기록 세트 임포트 중 오류 발생: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+    
+    // 모의고사 구성 생성 함수
+    async function createMockExam(year, session) {
+      try {
+        // 교시에 따른 과목 설정
+        let subjects;
+        if (session === '1교시') {
+          subjects = ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사'];
+        } else {
+          subjects = ['운동상해', '기능해부학', '병태생리학', '스포츠심리학'];
+        }
+        
+        logMessage(`모의고사 구성 과목: ${subjects.join(', ')}`);
+        
+        // 참조할 문제풀이기록 세트 ID 배열
+        const questionSets = subjects.map(subject => `${year}_${subject}`);
+        
+        // 각 문제풀이기록 세트 존재 확인
+        for (const setId of questionSets) {
+          const docRef = db.collection('questionSets').doc(setId);
+          const doc = await docRef.get();
+          
+          if (!doc.exists) {
+            logMessage(`경고: ${setId} 문제풀이기록 세트가 존재하지 않습니다. 먼저 세트를 임포트하세요.`, 'warning');
+          }
+        }
+        
+        // 모의고사 문서 ID
+        const mockExamId = `${year}_${session}`;
+        
+        // 파이어스토어에 저장
+        await db.collection('mockExams').doc(mockExamId).set({
+          title: `${year}년 모의고사 ${session}`,
+          year: year,
+          session: session,
+          subjects: subjects,
+          questionSets: questionSets,
+          totalQuestions: subjects.length * 20, // 과목당 20문제 가정
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        logMessage(`${year}년 모의고사 ${session}가 성공적으로 생성되었습니다.`, 'success');
+        return mockExamId;
+      } catch (error) {
+        logMessage(`모의고사 생성 중 오류 발생: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+    
+    // 통계 데이터 구조 초기화 함수
+    async function initializeQuestionStats(year, subject) {
+      try {
+        // 문제풀이기록 세트 가져오기
+        const questionSetRef = db.collection('questionSets').doc(`${year}_${subject}`);
+        const questionSetDoc = await questionSetRef.get();
+        
+        if (!questionSetDoc.exists) {
+          logMessage(`${year}_${subject} 문제풀이기록 세트가 존재하지 않습니다.`, 'warning');
+          return;
+        }
+        
+        const questionSetData = questionSetDoc.data();
+        const questions = questionSetData.questions || [];
+        
+        logMessage(`${questions.length}개 문제에 대한 통계 구조 초기화 중...`);
+        
+        // 각 문제에 대한 통계 문서 생성
+        for (let i = 0; i < questions.length; i++) {
+          const question = questions[i];
+          const questionId = question.id;
+          const statId = `${year}_${subject}_${questionId}`;
+          
+          // 임의의 통계 데이터 생성 (샘플용)
+          const totalAttempts = Math.floor(Math.random() * 100) + 50; // 50-149 범위
+          const correctAnswer = question.correctAnswer;
+          
+          // 답변 분포 생성 (임의 데이터)
+          const distribution = {
+            "0": 0,
+            "1": 0,
+            "2": 0,
+            "3": 0
+          };
+          
+          // 정답에 더 많은 비중 부여
+          let correctAttempts = Math.floor(totalAttempts * (0.4 + Math.random() * 0.4)); // 40-80% 정답률
+          distribution[correctAnswer.toString()] = correctAttempts;
+          
+          // 나머지 오답 분포
+          let remainingAttempts = totalAttempts - correctAttempts;
+          
+          for (let j = 0; j < 4; j++) {
+            if (j !== correctAnswer) {
+              const wrongCount = j === ((correctAnswer + 2) % 4) ? 
+                Math.floor(remainingAttempts * 0.5) : // 특정 오답에 더 많은 비중
+                Math.floor(remainingAttempts * 0.25);
+              
+              distribution[j.toString()] = wrongCount;
+              remainingAttempts -= wrongCount;
+            }
+          }
+          
+          // 남은 응답 마지막 오답에 추가
+          const lastWrongAnswer = (correctAnswer + 1) % 4;
+          distribution[lastWrongAnswer.toString()] += remainingAttempts;
+          
+          // 가장 많이 선택된 오답 찾기
+          let maxWrong = null;
+          let maxCount = 0;
+          
+          for (let j = 0; j < 4; j++) {
+            if (j !== correctAnswer && distribution[j.toString()] > maxCount) {
+              maxCount = distribution[j.toString()];
+              maxWrong = j;
+            }
+          }
+          
+          // 통계 문서 저장
+          await db.collection('questionStats').doc(statId).set({
+            year: year,
+            subject: subject,
+            questionId: questionId,
+            totalAttempts: totalAttempts,
+            correctAttempts: correctAttempts,
+            answersDistribution: distribution,
+            correctAnswerRate: (correctAttempts / totalAttempts) * 100,
+            mostCommonWrongAnswer: maxWrong,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          logMessage(`문제 ${questionId} 통계 초기화 완료 (정답률: ${((correctAttempts / totalAttempts) * 100).toFixed(1)}%)`);
+        }
+        
+        logMessage(`${year}년 ${subject} 통계 데이터 구조가 성공적으로 초기화되었습니다.`, 'success');
+        return true;
+      } catch (error) {
+        logMessage(`통계 데이터 초기화 중 오류 발생: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+/* 서브젝트 페이지 전용 스타일 */
+
+/* 헤더 콘텐츠 스타일 */
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+}
+
+.back-link {
+    display: flex;
+    align-items: center;
+    color: var(--frost-white);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+
+.back-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(-3px);
+}
+
+.back-arrow {
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+.page-title {
+    text-align: center;
+}
+
+.page-title h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    margin-top: 20px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    color: var(--frost-white);
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    opacity: 1;
+    color: #1e3a8a;
+    font-weight: 700;
+    margin-top: 8px;
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.page-subtitle-fixed {
+    font-size: 1.2rem;
+    opacity: 1;
+    color: #1e3a8a;
+    font-weight: 700;
+    margin-top: 8px;
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 서브젝트 페이지의 펭귄 데코레이션 위치 조정 */
+.penguin-decoration {
+    font-size: 5rem;
+    right: 20px;
+    top: -15px;
+    transform: rotate(15deg);
+    opacity: 0.12;
+    filter: drop-shadow(0 1px 2px rgba(29, 47, 78, 0.1));
+}
+
+/* 연도별 리스트 스타일 - Grid Layout 통일 */
+.years-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+}
+
+/* year-item은 components.css의 공통 스타일을 상속받음 */
+.year-item .year-header {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+    margin-bottom: 10px;
+    /* 하단 마진 약간 감소 (12px → 10px) */
+}
+
+.year-content {
+    padding: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.year-header::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(to right, transparent, var(--aqua-accent), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+
+.year-item:hover .year-header::after {
+    transform: translateX(0);
+}
+
+.year-content {
+    padding: 0;
+    /* 패딩 제거 (year-item의 padding으로 충분) */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    /* gap 감소 (18px → 10px) */
+}
+
+.question-count {
+    font-size: 0.95rem;
+    color: var(--deep-sea-gray);
+    margin-bottom: 5px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.start-button {
+    display: none;
+    /* 카드 전체 클릭으로 통일하므로 숨김 처리 */
+}
+
+/* 컨텐츠 소개 섹션 */
+.subject-intro {
+    background-color: var(--frost-white);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 8px rgba(29, 47, 78, 0.08);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(29, 47, 78, 0.08);
+}
+
+.subject-intro:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(29, 47, 78, 0.12);
+}
+
+.subject-intro h2 {
+    color: var(--penguin-navy);
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.subject-description {
+    color: var(--deep-sea-gray);
+    line-height: 1.8;
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
+
+.source-note {
+    display: block;
+    color: var(--deep-sea-gray);
+    font-size: 0.875rem;
+    opacity: 0.8;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(29, 47, 78, 0.1);
+}
+
+/* 연도별 배지 */
+.year-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: var(--aqua-accent);
+    color: var(--frost-white);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+    box-shadow: 0 3px 8px rgba(95, 178, 201, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.year-item:hover .year-badge {
+    transform: rotate(10deg) scale(1.1);
+}
+
+/* 문제 개수에 따른 배지 */
+.difficulty-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 애니메이션 효과 */
+@keyframes softFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.years-list {
+    animation: softFadeIn 0.8s ease-out;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .years-list {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .page-title h1 {
+        font-size: 1.5rem;
+    }
+
+    .subject-intro {
+        padding: 20px;
+    }
+
+    .subject-intro h2 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .years-list {
+        grid-template-columns: 1fr;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .back-link {
+        align-self: flex-start;
+    }
+
+    .year-content {
+        padding: 20px 15px;
+    }
+}
+
+
+/* 모의고사 섹션 스타일 */
+.mock-exam-section,
+.subject-section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    color: var(--penguin-navy);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(29, 47, 78, 0.1);
+    position: relative;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background-color: var(--aqua-accent);
+}
+
+/* 특별 항목 스타일 - 모의고사용 */
+.special-item {
+    border: 1px solid rgba(95, 178, 201, 0.3);
+    background: white;
+}
+
+.special-item .year-header {
+    color: var(--aqua-accent);
+}
+
+.special-item:hover {
+    border-color: var(--aqua-accent);
+    box-shadow: 0 12px 32px rgba(95, 178, 201, 0.2);
+}
+
+.special-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(95, 178, 201, 0.25);
+}
+
+.special-item .start-button {
+    background-color: var(--penguin-navy);
+    box-shadow: 0 4px 12px rgba(29, 47, 78, 0.2);
+}
+
+.special-item .start-button:hover {
+    background-color: #2a4366;
+    box-shadow: 0 6px 18px rgba(29, 47, 78, 0.3);
+}
+
+.special-item .question-count {
+    color: var(--aqua-accent);
+    font-weight: 600;
+}
+
+/* 문제 개수가 많은 경우 강조 표시 */
+.question-count:has(+ .start-button[href*="모의고사"]) {
+    font-weight: 700;
+    color: var(--penguin-navy);
+}
+
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 1.2rem;
+    }
+}

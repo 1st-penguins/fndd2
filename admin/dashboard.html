@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  // 관리자 권한 확인
+  auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+  alert('로그인이 필요합니다.');
+  window.location.href = '../login.html';
+  return;
+  }
+
+  // 관리자 권한 확인
+  const adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+  if (!adminEmails.includes(user.email)) {
+  alert('관리자 권한이 없습니다.');
+  window.location.href = '../index.html';
+  return;
+  }
+
+  // 데이터 로드
+  await loadDashboardData();
+  });
+
+  // 탭 전환
+  document.querySelectorAll('.admin-tab-btn').forEach(button => {
+  button.addEventListener('click', () => {
+  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+  button.classList.add('active');
+  document.getElementById(button.dataset.tab).classList.add('active');
+  });
+  });
+
+  // 대시보드 데이터 로드
+  async function loadDashboardData() {
+  try {
+  // 구매 내역 로드
+  const purchasesRef = collection(db, 'purchases');
+  const purchasesSnap = await getDocs(purchasesRef);
+
+  let totalRevenue = 0;
+  let totalSales = 0;
+  let todayRevenue = 0;
+  const today = new Date().toDateString();
+
+  const productPrices = {
+  'pdf_001': 50000,
+  'pdf_002': 50000,
+  'pdf_003': 50000,
+  'pdf_004': 30000,
+  'pdf_005': 30000,
+  'pdf_006': 20000
+  };
+
+  const productSales = {};
+  const purchasesList = [];
+
+  purchasesSnap.forEach(doc => {
+  const data = doc.data();
+  const productId = data.productId;
+  const price = productPrices[productId] || 0;
+
+  totalRevenue += price;
+  totalSales++;
+
+  // 상품별 판매수 집계
+  productSales[productId] = (productSales[productId] || 0) + 1;
+
+  // 오늘 매출
+  if (data.purchasedAt && data.purchasedAt.toDate().toDateString() === today) {
+  todayRevenue += price;
+  }
+
+  purchasesList.push({
+  ...data,
+  id: doc.id,
+  price: price
+  });
+  });
+
+  // 통계 업데이트
+  document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString() + '원';
+  document.getElementById('totalSales').textContent = totalSales + '건';
+  document.getElementById('todayRevenue').textContent = todayRevenue.toLocaleString() + '원';
+
+  // 상품별 판매수 업데이트
+  Object.keys(productSales).forEach(productId => {
+  const elem = document.getElementById(`sales_${productId}`);
+  if (elem) {
+  elem.textContent = productSales[productId] + '건';
+  }
+  });
+
+  // ⚡ 최적화 및 요약 통계 로드
+  let userActivityMap = {};
+  let activeUserCount = 0;
+
+  const summaryStatsRef = doc(db, 'adminStats', 'userSummary');
+  const summaryStatsDoc = await getDoc(summaryStatsRef);
+
+  if (summaryStatsDoc.exists()) {
+  const summaryData = summaryStatsDoc.data();
+  userActivityMap = summaryData.userActivityMap || {};
+  activeUserCount = Object.keys(userActivityMap).length;
+  document.getElementById('totalUsers').textContent = activeUserCount + '명';
+  } else {
+  // 자동 생성 로직 (생략 - 필요 시 generateSummaryStats 호출)
+  const result = await generateSummaryStats();
+  if (result.success) {
+  activeUserCount = result.totalUsers;
+  userActivityMap = result.userActivityMap;
+  document.getElementById('totalUsers').textContent = activeUserCount + '명';
+  }
+  }
+
+  // 최근 구매 내역 렌더링
+  renderRecentPurchases(purchasesList.slice(0, 10));
+
+  // 전체 구매 내역 렌더링
+  renderAllPurchases(purchasesList);
+
+  // 사용자 목록 렌더링
+  renderUsersList(userActivityMap);
+
+  } catch (error) {
+  console.error('데이터 로드 오류:', error);
+  alert('데이터를 불러오는 중 오류가 발생했습니다.');
+  }
+  }
+
+  // 최근 구매 내역 렌더링
+  function renderRecentPurchases(purchases) {
+  const container = document.getElementById('recentPurchases');
+
+  if (purchases.length === 0) {
+  container.innerHTML = '<div class="empty-state"><span class="empty-icon">📦</span>
+    <p>구매 내역이 없습니다.</p>
+  </div>';
+  return;
+  }
+
+  const productNames = {
+  'pdf_001': 'NSCA-CSCS 요약정리본',
+  'pdf_002': '운동생리학 요약본',
+  'pdf_003': '병태생리학 압축요약본',
+  'pdf_004': '기능해부학 상지 요약본',
+  'pdf_005': '운동처방론 요약정리본',
+  'pdf_006': '스페셜테스트 압축본'
+  };
+
+  container.innerHTML = `
+  <div style="overflow-x: auto;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>구매일시</th>
+          <th>구매자</th>
+          <th>상품명</th>
+          <th>금액</th>
+          <th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${purchases.map(p => `
+        <tr>
+          <td>${p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleString('ko-KR') : '-'}</td>
+          <td>${p.userName || '-'}</td>
+          <td>${productNames[p.productId] || p.productId}</td>
+          <td>${p.price.toLocaleString()}원</td>
+          <td><span class="status-badge status-${p.status || 'completed'}">${p.status === 'completed' ? '완료' :
+              '대기'}</span></td>
+        </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+  }
+
+  // 전체 구매 내역 렌더링
+  function renderAllPurchases(purchases) {
+  const container = document.getElementById('purchasesList');
+
+  if (purchases.length === 0) {
+  container.innerHTML = '<div class="empty-state"><span class="empty-icon">📦</span>
+    <p>구매 내역이 없습니다.</p>
+  </div>';
+  return;
+  }
+
+  const productNames = {
+  'pdf_001': 'NSCA-CSCS 요약정리본',
+  'pdf_002': '운동생리학 요약본',
+  'pdf_003': '병태생리학 압축요약본',
+  'pdf_004': '기능해부학 상지 요약본',
+  'pdf_005': '운동처방론 요약정리본',
+  'pdf_006': '스페셜테스트 압축본'
+  };
+
+  container.innerHTML = `
+  <div style="overflow-x: auto;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>주문번호</th>
+          <th>구매일시</th>
+          <th>구매자</th>
+          <th>상품명</th>
+          <th>유형</th>
+          <th>금액</th>
+          <th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${purchases.map(p => `
+        <tr>
+          <td>${p.orderId || '-'}</td>
+          <td>${p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleString('ko-KR') : '-'}</td>
+          <td>${p.userName || '-'}</td>
+          <td>${productNames[p.productId] || p.productId}</td>
+          <td>${p.productType === 'pdf' ? 'PDF' : '동영상'}</td>
+          <td>${p.price.toLocaleString()}원</td>
+          <td><span class="status-badge status-${p.status || 'completed'}">${p.status === 'completed' ? '완료' :
+              '대기'}</span></td>
+        </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+
+  // 필터 이벤트 (Optional if elements exist)
+  const pFilter = document.getElementById('productFilter');
+  if(pFilter) {
+  pFilter.addEventListener('change', (e) => {
+  filterPurchases(purchases, e.target.value, document.getElementById('statusFilter').value);
+  });
+  }
+
+  const sFilter = document.getElementById('statusFilter');
+  if(sFilter) {
+  sFilter.addEventListener('change', (e) => {
+  filterPurchases(purchases, document.getElementById('productFilter').value, e.target.value);
+  });
+  }
+  }
+
+  // 구매 내역 필터링
+  function filterPurchases(purchases, productType, status) {
+  let filtered = purchases;
+
+  if (productType !== 'all') {
+  filtered = filtered.filter(p => p.productType === productType);
+  }
+
+  if (status !== 'all') {
+  filtered = filtered.filter(p => p.status === status);
+  }
+
+  renderAllPurchases(filtered);
+  }
+
+  // 요약 통계 생성 함수
+  async function generateSummaryStats() {
+  try {
+  console.log('📊 요약 통계 생성 시작...');
+  const attemptsRef = collection(db, 'attempts');
+  const attemptsSnap = await getDocs(attemptsRef);
+  console.log(`📥 ${attemptsSnap.size.toLocaleString()}개 attempts 조회 완료`);
+
+  const userActivityMap = {};
+  let totalAttempts = 0;
+
+  attemptsSnap.forEach(doc => {
+  const data = doc.data();
+  totalAttempts++;
+  if (data.userId) {
+  if (!userActivityMap[data.userId]) {
+  userActivityMap[data.userId] = {
+  userId: data.userId,
+  userName: data.userName || null,
+  userEmail: data.userEmail || null,
+  attemptCount: 0,
+  correctCount: 0,
+  lastActivity: null,
+  deviceType: data.deviceType || 'unknown',
+  totalTimeSpent: 0
+  };
+  }
+  userActivityMap[data.userId].attemptCount++;
+  if (data.isCorrect) userActivityMap[data.userId].correctCount++;
+  if (data.timeSpent) userActivityMap[data.userId].totalTimeSpent += data.timeSpent;
+  if (data.userName) userActivityMap[data.userId].userName = data.userName;
+  if (data.userEmail) userActivityMap[data.userId].userEmail = data.userEmail;
+  const timestamp = data.timestamp?.toDate();
+  if (timestamp && (!userActivityMap[data.userId].lastActivity || timestamp >
+  userActivityMap[data.userId].lastActivity)) {
+  userActivityMap[data.userId].lastActivity = timestamp;
+  }
+  }
+  });
+
+  const userCount = Object.keys(userActivityMap).length;
+  const summaryRef = doc(db, 'adminStats', 'userSummary');
+  await setDoc(summaryRef, {
+  userActivityMap: userActivityMap,
+  totalUsers: userCount,
+  totalAttempts: totalAttempts,
+  lastUpdated: serverTimestamp(),
+  generatedAt: new Date().toISOString()
+  });
+
+  console.log(`✅ 요약 통계 저장 완료: ${userCount}명`);
+  return { success: true, userActivityMap: userActivityMap, totalUsers: userCount, totalAttempts: totalAttempts };
+  } catch (error) {
+  console.error('❌ 요약 통계 생성 오류:', error);
+  return { success: false, error: error.message };
+  }
+  }
+
+  // 사용자 목록 렌더링
+  function renderUsersList(userActivityMap) {
+  const container = document.getElementById('usersList');
+
+  if (Object.keys(userActivityMap).length === 0) {
+  container.innerHTML = '<div class="empty-state"><span class="empty-icon">👥</span>
+    <p>활성 사용자가 없습니다.</p>
+  </div>';
+  return;
+  }
+
+  const sortedUsers = Object.values(userActivityMap).sort((a, b) => {
+  if (!a.lastActivity) return 1;
+  if (!b.lastActivity) return -1;
+  return b.lastActivity - a.lastActivity;
+  });
+
+  container.innerHTML = `
+  <div style="overflow-x: auto;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>UID</th>
+          <th>이름</th>
+          <th>이메일</th>
+          <th>문제 풀이 수</th>
+          <th>최근 활동</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sortedUsers.map(u => `
+        <tr>
+          <td title="${u.userId}">
+            <code
+              style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">${u.userId.substring(0, 10)}...</code>
+          </td>
+          <td>${u.userName || '<span style="color: #999; font-style: italic;">미등록</span>'}</td>
+          <td>${u.userEmail || '<span style="color: #999; font-style: italic;">미등록</span>'}</td>
+          <td><strong style="color: var(--penguin-navy);">${u.attemptCount || 0}</strong> 문제</td>
+          <td>${u.lastActivity ? new Date(u.lastActivity).toLocaleDateString('ko-KR') : '-'}</td>
+        </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top: 15px; text-align: center; color: #666; font-size: 0.9rem;">
+    📊 활성 사용자 ${sortedUsers.length}명
+  </div>
+  <div style="margin-top: 10px; text-align: center;">
+    <button onclick="refreshSummaryStats()" class="admin-btn admin-btn-primary">
+      🔄 통계 새로고침
+    </button>
+  </div>
+  `;
+  }
+
+  window.refreshSummaryStats = async function() {
+  if (!confirm('요약 통계를 새로고침하시겠습니까?')) return;
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '⏳ 생성 중...';
+  try {
+  const result = await generateSummaryStats();
+  if (result.success) {
+  alert('✅ 완료');
+  location.reload();
+  } else {
+  alert('❌ 실패: ' + result.error);
+  }
+  } catch (e) {
+  alert('오류: ' + e.message);
+  } finally {
+  btn.disabled = false;
+  btn.textContent = '🔄 통계 새로고침';
+  }
+  };
+  </script>
+  </body>
+
+</html>

@@ -1,0 +1,776 @@
+/* 모의고사 페이지 전용 CSS (mock-exam.css) */
+
+/* 과목 탭 스타일 */
+.mock-exam-subjects {
+    margin-top: 24px;
+    margin-bottom: 20px;
+}
+
+.subject-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.subject-tab {
+    padding: 8px 15px;
+    background-color: var(--light-gray);
+    border: none;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--deep-sea-gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.subject-tab:hover {
+    background-color: var(--iceberg-blue);
+    color: var(--penguin-navy);
+}
+
+.subject-tab.active {
+    background-color: var(--penguin-navy);
+    color: var(--frost-white);
+    box-shadow: 0 2px 6px rgba(29, 47, 78, 0.2);
+}
+
+/* 각 과목별 탭 색상 (인디케이터와 동일) */
+/* 1번 과목: 차분한 블루 */
+.subject-tab[data-subject="운동생리학"],
+.subject-tab[data-subject="운동상해"] {
+    background-color: rgba(100, 181, 246, 0.12);
+    color: #7CA9D8;
+}
+
+.subject-tab[data-subject="운동생리학"]:hover,
+.subject-tab[data-subject="운동생리학"].active,
+.subject-tab[data-subject="운동상해"]:hover,
+.subject-tab[data-subject="운동상해"].active {
+    background-color: rgba(100, 181, 246, 0.85);
+    color: white;
+    box-shadow: 0 2px 6px rgba(100, 181, 246, 0.3);
+}
+
+/* 2번 과목: 차분한 틸 */
+.subject-tab[data-subject="건강체력평가"],
+.subject-tab[data-subject="기능해부학"] {
+    background-color: rgba(77, 182, 172, 0.12);
+    color: #6BA39C;
+}
+
+.subject-tab[data-subject="건강체력평가"]:hover,
+.subject-tab[data-subject="건강체력평가"].active,
+.subject-tab[data-subject="기능해부학"]:hover,
+.subject-tab[data-subject="기능해부학"].active {
+    background-color: rgba(77, 182, 172, 0.85);
+    color: white;
+    box-shadow: 0 2px 6px rgba(77, 182, 172, 0.3);
+}
+
+/* 3번 과목: 차분한 퍼플 */
+.subject-tab[data-subject="운동처방론"],
+.subject-tab[data-subject="병태생리학"] {
+    background-color: rgba(149, 117, 205, 0.12);
+    color: #A88DC7;
+}
+
+.subject-tab[data-subject="운동처방론"]:hover,
+.subject-tab[data-subject="운동처방론"].active,
+.subject-tab[data-subject="병태생리학"]:hover,
+.subject-tab[data-subject="병태생리학"].active {
+    background-color: rgba(149, 117, 205, 0.85);
+    color: white;
+    box-shadow: 0 2px 6px rgba(149, 117, 205, 0.3);
+}
+
+/* 4번 과목: 차분한 그린 */
+.subject-tab[data-subject="운동부하검사"],
+.subject-tab[data-subject="스포츠심리학"] {
+    background-color: rgba(129, 199, 132, 0.12);
+    color: #8DB590;
+}
+
+.subject-tab[data-subject="운동부하검사"]:hover,
+.subject-tab[data-subject="운동부하검사"].active,
+.subject-tab[data-subject="스포츠심리학"]:hover,
+.subject-tab[data-subject="스포츠심리학"].active {
+    background-color: rgba(129, 199, 132, 0.85);
+    color: white;
+    box-shadow: 0 2px 6px rgba(129, 199, 132, 0.3);
+}
+
+/* all 탭은 원래 스타일 유지 */
+.subject-tab[data-subject="all"] {
+    background-color: var(--light-gray);
+}
+
+.subject-tab[data-subject="all"]:hover {
+    background-color: var(--iceberg-blue);
+}
+
+.subject-tab[data-subject="all"].active {
+    background-color: var(--penguin-navy);
+}
+
+/* 과목 배지 스타일 */
+.subject-badge {
+    position: absolute;
+    top: 15px;
+    right: 30px;
+    /* quiz-container의 padding(30px)과 맞춰서 오른쪽 여백 유지 */
+    background-color: var(--aqua-accent);
+    color: var(--frost-white);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 8px rgba(95, 178, 201, 0.3);
+    z-index: 10;
+    /* question-number와 같은 z-index로 겹침 방지 */
+}
+
+/* 인디케이터 레이아웃은 css/indicators.css로 이동 */
+/* 오답 리뷰 모드 스타일 */
+.review-mode-message {
+    background: linear-gradient(135deg, #fef5f9 0%, #fce7f3 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1), 0 2px 4px rgba(236, 72, 153, 0.06);
+}
+
+.review-mode-title {
+    font-weight: 600;
+    color: #ec4899;
+    margin-bottom: 6px;
+    font-size: 1rem;
+}
+
+.review-mode-info {
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.exit-review-button {
+    background: linear-gradient(135deg, #5F6368, #3C4043);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.exit-review-button:hover {
+    background: linear-gradient(135deg, #3C4043, #202124);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+.exit-review-button::before {
+    content: '✖️';
+    margin-right: 6px;
+}
+
+/* 결과 요약 스타일 개선 */
+.results-summary {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(29, 47, 78, 0.1);
+    padding: 30px;
+    margin: 30px auto;
+    max-width: 800px;
+    position: relative;
+    overflow: hidden;
+    display: none;
+    animation: fade-in 0.6s ease-out;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.results-summary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--aqua-accent), var(--penguin-navy));
+}
+
+.results-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--penguin-navy);
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--iceberg-blue);
+    position: relative;
+}
+
+/* 점수 요약 디스플레이 개선 */
+.score-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+    position: relative;
+}
+
+.score-card {
+    background: linear-gradient(135deg, #f8faff, #edf2f7);
+    border-radius: 12px;
+    padding: 20px 25px;
+    text-align: center;
+    min-width: 160px;
+    flex: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(163, 213, 224, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.score-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.score-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: var(--aqua-accent);
+    opacity: 0.7;
+}
+
+.score-label {
+    font-weight: 600;
+    color: var(--deep-sea-gray);
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--penguin-navy);
+    margin-bottom: 5px;
+    line-height: 1.2;
+}
+
+.score-percentage {
+    font-size: 1rem;
+    color: var(--deep-sea-gray);
+    opacity: 0.8;
+}
+
+/* 결과 메시지 개선 */
+.score-message {
+    text-align: center;
+    margin: 25px 0;
+    color: var(--deep-sea-gray);
+    line-height: 1.6;
+    font-size: 1.05rem;
+    background-color: rgba(163, 213, 224, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.results-message {
+    text-align: left;
+    padding: 20px;
+    margin: 30px 0;
+    background: linear-gradient(135deg, var(--iceberg-blue), #a3d5e0);
+    color: var(--penguin-navy);
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(95, 178, 201, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.results-message p {
+    margin-top: 0;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.results-message ul {
+    margin: 10px 0 0;
+    padding-left: 25px;
+}
+
+.results-message li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* 성적표 테이블 개선 */
+.subject-scores {
+    margin: 40px 0 30px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    background-color: white;
+}
+
+.subject-scores h3 {
+    font-size: 1.4rem;
+    color: var(--penguin-navy);
+    margin: 0;
+    padding: 15px 20px;
+    text-align: center;
+    background-color: #f1f7f9;
+    border-bottom: 1px solid #e1e8f0;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.results-table th,
+.results-table td {
+    padding: 15px;
+    text-align: center;
+    border: none;
+    border-bottom: 1px solid #e1e8f0;
+}
+
+.results-table th {
+    background-color: var(--penguin-navy);
+    color: var(--frost-white);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.results-table tr:last-child td {
+    border-bottom: none;
+}
+
+.results-table tr:nth-child(even) {
+    background-color: rgba(243, 248, 250, 0.7);
+}
+
+.results-table tr:hover {
+    background-color: rgba(163, 213, 224, 0.15);
+}
+
+.subject-name {
+    text-align: left;
+    font-weight: 600;
+}
+
+.correct-count {
+    color: var(--penguin-navy);
+    font-weight: 600;
+}
+
+.score-points {
+    font-weight: 700;
+    position: relative;
+}
+
+.score-points::after {
+    content: "점";
+    font-size: 0.8em;
+    margin-left: 2px;
+    opacity: 0.8;
+}
+
+.pass-status {
+    font-weight: 600;
+}
+
+/* 점수별 색상 스타일 */
+.score-high {
+    color: #38a169;
+    /* 높은 점수 (70점 이상) */
+}
+
+.score-medium {
+    color: #dd6b20;
+    /* 중간 점수 (40점 ~ 70점) */
+}
+
+.score-low {
+    color: #e53e3e;
+    /* 낮은 점수 (40점 미만) */
+}
+
+/* 액션 버튼 개선 */
+.results-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 35px;
+}
+
+.action-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.retry-button {
+    background: linear-gradient(135deg, var(--penguin-navy), #172a50);
+    color: white;
+}
+
+.retry-button:hover {
+    background: linear-gradient(135deg, #172a50, #0e1d3b);
+    box-shadow: 0 6px 15px rgba(23, 42, 80, 0.3);
+    transform: translateY(-2px);
+}
+
+.review-button {
+    background: linear-gradient(135deg, var(--aqua-accent), #4a9daf);
+    color: white;
+}
+
+.review-button:hover {
+    background: linear-gradient(135deg, #4a9daf, #3a8da1);
+    box-shadow: 0 6px 15px rgba(74, 157, 175, 0.3);
+    transform: translateY(-2px);
+}
+
+.action-button::before {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+.retry-button::before {
+    content: '🔄';
+}
+
+.review-button::before {
+    content: '📝';
+}
+
+/* 결과 차트 영역 */
+.results-chart {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8faff;
+    border-radius: 12px;
+    border: 1px solid rgba(163, 213, 224, 0.3);
+}
+
+.chart-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--penguin-navy);
+    margin: 25px 0 15px;
+    text-align: center;
+}
+
+.chart-title:first-child {
+    margin-top: 0;
+}
+
+/* 통과 뱃지 스타일 */
+.result-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pass-badge {
+    background-color: #38a169;
+    color: white;
+}
+
+.fail-badge {
+    background-color: #e53e3e;
+    color: white;
+}
+
+/* 추가 정보 접기/펼치기 스타일 */
+.additional-info {
+    margin-top: 30px;
+}
+
+.info-toggle {
+    background: none;
+    border: none;
+    color: var(--penguin-navy);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.info-toggle:hover {
+    background-color: rgba(163, 213, 224, 0.1);
+}
+
+.info-toggle::after {
+    content: '▼';
+    margin-left: 8px;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.info-toggle.active::after {
+    transform: rotate(180deg);
+}
+
+.info-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.info-content.show {
+    max-height: 800px;
+}
+
+@media (max-width: 768px) {
+
+    /* 과목 탭 - 모바일 최적화 */
+    .subject-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+        justify-content: center;
+    }
+
+    .subject-tab {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+        flex: 0 1 auto;
+        min-width: calc(50% - 3px);
+        text-align: center;
+        border-radius: 16px;
+    }
+
+    /* "전체 문제" 탭은 전체 너비 사용 */
+    .subject-tab[data-subject="all"] {
+        flex: 1 1 100%;
+        min-width: 100%;
+        margin-bottom: 4px;
+    }
+
+    /* 인디케이터 스타일은 css/indicators.css에서 관리 */
+
+    .subject-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        right: 20px;
+        /* 모바일에서 quiz-container 패딩(20px)과 맞춤 */
+    }
+
+    /* 결과 영역 */
+    .results-summary {
+        padding: 25px 20px;
+        margin: 20px 10px;
+        border-radius: 12px;
+    }
+
+    .results-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .score-display {
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .score-card {
+        padding: 15px;
+        min-width: 130px;
+    }
+
+    .score-value {
+        font-size: 1.6rem;
+    }
+
+    .score-message {
+        padding: 15px;
+        margin: 20px 0;
+        font-size: 0.95rem;
+    }
+
+    .results-message {
+        padding: 15px;
+        margin: 20px 0;
+    }
+
+    .results-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .action-button {
+        width: 100%;
+        padding: 10px 20px;
+    }
+
+    .subject-scores h3 {
+        font-size: 1.2rem;
+        padding: 12px 15px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* 과목 탭 - 작은 모바일 최적화 */
+    .subject-tabs {
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+
+    .subject-tab {
+        padding: 7px 12px;
+        font-size: 0.8rem;
+        min-width: calc(50% - 2.5px);
+        border-radius: 14px;
+    }
+
+    .subject-tab[data-subject="all"] {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    /* 인디케이터 스타일은 css/indicators.css에서 관리 */
+
+    .subject-badge {
+        right: 15px;
+        /* 작은 모바일에서도 위치 조정 */
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+
+    /* 결과 영역 */
+    .results-title {
+        font-size: 1.3rem;
+    }
+
+    .score-card {
+        flex: 1 1 100%;
+        margin-bottom: 10px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+
+    .results-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .action-button {
+        width: 100%;
+    }
+}
+
+
+/* 각 과목별 탭 색상 클래스 - 채도/명도 차별화 (중복 제거됨, 위의 38-89줄 참조) */
+
+/* 과목 배지 색상 스타일 추가 - 기본 스타일은 위쪽에 정의되어 있음 */
+
+/* 1번 과목 배지 색상 - 진한 파란색 */
+.subject-badge[textContent="운동생리학"],
+.subject-badge[textContent="운동상해"] {
+    background-color: #1E90FF;
+    border: 1px solid #1873cc;
+    box-shadow: 0 2px 8px rgba(30, 144, 255, 0.5);
+    color: white;
+}
+
+/* 2번 과목 배지 색상 - 청록색/민트 */
+.subject-badge[textContent="건강체력평가"],
+.subject-badge[textContent="기능해부학"] {
+    background-color: #20C997;
+    border: 1px solid #1aa179;
+    box-shadow: 0 2px 8px rgba(32, 201, 151, 0.5);
+    color: white;
+}
+
+/* 3번 과목 배지 색상 - 보라/자주색 */
+.subject-badge[textContent="운동처방론"],
+.subject-badge[textContent="병태생리학"] {
+    background-color: #8A2BE2;
+    border: 1px solid #7025b5;
+    box-shadow: 0 2px 8px rgba(138, 43, 226, 0.5);
+    color: white;
+}
+
+/* 4번 과목 배지 색상 - 핑크/로즈골드 */
+.subject-badge[textContent="운동부하검사"],
+.subject-badge[textContent="스포츠심리학"] {
+    background-color: #FF69B4;
+    border: 1px solid #e55aa0;
+    box-shadow: 0 2px 8px rgba(255, 105, 180, 0.5);
+    color: white;
+}
+
+/* 인디케이터 색상 스타일도 추가 */
+/* 과목별 배경색 설정 - 새로운 색상 배열 적용 */
+/* 인디케이터 색상 - 더 선명하게 */
+/* 과목별 인디케이터 색상은 css/indicators.css에서 관리 (중복 제거) */
+
+/* 정답/오답 인디케이터 스타일은 css/indicators.css에서 관리 (중복 제거) */
+
+/* 모든 인디케이터 스타일은 css/indicators.css에서 관리 (중복 제거) */
+
+/* 모든 인디케이터 스타일은 css/indicators.css에서 관리 */

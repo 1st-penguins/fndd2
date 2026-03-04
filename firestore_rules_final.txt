@@ -1,0 +1,134 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 관리자 확인 함수
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    function isAdminUser() {
+      return request.auth != null && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+    
+    function isAdminEmail() {
+      let adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+      return request.auth != null && adminEmails.hasAny([request.auth.token.email]);
+    }
+    
+    // users 컬렉션
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // purchases 컬렉션 (강의/PDF 구매 내역)
+    match /purchases/{purchaseId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || isAdminEmail() || isAdminUser();
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // coupons 컬렉션
+    match /coupons/{couponId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // couponUsage 컬렉션
+    match /couponUsage/{usageId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || isAdminEmail() || isAdminUser();
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // lectureProgress 컬렉션 (강의 시청 진도)
+    match /lectureProgress/{progressId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || isAdminEmail() || isAdminUser();
+      allow create, update: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // pdfDownloads 컬렉션 (PDF 다운로드 기록)
+    match /pdfDownloads/{downloadId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || isAdminEmail() || isAdminUser();
+      allow create, update: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // adminStats 컬렉션 (관리자 요약 통계)
+    match /adminStats/{statId} {
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // notices 컬렉션
+    match /notices/{noticeId} {
+      allow get, list: if !resource.data.isDraft;
+      allow get, list: if request.auth != null;
+      allow create, update, delete: if isAdmin() || isAdminEmail() || isAdminUser();
+      
+      // 좋아요 기능
+      allow update: if request.auth != null 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+                    && request.resource.data.likes.users.size() <= resource.data.get('likes', {users: []}).users.size() + 1;
+    }
+    
+    // admins 컬렉션
+    match /admins/{adminId} {
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // adminUsers 컬렉션
+    match /adminUsers/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+    
+    // attempts 컬렉션
+    match /attempts/{attemptId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // sessions 컬렉션
+    match /sessions/{sessionId} {
+      allow read, write: if request.auth != null;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // userStatistics 컬렉션
+    match /userStatistics/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // userProgress 컬렉션
+    match /userProgress/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // questionStats 컬렉션
+    match /questionStats/{questionId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isAdminEmail() || isAdminUser();
+    }
+    
+    // mockExamResults 컬렉션
+    match /mockExamResults/{resultId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read, write: if isAdmin() || isAdminEmail() || isAdminUser();
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // 기본 거부
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

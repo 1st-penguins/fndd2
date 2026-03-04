@@ -1,0 +1,306 @@
+﻿/* tabs.css - 프리미엄 세그먼트 컨트롤 스타일 (Linear Design) */
+
+/* 메인 탭 컨테이너 - 세그먼트 컨트롤 스타일 */
+.access-tabs {
+  display: flex;
+  /* Changed from inline-flex */
+  justify-content: center;
+  align-items: center;
+  background: #F1F3F5;
+  /* 밝은 회색 배경 */
+  padding: 6px;
+  border-radius: 9999px;
+  /* 완전한 캡슐 형태 */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+  margin: 0 auto 40px;
+  position: relative;
+  flex-wrap: nowrap;
+  gap: 0;
+  border-bottom: none !important;
+  /* 기존 하단 보더 제거 */
+  max-width: fit-content;
+  /* Changed from 800px to fit-content */
+  width: auto;
+}
+
+/* 탭 버튼 - 캡슐 스타일 */
+.tab-button {
+  padding: 10px 32px;
+  border: none;
+  background: transparent;
+  color: #868E96;
+  /* 비활성 텍스트 색상 */
+  border-radius: 9999px;
+  /* 캡슐 형태 */
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: visible;
+  min-height: 44px;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  box-shadow: none;
+  flex: 0 0 auto;
+}
+
+.tab-button::before {
+  display: none;
+  /* 기존 그라디언트 효과 제거 */
+}
+
+.tab-button:hover {
+  color: var(--penguin-navy);
+  background: rgba(255, 255, 255, 0.5);
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* 활성 탭 - 강조 스타일 */
+.tab-button.active {
+  background: #FFFFFF;
+  color: var(--penguin-navy);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-weight: 700;
+  transform: scale(1.02);
+}
+
+.tab-button.active:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 탭 콘텐츠 */
+.tab-content {
+  display: none;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: visible;
+  /* 그림자 잘림 방지 */
+  min-height: 400px;
+  /* 콘텐츠 로드 전 깜빡임 방지 */
+}
+
+.tab-content.active {
+  display: block;
+  animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 서브탭 (문제풀기 등 내부 탭) - 더 작고 날렵한 디자인 */
+.sub-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 4px;
+}
+
+.sub-tab-button,
+.tag-search-link {
+  padding: 10px 24px;
+  border: 1px solid rgba(29, 47, 78, 0.1);
+  background: #FFFFFF;
+  color: var(--deep-sea-gray);
+  border-radius: 9999px;
+  /* 서브탭도 캡슐형 */
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: -0.2px;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  min-height: 40px;
+  /* 높이 통일 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sub-tab-button::before {
+  display: none;
+}
+
+.sub-tab-button:hover,
+.tag-search-link:hover {
+  background: #F8F9FA;
+  border-color: rgba(95, 178, 201, 0.5);
+  color: var(--penguin-navy);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(95, 178, 201, 0.15);
+}
+
+.sub-tab-button.active {
+  background: var(--penguin-navy);
+  color: #FFFFFF;
+  border-color: var(--penguin-navy);
+  box-shadow: 0 4px 12px rgba(29, 47, 78, 0.2);
+  transform: translateY(-1px);
+}
+
+.sub-tab-button.active:hover {
+  background: var(--cert-primary-light, #2a4570);
+  box-shadow: 0 6px 16px rgba(29, 47, 78, 0.25);
+}
+
+
+/* 학습분석 탭 내부 서브탭 콘텐츠 */
+#analytics-tab .sub-tab-content {
+  display: none;
+}
+
+#analytics-tab .sub-tab-content.active {
+  display: block;
+  animation: fadeIn 0.4s ease-out;
+}
+
+
+/* ==========================================================================
+   모바일 반응형 (Linear 모바일 UX 최적화)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .access-tabs {
+    flex-wrap: nowrap;
+    justify-content: center;
+    /* Center tabs on mobile */
+    overflow-x: visible;
+    padding: 6px;
+    margin: 0 auto 24px;
+    /* Center margin */
+    width: 100%;
+    /* Full width on mobile */
+    max-width: 100%;
+    /* Full width to fit all tabs in one line */
+    background: #F1F3F5;
+    /* Keep background on mobile */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+    border-radius: 20px;
+    gap: 4px;
+    scrollbar-width: none;
+  }
+
+  .access-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-button {
+    background: #FFFFFF;
+    border: 1px solid #E9ECEF;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: #495057;
+    flex: 1 1 0;
+    /* 균등하게 공간 배분 */
+    min-width: 0;
+    /* 최소 너비 제한 해제 */
+    min-height: 36px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tab-button.active {
+    background: var(--penguin-navy);
+    color: #FFFFFF;
+    border-color: var(--penguin-navy);
+    box-shadow: 0 4px 10px rgba(29, 47, 78, 0.2);
+  }
+
+  /* 서브탭 모바일 */
+  .sub-tabs {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 0 16px 8px;
+    gap: 8px;
+    margin-bottom: 24px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sub-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sub-tab-button {
+    padding: 8px 16px;
+    font-size: 13px;
+    flex: 0 0 auto;
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-button {
+    padding: 7px 8px;
+    font-size: 12px;
+    min-height: 34px;
+  }
+
+  .access-tabs {
+    margin: 0 auto 20px;
+    padding: 5px;
+    gap: 3px;
+  }
+}
+
+/* 로그인 필요 메시지 스타일 (유지) */
+.login-required-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--penguin-navy);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(29, 47, 78, 0.08);
+  margin: 40px 0;
+  min-height: 240px;
+  gap: 24px;
+  border: 1px solid rgba(29, 47, 78, 0.05);
+}
+
+.login-required-message .login-button {
+  padding: 14px 32px;
+  background: var(--penguin-navy);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(29, 47, 78, 0.2);
+}
+
+.login-required-message .login-button:hover {
+  background: var(--penguin-skyblue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(95, 178, 201, 0.3);
+}
+
+.content-locked {
+  opacity: 1;
+  filter: none;
+}

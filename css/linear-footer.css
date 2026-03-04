@@ -1,0 +1,542 @@
+/* Linear Design System - Footer Component */
+/* BEM 방법론: .linear-footer__element--modifier */
+
+.linear-footer {
+  background: var(--penguin-navy);
+  color: white;
+  padding: 40px 0 24px;
+  /* 패딩 축소 */
+  position: relative;
+  overflow: hidden;
+}
+
+.linear-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.linear-footer__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--page-padding-inline, 24px);
+}
+
+.linear-footer__content {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  /* 브랜드 영역 살짝 넓힘 */
+  gap: 40px;
+  margin-bottom: 32px;
+}
+
+.linear-footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.linear-footer__brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.linear-footer__brand-logo:hover {
+  transform: translateY(-1px);
+}
+
+.linear-footer__brand-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.linear-footer__brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  /* 로고를 하얀색으로 변경 */
+}
+
+.linear-footer__brand-text {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 680;
+  font-size: 28px;
+  color: white;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.linear-footer__brand-description {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+.linear-footer__sections {
+  display: flex;
+  gap: 48px;
+  flex: 1;
+  min-width: 0;
+}
+
+.linear-footer__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.linear-footer__section-title {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 590;
+  font-size: 16px;
+  color: white;
+  margin-bottom: 8px;
+  letter-spacing: -0.2px;
+}
+
+.linear-footer__nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.linear-footer__nav-item {
+  position: relative;
+}
+
+.linear-footer__nav-link {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: inline-block;
+}
+
+.linear-footer__nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--penguin-skyblue);
+  transition: width 0.3s ease;
+}
+
+.linear-footer__nav-link:hover {
+  color: white;
+  transform: translateX(4px);
+}
+
+.linear-footer__nav-link:hover::after {
+  width: 100%;
+}
+
+.linear-footer__social {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.linear-footer__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-6, 6px);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 18px;
+}
+
+.linear-footer__social-link:hover {
+  background: var(--penguin-skyblue);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(95, 178, 201, 0.3);
+}
+
+.linear-footer__divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  margin: 32px 0;
+}
+
+.linear-footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.linear-footer__copyright {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.linear-footer__legal {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.linear-footer__legal-item {
+  position: relative;
+}
+
+.linear-footer__legal-link {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.linear-footer__legal-link:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.linear-footer__legal-item:not(:last-child)::after {
+  content: '•';
+  position: absolute;
+  right: -12px;
+  top: 0;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* 배경 장식 요소 */
+.linear-footer__decoration {
+  position: absolute;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.linear-footer__decoration--1 {
+  top: 20%;
+  left: 10%;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, var(--penguin-skyblue) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.linear-footer__decoration--2 {
+  top: 60%;
+  right: 15%;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, var(--iceberg-blue) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 4s ease-in-out infinite reverse;
+}
+
+.linear-footer__decoration--3 {
+  bottom: 20%;
+  left: 20%;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, white 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 5s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* 간소화된 푸터 (문제풀이/분석 페이지용) */
+.linear-footer--simple {
+  background: var(--penguin-navy);
+  color: white;
+  padding: 32px 0 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.linear-footer--simple::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.linear-footer--simple .linear-footer__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--page-padding-inline, 24px);
+  text-align: center;
+}
+
+.linear-footer--simple .linear-footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.linear-footer--simple .linear-footer__brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.linear-footer--simple .linear-footer__brand-logo:hover {
+  transform: translateY(-1px);
+}
+
+.linear-footer--simple .linear-footer__brand-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.linear-footer--simple .linear-footer__brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  /* 로고를 하얀색으로 변경 */
+}
+
+.linear-footer--simple .linear-footer__brand-text {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 680;
+  font-size: 24px;
+  color: white;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.linear-footer--simple .linear-footer__nav {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.linear-footer--simple .linear-footer__nav-link {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.linear-footer--simple .linear-footer__nav-link:hover {
+  color: white;
+}
+
+.linear-footer--simple .linear-footer__copyright {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .linear-footer__content {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .linear-footer__brand {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .linear-footer__brand-description {
+    max-width: 100%;
+  }
+}
+
+/* 모바일 푸터 최적화 - 모든 페이지 통일 */
+@media (max-width: 768px) {
+  .linear-footer {
+    padding: 32px 0 20px;
+  }
+
+  .linear-footer__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .linear-footer__brand {
+    align-items: center;
+  }
+
+  .linear-footer__brand-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .linear-footer__brand-text {
+    font-size: 20px;
+  }
+
+  .linear-footer__brand-description {
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .linear-footer__section {
+    display: none;
+    /* 모바일에서는 섹션 숨김 (공간 절약) */
+  }
+
+  .linear-footer__bottom {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .linear-footer__copyright {
+    font-size: 12px;
+  }
+
+  .linear-footer__legal {
+    gap: 16px;
+  }
+
+  /* 슬림 모드 강제 적용 효과 */
+  .linear-footer--mobile-slim .linear-footer__brand-description {
+    display: none;
+  }
+}
+
+/* ============================================
+   슬림형 푸터 (Slim Mode)
+   전체적인 높이를 최소화한 1줄/2줄 형태
+   ============================================ */
+.linear-footer--slim {
+  padding: 24px 0;
+}
+
+.linear-footer--slim .linear-footer__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0;
+  gap: 24px;
+}
+
+.linear-footer--slim .linear-footer__section,
+.linear-footer--slim .linear-footer__brand-description,
+.linear-footer--slim .linear-footer__divider {
+  display: none;
+}
+
+.linear-footer--slim .linear-footer__brand-logo {
+  margin-bottom: 0;
+}
+
+.linear-footer--slim .linear-footer__brand-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.linear-footer--slim .linear-footer__brand-text {
+  font-size: 18px;
+}
+
+.linear-footer--slim .linear-footer__bottom {
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .linear-footer--slim .linear-footer__content {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .linear-footer__container {
+    padding: 0 16px;
+  }
+
+  .linear-footer__brand-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .linear-footer__brand-text {
+    font-size: 20px;
+  }
+
+  .linear-footer__brand-description {
+    font-size: 14px;
+  }
+
+  .linear-footer__section-title {
+    font-size: 15px;
+  }
+
+  .linear-footer__nav-link {
+    font-size: 13px;
+  }
+
+  .linear-footer__social-link {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}

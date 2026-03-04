@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>인터넷 강의 | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1D2F4E">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+
+  <!-- 외부 CSS 파일 연결 -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/linear-header.css" />
+  <link rel="stylesheet" href="css/linear-footer.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/login.css" />
+  <link rel="stylesheet" href="css/tabs.css" />
+  <link rel="stylesheet" href="css/cert-selector.css" />
+  <link rel="stylesheet" href="css/premium-ui.css">
+
+  <!-- Firebase SDK -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+
+  <!-- 코어 모듈 -->
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+
+  <!-- 유틸리티 모듈 -->
+  <script type="module" src="js/utils/certificate-utils.js"></script>
+  <script type="module" src="js/auth/auth-utils.js"></script>
+
+  <!-- UI 모듈 -->
+  <script type="module" src="js/auth/auth-ui.js"></script>
+
+  <!-- 헤더 스크립트 -->
+  <script src="js/linear-header.js"></script>
+
+  <style>
+    :root {
+      --penguin-navy: #1D2F4E;
+      --penguin-skyblue: #5FB2C9;
+      --frost-white: #ffffff;
+      --deep-sea-gray: #64748b;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--penguin-navy) 0%, var(--penguin-skyblue) 100%);
+      min-height: 100vh;
+    }
+
+    .lectures-container {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 40px 20px;
+      width: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 50px;
+      color: white;
+    }
+
+    .page-header h1 {
+      color: white;
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .page-header p {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1.125rem;
+      line-height: 1.6;
+    }
+
+    .lectures-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .lecture-card {
+      /* glass-card 클래스에서 배경 및 border-radius 스타일 처리 */
+      overflow: hidden;
+    }
+
+    .lecture-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .lecture-thumbnail {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      position: relative;
+    }
+
+    .lecture-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--penguin-navy);
+    }
+
+    .lecture-content {
+      padding: 25px;
+    }
+
+    .lecture-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--penguin-navy);
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+
+    .lecture-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .lecture-price {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--penguin-navy);
+      margin-bottom: 20px;
+    }
+
+    .lecture-price span {
+      font-size: 18px;
+      font-weight: normal;
+    }
+
+    .lecture-button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .purchase-button {
+      background: var(--penguin-navy);
+      color: white;
+    }
+
+    .purchase-button:hover {
+      background: var(--penguin-skyblue);
+      transform: translateY(-2px);
+    }
+
+    .owned-button {
+      background: #4caf50;
+      color: white;
+    }
+
+    .owned-button:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .lectures-container {
+        padding: 30px 16px;
+        margin: 40px auto;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .lectures-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .page-header h1 {
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .lectures-container {
+        padding: 24px 12px;
+        margin: 32px auto;
+      }
+
+      .page-header {
+        padding: 0 12px;
+      }
+
+      .page-header h1 {
+        font-size: 24px;
+      }
+
+      .page-header p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Linear Header -->
+  <header class="linear-header" id="linear-header">
+    <div class="linear-header__container">
+      <a href="index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+        <span class="cert-badge" id="header-cert-badge">건강운동관리사</span>
+      </a>
+
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="https://litt.ly/the1stpeng" target="_blank" rel="noopener noreferrer" class="linear-header__nav-link linear-header__nav-link--active">강의</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="contact.html" class="linear-header__nav-link">문의</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 로그인/로그아웃을 별도 영역으로 분리 -->
+      <div class="linear-header__auth">
+        <!-- 로그인 전 상태 -->
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">
+          로그인
+        </a>
+
+        <!-- 로그인 후 상태 (JavaScript로 동적 생성) -->
+        <div id="user-profile-container" style="display: none;">
+          <div class="linear-header__user-profile">
+            <div class="linear-header__user-avatar" id="user-avatar">U</div>
+            <span class="linear-header__user-name" id="user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout">
+            로그아웃
+          </a>
+        </div>
+      </div>
+
+      <div class="linear-header__actions">
+        <!-- 개발 모드 토글 (개발 환경에서만 표시) -->
+        <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
+          <button id="dev-mode-btn" class="dev-mode-btn">
+            <span class="dev-mode-indicator"></span>
+            DEV
+          </button>
+        </div>
+
+        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
+          aria-expanded="false">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <div class="mobile-cert-badge" id="mobile-cert-badge">
+        <span class="mobile-cert-badge__label">현재 선택</span>
+        <span class="mobile-cert-badge__name">건강운동관리사</span>
+      </div>
+      <a href="index.html" class="linear-header__nav-link">홈</a>
+      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="https://litt.ly/the1stpeng" target="_blank" rel="noopener noreferrer" class="linear-header__nav-link linear-header__nav-link--active">강의</a>
+      <a href="contact.html" class="linear-header__nav-link">문의</a>
+      <!-- 모바일 메뉴에 로그인/로그아웃 링크 추가 -->
+      <div class="mobile-menu-auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">
+          로그인
+        </a>
+        <div id="mobile-user-profile-container" style="display: none;">
+          <div class="mobile-user-info">
+            <div class="linear-header__user-avatar" id="mobile-user-avatar">U</div>
+            <span class="linear-header__user-name" id="mobile-user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">
+            로그아웃
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="lectures-container">
+    <div class="page-header">
+      <h1>📚 학습자료</h1>
+      <p>전문가의 명쾌한 강의와 요약 PDF로 확실하게 준비하세요</p>
+    </div>
+
+    <!-- 강의 타입 탭 (PDF / 인터넷강의) -->
+    <div class="access-tabs">
+      <button class="tab-button active" data-tab="pdf-tab">
+        📄 PDF 자료
+      </button>
+      <button class="tab-button" data-tab="video-tab">
+        🎥 인터넷강의
+      </button>
+    </div>
+
+    <!-- PDF 자료 탭 -->
+    <div id="pdf-tab" class="tab-content active">
+      <div class="lectures-grid animate-premium">
+        <!-- 강의 1 - CSCS 요약정리본 -->
+        <div class="lecture-card glass-card">
+          <div class="lecture-thumbnail" style="background: #f5f5f5; padding: 0;">
+            <img src="images/course/thumbnail_01.jpg" alt="CSCS 요약정리본"
+              style="width: 100%; height: 100%; object-fit: cover;">
+            <span class="lecture-badge">PDF</span>
+          </div>
+          <div class="lecture-content">
+            <div class="lecture-title">CSCS 요약정리본</div>
+            <div class="lecture-info">
+              <div>📄 PDF 다운로드</div>
+              <div>📚 핵심 내용 압축 정리</div>
+            </div>
+            <div class="lecture-price">50,000<span>원</span></div>
+            <button class="lecture-button btn-premium purchase-button"
+              onclick="purchaseProduct('pdf_001', 50000, 'CSCS 요약정리본', 'pdf')">
+              🛒 구매하기
+            </button>
+          </div>
+        </div>
+
+        <!-- 강의 2 - 2026 합격대비 병태생리학 정리본 -->
+        <div class="lecture-card glass-card">
+          <div class="lecture-thumbnail" style="background: #f5f5f5; padding: 0;">
+            <img src="images/course/thumbnail_02.jpg" alt="2026 합격대비 병태생리학 정리본"
+              style="width: 100%; height: 100%; object-fit: cover;">
+            <span class="lecture-badge">PDF</span>
+          </div>
+          <div class="lecture-content">
+            <div class="lecture-title">2026 합격대비 병태생리학 정리본</div>
+            <div class="lecture-info">
+              <div>📄 PDF 다운로드</div>
+              <div>📚 복잡한 내용 쉽게 정리</div>
+            </div>
+            <div class="lecture-price">50,000<span>원</span></div>
+            <button class="lecture-button btn-premium purchase-button"
+              onclick="purchaseProduct('pdf_002', 50000, '2026 합격대비 병태생리학 정리본', 'pdf')">
+              🛒 구매하기
+            </button>
+          </div>
+        </div>
+
+        <!-- 강의 3 - 2026 합격대비 운동생리학 정리본 -->
+        <div class="lecture-card glass-card">
+          <div class="lecture-thumbnail" style="background: #f5f5f5; padding: 0;">
+            <img src="images/course/thumbnail_03.jpg" alt="2026 합격대비 운동생리학 정리본"
+              style="width: 100%; height: 100%; object-fit: cover;">
+            <span class="lecture-badge">PDF</span>
+          </div>
+          <div class="lecture-content">
+            <div class="lecture-title">2026 합격대비 운동생리학 정리본</div>
+            <div class="lecture-info">
+              <div>📄 PDF 다운로드</div>
+              <div>📚 시험 핵심만 쏙쏙</div>
+            </div>
+            <div class="lecture-price">50,000<span>원</span></div>
+            <button class="lecture-button btn-premium purchase-button"
+              onclick="purchaseProduct('pdf_003', 50000, '2026 합격대비 운동생리학 정리본', 'pdf')">
+              🛒 구매하기
+            </button>
+          </div>
+        </div>
+
+        <!-- 강의 4 - 기능해부학 상지파트 -->
+        <div class="lecture-card glass-card">
+          <div class="lecture-thumbnail" style="background: #f5f5f5; padding: 0;">
+            <img src="images/course/thumbnail_04.jpg" alt="기능해부학 상지파트"
+              style="width: 100%; height: 100%; object-fit: cover;">
+            <span class="lecture-badge">PDF</span>
+          </div>
+          <div class="lecture-content">
+            <div class="lecture-title">기능해부학 상지파트</div>
+            <div class="lecture-info">
+              <div>📄 PDF 다운로드</div>
+              <div>📚 상지 부위 집중 정리</div>
+            </div>
+            <div class="lecture-price">30,000<span>원</span></div>
+            <button class="lecture-button btn-premium purchase-button"
+              onclick="purchaseProduct('pdf_004', 30000, '기능해부학 상지파트', 'pdf')">
+              🛒 구매하기
+            </button>
+          </div>
+        </div>
+
+        <!-- 강의 5 - 스페셜테스트 -->
+        <div class="lecture-card glass-card">
+          <div class="lecture-thumbnail" style="background: #f5f5f5; padding: 0;">
+            <img src="images/course/thumbnail_05.jpg" alt="스페셜테스트"
+              style="width: 100%; height: 100%; object-fit: cover;">
+            <span class="lecture-badge">PDF</span>
+          </div>
+          <div class="lecture-content">
+            <div class="lecture-title">스페셜테스트</div>
+            <div class="lecture-info">
+              <div>📄 PDF 다운로드</div>
+              <div>📚 특별 제공 자료</div>
+            </div>
+            <div class="lecture-price">50,000<span>원</span></div>
+            <button class="lecture-button btn-premium purchase-button"
+              onclick="purchaseProduct('pdf_005', 50000, '스페셜테스트', 'pdf')">
+              🛒 구매하기
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 인터넷강의 탭 -->
+    <div id="video-tab" class="tab-content">
+      <div
+        style="background: linear-gradient(135deg, var(--penguin-navy) 0%, var(--penguin-skyblue) 100%); padding: 60px 40px; border-radius: 16px; text-align: center; color: white; margin-bottom: 30px; box-shadow: 0 8px 24px rgba(29, 47, 78, 0.2);">
+        <div style="font-size: 80px; margin-bottom: 20px;">🚧</div>
+        <h2 style="color: white; margin-bottom: 15px; font-size: 36px; font-weight: 700;">준비중입니다</h2>
+        <p style="font-size: 18px; margin-bottom: 20px; opacity: 0.95;">더 나은 인터넷 강의를 준비하고 있습니다</p>
+        <p style="font-size: 14px; opacity: 0.85;">곧 만나요! 🐧</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Linear Footer (Simple) -->
+  <footer class="linear-footer linear-footer--simple">
+    <div class="linear-footer__container">
+      <div class="linear-footer__brand">
+        <a href="index.html" class="linear-footer__brand-logo">
+          <div class="linear-footer__brand-icon">
+            <img src="images/firstpenguin-logo.png" alt="퍼스트펭귄 로고" />
+          </div>
+          <span class="linear-footer__brand-text">퍼스트펭귄</span>
+        </a>
+      </div>
+
+      <nav class="linear-footer__nav">
+        <a href="index.html" class="linear-footer__nav-link">홈</a>
+        <a href="notices.html" class="linear-footer__nav-link">공지사항</a>
+        <a href="https://litt.ly/the1stpeng" target="_blank" rel="noopener noreferrer" class="linear-footer__nav-link">강의</a>
+        <a href="contact.html" class="linear-footer__nav-link">문의</a>
+      </nav>
+
+      <div class="linear-footer__copyright">
+        &copy; 2025 퍼스트펭귄. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { auth, db } from './js/core/firebase-core.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    import { isAdmin } from './js/utils/admin-utils.js';
+
+    // 페이지 로드 시 구매 내역 확인
+    window.addEventListener('DOMContentLoaded', async () => {
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          await checkAccessPermission(user);
+        }
+      });
+    });
+
+    // 접근 권한 확인 (관리자 또는 구매 여부)
+    async function checkAccessPermission(user) {
+      const productIds = ['pdf_001', 'pdf_002', 'pdf_003', 'pdf_004', 'pdf_005'];
+
+      // 🔐 관리자 확인
+      const userIsAdmin = isAdmin(user);
+
+      if (userIsAdmin) {
+        console.log('🔑 관리자 로그인:', user.email);
+
+        // 관리자는 모든 상품에 다운로드 버튼 표시
+        for (const productId of productIds) {
+          const buttons = document.querySelectorAll(`button[onclick*="${productId}"]`);
+          buttons.forEach(btn => {
+            btn.textContent = '📥 다운로드 (관리자)';
+            btn.className = 'lecture-button owned-button';
+            btn.onclick = () => accessProduct(productId, 'pdf');
+          });
+        }
+
+        return;
+      }
+
+      // 일반 사용자: 구매 내역 확인
+      for (const productId of productIds) {
+        const purchaseRef = doc(db, 'purchases', `${user.uid}_${productId}`);
+        const purchaseSnap = await getDoc(purchaseRef);
+
+        if (purchaseSnap.exists()) {
+          const purchaseData = purchaseSnap.data();
+          const productType = purchaseData.productType || 'pdf';
+
+          // 구매한 상품 - 버튼 변경
+          const buttons = document.querySelectorAll(`button[onclick*="${productId}"]`);
+          buttons.forEach(btn => {
+            if (productType === 'pdf') {
+              btn.textContent = '📥 다운로드';
+              btn.className = 'lecture-button owned-button';
+              btn.onclick = () => accessProduct(productId, 'pdf');
+            } else {
+              btn.textContent = '▶️ 수강하기';
+              btn.className = 'lecture-button owned-button';
+              btn.onclick = () => accessProduct(productId, 'video');
+            }
+          });
+        }
+      }
+    }
+
+    // 상품 구매 (동영상 또는 PDF)
+    window.purchaseProduct = async function (productId, price, title, type) {
+      const user = auth.currentUser;
+
+      if (!user) {
+        // 로그인 모달 표시 (페이지 이동 대신)
+        const { showLoginModal } = await import('./js/auth/auth-ui.js');
+        showLoginModal();
+        return;
+      }
+
+      // 🚧 결제 시스템 준비 중
+      alert('결제 시스템 준비 중입니다.\n관리자 계정으로 로그인하시면 다운로드 가능합니다.');
+    };
+
+    // 강의 수강 또는 PDF 다운로드
+    window.accessProduct = function (productId, type) {
+      if (type === 'video') {
+        window.location.href = `lecture-play.html?id=${productId}`;
+      } else if (type === 'pdf') {
+        window.location.href = `pdf-download.html?id=${productId}`;
+      }
+    };
+  </script>
+
+  <!-- 탭 핸들러 -->
+  <script>
+    // 탭 전환 핸들러 (tabs.css 스타일 사용)
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const targetTab = button.getAttribute('data-tab');
+
+        // 모든 탭 버튼에서 active 제거
+        document.querySelectorAll('.tab-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+
+        // 모든 탭 콘텐츠 숨기기
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        // 클릭한 버튼과 해당 탭 콘텐츠 활성화
+        button.classList.add('active');
+        document.getElementById(targetTab)?.classList.add('active');
+      });
+    });
+  </script>
+
+  <!-- Certificate Badge 업데이트 -->
+  <script type="module">
+    import { getCurrentCertificateType, getCertificateNameKo } from './js/utils/certificate-utils.js';
+
+    // 페이지 로드 시 cert-badge 업데이트
+    document.addEventListener('DOMContentLoaded', () => {
+      const certType = getCurrentCertificateType();
+      const certName = getCertificateNameKo(certType);
+
+      // 헤더 배지 업데이트
+      const headerBadge = document.getElementById('header-cert-badge');
+      if (headerBadge) {
+        headerBadge.textContent = certName;
+        console.log('✅ 헤더 배지 업데이트:', certName);
+      }
+
+      // 모바일 배지 업데이트
+      const mobileBadge = document.querySelector('#mobile-cert-badge .mobile-cert-badge__name');
+      if (mobileBadge) {
+        mobileBadge.textContent = certName;
+        console.log('✅ 모바일 배지 업데이트:', certName);
+      }
+
+      // 테마 색상 적용
+      const root = document.documentElement;
+      if (certType === 'health-manager') {
+        root.style.setProperty('--cert-primary', '#1D2F4E');
+        root.style.setProperty('--cert-primary-dark', '#162740');
+        root.style.setProperty('--cert-primary-light', '#2a4570');
+      } else if (certType === 'sports-instructor') {
+        root.style.setProperty('--cert-primary', '#059669');
+        root.style.setProperty('--cert-primary-dark', '#047857');
+        root.style.setProperty('--cert-primary-light', '#10b981');
+      }
+    });
+
+    // certificate type 변경 이벤트 리스너
+    document.addEventListener('certificateTypeChanged', (e) => {
+      const certType = e.detail.type;
+      const certName = getCertificateNameKo(certType);
+
+      // 헤더 배지 업데이트
+      const headerBadge = document.getElementById('header-cert-badge');
+      if (headerBadge) {
+        headerBadge.textContent = certName;
+      }
+
+      // 모바일 배지 업데이트
+      const mobileBadge = document.querySelector('#mobile-cert-badge .mobile-cert-badge__name');
+      if (mobileBadge) {
+        mobileBadge.textContent = certName;
+      }
+
+      console.log('🎯 강의 페이지 배지 업데이트:', certName);
+    });
+  </script>
+</body>
+
+</html>

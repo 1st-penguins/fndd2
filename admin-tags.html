@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>태그 마스터 - 건강운동관리사 관리자</title>
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/admin-tags.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="admin-mode">
+    <header class="admin-header">
+        <div class="logo">
+            <h1>🏷️ TAG MASTER ADMIN</h1>
+        </div>
+        <div class="header-actions">
+            <button class="admin-btn-primary" onclick="generateCode()" style="width: auto;">코드 내보내기</button>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <!-- 과목 슬라이드바 -->
+        <aside class="subject-sidebar" id="subject-list">
+            <!-- JS에서 렌더링 -->
+        </aside>
+
+        <!-- 편집 영역 -->
+        <section class="editor-pane">
+            <div id="editor-header">
+                <h2 id="current-subject-title">과목을 선택해주세요</h2>
+                <p style="color: var(--admin-text-muted); margin-bottom: 2rem;">선택한 과목의 중간 카테고리와 세부 태그를 관리합니다.</p>
+            </div>
+
+            <div id="category-container">
+                <!-- JS에서 렌더링 -->
+            </div>
+
+            <button class="add-btn" onclick="openCategoryModal()"
+                style="width: fit-content; padding: 12px 24px; margin-top: 1rem;">
+                + 새 카테고리 추가
+            </button>
+
+            <!-- 코드 출력 패널 -->
+            <div class="export-panel" id="export-panel" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">추출된 소스 코드</h3>
+                    <button class="copy-btn" onclick="copyToClipboard()">코드 복사하기</button>
+                </div>
+                <p style="font-size: 14px; color: var(--admin-text-muted);">아래 코드를
+                    <code>js/data/tag-dictionary.js</code> 파일에 덮어쓰기 하세요.</p>
+                <pre class="code-block" id="generated-code"></pre>
+            </div>
+        </section>
+    </main>
+
+    <!-- 모달: 카테고리 추가 -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0;">새 카테고리 추가</h3>
+            <div class="input-group">
+                <label>카테고리 이름</label>
+                <input type="text" id="new-category-name" class="admin-input" placeholder=" 예: 심장해부학">
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="admin-btn-primary" onclick="addCategory()">추가</button>
+                <button class="admin-btn-primary" onclick="closeModal('category-modal')"
+                    style="background: var(--admin-card);">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달: 태그 추가 -->
+    <div id="tag-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0;">새 태그 추가</h3>
+            <div class="input-group">
+                <label id="tag-modal-label">카테고리 태그 추가</label>
+                <input type="text" id="new-tag-name" class="admin-input" placeholder=" 예: 관상동맥">
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="admin-btn-primary" id="tag-add-confirm-btn">추가</button>
+                <button class="admin-btn-primary" onclick="closeModal('tag-modal')"
+                    style="background: var(--admin-card);">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/admin-tags.js"></script>
+</body>
+
+</html>

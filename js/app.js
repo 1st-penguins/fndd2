@@ -1,0 +1,964 @@
+// app.js - 메인 애플리케이션 스크립트
+// 인덱스 페이지의 초기화 및 UI 기능 관리
+
+import { updateLoginUI } from './auth/auth-ui.js';
+import { loadNotices } from './notice/notice-ui.js';
+import { formatRelativeDate } from './utils/date-utils.js';
+import { addScrollUpButton } from './utils/ui-utils.js';
+import { isDevMode } from './config/dev-config.js';
+
+/**
+ * 홈 페이지 클래스 추가 (모바일 푸터 제어용)
+ */
+function addHomePageClass() {
+  const currentUrl = window.location.href;
+  const isHomePage = currentUrl.includes('index.html') ||
+    currentUrl.endsWith('/') ||
+    currentUrl.endsWith('localhost:8000');
+
+  if (isHomePage) {
+    document.body.classList.add('home-page');
+    window.Logger?.debug('🏠 홈 페이지 클래스 추가됨');
+  } else {
+    document.body.classList.remove('home-page');
+    window.Logger?.debug('📄 다른 페이지 - 홈 페이지 클래스 제거됨');
+  }
+}
+
+// 전역 상태 관리
+let currentTab = 'notice-tab';
+
+// 관리자 이메일 목록
+const ADMIN_EMAILS = [
+  'kspo0324@gmail.com',
+  'mingdy7283@gmail.com',
+  'sungsoo702@gmail.com'
+];
+
+/**
+ * 현재 사용자가 관리자인지 확인
+ */
+function isAdmin() {
+  const user = (window.auth && window.auth.currentUser) ? window.auth.currentUser : null;
+  window.Logger?.debug('🔍 관리자 확인:', {
+    user: user?.email || 'null',
+    isAdmin: user ? ADMIN_EMAILS.includes(user.email) : false
+  });
+
+  if (!user || !user.email) {
+    return false;
+  }
+  return ADMIN_EMAILS.includes(user.email);
+}
+
+/**
+ * 강의 탭 표시 제어 (관리자 vs 일반 사용자)
+ */
+export function updateLectureTabVisibility() {
+  const comingSoon = document.getElementById('lecture-coming-soon');
+  const adminContent = document.getElementById('lecture-admin-content');
+
+  if (!comingSoon || !adminContent) {
+    window.Logger?.warn('⚠️ 강의 탭 요소를 찾을 수 없습니다');
+    return;
+  }
+
+  const adminStatus = isAdmin();
+  window.Logger?.debug('🎓 강의 탭 업데이트:', adminStatus ? '관리자' : '일반 사용자');
+
+  if (adminStatus) {
+    // 관리자: 강의 목록 보기
+    comingSoon.style.display = 'none';
+    adminContent.style.display = 'block';
+    window.Logger?.debug('✅ 관리자: 강의 탭 전체 접근 가능');
+  } else {
+    // 일반 사용자: 준비중 메시지
+    comingSoon.style.display = 'block';
+    adminContent.style.display = 'none';
+    window.Logger?.debug('👤 일반 사용자: 강의 준비중 메시지 표시');
+  }
+
+  // 태그 검색 링크 표시 제어
+  updateTagSearchLinkVisibility(adminStatus);
+}
+
+/**
+ * 태그 검색 링크 표시 제어 (관리자만)
+ */
+export function updateTagSearchLinkVisibility(adminStatus) {
+  let tagSearchLink = document.querySelector('.tag-search-link');
+
+  if (adminStatus) {
+    // 관리자: 링크 표시 (없으면 생성)
+    if (!tagSearchLink) {
+      const subTabs = document.querySelector('#quiz-tab .sub-tabs');
+      if (subTabs) {
+        tagSearchLink = document.createElement('a');
+        tagSearchLink.href = 'search-by-tags.html';
+        tagSearchLink.className = 'sub-tab-button tag-search-link';
+        // admin-only 클래스는 auth-init.js와 충돌 가능성 있으므로 제외하고 직접 제어
+        tagSearchLink.style.cssText = 'text-decoration: none; display: inline-flex; align-items: center; justify-content: center;';
+        tagSearchLink.innerHTML = '🏷️ 태그 검색';
+        subTabs.appendChild(tagSearchLink);
+        window.Logger?.debug('✅ 관리자: 태그 검색 링크 생성됨');
+      }
+    } else {
+      tagSearchLink.style.display = 'inline-flex';
+      window.Logger?.debug('✅ 관리자: 태그 검색 링크 표시');
+    }
+  } else {
+    // 일반 사용자: 링크 제거 (DOM에서 완전 삭제)
+    if (tagSearchLink) {
+      tagSearchLink.remove();
+      window.Logger?.debug('👤 일반 사용자: 태그 검색 링크 제거됨');
+    }
+  }
+}
+
+// 전역으로 노출 (auth-core.js에서 접근 가능하도록)
+window.updateLectureTabVisibility = updateLectureTabVisibility;
+window.updateTagSearchLinkVisibility = updateTagSearchLinkVisibility;
+
+/**
+ * 문서 로드 완료 시 실행되는 초기화 함수
+ */
+function initApp() {
+  // 홈 페이지 클래스 추가 (모바일 푸터 제어용)
+  addHomePageClass();
+
+  // 페이지 로드 직후 즉시 모든 탭 숨기기
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.style.display = 'none';
+  });
+
+  // 기본 탭만 표시
+  const defaultTab = document.getElementById('notice-tab');
+  if (defaultTab) {
+    defaultTab.style.display = 'block';
+  }
+
+  // 초기 렌더 시에는 인증 모듈을 로드하지 않음 (사용자 상호작용 시 로드)
+
+  // 탭 초기화
+  initTabs();
+
+  // 초기 태그 검색 링크 표시 상태 설정
+  updateTagSearchLinkVisibility(isAdmin());
+
+  // 전역 프리로더 숨기기 (약간의 지연으로 부드러운 전환)
+  setTimeout(() => {
+    const preloader = document.getElementById('global-preloader');
+    if (preloader) {
+      preloader.classList.add('hidden');
+      // 트랜지션 완료 후 제거
+      setTimeout(() => {
+        preloader.remove();
+      }, 500);
+    }
+  }, 300);
+
+  // 공지사항 로드: 즉시 실행 (UX 개선)
+  const noticeSectionEl = document.querySelector('.notice-section');
+  if (noticeSectionEl) {
+    initNotices();
+  }
+
+  // 로그인 상태에 따른 콘텐츠 제어
+  updateRestrictedContent(isUserLoggedIn());
+
+  // 강의 탭 표시 제어
+  updateLectureTabVisibility();
+
+  // 빙하 애니메이션 효과 설정
+  initIcebergAnimation();
+
+  // 플로팅 버튼 초기화 (맨위로 가기, 관리자 공지 작성)
+  initFloatingButtons();
+
+  // 로그인 상태에 따른 오버레이 제어
+  updateLoginOverlays();
+
+  // 초기 로드 후 안정화 체크 (1초 후 한 번만)
+  setTimeout(() => {
+    window.Logger?.debug('초기 로드 후 오버레이 재확인');
+    updateLoginOverlays();
+  }, 1000);
+
+  // 히어로 버튼 이벤트 바인딩
+  const handleHeroQuizClick = (certType) => {
+    // 먼저 메인 콘텐츠로 부드럽게 스크롤
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // 스크롤 후 탭 전환 및 자격증 변경 (약간 딜레이)
+    setTimeout(() => {
+      // 자격증 변경 로직이 필요할 경우 여기에 추가
+      if (typeof window.setCertificateType === 'function') {
+        window.setCertificateType(certType);
+      }
+
+      const quizTabBtn = document.querySelector('.access-tabs .tab-button[data-tab="quiz-tab"]');
+      if (quizTabBtn) {
+        quizTabBtn.click();
+      }
+    }, 400);
+  };
+
+  const healthBtn = document.getElementById('hero-start-quiz-health');
+  if (healthBtn) {
+    healthBtn.addEventListener('click', () => handleHeroQuizClick('health-manager'));
+  }
+
+  const sportsBtn = document.getElementById('hero-start-quiz-sports');
+  if (sportsBtn) {
+    sportsBtn.addEventListener('click', () => handleHeroQuizClick('sports-instructor'));
+  }
+
+  const viewNoticesBtn = document.getElementById('hero-view-notices');
+  if (viewNoticesBtn) {
+    viewNoticesBtn.addEventListener('click', () => {
+      const mainContent = document.querySelector('.main-content');
+      if (mainContent) {
+        mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      setTimeout(() => {
+        const noticeTabBtn = document.querySelector('.access-tabs .tab-button[data-tab="notice-tab"]');
+        if (noticeTabBtn) {
+          noticeTabBtn.click();
+        }
+      }, 400);
+    });
+  }
+
+  // 페이지 포커스 시 오버레이 상태 재확인
+  window.addEventListener('focus', () => {
+    window.Logger?.debug('페이지 포커스 시 오버레이 재확인');
+    updateLoginOverlays();
+  });
+
+  // 탭 전환 시 오버레이 상태 재확인 (모바일 중요)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      window.Logger?.debug('탭 활성화 시 오버레이 재확인');
+      updateLoginOverlays();
+    }
+  });
+
+  // 로그인 트리거 버튼 이벤트 바인딩 (인라인 onclick 제거 대응)
+  document.querySelectorAll('.login-trigger-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof window.lazyAuthAndShowLoginModal === 'function') {
+        window.lazyAuthAndShowLoginModal();
+      } else {
+        console.error('Login function not available');
+        window.location.href = 'login.html';
+      }
+    });
+  });
+}
+
+/**
+ * 로그인 상태에 따른 오버레이 표시/숨김
+ */
+function updateLoginOverlays() {
+  // 모바일에서 더 안정적인 로그인 상태 확인
+  let isLoggedIn = false;
+
+  try {
+    // 1차: localStorage 확인
+    if (localStorage && localStorage.getItem) {
+      isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+    }
+    // 2차: Firebase 인증 상태 확인 (로드된 경우, 더 확실히)
+    if (window.auth) {
+      const currentUser = window.auth.currentUser;
+      if (currentUser) {
+        isLoggedIn = true;
+        // localStorage 동기화 (혹시 모를 불일치 방지)
+        localStorage.setItem('userLoggedIn', 'true');
+      }
+    }
+    // 3차: isUserLoggedIn 함수 확인 (최종 확인)
+    if (typeof window.isUserLoggedIn === 'function') {
+      const funcResult = window.isUserLoggedIn();
+      if (funcResult) {
+        isLoggedIn = true;
+      }
+    }
+  } catch (error) {
+    window.Logger?.error('로그인 상태 확인 중 오류:', error);
+    isLoggedIn = false;
+  }
+
+  // 로그인 상태 디버그 로그
+  window.Logger?.debug('오버레이 업데이트', {
+    isLoggedIn,
+    userAgent: navigator.userAgent,
+    localStorageState: localStorage.getItem('userLoggedIn')
+  });
+
+  if (isLoggedIn) {
+    document.body.classList.add('logged-in');
+
+    // 로그인 상태: 오버레이 숨기기
+    const overlays = document.querySelectorAll('.login-required-overlay');
+    window.Logger?.debug('오버레이 숨김', { count: overlays.length });
+
+    overlays.forEach((overlay) => {
+      overlay.style.display = 'none';
+      overlay.style.visibility = 'hidden';
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+    });
+
+    window.Logger?.info('로그인 상태: 오버레이 모두 숨김');
+  } else {
+    document.body.classList.remove('logged-in');
+
+    // 비로그인 상태: 오버레이 표시
+    const overlays = document.querySelectorAll('.login-required-overlay');
+    window.Logger?.debug('오버레이 표시', { count: overlays.length });
+
+    overlays.forEach((overlay) => {
+      overlay.style.display = 'flex';
+      overlay.style.visibility = 'visible';
+      overlay.style.opacity = '1';
+      overlay.style.pointerEvents = 'auto';
+    });
+
+    window.Logger?.info('비로그인 상태: 오버레이 모두 표시');
+  }
+
+  // 오버레이 상태 확인 (디버그)
+  window.Logger?.debug('현재 오버레이 상태', {
+    count: document.querySelectorAll('.login-required-overlay').length
+  });
+}
+
+/**
+ * 디버깅용: 강제로 오버레이 상태 업데이트
+ */
+window.forceUpdateOverlays = function () {
+  window.Logger?.debug('=== 강제 오버레이 업데이트 ===');
+  updateLoginOverlays();
+}
+
+// 필요 시 인증 모듈을 로드하고 로그인 모달을 표시하는 래퍼
+window.lazyAuthAndShowLoginModal = async function () {
+  try {
+    // Firebase 및 auth 모듈 초기화 보장
+    const [{ ensureFirebase }, authMod] = await Promise.all([
+      import('./core/firebase-core.js').then(m => ({ ensureFirebase: m.ensureFirebase })),
+      import('./auth/auth-core.js')
+    ]);
+
+    // Firebase 초기화
+    await ensureFirebase();
+
+    // 인증 초기화 (필요시)
+    if (authMod && typeof authMod.initAuth === 'function') {
+      await authMod.initAuth();
+    }
+
+    // 모달 표시
+    if (typeof window.showLoginModal === 'function') {
+      window.showLoginModal();
+    } else {
+      // auth-ui 모듈도 로드 시도
+      const uiMod = await import('./auth/auth-ui.js');
+      if (uiMod && typeof uiMod.showLoginModal === 'function') {
+        uiMod.showLoginModal();
+      }
+    }
+  } catch (e) {
+    window.Logger?.error('인증 모듈 로드 실패:', e);
+    // 로그인 페이지로 이동
+    if (window.location.pathname !== '/login.html' && !window.location.pathname.includes('login.html')) {
+      window.location.href = 'login.html';
+    }
+  }
+}
+
+// 전역 오버레이 업데이트 함수 노출
+window.updateLoginOverlays = updateLoginOverlays;
+
+/**
+ * 미리보기 콘텐츠 표시
+ */
+window.showPreviewContent = function () {
+  // 현재 활성화된 탭 확인
+  const activeTab = document.querySelector('.tab-content.active');
+  const overlay = activeTab.querySelector('.login-required-overlay');
+
+  if (overlay) {
+    // 오버레이를 일시적으로 숨기고 3초 후 다시 표시
+    overlay.style.display = 'none';
+
+    // 3초 후 다시 표시
+    setTimeout(() => {
+      overlay.style.display = 'flex';
+
+      // 미리보기 종료 알림
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(29, 47, 78, 0.9);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      `;
+      notification.textContent = '미리보기가 종료되었습니다. 로그인하여 모든 기능을 이용하세요.';
+
+      document.body.appendChild(notification);
+
+      // 3초 후 알림 제거
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 3000);
+    }, 3000);
+
+    // 미리보기 시작 알림
+    const previewNotification = document.createElement('div');
+    previewNotification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(95, 178, 201, 0.9);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      z-index: 1000;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    previewNotification.textContent = '3초간 미리보기 중입니다...';
+
+    document.body.appendChild(previewNotification);
+
+    setTimeout(() => {
+      if (previewNotification.parentNode) {
+        previewNotification.remove();
+      }
+    }, 3000);
+  }
+}
+
+/**
+ * 학습 분석 탭 클릭 처리 (로그인 체크)
+ * 홈 화면 내에서 대시보드 로드
+ */
+window.handleAnalyticsTabClick = async function () {
+  // 전역 isUserLoggedIn 함수가 있으면 사용, 없으면 localStorage 직접 확인
+  let isLoggedIn = (typeof window.isUserLoggedIn === 'function')
+    ? window.isUserLoggedIn()
+    : localStorage.getItem('userLoggedIn') === 'true';
+
+  // Firebase auth 상태도 확인 (더 정확한 로그인 상태 확인)
+  try {
+    const { ensureFirebase } = await import('./core/firebase-core.js');
+    const { auth } = await ensureFirebase();
+    if (auth && auth.currentUser) {
+      isLoggedIn = true;
+    }
+  } catch (e) {
+    console.warn('Firebase auth 확인 실패:', e);
+  }
+
+  // 서브탭 초기화는 탭이 실제로 표시될 때만 실행하도록 변경
+  // 초기 로드 시에는 제거 (탭 전환 시에만 초기화)
+
+  if (isLoggedIn) {
+    // 로그인 상태: 오버레이 즉시 숨기기
+    const analyticsOverlay = document.getElementById('analytics-login-overlay');
+    if (analyticsOverlay) {
+      analyticsOverlay.style.display = 'none';
+    }
+    const restrictedOverlay = document.querySelector('.restricted-content-overlay');
+    if (restrictedOverlay) {
+      restrictedOverlay.style.display = 'none';
+    }
+
+    // 즉시 로딩 표시 (모듈 로드 대기 시간 동안 빈 화면 방지)
+    const container = document.querySelector('.analytics-dashboard-container');
+    // 이미 로드된 컨텐츠가 없거나 비어있을 때만 로딩 표시
+    if (container && (!container.classList.contains('dashboard-loaded') && !document.querySelector('.stats-summary-grid'))) {
+      // 임시 로딩 UI 주입 (기존 구조 유지하면서 로더만 추가)
+      const existingLoader = document.getElementById('temp-analytics-loader');
+      if (!existingLoader) {
+        const loader = document.createElement('div');
+        loader.id = 'temp-analytics-loader';
+        loader.style.cssText = 'padding: 60px 0; text-align: center; color: #666;';
+        loader.innerHTML = '<div class="loading-spinner" style="margin: 0 auto 10px; width: 30px; height: 30px; border: 3px solid #eee; border-top-color: #5FB2C9; border-radius: 50%; animation: spin 1s infinite linear;"></div><div>분석 도구를 불러오는 중...</div>';
+
+        // overview-tab에 추가
+        const overviewTab = document.getElementById('overview-tab');
+        if (overviewTab) {
+          overviewTab.insertBefore(loader, overviewTab.firstChild);
+        }
+      }
+    }
+
+    // 로그인 상태: 대시보드 모듈 동적 로드 및 초기화
+    try {
+      const dashboardModule = await import('./analytics/analytics-dashboard.js');
+
+      // 임시 로더 제거
+      const tempLoader = document.getElementById('temp-analytics-loader');
+      if (tempLoader) tempLoader.remove();
+
+      // 컨테이너에 로드 완료 클래스 표시
+      if (container) container.classList.add('dashboard-loaded');
+
+      // 대시보드 이벤트 리스너 및 초기화 (한 번만 실행되도록 모듈이 알아서 처리하거나 여기서 명시적 호출)
+      if (dashboardModule && typeof dashboardModule.initDashboard === 'function') {
+        dashboardModule.initDashboard();
+      }
+
+      if (dashboardModule && dashboardModule.renderHomeDashboard) {
+        // Firebase 초기화 보장 후 사용자 정보 가져오기
+        const { ensureFirebase } = await import('./core/firebase-core.js');
+        const { auth } = await ensureFirebase();
+        const user = auth ? auth.currentUser : null;
+        dashboardModule.renderHomeDashboard(user);
+      }
+    } catch (e) {
+      console.error('대시보드 로드 실패:', e);
+      const tempLoader = document.getElementById('temp-analytics-loader');
+      if (tempLoader) {
+        tempLoader.innerHTML = '<div style="color: red;">불러오기 실패. 페이지를 새로고침해주세요.</div>';
+      }
+    }
+  } else {
+    // 비로그인 상태: 로그인 모달 표시 (탭은 전환되도록 true 반환)
+    if (typeof window.lazyAuthAndShowLoginModal === 'function') {
+      window.lazyAuthAndShowLoginModal();
+    } else if (typeof window.showLoginModal === 'function') {
+      window.showLoginModal();
+    }
+  }
+
+  // 항상 true 반환하여 탭 전환 허용 (오버레이는 표시되지만 탭은 전환됨)
+  return true;
+}
+
+/**
+ * 탭 기능 초기화
+ */
+function initTabs() {
+  // 탭 버튼에 이벤트 리스너 추가 (메인 탭만)
+  document.querySelectorAll('.access-tabs .tab-button').forEach(button => {
+    if (!button.hasAttribute('onclick')) {  // onclick이 없는 버튼만 처리
+      button.addEventListener('click', async function () {
+        const tabId = this.getAttribute('data-tab');
+
+        // 학습분석 탭 클릭 시 특별 처리
+        if (tabId === 'analytics-tab') {
+          const result = await window.handleAnalyticsTabClick();
+          // 로그인하지 않은 경우 탭 전환하지 않음 (false 리턴 시)
+          if (result === false) {
+            return;
+          }
+          // true 리턴 시 (비로그인이라도) 탭 전환 진행
+        }
+
+        // 문제풀기 탭 클릭 시 로그인 체크
+        if (tabId === 'quiz-tab') {
+          const isLoggedIn = (typeof window.isUserLoggedIn === 'function')
+            ? window.isUserLoggedIn()
+            : localStorage.getItem('userLoggedIn') === 'true';
+
+          if (!isLoggedIn) {
+            // 비로그인 시 로그인 유도 (모달 표시)
+            if (typeof window.lazyAuthAndShowLoginModal === 'function') {
+              window.lazyAuthAndShowLoginModal();
+            } else if (typeof window.showLoginModal === 'function') {
+              window.showLoginModal();
+            }
+            // 탭 전환은 진행시켜서 "문제풀기 + 오버레이(있는 경우)"를 보여주거나 
+            // UX상 탭 전환을 하면서 모달을 띄우는 게 자연스러움
+          }
+        }
+
+        if (tabId) {  // data-tab 속성이 있는 경우에만 처리
+          showTab(tabId);
+        }
+      });
+    }
+  });
+
+  // 페이지 처음 로드 시 항상 notice-tab을 표시하도록 설정
+  // 이전 코드: const lastActiveTab = localStorage.getItem('lastActiveTab') || 'notice-tab';
+
+  // 항상 공지사항 탭부터 시작
+  const defaultTab = 'notice-tab';
+  localStorage.setItem('lastActiveTab', defaultTab);
+  window.Logger?.debug('탭 초기화', { defaultTab });
+
+  // 공지사항 탭 표시
+  showTab(defaultTab);
+}
+
+/**
+ * 공지사항 초기화
+ */
+function initNotices() {
+  // 공지사항 컨테이너 확인
+  const noticeContainer = document.getElementById('notice-list');
+  if (!noticeContainer) return;
+
+  // 로딩 표시
+  noticeContainer.innerHTML = `
+    <div class="notice-item loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">공지사항을 불러오는 중입니다...</div>
+    </div>
+  `;
+
+  // 공지사항 로드
+  loadNotices('notice-list', {
+    showBadges: true,
+    showDates: true,
+    dateFn: formatRelativeDate
+  })
+    .then(() => {
+      // 페이지네이션 처리가 필요할 경우 여기에 코드 추가
+      const paginationElement = document.getElementById('notice-pagination');
+      if (paginationElement) {
+        // 페이지네이션 설정
+      }
+    })
+    .catch(error => {
+      window.Logger?.error('공지사항 로드 오류:', error);
+      noticeContainer.innerHTML = `
+      <div class="notice-error">
+        공지사항을 불러오는 중 오류가 발생했습니다: ${error.message}
+        <br>오류가 지속되면 관리자에게 문의해주세요.
+      </div>
+    `;
+    });
+}
+
+/**
+ * 빙하 애니메이션 효과 초기화 (반응형 개선)
+ */
+function initIcebergAnimation() {
+  window.addEventListener('scroll', function () {
+    const leftIceberg = document.querySelector('.iceberg-container.iceberg-left');
+    const rightIceberg = document.querySelector('.iceberg-container.iceberg-right');
+    let scrollPosition = window.scrollY;
+
+    // 화면 크기에 따라 움직임 조절
+    const screenWidth = window.innerWidth;
+    let horizontalSpeed = 0.2;
+    let verticalSpeed = 0.7;
+
+    // 모바일에서는 움직임 감소
+    if (screenWidth <= 480) {
+      horizontalSpeed = 0.1;
+      verticalSpeed = 0.4;
+    } else if (screenWidth <= 768) {
+      horizontalSpeed = 0.15;
+      verticalSpeed = 0.5;
+    }
+
+    if (leftIceberg) {
+      leftIceberg.style.transform = `translate(${-scrollPosition * horizontalSpeed}px, ${scrollPosition * verticalSpeed}px)`;
+    }
+    if (rightIceberg) {
+      rightIceberg.style.transform = `translate(${scrollPosition * horizontalSpeed}px, ${scrollPosition * verticalSpeed}px)`;
+    }
+  });
+}
+
+/**
+ * 탭 표시 함수 (로그인 체크 포함)
+ * @param {string} tabId - 탭 ID
+ */
+function showTab(tabId) {
+  // 전역 isUserLoggedIn 함수가 있으면 사용, 없으면 localStorage 직접 확인
+  const isLoggedIn = (typeof window.isUserLoggedIn === 'function')
+    ? window.isUserLoggedIn()
+    : localStorage.getItem('userLoggedIn') === 'true';
+
+  // 로그인이 필요한 탭들
+  const restrictedTabs = ['subject-tab', 'year-tab'];
+
+  // 제한된 탭을 클릭했는데 로그인하지 않은 경우
+  if (restrictedTabs.includes(tabId) && !isLoggedIn && !isDevMode()) {
+    let message = '';
+
+    if (tabId === 'subject-tab') {
+      message = '과목별 목차 기능을 이용하려면 로그인이 필요합니다.\n로그인하시겠습니까?';
+    } else if (tabId === 'year-tab') {
+      message = '연도별 목차 기능을 이용하려면 로그인이 필요합니다.\n로그인하시겠습니까?';
+    }
+
+    if (confirm(message)) {
+      if (typeof window.showLoginModal === 'function') {
+        window.showLoginModal();
+      } else {
+        window.location.href = 'login.html';
+      }
+    }
+    return; // 탭 전환하지 않음
+  }
+
+  // 모든 탭 내용 숨기기
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    // 서브탭 콘텐츠는 tab-content 클래스를 가지지 않으므로 제외할 필요 없음
+    // 하지만 안전을 위해 analytics-tab 내부의 서브탭은 건드리지 않도록 함
+    // (서브탭은 .sub-tab-content 클래스를 사용하므로 .tab-content 선택자에 포함되지 않음)
+    tab.style.display = 'none';
+    tab.classList.remove('active');
+  });
+
+  // 모든 탭 버튼 비활성화
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.classList.remove('active');
+  });
+
+  // 선택된 탭 내용과 버튼 활성화
+  const selectedTab = document.getElementById(tabId);
+  const selectedButton = document.querySelector(`[data-tab="${tabId}"]`);
+
+  if (selectedTab) {
+    selectedTab.style.display = 'block';
+    selectedTab.classList.add('active');
+    currentTab = tabId;
+
+    // 학습분석 탭이 표시된 경우 서브탭 초기화
+    if (tabId === 'analytics-tab') {
+      setTimeout(async () => {
+        try {
+          const dashboardModule = await import('./analytics/analytics-dashboard.js');
+          if (dashboardModule && typeof dashboardModule.initAnalyticsSubTabs === 'function') {
+            // 탭이 실제로 표시된 후 초기화
+            dashboardModule.initAnalyticsSubTabs();
+          }
+        } catch (e) {
+          console.error('서브탭 초기화 실패:', e);
+        }
+      }, 100); // DOM 업데이트를 위한 충분한 지연 시간
+    }
+  }
+
+  if (selectedButton) {
+    selectedButton.classList.add('active');
+  }
+
+  // 탭 선택 상태 로컬 스토리지에 저장 (페이지 새로고침 시 유지)
+  localStorage.setItem('lastActiveTab', tabId);
+}
+
+/**
+ * 로그인 상태에 따른 콘텐츠 제어
+ * @param {boolean} isLoggedIn - 로그인 상태
+ */
+function updateRestrictedContent(isLoggedIn) {
+  // 제한된 콘텐츠 요소들
+  const restrictedContents = document.querySelectorAll('.restricted-content');
+
+  restrictedContents.forEach(content => {
+    if (isLoggedIn) {
+      // 로그인 상태면 원래 콘텐츠 표시
+      if (content.getAttribute('data-original-content')) {
+        content.innerHTML = content.getAttribute('data-original-content');
+      }
+      content.classList.remove('content-locked');
+    } else {
+      // 비로그인 상태면 제한된 콘텐츠 표시 (개발 모드가 아닐 때만)
+      if (!isDevMode()) {
+        if (!content.classList.contains('content-locked')) {
+          // 원본 내용 저장 (아직 저장되지 않은 경우)
+          if (!content.getAttribute('data-original-content')) {
+            content.setAttribute('data-original-content', content.innerHTML);
+          }
+          content.innerHTML = `
+            <div class="login-required-message">
+              <span>이 내용을 보려면 로그인이 필요합니다.</span>
+              <button class="login-button" onclick="window.showLoginModal && window.showLoginModal()">
+                로그인하기
+              </button>
+            </div>
+          `;
+          content.classList.add('content-locked');
+        }
+      }
+    }
+  });
+
+  // 제한된 링크 이벤트 처리
+  const restrictedLinks = document.querySelectorAll('.restricted-link');
+
+  restrictedLinks.forEach(link => {
+    const href = link.getAttribute('data-href');
+    const isPremiumOnly = link.classList.contains('premium-only');
+    const clone = link.cloneNode(true);
+    link.parentNode.replaceChild(clone, link);
+
+    // 원래 스타일 및 커서 설정
+    clone.style.cursor = 'pointer';
+
+    // 클릭 이벤트 핸들러 추가
+    clone.addEventListener('click', async function (e) {
+      e.preventDefault();
+
+      if (!isLoggedIn && !isDevMode()) {
+        // 로그인 필요 모달 표시 (개발 모드가 아닐 때만)
+        const loginRequiredModal = document.getElementById('login-required-modal');
+        if (loginRequiredModal) {
+          loginRequiredModal.style.display = 'flex';
+
+          // 모달 닫기 버튼에 이벤트 추가
+          const closeButton = loginRequiredModal.querySelector('.login-modal-close');
+          if (closeButton) {
+            closeButton.onclick = function () {
+              loginRequiredModal.style.display = 'none';
+            };
+          }
+        }
+        return;
+      }
+
+      // 프리미엄 전용 콘텐츠 확인 (현재 사용 안함)
+      // 2025년 문제도 무료 회원 접근 가능
+      if (isPremiumOnly) {
+        // 구독 상태 확인
+        const isPremium = window.subscriptionManager?.isPremium() || false;
+
+        if (!isPremium) {
+          // 프리미엄 안내는 표시하지 않고 바로 접근 허용
+          // (필요시 나중에 다시 활성화 가능)
+        }
+      }
+
+      // 로그인 상태이고 권한이 있으면 페이지 이동
+      if (href) {
+        window.location.href = href;
+      }
+    });
+  });
+}
+
+/**
+ * 콘텐츠 접근 제어 적용
+ */
+function applyContentRestrictions() {
+  const isLoggedIn = window.isUserLoggedIn ? window.isUserLoggedIn() : false;
+
+  // 제한된 링크 이벤트 리스너 설정
+  const links = document.querySelectorAll('.restricted-link');
+
+  links.forEach(link => {
+    const clone = link.cloneNode(true);
+    link.parentNode.replaceChild(clone, link);
+
+    if (!isLoggedIn && !isDevMode()) {
+      clone.addEventListener('click', function (e) {
+        e.preventDefault();
+        const loginRequiredModal = document.getElementById('login-required-modal');
+        if (loginRequiredModal) {
+          loginRequiredModal.style.display = 'flex';
+
+          const closeButton = loginRequiredModal.querySelector('.login-modal-close');
+          if (closeButton) {
+            closeButton.onclick = function () {
+              loginRequiredModal.style.display = 'none';
+            };
+          }
+        }
+      });
+    }
+  });
+}
+
+// DOM 로드 시 앱 초기화
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 인증 상태 변경 이벤트 리스너
+document.addEventListener('authStateChanged', function (e) {
+  // 로그인 UI 업데이트
+  updateLoginUI();
+
+  // 제한된 콘텐츠 업데이트
+  updateRestrictedContent(!!e.detail.user);
+
+  // 플로팅 버튼 표시 여부 업데이트
+  updateFloatingButtonsVisibility();
+});
+
+/**
+ * 플로팅 버튼 초기화
+ */
+function initFloatingButtons() {
+  const backToTopBtn = document.getElementById('fab-back-to-top');
+
+  if (backToTopBtn) {
+    backToTopBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // 스크롤 위치에 따른 맨위로 가기 버튼 표시/숨김
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        backToTopBtn.classList.add('visible');
+      } else {
+        backToTopBtn.classList.remove('visible');
+      }
+    });
+  }
+
+  // 관리자 공지 작성 버튼 상태 초기화
+  updateFloatingButtonsVisibility();
+}
+
+/**
+ * 관리자 권한에 따른 플로팅 버튼 표시 여부 업데이트
+ */
+function updateFloatingButtonsVisibility() {
+  const adminNoticeBtn = document.getElementById('fab-admin-notice');
+  if (adminNoticeBtn) {
+    const adminStatus = isAdmin();
+    if (adminStatus) {
+      // 관리자일 때만 표시
+      adminNoticeBtn.style.display = 'flex';
+      // 애니메이션을 위해 약간의 지연 후 클래스 추가
+      setTimeout(() => {
+        adminNoticeBtn.classList.add('visible');
+      }, 100);
+    } else {
+      // 일반 사용자는 숨김
+      adminNoticeBtn.classList.remove('visible');
+      // 애니메이션 완료 후 display: none 처리
+      setTimeout(() => {
+        if (!adminNoticeBtn.classList.contains('visible')) {
+          adminNoticeBtn.style.display = 'none';
+        }
+      }, 400);
+    }
+  }
+}
+
+// 전역 함수 노출 (마이그레이션 호환성 유지)
+window.showTab = showTab;
+window.updateRestrictedContent = updateRestrictedContent;
+window.applyContentRestrictions = applyContentRestrictions;
+
+// 함수 내보내기 추가
+export { initApp };

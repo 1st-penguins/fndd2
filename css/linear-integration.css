@@ -1,0 +1,654 @@
+/* Linear Design System Integration - CSS 우선순위 조정 */
+
+/* 1. 기존 CSS 변수를 Linear 테마 변수로 매핑 */
+:root {
+  /* 기존 변수들을 Linear 테마 변수로 재정의 */
+  --primary-color: var(--color-brand);
+  --secondary-color: var(--color-accent);
+  --accent-color: var(--color-accent);
+  --light-blue: var(--color-bg-level-1);
+  --dark-blue: var(--color-bg-level-3);
+  --light-gray: var(--color-bg-secondary);
+  --dark-gray: var(--color-text-secondary);
+  --white: var(--color-bg-level-0);
+  --shadow: var(--shadow-medium);
+}
+
+/* 2. 전역 스타일 정리 */
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 3. 헤더 스타일 정리 */
+.linear-navigation {
+  position: relative;
+  z-index: 1000;
+  background-color: var(--color-bg-level-0);
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.linear-navigation__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.linear-navigation__logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* 4. 히어로 섹션 스타일 정리 */
+.hero-section {
+  background: linear-gradient(135deg, var(--color-bg-level-1) 0%, var(--color-bg-level-2) 100%);
+  padding: 80px 0;
+  margin-top: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.hero-logo img {
+  max-width: 200px;
+  height: auto;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-brand));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+  color: var(--color-text-secondary);
+}
+
+.hero-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0 0 32px 0;
+  color: var(--color-text-tertiary);
+}
+
+.hero-promise {
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+/* 5. 메인 콘텐츠 스타일 정리 */
+.main-content {
+  padding: 60px 0;
+  background-color: var(--color-bg-primary);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* 6. 탭 네비게이션 스타일 정리 */
+.tab-navigation {
+  display: flex;
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 40px;
+  overflow-x: auto;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background: var(--color-bg-level-2);
+  color: var(--color-text-primary);
+}
+
+.tab-button.active {
+  background: var(--color-brand);
+  color: white;
+  box-shadow: 0 2px 8px color-mix(in lch, var(--color-brand), transparent 70%);
+}
+
+/* 7. 탭 콘텐츠 스타일 정리 */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* 8. 서브 네비게이션 */
+.sub-navigation {
+  display: flex;
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 32px;
+  overflow-x: auto;
+}
+
+.sub-tab-button {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.sub-tab-button:hover {
+  background: var(--color-bg-level-2);
+  color: var(--color-text-primary);
+}
+
+.sub-tab-button.active {
+  background: var(--color-accent);
+  color: white;
+}
+
+/* 9. 서브 탭 콘텐츠 */
+/* 학습분석 탭 내부 서브탭 콘텐츠 (더 구체적인 선택자) */
+#analytics-tab .sub-tab-content {
+  display: none;
+}
+
+#analytics-tab .sub-tab-content.active {
+  display: block;
+}
+
+/* 문제풀기 탭 내부 서브탭 콘텐츠 */
+#quiz-tab .sub-tab-content {
+  display: none;
+}
+
+#quiz-tab .sub-tab-content.active {
+  display: block;
+}
+
+/* 10. 섹션 헤더 */
+.section-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.section-header h2,
+.section-header h3 {
+  margin: 0 0 8px 0;
+  color: var(--color-text-primary);
+}
+
+.section-header p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* 11. 카드 스타일 정리 */
+.linear-card {
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.2s ease;
+}
+
+.linear-card:hover {
+  border-color: var(--color-border-secondary);
+  box-shadow: var(--shadow-medium);
+}
+
+.linear-card--feature {
+  background: linear-gradient(135deg, var(--color-bg-level-1), var(--color-bg-level-2));
+  border-color: var(--color-brand);
+}
+
+.linear-card--outlined {
+  border: 2px solid var(--color-border-primary);
+}
+
+/* 12. 공지사항 스타일 */
+.notice-list {
+  display: grid;
+  gap: 16px;
+}
+
+.notice-item {
+  padding: 20px;
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.notice-item:hover {
+  border-color: var(--color-border-secondary);
+  box-shadow: var(--shadow-low);
+}
+
+.notice-item.pinned {
+  border-color: var(--color-brand);
+  background: linear-gradient(135deg, var(--color-bg-level-1), var(--color-accent-tint));
+}
+
+.notice-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.notice-header h3 {
+  margin: 0;
+  flex: 1;
+  color: var(--color-text-primary);
+}
+
+.notice-date {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+}
+
+.pin-badge {
+  font-size: 16px;
+}
+
+/* 13. 로그인 오버레이 */
+.login-required-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.login-required-card {
+  max-width: 500px;
+  text-align: center;
+  padding: 40px;
+}
+
+.login-icon {
+  font-size: 4rem;
+  margin-bottom: 24px;
+}
+
+.feature-list {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+  text-align: left;
+}
+
+.feature-item {
+  padding: 12px;
+  background: var(--color-bg-level-2);
+  border-radius: 8px;
+  border: 1px solid var(--color-border-secondary);
+}
+
+.feature-item:last-child {
+  border: none;
+  background: transparent;
+}
+
+.login-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+/* 14. 그리드 레이아웃 */
+.subjects-grid,
+.years-grid,
+.mockexam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.subject-card,
+.year-card,
+.mockexam-card {
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.subject-card:hover,
+.year-card:hover,
+.mockexam-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.subject-icon,
+.mockexam-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.year-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--color-brand);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 15. 강의 섹션 */
+.lecture-section {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.lecture-coming-soon {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 60px 40px;
+}
+
+.lecture-icon {
+  font-size: 5rem;
+  margin-bottom: 32px;
+}
+
+/* 16. 푸터 스타일 */
+.linear-navigation--footer {
+  background: var(--color-bg-level-1);
+  border-top: 1px solid var(--color-border-primary);
+  margin-top: 80px;
+  padding: 40px 0;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-nav ul {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-copyright {
+  text-align: right;
+}
+
+/* 17. 반응형 디자인 */
+@media (max-width: 768px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .tab-navigation,
+  .sub-navigation {
+    flex-direction: column;
+  }
+  
+  .subjects-grid,
+  .years-grid,
+  .mockexam-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+  
+  .footer-nav ul {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .footer-copyright {
+    text-align: center;
+  }
+}
+
+/* 18. 로딩 상태 */
+.notice-loading {
+  padding: 40px;
+  text-align: center;
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 12px;
+}
+
+/* 19. 모달 스타일 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modal-content {
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.close:hover {
+  color: var(--color-text-primary);
+}
+
+/* 20. 폼 스타일 */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-text-primary);
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: 8px;
+  background: var(--color-bg-level-0);
+  color: var(--color-text-primary);
+  font-size: 16px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-accent-tint);
+}
+
+.link {
+  color: var(--color-brand);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* 21. CSS 우선순위 조정을 위한 특정도 증가 */
+html body .linear-navigation {
+  /* 기존 navigation 스타일 오버라이드 */
+  background-color: var(--color-bg-level-0);
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+html body .hero-section {
+  /* 기존 hero 스타일 오버라이드 */
+  background: linear-gradient(135deg, var(--color-bg-level-1) 0%, var(--color-bg-level-2) 100%);
+}
+
+html body .tab-navigation {
+  /* 기존 tab 스타일 오버라이드 */
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+}
+
+html body .linear-card {
+  /* 기존 card 스타일 오버라이드 */
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+}
+
+/* 22. 기존 클래스와의 호환성을 위한 별칭 */
+.navigation {
+  background-color: var(--color-bg-level-0);
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--color-bg-level-1) 0%, var(--color-bg-level-2) 100%);
+}
+
+.card {
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+}
+
+/* 23. 기존 스타일 오버라이드를 위한 더 구체적인 선택자 */
+main .container .tab-navigation .tab-button {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+main .container .tab-navigation .tab-button.active {
+  background: var(--color-brand);
+  color: white;
+}
+
+main .container .notice-list .notice-item {
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+}
+
+main .container .subjects-grid .subject-card,
+main .container .years-grid .year-card,
+main .container .mockexam-grid .mockexam-card {
+  background: var(--color-bg-level-1);
+  border: 1px solid var(--color-border-primary);
+}
+
+/* 24. 테마 전환 시 부드러운 애니메이션 */
+.linear-navigation,
+.hero-section,
+.main-content,
+.linear-navigation--footer,
+.linear-card,
+.tab-navigation,
+.sub-navigation,
+.notice-item,
+.subject-card,
+.year-card,
+.mockexam-card {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URL 인코딩 과목명 수정 | 관리자 | 퍼스트펭귄</title>
+  
+  <link rel="stylesheet" href="../css/base.css" />
+  
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 900px;
+      width: 100%;
+      padding: 40px;
+    }
+    
+    h1 {
+      color: #f5576c;
+      margin-bottom: 10px;
+    }
+    
+    .warning-box {
+      background: #fff3cd;
+      border-left: 4px solid #ff9800;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-right: 10px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    .preview-table th,
+    .preview-table td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .preview-table th {
+      background: #f5f5f5;
+      font-weight: bold;
+    }
+    
+    .encoded {
+      color: #f44336;
+      font-family: monospace;
+    }
+    
+    .decoded {
+      color: #4caf50;
+      font-weight: bold;
+    }
+    
+    .log-container {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 URL 인코딩 과목명 수정</h1>
+    <p style="color: #666;">URL 인코딩되어 저장된 과목명을 정상 한글로 수정합니다</p>
+    
+    <div class="warning-box">
+      <strong>⚠️ 문제 상황</strong>
+      <p style="margin: 10px 0;">일부 데이터에서 과목명이 다음과 같이 저장되어 있습니다:</p>
+      <ul style="margin: 10px 0 0 20px;">
+        <li><span class="encoded">%EA%B1%B4%EA%B0%95%EC%B2%B4%EB%A0%A5%ED%8F%89%EA%B0%80</span> → <span class="decoded">건강체력평가</span></li>
+        <li><span class="encoded">%EA%B8%B0%EB%8A%A5%ED%95%B4%EB%B6%80%ED%95%99</span> → <span class="decoded">기능해부학</span></li>
+        <li><span class="encoded">%EC%9A%B4%EB%8F%99%EC%83%9D%EB%A6%AC%ED%95%99</span> → <span class="decoded">운동생리학</span></li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <strong>ℹ️ 수정 내용</strong>
+      <p style="margin: 10px 0;">URL 인코딩된 과목명을 한글로 디코딩하여 업데이트합니다.</p>
+      <p style="margin: 10px 0;">questionData.subject와 subject 필드 모두 수정됩니다.</p>
+    </div>
+    
+    <div id="preview-section" style="display: none;">
+      <h3>수정 대상 미리보기</h3>
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>현재 과목명 (잘못됨)</th>
+            <th>수정될 과목명</th>
+            <th>개수</th>
+          </tr>
+        </thead>
+        <tbody id="preview-body"></tbody>
+      </table>
+    </div>
+    
+    <div id="stats-section" style="display: none;">
+      <h3>수정 통계</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px 0;">
+        <div style="text-align: center; padding: 20px; background: #ffebee; border-radius: 8px;">
+          <div style="font-size: 28px; font-weight: bold; color: #f44336;" id="encoded-count">0</div>
+          <div style="font-size: 12px; color: #666;">잘못 인코딩됨</div>
+        </div>
+        <div style="text-align: center; padding: 20px; background: #e8f5e9; border-radius: 8px;">
+          <div style="font-size: 28px; font-weight: bold; color: #4caf50;" id="fixed-count">0</div>
+          <div style="font-size: 12px; color: #666;">수정 완료</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+      <button class="btn btn-primary" id="check-button" onclick="checkEncodedData()">
+        🔍 인코딩된 데이터 확인
+      </button>
+      <button class="btn btn-primary" id="fix-button" onclick="fixEncodedSubjects()" disabled>
+        🔧 과목명 수정
+      </button>
+      <button class="btn" style="background: #6c757d; color: white;" onclick="window.location.href='../index.html'">
+        ← 돌아가기
+      </button>
+    </div>
+    
+    <div class="log-container" id="log-container">
+      <strong>📋 실행 로그</strong>
+      <div id="log-content"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from '../js/core/firebase-core.js';
+    import { isAdmin } from '../js/auth/auth-utils.js';
+    import { 
+      collection, 
+      getDocs,
+      doc,
+      updateDoc,
+      writeBatch
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    
+    let encodedDocs = [];
+    
+    // 관리자 권한 확인
+    auth.onAuthStateChanged(async (user) => {
+      if (!user || !isAdmin(user)) {
+        alert('❌ 관리자만 접근할 수 있습니다.');
+        window.location.href = '../index.html';
+        return;
+      }
+    });
+    
+    // URL 디코딩 함수
+    function safeDecodeURIComponent(str) {
+      if (!str) return str;
+      
+      try {
+        // 이미 디코딩된 경우
+        if (str === decodeURIComponent(str)) {
+          return str;
+        }
+        
+        // 디코딩 (최대 3번 시도 - 이중/삼중 인코딩 대비)
+        let decoded = str;
+        for (let i = 0; i < 3; i++) {
+          const temp = decodeURIComponent(decoded);
+          if (temp === decoded) break;
+          decoded = temp;
+        }
+        
+        return decoded;
+      } catch (error) {
+        console.warn('디코딩 실패:', str);
+        return str;
+      }
+    }
+    
+    // 인코딩된 데이터 확인
+    window.checkEncodedData = async function() {
+      const checkButton = document.getElementById('check-button');
+      checkButton.disabled = true;
+      checkButton.textContent = '확인 중...';
+      
+      document.getElementById('log-container').style.display = 'block';
+      addLog('🔍 인코딩된 데이터 검색 시작...', 'info');
+      
+      try {
+        const snapshot = await getDocs(collection(db, 'attempts'));
+        
+        encodedDocs = [];
+        const subjectCounts = {};
+        
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          
+          // questionData.subject 확인
+          const qSubject = data.questionData?.subject;
+          const flatSubject = data.subject;
+          
+          let needsFixing = false;
+          let currentSubject = qSubject || flatSubject;
+          
+          // % 문자가 있으면 URL 인코딩됨
+          if (currentSubject && currentSubject.includes('%')) {
+            needsFixing = true;
+            
+            const decoded = safeDecodeURIComponent(currentSubject);
+            
+            encodedDocs.push({
+              id: docSnap.id,
+              currentSubject,
+              decodedSubject: decoded,
+              hasQuestionData: !!qSubject,
+              hasFlatField: !!flatSubject
+            });
+            
+            // 카운트
+            if (!subjectCounts[currentSubject]) {
+              subjectCounts[currentSubject] = {
+                encoded: currentSubject,
+                decoded: decoded,
+                count: 0
+              };
+            }
+            subjectCounts[currentSubject].count++;
+          }
+        });
+        
+        addLog(`📊 총 ${snapshot.size}개 문서 확인`, 'info');
+        addLog(`❌ URL 인코딩됨: ${encodedDocs.length}개`, 'error');
+        
+        // 미리보기 표시
+        if (encodedDocs.length > 0) {
+          document.getElementById('preview-section').style.display = 'block';
+          document.getElementById('stats-section').style.display = 'block';
+          document.getElementById('encoded-count').textContent = encodedDocs.length;
+          
+          const tbody = document.getElementById('preview-body');
+          tbody.innerHTML = '';
+          
+          Object.values(subjectCounts).forEach(item => {
+            const row = tbody.insertRow();
+            row.innerHTML = `
+              <td class="encoded">${item.encoded}</td>
+              <td class="decoded">${item.decoded}</td>
+              <td>${item.count}개</td>
+            `;
+          });
+          
+          document.getElementById('fix-button').disabled = false;
+          addLog('✅ 수정 버튼이 활성화되었습니다', 'success');
+        } else {
+          addLog('✅ 모든 과목명이 정상입니다!', 'success');
+        }
+        
+      } catch (error) {
+        console.error('확인 오류:', error);
+        addLog(`❌ 오류: ${error.message}`, 'error');
+      } finally {
+        checkButton.disabled = false;
+        checkButton.textContent = '🔍 인코딩된 데이터 확인';
+      }
+    };
+    
+    // 과목명 수정
+    window.fixEncodedSubjects = async function() {
+      if (!confirm(`⚠️ ${encodedDocs.length}개의 문서를 수정합니다.\n\n계속하시겠습니까?`)) {
+        return;
+      }
+      
+      const fixButton = document.getElementById('fix-button');
+      const checkButton = document.getElementById('check-button');
+      fixButton.disabled = true;
+      checkButton.disabled = true;
+      fixButton.textContent = '수정 중...';
+      
+      addLog('🔧 과목명 수정 시작!', 'info');
+      
+      try {
+        // 500개씩 배치 처리
+        const batchSize = 500;
+        let fixed = 0;
+        
+        for (let i = 0; i < encodedDocs.length; i += batchSize) {
+          const batch = writeBatch(db);
+          const batchDocs = encodedDocs.slice(i, Math.min(i + batchSize, encodedDocs.length));
+          
+          batchDocs.forEach(item => {
+            const docRef = doc(db, 'attempts', item.id);
+            
+            const updateData = {};
+            
+            // questionData.subject 수정
+            if (item.hasQuestionData) {
+              updateData['questionData.subject'] = item.decodedSubject;
+            }
+            
+            // 평탄화된 subject 필드도 수정
+            if (item.hasFlatField) {
+              updateData.subject = item.decodedSubject;
+            } else {
+              // 없으면 추가
+              updateData.subject = item.decodedSubject;
+            }
+            
+            batch.update(docRef, updateData);
+          });
+          
+          await batch.commit();
+          fixed += batchDocs.length;
+          
+          document.getElementById('fixed-count').textContent = fixed;
+          addLog(`✅ 배치 ${Math.floor(i / batchSize) + 1}: ${batchDocs.length}개 수정 완료`, 'success');
+          
+          // 과도한 요청 방지
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        addLog(`🎉 수정 완료! 총 ${fixed}개 문서 처리`, 'success');
+        alert(`✅ ${fixed}개의 과목명이 정상적으로 수정되었습니다!`);
+        
+        fixButton.textContent = '✅ 완료';
+        
+      } catch (error) {
+        console.error('수정 오류:', error);
+        addLog(`❌ 오류: ${error.message}`, 'error');
+        alert('❌ 수정 중 오류가 발생했습니다:\n' + error.message);
+        fixButton.textContent = '🔧 과목명 수정';
+      } finally {
+        checkButton.disabled = false;
+      }
+    };
+    
+    // 로그 추가
+    function addLog(message, type = 'info') {
+      const logContent = document.getElementById('log-content');
+      const entry = document.createElement('div');
+      entry.style.padding = '5px';
+      entry.style.color = type === 'error' ? '#f44336' : type === 'success' ? '#4caf50' : type === 'warning' ? '#ff9800' : '#2196f3';
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContent.appendChild(entry);
+      logContent.scrollTop = logContent.scrollHeight;
+      
+      console.log(message);
+    }
+    
+    window.addLog = addLog;
+  </script>
+</body>
+</html>
+

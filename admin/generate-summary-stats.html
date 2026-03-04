@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>요약 통계 생성 - 관리자</title>
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .admin-container {
+      max-width: 1000px;
+      margin: 50px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: var(--penguin-navy);
+    }
+    
+    .info-value {
+      color: #666;
+    }
+    
+    .generate-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--penguin-navy), var(--aqua-accent));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(95, 178, 201, 0.3);
+    }
+    
+    .generate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .log-container {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Consolas', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    .log-line {
+      margin: 5px 0;
+    }
+    
+    .success { color: #4ade80; }
+    .error { color: #f87171; }
+    .warning { color: #fbbf24; }
+    .info { color: #60a5fa; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo-container">
+        <a href="../index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+          <img src="../images/firstpenguin-logo2.png" alt="퍼스트펭귄" style="height: 50px; margin-right: 10px;">
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 700;">퍼스트펭귄</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">관리자 도구</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="admin-container">
+    <h1 style="text-align: center; color: var(--penguin-navy); margin-bottom: 30px;">
+      📊 요약 통계 생성기
+    </h1>
+    
+    <div class="stats-info">
+      <h3 style="margin-top: 0;">현재 상태</h3>
+      <div class="info-item">
+        <span class="info-label">마지막 업데이트:</span>
+        <span class="info-value" id="lastUpdated">확인 중...</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">총 사용자 수:</span>
+        <span class="info-value" id="totalUsersCount">-</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">총 문제 풀이 수:</span>
+        <span class="info-value" id="totalAttemptsCount">-</span>
+      </div>
+      <div class="info-item" style="border: none;">
+        <span class="info-label">예상 소요 시간:</span>
+        <span class="info-value" id="estimatedTime">-</span>
+      </div>
+    </div>
+    
+    <button id="generateBtn" class="generate-btn">
+      🚀 요약 통계 생성/업데이트
+    </button>
+    
+    <div class="log-container" id="logContainer">
+      <div class="log-line info">💡 요약 통계를 생성하면 관리자 대시보드 로딩이 10배 이상 빨라집니다!</div>
+      <div class="log-line info">💰 Firebase 읽기 비용도 90% 이상 절감됩니다.</div>
+      <div class="log-line warning">⏰ 처음 생성 시 1-2분 소요될 수 있습니다.</div>
+      <div class="log-line">준비되면 위 버튼을 클릭하세요.</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import { 
+      getFirestore, 
+      collection, 
+      doc,
+      getDoc,
+      getDocs,
+      setDoc,
+      query,
+      orderBy,
+      limit,
+      serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    // Firebase 설정
+    const firebaseConfig = {
+      apiKey: "AIzaSyDOBkaY46P5gv9WKqu0t4t91B3G1ňXŻŻŻ_lŻŻŻkŻŻŻ",
+      authDomain: "health-exercise-quiz.firebaseapp.com",
+      projectId: "health-exercise-quiz",
+      storageBucket: "health-exercise-quiz.firebasestorage.app",
+      messagingSenderId: "278024235059",
+      appId: "1:278024235059:web:af9d5f62a8fbe69f6d8e6d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+    const logContainer = document.getElementById('logContainer');
+    const generateBtn = document.getElementById('generateBtn');
+
+    // 로그 추가 함수
+    function addLog(message, type = 'info') {
+      const logLine = document.createElement('div');
+      logLine.className = `log-line ${type}`;
+      logLine.textContent = `[${new Date().toLocaleTimeString('ko-KR')}] ${message}`;
+      logContainer.appendChild(logLine);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // 인증 확인
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '../login.html';
+        return;
+      }
+      
+      if (!adminEmails.includes(user.email)) {
+        alert('관리자 권한이 없습니다.');
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      addLog(`✅ 관리자 로그인: ${user.email}`, 'success');
+      
+      // 현재 상태 확인
+      await checkCurrentStats();
+    });
+
+    // 현재 통계 확인
+    async function checkCurrentStats() {
+      try {
+        const summaryRef = doc(db, 'adminStats', 'userSummary');
+        const summaryDoc = await getDoc(summaryRef);
+        
+        if (summaryDoc.exists()) {
+          const data = summaryDoc.data();
+          const lastUpdated = data.lastUpdated?.toDate();
+          document.getElementById('lastUpdated').textContent = lastUpdated ? lastUpdated.toLocaleString('ko-KR') : '없음';
+          document.getElementById('totalUsersCount').textContent = (Object.keys(data.userActivityMap || {}).length) + '명';
+          document.getElementById('totalAttemptsCount').textContent = (data.totalAttempts || 0).toLocaleString() + '개';
+        } else {
+          document.getElementById('lastUpdated').textContent = '아직 생성되지 않음';
+        }
+        
+        // 예상 시간 계산
+        const attemptsSnap = await getDocs(query(collection(db, 'attempts'), limit(1)));
+        document.getElementById('estimatedTime').textContent = '약 1-2분';
+        
+      } catch (error) {
+        console.error('상태 확인 오류:', error);
+      }
+    }
+
+    // 요약 통계 생성
+    generateBtn.addEventListener('click', async () => {
+      if (!confirm('요약 통계를 생성/업데이트하시겠습니까?\n\n⏰ 1-2분 소요될 수 있습니다.')) {
+        return;
+      }
+      
+      generateBtn.disabled = true;
+      generateBtn.textContent = '⏳ 생성 중...';
+      
+      try {
+        addLog('🚀 요약 통계 생성 시작...', 'info');
+        
+        // 1. attempts 데이터 수집
+        addLog('📥 attempts 데이터 조회 중...', 'info');
+        const attemptsRef = collection(db, 'attempts');
+        const attemptsSnap = await getDocs(attemptsRef);
+        addLog(`✅ ${attemptsSnap.size.toLocaleString()}개 attempts 조회 완료`, 'success');
+        
+        // 2. 사용자별 집계
+        addLog('📊 사용자별 데이터 집계 중...', 'info');
+        const userActivityMap = {};
+        let totalAttempts = 0;
+        
+        attemptsSnap.forEach(doc => {
+          const data = doc.data();
+          totalAttempts++;
+          
+          if (data.userId) {
+            if (!userActivityMap[data.userId]) {
+              userActivityMap[data.userId] = {
+                userId: data.userId,
+                userName: data.userName || null,
+                userEmail: data.userEmail || null,
+                attemptCount: 0,
+                correctCount: 0,
+                lastActivity: null,
+                deviceType: data.deviceType || 'unknown',
+                totalTimeSpent: 0
+              };
+            }
+            
+            userActivityMap[data.userId].attemptCount++;
+            if (data.isCorrect) userActivityMap[data.userId].correctCount++;
+            if (data.timeSpent) userActivityMap[data.userId].totalTimeSpent += data.timeSpent;
+            
+            // 최신 정보로 업데이트
+            if (data.userName) userActivityMap[data.userId].userName = data.userName;
+            if (data.userEmail) userActivityMap[data.userId].userEmail = data.userEmail;
+            
+            // 최근 활동일
+            const timestamp = data.timestamp?.toDate();
+            if (timestamp && (!userActivityMap[data.userId].lastActivity || timestamp > userActivityMap[data.userId].lastActivity)) {
+              userActivityMap[data.userId].lastActivity = timestamp;
+            }
+          }
+        });
+        
+        const userCount = Object.keys(userActivityMap).length;
+        addLog(`✅ ${userCount.toLocaleString()}명 사용자 집계 완료`, 'success');
+        
+        // 3. 요약 통계 저장
+        addLog('💾 요약 통계 저장 중...', 'info');
+        const summaryRef = doc(db, 'adminStats', 'userSummary');
+        await setDoc(summaryRef, {
+          userActivityMap: userActivityMap,
+          totalUsers: userCount,
+          totalAttempts: totalAttempts,
+          lastUpdated: serverTimestamp(),
+          generatedAt: new Date().toISOString()
+        });
+        
+        addLog(`✅ 요약 통계 저장 완료!`, 'success');
+        addLog(`📊 총 ${userCount}명, ${totalAttempts.toLocaleString()}개 문제 풀이`, 'success');
+        addLog('', 'info');
+        addLog('🎉 완료! 이제 대시보드가 빠르게 로드됩니다!', 'success');
+        addLog('💰 Firebase 읽기 비용도 90% 절감됩니다!', 'success');
+        
+        // 상태 업데이트
+        await checkCurrentStats();
+        
+        generateBtn.textContent = '✅ 생성 완료!';
+        setTimeout(() => {
+          generateBtn.disabled = false;
+          generateBtn.textContent = '🔄 요약 통계 재생성';
+        }, 3000);
+        
+      } catch (error) {
+        console.error('통계 생성 오류:', error);
+        addLog(`❌ 오류 발생: ${error.message}`, 'error');
+        generateBtn.disabled = false;
+        generateBtn.textContent = '🚀 요약 통계 생성/업데이트';
+      }
+    });
+  </script>
+</body>
+</html>
+

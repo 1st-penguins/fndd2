@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>강의 수강 | 퍼스트펭귄</title>
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+
+  <!-- Vimeo Player API -->
+  <script src="https://player.vimeo.com/api/player.js"></script>
+
+  <!-- Firebase -->
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+
+  <style>
+    header .logo img {
+      max-width: 50px;
+      max-height: 50px;
+      object-fit: contain;
+    }
+
+    .player-container {
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--penguin-navy);
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .back-link:hover {
+      color: var(--penguin-skyblue);
+    }
+
+    .video-section {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      /* 16:9 */
+      height: 0;
+      background: #000;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .lecture-info-section {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .lecture-info-section h2 {
+      color: var(--penguin-navy);
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--penguin-skyblue);
+      transition: width 0.3s;
+    }
+
+    #accessDenied {
+      text-align: center;
+      padding: 100px 20px;
+    }
+
+    #accessDenied h1 {
+      color: #f44336;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: var(--penguin-navy);
+
+      <div id="accessDenied" style="display: none;"><h1>🔒 접근 권한이 없습니다</h1><p style="color: #666; margin-bottom: 30px;">이 강의를 시청하려면 먼저 구매해주세요.</p><button class="btn btn-primary" onclick="window.open('https://litt.ly/the1stpeng','_blank')">강의 구매하기 </button></div>< !-- 강의 플레이어 --><div id="lectureContent" style="display: none;"><div class="video-section"><div class="video-wrapper" id="video-container">< !-- Vimeo 플레이어가 여기에 삽입됨 --></div></div><div class="lecture-info-section"><h2 id="lectureTitle">강의 제목</h2><div><strong>진도율</strong><div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div><div id="progressText" style="color: #666; font-size: 14px;">0% 시청</div></div></div></div></main><script type="module">import {
+        auth,
+        db
+      }
+
+      from './js/core/firebase-core.js';
+
+      import {
+        doc,
+        getDoc,
+        setDoc,
+        serverTimestamp
+      }
+
+      from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+      const urlParams=new URLSearchParams(window.location.search);
+      const lectureId=urlParams.get('id');
+
+      // 강의 정보 (Vimeo 동영상 ID 매핑)
+      const lectures= {
+        'lecture_001': {
+          title: 'NSCA-CSCS 요약정리본', vimeoId: 'YOUR_VIMEO_ID_1'
+        }
+
+        ,
+        'lecture_002': {
+          title: '건강운동관리사 운동생리학 요약본', vimeoId: 'YOUR_VIMEO_ID_2'
+        }
+
+        ,
+        'lecture_003': {
+          title: '병태생리학 압축요약본', vimeoId: 'YOUR_VIMEO_ID_3'
+        }
+
+        ,
+        'lecture_004': {
+          title: '기능해부학 상지 요약본', vimeoId: 'YOUR_VIMEO_ID_4'
+        }
+
+        ,
+        'lecture_005': {
+          title: '운동처방론 요약정리본', vimeoId: 'YOUR_VIMEO_ID_5'
+        }
+
+        ,
+        'lecture_006': {
+          title: '건운사 스페셜테스트 압축본', vimeoId: 'YOUR_VIMEO_ID_6'
+        }
+      }
+
+      ;
+
+      const currentLecture=lectures[lectureId];
+
+      if ( !currentLecture) {
+        alert('강의를 찾을 수 없습니다.');
+        window.location.href='https://litt.ly/the1stpeng';
+      }
+
+      // 강의 접근 확인
+      auth.onAuthStateChanged(async (user)=> {
+          if ( !user) {
+            alert('로그인이 필요합니다.');
+            window.location.href='login.html';
+            return;
+          }
+
+          try {
+
+            // 구매 내역 확인
+            const purchaseRef=doc(db, 'purchases', `$ {
+                user.uid
+              }
+
+              _$ {
+                lectureId
+              }
+
+              `);
+            const purchaseSnap=await getDoc(purchaseRef);
+
+            if (purchaseSnap.exists()) {
+              // ✅ 구매함 - 강의 표시
+              document.getElementById('lectureContent').style.display='block';
+              document.getElementById('lectureTitle').textContent=currentLecture.title;
+
+              loadVimeoPlayer(currentLecture.vimeoId);
+            }
+
+            else {
+              // ❌ 미구매 - 접근 거부
+              document.getElementById('accessDenied').style.display='block';
+            }
+          }
+
+          catch (error) {
+            console.error('구매 확인 오류:', error);
+            alert('오류가 발생했습니다.');
+            window.location.href='https://litt.ly/the1stpeng';
+          }
+        });
+
+      // Vimeo 플레이어 로드
+      function loadVimeoPlayer(vimeoId) {
+        const container=document.getElementById('video-container');
+
+        // Vimeo iframe 생성
+        const iframe=document.createElement('iframe');
+        iframe.src=`https: //player.vimeo.com/video/${vimeoId}`;
+        iframe.width='100%';
+        iframe.height='100%';
+        iframe.frameborder='0';
+        iframe.allow='autoplay; fullscreen; picture-in-picture';
+        iframe.allowfullscreen=true;
+        iframe.id='vimeo-player';
+
+        container.appendChild(iframe);
+
+        // Vimeo Player API로 진도율 추적
+        const player=new Vimeo.Player(iframe);
+
+        player.on('timeupdate', function(data) {
+            const percent=Math.round(data.percent * 100);
+            document.getElementById('progressFill').style.width=percent + '%';
+            document.getElementById('progressText').textContent=percent + '% 시청';
+
+            // 진도율 저장 (10초마다)
+            if (data.seconds % 10===0) {
+              saveProgress(percent);
+            }
+          });
+      }
+
+      // 진도율 저장
+      async function saveProgress(percent) {
+        const user=auth.currentUser;
+        if ( !user) return;
+
+        try {
+          await setDoc(doc(db, 'lectureProgress', `$ {
+                user.uid
+              }
+
+              _$ {
+                lectureId
+              }
+
+              `), {
+            userId: user.uid,
+            lectureId: lectureId,
+            progress: percent,
+            lastWatched: serverTimestamp()
+          }
+
+          , {
+          merge: true
+        });
+    }
+
+    catch (error) {
+      console.error('진도율 저장 오류:', error);
+    }
+    }
+
+    </script></body></html>

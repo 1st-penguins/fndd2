@@ -1,0 +1,95 @@
+/* 페이지 헤더 스타일 */
+.page-header {
+  background: linear-gradient(135deg, var(--penguin-navy) 0%, var(--penguin-skyblue) 100%);
+  color: white;
+  padding: 40px 0;
+  margin-top: 44px; /* 헤더 높이만큼 여백 */
+}
+
+.page-header .container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.back-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.back-arrow {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* notice.css의 ::before 화살표 중복 방지 */
+.page-header .back-link::before {
+  content: none;
+}
+
+.page-title {
+  flex: 1;
+  text-align: center;
+}
+
+.page-title h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* .page-subtitle 스타일은 subject.css에서 관리 */
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 24px 0;
+    margin-top: 44px;
+  }
+  
+  .page-header .container {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .page-title h1 {
+    font-size: 2rem;
+  }
+  
+  
+  .back-link {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 20px 0;
+  }
+  
+  .page-title h1 {
+    font-size: 1.75rem;
+  }
+  
+}

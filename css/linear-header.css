@@ -1,0 +1,712 @@
+﻿/* Linear Design System - Header Component */
+/* BEM 방법론: .linear-header__element--modifier */
+/* Last updated: 2025-10-21 12:36 - Mobile badge fix */
+
+.linear-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  transition: background 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    backdrop-filter 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  height: 48px;
+  padding: 0;
+}
+
+.linear-header--scrolled {
+  background: rgba(255, 255, 255, 0.99);
+  box-shadow: 0 2px 12px rgba(29, 47, 78, 0.12);
+  backdrop-filter: blur(28px);
+}
+
+.linear-header__container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  gap: 16px;
+  /* Reduced from 24px to prevent wrapping on mid-sized screens */
+  transition: none;
+  /* 컨테이너 크기 변화 방지 */
+}
+
+.linear-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  /* 브랜드 영역 위치 고정 */
+  position: relative;
+}
+
+/* 모바일에서 로고와 뱃지 사이 간격 늘리기 */
+@media (max-width: 768px) {
+  .linear-header__brand {
+    gap: 10px;
+    /* 모바일에서 간격 조정 */
+  }
+}
+
+.linear-header__brand:hover {
+  transform: translateY(-1px);
+}
+
+/* 헤더 브랜드 내부 배지: 구체성으로 항상 표시 보장 */
+.linear-header .linear-header__brand .cert-badge {
+  display: inline-flex;
+  /* 모바일에서도 강제 표시 */
+  align-items: center;
+  visibility: visible;
+  /* 숨김 방지 */
+  opacity: 1;
+  /* 투명도 보장 */
+}
+
+/* 데스크톱: 브랜드 영역 최소 폭 확보로 네비게이션 중심 이동 방지 */
+@media (min-width: 769px) {
+  .linear-header__brand {
+    min-width: 220px;
+    /* 긴 배지 텍스트도 수용하여 레이아웃 안정화 */
+  }
+}
+
+.linear-header__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-6, 6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: none;
+  /* 로고 크기 고정 */
+  flex-shrink: 0;
+  /* 로고 크기 축소 방지 */
+}
+
+.linear-header__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.linear-header__brand-text {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 680;
+  font-size: 19px;
+  color: var(--penguin-navy);
+  letter-spacing: -0.3px;
+  transition: none;
+  /* 브랜드 텍스트 크기 고정 */
+  white-space: nowrap;
+  /* 텍스트 줄바꿈 방지 */
+}
+
+.linear-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+
+/* 로그인/인증 영역을 오른쪽에 배치 */
+.linear-header__auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* 인증 영역 내 로그인/로그아웃 링크 스타일 (필요 시 속성 추가) */
+.linear-header__auth .linear-header__nav-link[data-action="show-login"],
+.linear-header__auth .linear-header__nav-link[data-action="logout"] {
+  font-weight: 590;
+}
+
+/* 사용자 프로필 영역 스타일 */
+.linear-header__user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+}
+
+/* 로그인된 상태의 사용자 프로필 컨테이너 */
+#user-profile-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.linear-header__user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--penguin-skyblue);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 590;
+}
+
+.linear-header__user-name {
+  font-size: 14px;
+  color: var(--penguin-navy);
+  font-weight: 510;
+}
+
+.linear-header__nav-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.linear-header__nav-item {
+  position: relative;
+}
+
+.linear-header__nav-link {
+  display: flex;
+  align-items: center;
+  padding: 7px 12px;
+  /* Slightly reduced padding */
+  border-radius: var(--radius-6, 6px);
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 510;
+  font-size: 15px;
+  color: var(--penguin-navy);
+  /* 테마 색상으로 변경: --deep-sea-gray → --penguin-navy */
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  /* Prevent text wrapping to two lines */
+}
+
+.linear-header__nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--penguin-skyblue);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: var(--radius-6, 6px);
+}
+
+.linear-header__nav-link:hover {
+  color: var(--penguin-navy);
+  background: rgba(95, 178, 201, 0.08);
+  transform: translateY(-1px);
+}
+
+.linear-header__nav-link:hover::before {
+  opacity: 0.1;
+}
+
+.linear-header__nav-link--active {
+  color: var(--penguin-navy);
+  background: rgba(95, 178, 201, 0.12);
+  font-weight: 590;
+}
+
+.linear-header__nav-link--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--penguin-skyblue);
+  border-radius: 1px;
+}
+
+.linear-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.linear-header__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 14px;
+  border-radius: var(--radius-6, 6px);
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 510;
+  font-size: 14px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 32px;
+}
+
+.linear-header__button--primary {
+  background: var(--penguin-navy);
+  color: white;
+  box-shadow: 0 2px 8px rgba(29, 47, 78, 0.15);
+}
+
+.linear-header__button--primary:hover {
+  background: #2a4366;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 47, 78, 0.25);
+}
+
+.linear-header__button--secondary {
+  background: transparent;
+  color: var(--penguin-navy);
+  border: 1px solid rgba(29, 47, 78, 0.2);
+}
+
+.linear-header__button--secondary:hover {
+  background: rgba(29, 47, 78, 0.05);
+  border-color: var(--penguin-navy);
+}
+
+.linear-header__button--ghost {
+  background: transparent;
+  color: var(--deep-sea-gray);
+}
+
+.linear-header__button--ghost:hover {
+  background: rgba(95, 178, 201, 0.08);
+  color: var(--penguin-navy);
+}
+
+/* 사용자 프로필 */
+.linear-header__user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: var(--radius-6, 6px);
+  transition: background 0.2s ease;
+}
+
+.linear-header__user-profile:hover {
+  background: rgba(95, 178, 201, 0.08);
+}
+
+.linear-header__user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--penguin-skyblue), var(--iceberg-blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 590;
+  font-size: 14px;
+}
+
+.linear-header__user-name {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 510;
+  font-size: 14px;
+  color: var(--penguin-navy);
+}
+
+/* 로그인/로그아웃 상태 관리 */
+#user-profile-container {
+  display: none;
+  /* 기본적으로 숨김 */
+}
+
+#user-profile-container.show {
+  display: flex;
+  /* 로그인 상태일 때만 표시 */
+}
+
+#login-button-container {
+  display: block;
+  /* 기본적으로 표시 */
+}
+
+#login-button-container.hide {
+  display: none;
+  /* 로그인 상태일 때 숨김 */
+}
+
+/* 인라인 스타일을 덮어쓰기 위한 더 강력한 규칙 */
+.linear-header #user-profile-container {
+  display: none;
+}
+
+.linear-header #user-profile-container.show {
+  display: flex;
+}
+
+/* 모바일 메뉴 */
+.linear-header__mobile-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-6, 6px);
+  transition: background 0.2s ease;
+  position: relative;
+  z-index: 1000;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: rgba(95, 178, 201, 0.2);
+}
+
+/* 터치 타깃 보장 */
+.linear-header__mobile-toggle {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.linear-header__mobile-toggle:hover {
+  background: rgba(95, 178, 201, 0.08);
+}
+
+.linear-header__mobile-toggle-line {
+  width: 20px;
+  height: 2px;
+  background: var(--penguin-navy);
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.linear-header__mobile-toggle--active .linear-header__mobile-toggle-line:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.linear-header__mobile-toggle--active .linear-header__mobile-toggle-line:nth-child(2) {
+  opacity: 0;
+}
+
+.linear-header__mobile-toggle--active .linear-header__mobile-toggle-line:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+.linear-header__mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid rgba(29, 47, 78, 0.1);
+  box-shadow: 0 8px 24px rgba(29, 47, 78, 0.12);
+  display: none;
+  flex-direction: column;
+  padding: 16px;
+  gap: 8px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease;
+  transform-origin: top;
+}
+
+.linear-header__mobile-menu--active {
+  display: flex;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .linear-header__container {
+    gap: 12px;
+  }
+
+  .linear-header__nav {
+    display: none;
+  }
+
+  .linear-header__mobile-toggle {
+    display: flex;
+    padding: 6px;
+  }
+
+  .linear-header__actions {
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .linear-header__button {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-width: 0;
+  }
+
+  .linear-header__user-name {
+    display: none;
+  }
+
+  /* 모바일에서 브랜드 텍스트 숨김 */
+  .linear-header__brand-text {
+    display: none;
+  }
+
+  /* 모바일에서 뱃지는 반드시 표시 */
+  .linear-header .linear-header__brand .cert-badge {
+    display: inline-flex;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* 로고 크기 조정 - 헤더 높이에 맞게 */
+  .linear-header__logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* 모바일: 스크롤 시에도 로고 크기 고정 */
+  .linear-header--scrolled .linear-header__logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* 모바일에서 헤더 링크/액션의 최소 터치 크기 보장 */
+  .linear-header__auth .linear-header__nav-link,
+  .linear-header__actions .linear-header__button,
+  .linear-header__nav-link {
+    min-height: 44px;
+  }
+
+  /* 모바일 메뉴 링크 터치 영역 및 피드백 개선 */
+  .linear-header__mobile-menu .linear-header__nav-link {
+    padding: 16px 20px;
+    min-height: 48px;
+    font-size: 16px;
+    -webkit-tap-highlight-color: rgba(95, 178, 201, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .linear-header__mobile-menu .linear-header__nav-link:active {
+    background: rgba(95, 178, 201, 0.1);
+    transform: scale(0.98);
+  }
+
+  /* 모바일 메뉴 자격증 배지 터치 영역 */
+  .mobile-cert-badge {
+    min-height: 60px;
+    padding: 16px 20px;
+  }
+
+  /* 모바일 메뉴 인증 영역 스타일 */
+  .mobile-menu-auth {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(29, 47, 78, 0.1);
+  }
+
+  .mobile-menu-auth .linear-header__nav-link {
+    padding: 16px 20px;
+    min-height: 48px;
+  }
+
+  .mobile-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    margin-bottom: 8px;
+  }
+
+  .mobile-menu-auth .linear-header__user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .mobile-menu-auth .linear-header__user-name {
+    font-size: 16px;
+    font-weight: 510;
+  }
+}
+
+@media (max-width: 480px) {
+  .linear-header__container {
+    padding: 0 16px;
+  }
+
+  .linear-header__brand-text {
+    display: none;
+    /* 모바일에서 브랜드 텍스트 숨김 */
+  }
+
+  .linear-header__logo {
+    width: 36px;
+    /* 헤더 높이에 맞게 조정 */
+    height: 36px;
+  }
+}
+
+/* 스크롤 시 헤더 변화 */
+/* 스크롤 시 크기 변화 제거 - 항상 같은 크기 유지 */
+.linear-header--scrolled .linear-header__container {
+  height: 44px;
+}
+
+/* 스크롤 시에도 로고 크기 고정 (변경 없음) */
+.linear-header--scrolled .linear-header__logo {
+  width: 40px;
+  height: 40px;
+}
+
+/* 스크롤 시에도 브랜드 텍스트 크기 고정 (변경 없음) */
+.linear-header--scrolled .linear-header__brand-text {
+  font-size: 19px;
+}
+
+/* 개발 모드 토글 */
+.dev-mode-toggle {
+  margin-right: 16px;
+}
+
+.dev-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.dev-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dev-mode-btn.active {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.dev-mode-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  transition: background-color 0.2s ease;
+}
+
+.dev-mode-btn.active .dev-mode-indicator {
+  background: #22c55e;
+}
+
+/* 🎯 자격증 배지 (데스크톱 + 모바일) */
+.cert-badge {
+  display: inline-flex;
+  /* flex로 변경하여 중앙 정렬 보장 */
+  align-items: center;
+  /* 수직 중앙 정렬 */
+  justify-content: center;
+  /* 수평 중앙 정렬 */
+  padding: 4px 10px;
+  background: var(--cert-primary, var(--penguin-navy));
+  color: white;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  margin-left: 8px;
+  text-align: center;
+  /* 추가 보장 */
+}
+
+/* 배지 폭 변동 최소화로 레이아웃 흔들림 방지 */
+@media (min-width: 769px) {
+  .cert-badge {
+    min-width: 120px;
+    /* "생활스포츠지도사" 텍스트를 수용하기 위해 약간 증가 */
+  }
+}
+
+/* 모바일: 작게 조정 */
+@media (max-width: 768px) {
+  .cert-badge {
+    display: inline-flex;
+    /* 모바일에서도 flex 유지 */
+    align-items: center;
+    /* 수직 중앙 정렬 */
+    justify-content: center;
+    /* 수평 중앙 정렬 */
+    padding: 4px 10px;
+    /* 패딩 약간 증가로 가독성 향상 */
+    font-size: 10px;
+    border-radius: 10px;
+    letter-spacing: -0.3px;
+    margin-left: 8px;
+    /* 간격 약간 증가 */
+    text-align: center;
+    /* 추가 보장 */
+  }
+}
+
+/* 🎯 모바일 자격증 배지 */
+.mobile-cert-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--cert-gradient-start, var(--penguin-navy)) 0%, var(--cert-gradient-end, #2a4570) 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-cert-badge__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.mobile-cert-badge__name {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.3px;
+}
+
+/* 모바일에서만 표시 */
+@media (min-width: 769px) {
+  .mobile-cert-badge {
+    display: none;
+  }
+}

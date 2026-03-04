@@ -1,0 +1,31 @@
+/firebase/
+  - firebase-core.js       # Firebase 초기화 및 중앙 설정
+  
+/auth/
+  - auth-core.js           # 인증 핵심 기능
+  - auth-ui.js             # 인증 관련 UI 기능
+  - auth-utils.js          # 인증 유틸리티 함수
+  
+/data/
+  - firestore-utils.js     # Firestore 기본 유틸리티
+  - notice-repository.js   # 공지사항 데이터 접근
+  - quiz-repository.js     # 퀴즈 데이터 접근
+  - admin-repository.js    # 관리자 데이터 접근
+  
+/quiz/
+  - quiz-core.js           # 퀴즈 핵심 기능
+  - quiz-ui.js             # 퀴즈 UI 관리
+  - mock-exam.js           # 모의고사 기능
+  - attempts-tracker.js    # 시도 추적 기능
+  - quiz-analytics.js      # 퀴즈 분석 기능
+  
+/notice/
+  - notice-ui.js           # 공지사항 UI 관련 기능
+  - notice-manager.js      # 공지사항 관리 기능
+  
+/admin/
+  - admin-manager.js       # 관리자 계정 관리 기능
+  
+/utils/
+  - date-utils.js          # 날짜 관련 유틸리티
+  - ui-utils.js            # 일반 UI 유틸리티

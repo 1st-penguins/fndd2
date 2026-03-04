@@ -1,0 +1,67 @@
+[
+  {
+    "id": "pdf_001",
+    "productId": "pdf_001",
+    "title": "CSCS 요약정리본",
+    "description": "CSCS 자격증 핵심 내용 압축 정리",
+    "type": "pdf",
+    "price": 50000,
+    "thumbnailUrl": "images/course/thumbnail_01.jpg",
+    "fileUrl": "https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/lectures%2Fpdf%2F%ED%8D%BC%EC%8A%A4%ED%8A%B8%ED%8E%AD%EA%B7%84_CSCS_%EC%9A%94%EC%95%BD%EC%A0%95%EB%A6%AC%EB%B3%B8.zip?alt=media&token=b2c7b83c-8ca9-4ee8-afce-bdda47dcc4e8",
+    "fileSize": "62.7MB",
+    "pages": 120,
+    "isActive": true
+  },
+  {
+    "id": "pdf_002",
+    "productId": "pdf_002",
+    "title": "병태생리학 요약정리본",
+    "description": "2026 합격대비 병태생리학 핵심 정리",
+    "type": "pdf",
+    "price": 50000,
+    "thumbnailUrl": "images/course/thumbnail_02.jpg",
+    "fileUrl": "https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/lectures%2Fpdf%2F2026%20%ED%8D%BC%EC%8A%A4%ED%8A%B8%ED%8E%AD%EA%B7%84%20%EB%B3%91%ED%83%9C%EC%83%9D%EB%A6%AC%ED%95%99%20%EC%A0%95%EB%A6%AC%EB%B3%B8.pdf?alt=media&token=0dc4309f-6c8b-4cdf-888c-08dadb329872",
+    "fileSize": "62.5MB",
+    "pages": 150,
+    "isActive": true
+  },
+  {
+    "id": "pdf_003",
+    "productId": "pdf_003",
+    "title": "운동생리학 요약정리본",
+    "description": "2026 합격대비 운동생리학 핵심 정리",
+    "type": "pdf",
+    "price": 50000,
+    "thumbnailUrl": "images/course/thumbnail_03.jpg",
+    "fileUrl": "https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/lectures%2Fpdf%2F2026%EB%85%84%20%ED%95%A9%EA%B2%A9%EB%8C%80%EB%B9%84%20%EC%9A%B4%EB%8F%99%EC%83%9D%EB%A6%AC%ED%95%99%20%EC%A0%95%EB%A6%AC%EB%B3%B8.pdf?alt=media&token=c411e424-3cc4-44f6-b82e-1f1d65a6738d",
+    "fileSize": "90.7MB",
+    "pages": 130,
+    "isActive": true
+  },
+  {
+    "id": "pdf_004",
+    "productId": "pdf_004",
+    "title": "기능해부학 요약정리본 (파트1)",
+    "description": "2026 합격대비 기능해부학 상지편",
+    "type": "pdf",
+    "price": 50000,
+    "thumbnailUrl": "images/course/thumbnail_04.jpg",
+    "fileUrl": "https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/lectures%2Fpdf%2F2026%20%EA%B8%B0%EB%8A%A5%ED%95%B4%EB%B6%80%ED%95%99_%ED%8C%8C%ED%8A%B81.pdf?alt=media&token=f15331a4-da7a-47df-8163-2f0fdb039d47",
+    "fileSize": "147MB",
+    "pages": 160,
+    "isActive": true
+  },
+  {
+    "id": "pdf_005",
+    "productId": "pdf_005",
+    "title": "스페셜테스트 요약정리본",
+    "description": "2026 합격대비 스페셜테스트 완벽 정리",
+    "type": "pdf",
+    "price": 50000,
+    "thumbnailUrl": "images/course/thumbnail_05.jpg",
+    "fileUrl": "https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/lectures%2Fpdf%2F2026%20%ED%95%A9%EA%B2%A9%EB%8C%80%EB%B9%84%20%EC%8A%A4%ED%8E%98%EC%85%9C%ED%85%8C%EC%8A%A4%ED%8A%B8.pdf?alt=media&token=968a45e0-892c-42c4-820a-ec2e96a8af5b",
+    "fileSize": "20.9MB",
+    "pages": 100,
+    "isActive": true
+  }
+]

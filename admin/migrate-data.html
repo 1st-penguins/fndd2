@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>데이터 마이그레이션 | 관리자 | 퍼스트펭귄</title>
+  
+  <link rel="stylesheet" href="../css/base.css" />
+  
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 800px;
+      width: 100%;
+      padding: 40px;
+    }
+    
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .warning-box {
+      background: #fff3cd;
+      border-left: 4px solid #ff9800;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    
+    .success-box {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .stat-card {
+      text-align: center;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-right: 10px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    
+    .progress-container {
+      margin: 20px 0;
+      display: none;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 30px;
+      background: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .log-container {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 20px;
+      display: none;
+    }
+    
+    .log-entry {
+      padding: 5px;
+      margin: 2px 0;
+      border-radius: 3px;
+    }
+    
+    .log-info {
+      color: #2196f3;
+    }
+    
+    .log-success {
+      color: #4caf50;
+    }
+    
+    .log-error {
+      color: #f44336;
+      background: #ffebee;
+    }
+    
+    .log-warning {
+      color: #ff9800;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔄 데이터 마이그레이션</h1>
+    <p class="subtitle">기존 attempts 데이터를 최적화된 구조로 변환합니다</p>
+    
+    <div class="warning-box">
+      <strong>⚠️ 주의사항</strong>
+      <ul style="margin: 10px 0 0 20px;">
+        <li>관리자만 실행할 수 있습니다</li>
+        <li>마이그레이션 중에는 페이지를 닫지 마세요</li>
+        <li>Firebase 쓰기 비용이 발생합니다 (데이터 개수만큼)</li>
+        <li>이미 마이그레이션된 데이터는 건너뜁니다</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <strong>ℹ️ 마이그레이션 내용</strong>
+      <p style="margin: 10px 0;">questionData 내부의 year, subject, number를 최상위 필드로 복사합니다.</p>
+      <p style="margin: 10px 0;">원본 데이터는 그대로 유지되며, 새로운 필드만 추가됩니다.</p>
+    </div>
+    
+    <div id="stats-section" style="display: none;">
+      <h3>데이터 현황</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="total-count">0</div>
+          <div class="stat-label">전체 문서</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="need-migration-count">0</div>
+          <div class="stat-label">마이그레이션 필요</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="already-done-count">0</div>
+          <div class="stat-label">이미 완료</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="migrated-count">0</div>
+          <div class="stat-label">처리 완료</div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="success-section" style="display: none;" class="success-box">
+      <h3 style="color: #4caf50; margin-top: 0;">✅ 마이그레이션 완료!</h3>
+      <p id="success-message"></p>
+    </div>
+    
+    <div class="progress-container" id="progress-section">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill">0%</div>
+      </div>
+      <p style="text-align: center; margin-top: 10px; color: #666;" id="progress-text">준비 중...</p>
+    </div>
+    
+    <div style="margin-top: 30px;">
+      <button class="btn btn-primary" id="check-button" onclick="checkData()">
+        📊 데이터 확인
+      </button>
+      <button class="btn btn-primary" id="migrate-button" onclick="startMigration()" disabled>
+        🚀 마이그레이션 시작
+      </button>
+      <button class="btn btn-secondary" onclick="window.location.href='../index.html'">
+        ← 돌아가기
+      </button>
+    </div>
+    
+    <div class="log-container" id="log-container">
+      <strong>📋 실행 로그</strong>
+      <div id="log-content"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from '../js/core/firebase-core.js';
+    import { isAdmin } from '../js/auth/auth-utils.js';
+    import { 
+      collection, 
+      getDocs,
+      doc,
+      updateDoc,
+      writeBatch,
+      query,
+      limit
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    
+    let migrationStats = {
+      total: 0,
+      needMigration: 0,
+      alreadyDone: 0,
+      migrated: 0
+    };
+    
+    // 관리자 권한 확인
+    auth.onAuthStateChanged(async (user) => {
+      if (!user || !isAdmin(user)) {
+        alert('❌ 관리자만 접근할 수 있습니다.');
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      addLog('✅ 관리자 인증 완료', 'success');
+    });
+    
+    // 데이터 확인
+    window.checkData = async function() {
+      const checkButton = document.getElementById('check-button');
+      checkButton.disabled = true;
+      checkButton.textContent = '확인 중...';
+      
+      document.getElementById('log-container').style.display = 'block';
+      addLog('🔍 데이터 확인 시작...', 'info');
+      
+      try {
+        const snapshot = await getDocs(collection(db, 'attempts'));
+        
+        migrationStats.total = snapshot.size;
+        migrationStats.needMigration = 0;
+        migrationStats.alreadyDone = 0;
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          
+          // year, subject, number 필드가 없으면 마이그레이션 필요
+          if (!data.year || !data.subject || data.number === undefined) {
+            migrationStats.needMigration++;
+          } else {
+            migrationStats.alreadyDone++;
+          }
+        });
+        
+        // 통계 표시
+        document.getElementById('stats-section').style.display = 'block';
+        document.getElementById('total-count').textContent = migrationStats.total.toLocaleString();
+        document.getElementById('need-migration-count').textContent = migrationStats.needMigration.toLocaleString();
+        document.getElementById('already-done-count').textContent = migrationStats.alreadyDone.toLocaleString();
+        
+        addLog(`📊 전체: ${migrationStats.total}개`, 'info');
+        addLog(`✅ 완료: ${migrationStats.alreadyDone}개`, 'success');
+        addLog(`⏳ 필요: ${migrationStats.needMigration}개`, 'warning');
+        
+        if (migrationStats.needMigration > 0) {
+          document.getElementById('migrate-button').disabled = false;
+          addLog('✨ 마이그레이션 버튼이 활성화되었습니다', 'success');
+        } else {
+          addLog('✅ 모든 데이터가 이미 마이그레이션되었습니다!', 'success');
+        }
+        
+      } catch (error) {
+        console.error('데이터 확인 오류:', error);
+        addLog(`❌ 오류: ${error.message}`, 'error');
+      } finally {
+        checkButton.disabled = false;
+        checkButton.textContent = '📊 데이터 확인';
+      }
+    };
+    
+    // 마이그레이션 시작
+    window.startMigration = async function() {
+      if (!confirm(`⚠️ ${migrationStats.needMigration}개의 문서를 마이그레이션합니다.\n\n계속하시겠습니까?`)) {
+        return;
+      }
+      
+      const migrateButton = document.getElementById('migrate-button');
+      const checkButton = document.getElementById('check-button');
+      migrateButton.disabled = true;
+      checkButton.disabled = true;
+      
+      document.getElementById('progress-section').style.display = 'block';
+      addLog('🚀 마이그레이션 시작!', 'info');
+      
+      try {
+        const snapshot = await getDocs(collection(db, 'attempts'));
+        const docs = [];
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          
+          // 마이그레이션 필요한 문서만
+          if (!data.year || !data.subject || data.number === undefined) {
+            docs.push({ id: doc.id, data });
+          }
+        });
+        
+        addLog(`🔄 ${docs.length}개 문서 처리 중...`, 'info');
+        
+        // 배치 처리 (500개씩)
+        const batchSize = 500;
+        let processed = 0;
+        
+        for (let i = 0; i < docs.length; i += batchSize) {
+          const batch = writeBatch(db);
+          const batchDocs = docs.slice(i, Math.min(i + batchSize, docs.length));
+          
+          batchDocs.forEach(item => {
+            const docRef = doc(db, 'attempts', item.id);
+            const qData = item.data.questionData || {};
+            
+            batch.update(docRef, {
+              year: qData.year || '2025',
+              subject: qData.subject || '과목없음',
+              number: qData.number || 1
+            });
+          });
+          
+          await batch.commit();
+          processed += batchDocs.length;
+          migrationStats.migrated = processed;
+          
+          // 진행률 업데이트
+          const progress = Math.round((processed / docs.length) * 100);
+          document.getElementById('progress-fill').style.width = progress + '%';
+          document.getElementById('progress-fill').textContent = progress + '%';
+          document.getElementById('progress-text').textContent = `${processed} / ${docs.length} 완료`;
+          document.getElementById('migrated-count').textContent = processed.toLocaleString();
+          
+          addLog(`✅ 배치 ${Math.floor(i / batchSize) + 1}: ${batchDocs.length}개 완료`, 'success');
+          
+          // 과도한 요청 방지
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // 완료
+        addLog(`🎉 마이그레이션 완료! 총 ${processed}개 문서 처리`, 'success');
+        
+        document.getElementById('success-section').style.display = 'block';
+        document.getElementById('success-message').innerHTML = `
+          <strong>${processed}개</strong>의 문서가 성공적으로 마이그레이션되었습니다!<br>
+          이제 최적화된 쿼리를 사용할 수 있습니다. 🚀<br><br>
+          <strong>다음 단계:</strong><br>
+          1. Firebase Console에서 인덱스 생성<br>
+          2. 통계 페이지에서 빠른 조회 확인
+        `;
+        
+      } catch (error) {
+        console.error('마이그레이션 오류:', error);
+        addLog(`❌ 오류: ${error.message}`, 'error');
+        alert('❌ 마이그레이션 중 오류가 발생했습니다:\n' + error.message);
+      } finally {
+        migrateButton.disabled = false;
+        migrateButton.textContent = '✅ 완료';
+        checkButton.disabled = false;
+      }
+    };
+    
+    // 로그 추가
+    function addLog(message, type = 'info') {
+      const logContent = document.getElementById('log-content');
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContent.appendChild(entry);
+      logContent.scrollTop = logContent.scrollHeight;
+      
+      console.log(message);
+    }
+    
+    window.addLog = addLog;
+  </script>
+</body>
+</html>
+

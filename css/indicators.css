@@ -1,0 +1,246 @@
+/* ============================================
+   Linear Design System - Indicators
+   Clean, Modern, Unified Style
+   ============================================ */
+
+:root {
+  /* Indicator Colors */
+  --ind-bg: #FFFFFF;
+  --ind-border: #E2E8F0;
+  --ind-text: #64748B;
+
+  --ind-active-bg: #F0F9FF;
+  --ind-active-border: var(--penguin-navy);
+  --ind-active-text: var(--penguin-navy);
+
+  --ind-answered-bg: #F8FAFC;
+  --ind-answered-border: #CBD5E1;
+  --ind-answered-text: #475569;
+
+  --ind-correct-bg: #DCFCE7;
+  --ind-correct-border: #86EFAC;
+  --ind-correct-text: #166534;
+
+  --ind-incorrect-bg: #FEE2E2;
+  --ind-incorrect-border: #FCA5A5;
+  --ind-incorrect-text: #991B1B;
+}
+
+/* ============================================
+   Container Layout
+   ============================================ */
+.question-indicators-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto 30px;
+  padding: 20px;
+  /* Consistent padding */
+  background: transparent;
+  box-sizing: border-box;
+}
+
+/* Ensure centering for both modes */
+body:not([data-current-subject]) .question-indicators-container {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.question-indicators {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ============================================
+   Grid Layouts
+   ============================================ */
+
+/* Regular Exam (20 questions): 10 columns x 2 rows */
+body[data-current-subject] .question-indicators {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 10px;
+  max-width: 480px;
+  /* Optimal width for 10 items */
+}
+
+/* Mock Exam (80 questions): 20 columns layout */
+body:not([data-current-subject]) .question-indicators {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 6px;
+  /* Tighter gap for density */
+  width: 100%;
+}
+
+/* ============================================
+   Indicator Item Style (Unified)
+   ============================================ */
+.indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  /* Standard size */
+  height: 36px;
+  border-radius: 8px;
+  /* Soft square (Linear style) */
+  background-color: var(--ind-bg);
+  border: 1.5px solid var(--ind-border);
+  color: var(--ind-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  position: relative;
+}
+
+/* Mock exam indicators slightly smaller to fit 20 cols */
+body:not([data-current-subject]) .indicator {
+  width: 32px;
+  height: 32px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+}
+
+/* Hover State */
+.indicator:hover:not(.current) {
+  border-color: var(--penguin-skyblue);
+  color: var(--penguin-navy);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================
+   States
+   ============================================ */
+
+/* 1. Current (Active Question) */
+.indicator.current {
+  background-color: var(--ind-active-bg);
+  border-color: var(--ind-active-border);
+  color: var(--ind-active-text);
+  font-weight: 700;
+  box-shadow: 0 0 0 2px rgba(29, 47, 78, 0.1);
+  /* Subtle Ring */
+  z-index: 2;
+  transform: scale(1.05);
+}
+
+/* 2. Answered (Selected but not checked) */
+.indicator.answered:not(.correct):not(.incorrect) {
+  background-color: var(--ind-answered-bg);
+  border-color: var(--ind-answered-border);
+  color: var(--ind-answered-text);
+}
+
+/* 3. Correct */
+.indicator.correct {
+  background-color: var(--ind-correct-bg);
+  border-color: var(--ind-correct-border);
+  color: var(--ind-correct-text);
+}
+
+/* 4. Incorrect */
+.indicator.incorrect {
+  background-color: var(--ind-incorrect-bg);
+  border-color: var(--ind-incorrect-border);
+  color: var(--ind-incorrect-text);
+}
+
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+/* Tablet & Mobile - 그리드 유지, 스크롤 없이 한 화면에 */
+@media (max-width: 768px) {
+  .question-indicators-container {
+    padding: 10px 12px;
+    margin: 12px auto 20px;
+    overflow: visible;
+    max-width: 100%;
+  }
+
+  /* 과목별(20문항): 10열 x 2행 유지, 작은 버튼으로 스크롤 없이 표시 */
+  body[data-current-subject] .question-indicators {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 6px;
+    max-width: 100%;
+  }
+
+  /* 모의고사(80문항): 10열 x 8행으로 스크롤 없이 */
+  body:not([data-current-subject]) .question-indicators {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .indicator {
+    width: 100%;
+    max-width: 36px;
+    height: auto;
+    aspect-ratio: 1;
+    min-height: 28px;
+    font-size: 0.8rem;
+    margin: 0 auto;
+  }
+
+  body:not([data-current-subject]) .indicator {
+    max-width: 28px;
+    min-height: 24px;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .question-indicators-container {
+    padding: 8px 10px;
+    margin: 10px auto 16px;
+    overflow: visible;
+    scrollbar-width: unset;
+    -ms-overflow-style: unset;
+    white-space: normal;
+  }
+
+  .question-indicators-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 스크롤 제거: 그리드 유지, 한 화면에 맞춤 */
+  body[data-current-subject] .question-indicators,
+  body:not([data-current-subject]) .question-indicators {
+    display: grid;
+    width: 100%;
+    gap: 5px;
+    padding: 0;
+  }
+
+  body[data-current-subject] .question-indicators {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+
+  body:not([data-current-subject]) .question-indicators {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+
+  /* 작은 화면에서 버튼 크기만 축소, 터치 영역 확보 */
+  .indicator {
+    width: 100%;
+    max-width: 32px;
+    height: auto;
+    aspect-ratio: 1;
+    min-height: 26px;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    margin: 0 auto;
+  }
+
+  body:not([data-current-subject]) .indicator {
+    max-width: 26px;
+    min-height: 22px;
+    font-size: 0.65rem;
+  }
+}

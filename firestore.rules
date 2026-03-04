@@ -1,0 +1,151 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // 🛡️ 보안 함수 정의 (Security Functions)
+    // ============================================
+    
+    // 관리자 여부 확인 (이메일 목록 + DB 기반)
+    function isAdmin() {
+      let adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+      return request.auth != null && (
+        request.auth.token.email in adminEmails || 
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid))
+      );
+    }
+
+    // 본인 확인 함수
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 로그인 여부 확인
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    // ============================================
+    // 👤 사용자 데이터 (Users)
+    // ============================================
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+      
+      // 하위 컬렉션 포함 모든 데이터
+      match /{document=**} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+    
+    // ============================================
+    // 📚 강좌 및 상품 (Products & Lectures) - ⚠️ 중요 보안
+    // ============================================
+    // 상품 정보 (가격, 이름 등)은 누구나 볼 수 있어야 함 (로그인 시)
+    match /products/{productId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+    
+    // [NEW] 강의 콘텐츠 (동영상 URL 등 민감 정보)
+    // 실제 콘텐츠 URL은 별도 컬렉션으로 분리하거나, 클라이언트 SDK가 아닌 Backend API를 통해 접근하는 것이 안전합니다.
+    match /lectures/{lectureId} {
+      // 기본 정보는 로그인 사용자에게 공개
+      allow read: if isLoggedIn(); 
+      allow write: if isAdmin();
+    }
+
+    // ============================================
+    // 📦 구매 및 권한 (Purchases) (Pro Feature)
+    // ============================================
+    match /purchases/{purchaseId} {
+      // 본인의 구매 내역만 읽기/생성 가능
+      // resource.data.userId == request.auth.uid (읽기)
+      // request.resource.data.userId == request.auth.uid (생성)
+      allow read: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin(); // 사용자는 구매 내역 수정 불가
+    }
+
+    // ============================================
+    // 📝 학습 데이터 (Attempts, Mock Exams)
+    // ============================================
+    
+    // 통합된 문제 풀이 기록
+    match /attempts/{attemptId} {
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+    }
+    
+    // 모의고사 결과
+    match /mockExamResults/{resultId} {
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+    }
+    
+    // 사용자 진행률 (User Progress)
+    match /userProgress/{userId} {
+      allow read, write: if isLoggedIn() && (isOwner(userId) || isAdmin());
+    }
+    
+    // 사용자 통계 (User Statistics)
+    match /userStatistics/{userId} {
+      allow read, write: if isLoggedIn() && (isOwner(userId) || isAdmin());
+    }
+    
+    // 퀴즈/모의고사 세션 (중복 규칙 통합)
+    match /quizSessions/{sessionId} {
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+    }
+    match /sessions/{sessionId} {
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+    }
+
+    // ============================================
+    // 📢 커뮤니티 (Notices, Comments, Likes)
+    // ============================================
+    match /notices/{noticeId} {
+      allow read: if true; // 공개
+      allow write: if isAdmin();
+    }
+    
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+    
+    match /likes/{likeId} {
+      allow read: if true;
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+    }
+
+    // ============================================
+    // ⚙️ 시스템 및 통계 (System & Stats)
+    // ============================================
+    // 문제는 누구나 읽기 가능 (클라이언트에서 문제 풀이를 위해 필요)
+    match /exams/{matchId} { allow read: if isLoggedIn(); allow write: if isAdmin(); }
+    match /mockexams/{matchId} { allow read: if isLoggedIn(); allow write: if isAdmin(); }
+    match /mockExams/{matchId} { allow read: if isLoggedIn(); allow write: if isAdmin(); }
+    match /mockExams/{matchId}/{document=**} { allow read: if isLoggedIn(); allow write: if isAdmin(); }
+    
+    match /questionSets/{setId} { allow read: if isLoggedIn(); allow write: if isAdmin(); }
+    match /questionStats/{questionId} { allow read: if isLoggedIn(); allow write: if isAdmin(); }
+
+    match /adminStats/{statId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ============================================
+    // 🚫 기본 차단 (Default Deny)
+    // ============================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

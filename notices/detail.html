@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지사항 상세 - 퍼스트펭귄</title>
+
+  <!-- 외부 CSS 파일 연결 -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/linear-header.css">
+  <link rel="stylesheet" href="../css/linear-footer.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages/notice.css">
+
+  <!-- Firebase 및 데이터 관리 스크립트 (모듈 방식) -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/data/notice-repository.js"></script>
+  <script type="module" src="../js/utils/date-utils.js"></script>
+  <script type="module" src="../js/data/comment-repository.js"></script>
+  <script type="module" src="../js/data/comment-ui.js"></script>
+
+  <!-- 페이지 전용 스크립트 -->
+  <script type="module" src="../js/admin/notice-detail.js"></script>
+
+  <!-- Linear Header 스크립트 -->
+  <script src="../js/linear-header.js"></script>
+
+  <style>
+    /* 상세 페이지 전용 스타일 */
+    .main-content {
+      padding-top: 80px;
+      /* 헤더 공간 확보 */
+      min-height: calc(100vh - 300px);
+      background: #f8f9fa;
+    }
+
+    .notice-detail-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px;
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (max-width: 768px) {
+      .notice-detail-container {
+        padding: 24px 20px;
+        margin: 20px 16px;
+        border-radius: 12px;
+      }
+    }
+
+    .notice-header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .notice-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1D2F4E;
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .notice-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #64748b;
+      font-size: 0.95rem;
+      flex-wrap: wrap;
+    }
+
+    .notice-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .notice-content-wrapper {
+      line-height: 1.8;
+      color: #334155;
+      font-size: 1.05rem;
+    }
+
+    .notice-content-wrapper img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 24px 0;
+    }
+
+    .notice-content-wrapper p {
+      margin-bottom: 1.5em;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 24px;
+      text-decoration: none;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #1D2F4E;
+    }
+
+    .comments-container {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    /* 좋아요 버튼 스타일 */
+    .notice-actions {
+      margin: 40px 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .like-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border-radius: 50px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      color: #64748b;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .like-button:hover {
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .like-button.liked {
+      border-color: #f43f5e;
+      color: #f43f5e;
+      background: #fff1f2;
+    }
+
+    /* 로그인 모달 방지 */
+    .login-modal,
+    .login-container {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Linear Header -->
+  <header class="linear-header" id="linear-header">
+    <div class="linear-header__container">
+      <a href="../index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="../images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="40" height="40" />
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+        <span class="cert-badge" id="header-cert-badge">건강운동관리사</span>
+      </a>
+
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="../index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../notices.html" class="linear-header__nav-link linear-header__nav-link--active">공지사항</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../lectures.html" class="linear-header__nav-link">강의</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../contact.html" class="linear-header__nav-link">문의</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="linear-header__actions">
+        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <div class="mobile-cert-badge" id="mobile-cert-badge">
+        <span class="mobile-cert-badge__label">현재 선택</span>
+        <span class="mobile-cert-badge__name">건강운동관리사</span>
+      </div>
+      <a href="../index.html" class="linear-header__nav-link">홈</a>
+      <a href="../notices.html" class="linear-header__nav-link active">공지사항</a>
+      <a href="../index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="../lectures.html" class="linear-header__nav-link">강의</a>
+      <a href="../contact.html" class="linear-header__nav-link">문의</a>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="notice-detail-container">
+        <a href="../notices.html" class="back-link">← 목록으로 돌아가기</a>
+
+        <div class="notice-header">
+          <h1 id="notice-title" class="notice-title">공지사항 제목</h1>
+          <div class="notice-meta">
+            <span id="notice-badge" class="notice-badge" style="display:none;">배지</span>
+            <span id="notice-date">날짜</span>
+          </div>
+        </div>
+
+        <div class="notice-content-wrapper">
+          <div id="notice-content" class="notice-content">
+            <div style="display: flex; justify-content: center; padding: 40px;">
+              <div class="loading-spinner"
+                style="border: 2px solid #eee; border-top: 2px solid #5FB2C9; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;">
+              </div>
+            </div>
+            <p style="text-align: center; color: #999;">공지사항 내용을 불러오는 중...</p>
+          </div>
+
+          <!-- 좋아요 버튼 -->
+          <div class="notice-actions">
+            <button class="like-button" id="likeButton" onclick="handleLike()" aria-label="좋아요">
+              <span id="likeIcon">❤️</span>
+              <span class="like-label">좋아요</span>
+              <span class="like-count" id="likeCount">0</span>
+            </button>
+          </div>
+
+          <!-- 댓글 컨테이너 -->
+          <div id="comments-container" class="comments-container">
+            <!-- JS로 동적 생성됨 -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="linear-footer">
+    <div class="linear-footer__container">
+      <div class="linear-footer__content">
+        <div class="linear-footer__brand">
+          <a href="../index.html" class="linear-footer__brand-logo">
+            <div class="linear-footer__brand-icon">
+              <img src="../images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" />
+            </div>
+            <span class="linear-footer__brand-text">퍼스트펭귄</span>
+          </a>
+          <p class="linear-footer__brand-description">
+            체육지도자 자격증을 위한<br />
+            KSPO 기출문제 모음과 학습플랫폼입니다.
+          </p>
+        </div>
+
+        <div class="linear-footer__section">
+          <h3 class="linear-footer__section-title">서비스</h3>
+          <ul class="linear-footer__nav-list">
+            <li class="linear-footer__nav-item"><a href="../notices.html" class="linear-footer__nav-link">공지사항</a></li>
+            <li class="linear-footer__nav-item"><a href="../index.html" class="linear-footer__nav-link">문제풀기</a></li>
+          </ul>
+        </div>
+
+        <div class="linear-footer__section">
+          <h3 class="linear-footer__section-title">지원</h3>
+          <ul class="linear-footer__nav-list">
+            <li class="linear-footer__nav-item"><a href="../contact.html" class="linear-footer__nav-link">문의하기</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="linear-footer__bottom">
+        <p class="linear-footer__copyright">
+          © 2025 퍼스트펭귄. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <style>
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
+  <script type="module">
+    // 로그인 모달 방지
+    document.addEventListener('DOMContentLoaded', () => {
+      const preventLoginModal = () => {
+        const modals = document.querySelectorAll('#login-modal, .login-modal, .login-container');
+        modals.forEach(el => el.remove());
+      };
+      preventLoginModal();
+    });
+  </script>
+</body>
+
+</html>

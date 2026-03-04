@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>강의 구매 | 퍼스트펭귄</title>
+  
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  
+  <!-- Toss Payments SDK -->
+  <script src="https://js.tosspayments.com/v1/payment"></script>
+  
+  <!-- Firebase -->
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  
+  <style>
+    header .logo img {
+      max-width: 50px;
+      max-height: 50px;
+      object-fit: contain;
+    }
+    
+    .purchase-container {
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 20px;
+    }
+    
+    .purchase-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    
+    .purchase-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .purchase-header h1 {
+      color: var(--penguin-navy);
+      margin-bottom: 10px;
+    }
+    
+    .lecture-emoji {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    
+    .purchase-info {
+      margin-bottom: 30px;
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-label {
+      color: #666;
+      font-weight: 600;
+    }
+    
+    .info-value {
+      color: var(--penguin-navy);
+      font-weight: bold;
+    }
+    
+    .price-row {
+      font-size: 24px;
+      padding: 20px 0;
+      border-bottom: 2px solid var(--penguin-navy);
+    }
+    
+    .payment-button {
+      width: 100%;
+      padding: 18px;
+      background: var(--penguin-navy);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 30px;
+    }
+    
+    .payment-button:hover {
+      background: var(--penguin-skyblue);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(95, 178, 201, 0.3);
+    }
+    
+    .notice-box {
+      background: #e3f2fd;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo-container">
+        <div class="logo">
+          <a href="index.html">
+            <img src="images/firstpenguin-logo2.png" alt="퍼스트펭귄 로고" />
+          </a>
+        </div>
+        <div class="site-title">
+          <a href="index.html" style="text-decoration: none; color: inherit;">
+            <div class="title-brand">퍼스트펭귄</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="purchase-container">
+    <div class="purchase-card">
+      <div class="purchase-header">
+        <div class="lecture-emoji" id="lectureEmoji">🎓</div>
+        <h1 id="lectureTitle">강의 구매</h1>
+      </div>
+
+      <div class="purchase-info">
+        <div class="info-row">
+          <span class="info-label">강의명</span>
+          <span class="info-value" id="lectureTitleText">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">상품 금액</span>
+          <span class="info-value" id="originalPrice">0원</span>
+        </div>
+        
+        <!-- 쿠폰 입력 -->
+        <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input 
+              type="text" 
+              id="coupon-input" 
+              placeholder="쿠폰 코드 입력" 
+              style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+            >
+            <button 
+              type="button" 
+              id="apply-coupon-btn"
+              style="padding: 12px 24px; background: var(--penguin-navy); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+              onmouseover="this.style.background='var(--penguin-skyblue)'"
+              onmouseout="this.style.background='var(--penguin-navy)'"
+            >
+              적용
+            </button>
+          </div>
+          <div id="coupon-message" style="font-size: 13px; display: none;"></div>
+        </div>
+        
+        <!-- 할인 금액 -->
+        <div class="info-row" id="discount-row" style="display: none; color: #ff6b6b;">
+          <span class="info-label">할인 금액</span>
+          <span class="info-value" id="discountAmount">- 0원</span>
+        </div>
+        
+        <div class="info-row price-row">
+          <span class="info-label">최종 결제 금액</span>
+          <span class="info-value" id="lecturePrice">0원</span>
+        </div>
+      </div>
+
+      <button class="payment-button" id="paymentButton">
+        🔒 안전하게 결제하기
+      </button>
+
+      <div class="notice-box">
+        <strong>📌 안내사항</strong>
+        <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+          <li>결제 후 즉시 강의 시청이 가능합니다</li>
+          <li>결제 수단은 다음 단계에서 선택하실 수 있습니다</li>
+          <li>환불 규정은 <a href="refund-policy.html" style="color: var(--penguin-skyblue);">환불/교환 규정</a>을 참고해주세요</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth } from './js/core/firebase-core.js';
+    import { validateCoupon, applyCoupon } from './js/payment/coupon-manager.js';
+    
+    // URL 파라미터에서 상품 정보 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    let originalPrice = parseInt(urlParams.get('price'));
+    let currentPrice = originalPrice;
+    const title = decodeURIComponent(urlParams.get('title'));
+    const productType = urlParams.get('type') || 'pdf';
+    
+    let appliedCoupon = null;
+    
+    // 강의 정보 표시
+    document.getElementById('lectureTitleText').textContent = title;
+    document.getElementById('originalPrice').textContent = originalPrice.toLocaleString() + '원';
+    document.getElementById('lecturePrice').textContent = originalPrice.toLocaleString() + '원';
+    
+    // 쿠폰 적용 버튼
+    document.getElementById('apply-coupon-btn').addEventListener('click', async () => {
+      const couponCode = document.getElementById('coupon-input').value.trim();
+      
+      if (!couponCode) {
+        showCouponMessage('쿠폰 코드를 입력해주세요.', 'error');
+        return;
+      }
+      
+      // 버튼 비활성화
+      const btn = document.getElementById('apply-coupon-btn');
+      btn.disabled = true;
+      btn.textContent = '확인중...';
+      
+      try {
+        const result = await validateCoupon(couponCode, productId, originalPrice);
+        
+        if (result.valid) {
+          appliedCoupon = result.coupon;
+          currentPrice = result.finalAmount;
+          
+          // UI 업데이트
+          document.getElementById('discount-row').style.display = 'flex';
+          document.getElementById('discountAmount').textContent = '- ' + result.discountAmount.toLocaleString() + '원';
+          document.getElementById('lecturePrice').textContent = currentPrice.toLocaleString() + '원';
+          
+          showCouponMessage('✅ 쿠폰이 적용되었습니다!', 'success');
+          
+          // 입력 필드 비활성화
+          document.getElementById('coupon-input').disabled = true;
+          btn.textContent = '적용완료';
+          btn.style.background = '#37b24d';
+        } else {
+          showCouponMessage('❌ ' + result.message, 'error');
+          btn.disabled = false;
+          btn.textContent = '적용';
+        }
+      } catch (error) {
+        console.error('쿠폰 적용 오류:', error);
+        showCouponMessage('❌ 쿠폰 확인 중 오류가 발생했습니다.', 'error');
+        btn.disabled = false;
+        btn.textContent = '적용';
+      }
+    });
+    
+    // 쿠폰 메시지 표시
+    function showCouponMessage(message, type) {
+      const messageEl = document.getElementById('coupon-message');
+      messageEl.textContent = message;
+      messageEl.style.display = 'block';
+      messageEl.style.color = type === 'success' ? '#37b24d' : '#ff6b6b';
+    }
+    
+    // 이모지 매칭
+    const emojiMap = {
+      'NSCA': '🏋️‍♀️',
+      '운동생리학': '⭐️',
+      '병태생리학': '👍🏻',
+      '기능해부학': '🩻',
+      '운동처방론': '🔥',
+      '스페셜테스트': '📌'
+    };
+    
+    for (const [key, emoji] of Object.entries(emojiMap)) {
+      if (title.includes(key)) {
+        document.getElementById('lectureEmoji').textContent = emoji;
+        break;
+      }
+    }
+    
+    // Toss Payments 초기화
+    const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+    const tossPayments = TossPayments(clientKey);
+    
+    // 결제 버튼
+    document.getElementById('paymentButton').addEventListener('click', async () => {
+      const user = auth.currentUser;
+      
+      if (!user) {
+        alert('로그인이 필요합니다.');
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      try {
+        const orderId = `product_${productId}_${Date.now()}_${user.uid.substring(0, 6)}`;
+        
+        // 쿠폰 정보를 URL에 포함
+        const couponParam = appliedCoupon ? `&couponId=${appliedCoupon.id}&discount=${originalPrice - currentPrice}` : '';
+        
+        await tossPayments.requestPayment('카드', {
+          amount: currentPrice, // 할인된 금액으로 결제
+          orderId: orderId,
+          orderName: title,
+          customerName: user.displayName || user.email,
+          customerEmail: user.email,
+          successUrl: window.location.origin + `/lecture-success.html?productId=${productId}&orderId=${orderId}&type=${productType}${couponParam}`,
+          failUrl: window.location.origin + '/lecture-fail.html',
+        });
+      } catch (error) {
+        console.error('결제 오류:', error);
+        alert('결제 중 오류가 발생했습니다.');
+      }
+    });
+  </script>
+</body>
+</html>
+

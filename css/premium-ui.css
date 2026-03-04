@@ -1,0 +1,146 @@
+/* Premium UI Components & Micro-animations */
+
+/* 1. Glassmorphism Effects */
+.glass-effect {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-premium);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--radius-premium);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.glass-card:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--penguin-skyblue);
+}
+
+/* 2. Premium Entrance Animations */
+@keyframes premium-fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-premium {
+    animation: premium-fade-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Staggered animation classes */
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.delay-400 {
+    animation-delay: 400ms;
+}
+
+/* 3. High-fidelity Buttons */
+.btn-premium {
+    position: relative;
+    padding: 14px 28px;
+    border-radius: var(--radius-sm);
+    font-weight: 650;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--penguin-navy);
+    color: white;
+}
+
+.btn-premium::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.6s ease-out;
+}
+
+.btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(29, 47, 78, 0.25);
+}
+
+.btn-premium:hover::after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.btn-premium:active {
+    transform: translateY(0) scale(0.97);
+}
+
+/* 4. Smooth Mobile Menu Transitions */
+.mobile-menu-premium {
+    transition: transform 0.5s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+/* 5. Modern Input Styling */
+.input-premium {
+    width: 100%;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-premium:focus {
+    background: white;
+    border-color: var(--penguin-skyblue);
+    box-shadow: 0 0 0 4px rgba(95, 178, 201, 0.15);
+    outline: none;
+}
+
+/* 6. Section Titles */
+.section-title-premium {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--penguin-navy);
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    position: relative;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .section-title-premium {
+        font-size: 1.75rem;
+    }
+}

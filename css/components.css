@@ -1,0 +1,401 @@
+/* ============================================
+   Components.css - Linear Design System
+   ============================================ */
+
+/* 프리미엄 배지 스타일 - 고광택 처*/
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: var(--frost-white, #FFFFFF);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: 8px;
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.4);
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
+   섹션 컴포넌트 (Exam Section)
+   ============================================ */
+.exam-section {
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  /* 더 둥근 모서리 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  margin-bottom: 48px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
+  width: 100%;
+}
+
+.exam-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* 섹션 헤더 - 모던 그라디언트 */
+.section-header {
+  background: #FFFFFF;
+  color: #1D2F4E;
+  padding: 20px 28px 14px;
+  /* 패딩 줄임 */
+  font-size: 1.4rem;
+  /* 폰트 크기 약간 줄임 */
+  font-family: "Inter Variable", sans-serif;
+  font-weight: 700;
+  text-align: left;
+  /* 제목 좌측 정렬 */
+  border-bottom: none;
+  position: relative;
+  letter-spacing: -0.02em;
+}
+
+/* 장식용 밑줄 */
+.section-header::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: linear-gradient(to right, #5FB2C9, #8E44AD);
+  /* 포인트 컬러 */
+  border-radius: 2px;
+  margin-top: 12px;
+}
+
+.section-description {
+  padding: 0 28px 20px;
+  /* 패딩 줄임 */
+  text-align: left;
+  background: #FFFFFF;
+  color: #868E96;
+  font-size: 0.95rem;
+  /* 폰트 크기 약간 줄임 */
+  font-family: "Inter Variable", sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   과목 리스트 (Grid Layout)
+   ============================================ */
+.subjects-list {
+  list-style: none;
+  padding: 24px 28px;
+  /* 패딩 줄임 */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* 2열 그리드 */
+  gap: 16px;
+  /* 간격 줄임 */
+  margin-bottom: 0;
+}
+
+/* 과목 및 연도 아이템 카드 - Premium Glass Card */
+.subject-item,
+.year-item {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-premium);
+  padding: 16px 16px;
+  /* 상하 패딩 감소 (20px → 16px) */
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 110px;
+  /* 높이 약간 감소 (120px → 110px) */
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.subject-item:hover,
+.year-item:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--penguin-skyblue);
+  box-shadow: var(--shadow-lg);
+}
+
+.subject-name,
+.year-header {
+  font-size: 1.2rem;
+  /* 폰트 크기 증가 (1.1rem → 1.2rem) */
+  font-weight: 750;
+  color: var(--penguin-navy);
+  margin-bottom: 12px;
+  /* 하단 마진 감소 (16px → 12px) */
+  letter-spacing: -0.03em;
+  width: 100%;
+  transition: all 0.3s ease;
+  line-height: 1.3;
+}
+
+.subject-item:hover .subject-name,
+.year-item:hover .year-header {
+  color: var(--penguin-skyblue);
+  transform: scale(1.02);
+}
+
+.subject-code,
+.question-count {
+  background: rgba(29, 47, 78, 0.05);
+  color: #495057;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(29, 47, 78, 0.03);
+}
+
+.subject-item:hover .subject-code,
+.year-item:hover .question-count {
+  background: var(--penguin-navy);
+  color: #FFFFFF;
+  border-color: var(--penguin-navy);
+}
+
+/* 🎯 정보 영역 레이아웃 (Stack) */
+.subject-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* 연도/모의고사 카드용 클래스 (subject-info가 있는 경우) */
+.subject-item.has-info {
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.pass-rate {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--penguin-skyblue);
+  margin-top: 4px;
+}
+
+/* 데스크톱에서 pass-rate가 있는 경우 레이아웃 조정 */
+.subject-item:has(.pass-rate) {
+  flex-wrap: wrap;
+}
+
+.subject-item:has(.pass-rate) .pass-rate {
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 0.85rem;
+  color: #868E96;
+}
+
+/* 🎯 생활스포츠지도사 테마 */
+[data-cert-content="sports-instructor"] .subject-item:hover {
+  border-color: #10B981;
+  /* Green */
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+}
+
+[data-cert-content="sports-instructor"] .subject-item:hover .subject-code {
+  background: #059669;
+}
+
+/* ============================================
+   버튼 컴포넌트 (Interactive)
+   ============================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: var(--penguin-navy);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(29, 47, 78, 0.2);
+}
+
+.btn-primary:hover {
+  background: #2a4366;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(29, 47, 78, 0.25);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #DEE2E6;
+  color: #495057;
+}
+
+.btn-outline:hover {
+  border-color: var(--penguin-navy);
+  color: var(--penguin-navy);
+  background: #F8F9FA;
+}
+
+/* 모의고사 보기 그리드 */
+#mockexam-view .subjects-list,
+#sports-mockexam-view .subjects-list {
+  grid-template-columns: 1fr;
+  /* 모의고사는 크게 한 줄 */
+}
+
+#mockexam-view .subject-item,
+#sports-mockexam-view .subject-item {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 16px;
+  /* 패딩 줄임 */
+  min-height: auto;
+  /* 최소 높이 제거 */
+  flex-wrap: wrap;
+  /* pass-rate를 아래로 배치 */
+}
+
+/* ============================================
+   반응형 (Mobile)
+   ============================================ */
+@media (max-width: 768px) {
+  .exam-section {
+    border-radius: 16px;
+    margin-bottom: 32px;
+  }
+
+  .section-header {
+    font-size: 1.15rem;
+    /* 모바일에서 더 작은 폰트 */
+    padding: 16px 20px 10px;
+    /* 모바일에서 더 작은 패딩 */
+  }
+
+  .section-description {
+    padding: 0 20px 16px;
+    font-size: 0.9rem;
+    /* 모바일에서 더 작은 폰트 */
+  }
+
+  .subjects-list {
+    grid-template-columns: repeat(2, 1fr);
+    /* 모바일에서도 2x2 그리드 유지 */
+    padding: 16px 20px 20px;
+    gap: 12px;
+  }
+
+  /* 모바일: 카드 내 과목명 위 · 과목코드 아래 세로 배치, 2x2 그리드에서 칸 가득 채움 */
+  .subject-item {
+    display: flex;
+    min-height: auto;
+    padding: 16px 12px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  /* 모의고사 카드 모바일: 제목 위, 설명 아래 세로 배치 */
+  #mockexam-view .subject-item,
+  #sports-mockexam-view .subject-item {
+    padding: 16px 12px;
+    min-height: auto;
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .subject-name {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .subject-code {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    /* 크기 고정 */
+  }
+
+  /* pass-rate는 아래 줄에 배치 */
+  .pass-rate {
+    font-size: 0.8rem;
+    color: #868E96;
+    width: 100%;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
+
+@media (max-width: 480px) {
+  .section-header {
+    padding: 16px 16px 10px;
+    /* 작은 화면에서 더 작은 패딩 */
+    font-size: 1.1rem;
+  }
+
+  .section-description {
+    padding: 0 16px 14px;
+    font-size: 0.85rem;
+  }
+
+  .subjects-list {
+    padding: 12px 16px 16px;
+    /* 작은 화면에서 더 작은 패딩 */
+    gap: 8px;
+    /* 간격 더 줄임 */
+  }
+
+  /* 모든 카드 통일된 스타일 (작은 화면) */
+  .subject-item {
+    padding: 14px 12px;
+    /* 작은 화면에서 더 작은 패딩 */
+    gap: 10px;
+  }
+
+  .subject-name {
+    font-size: 0.9rem;
+  }
+
+  .subject-code {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  .pass-rate {
+    font-size: 0.75rem;
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+}

@@ -1,0 +1,567 @@
+/* ==============================
+   개선된 깔끔한 디자인 시스템
+   ============================== */
+
+:root {
+    /* 🎨 개선된 색상 팔레트 */
+    --primary-navy: #1A2B4A;        /* 더 깊은 네이비 */
+    --primary-blue: #4A90A4;        /* 더 부드러운 블루 */
+    --accent-teal: #5FB2C9;         /* 강조 틸 */
+    --light-blue: #E8F4F8;          /* 매우 연한 블루 */
+    --pure-white: #FFFFFF;          /* 순백색 */
+    --text-dark: #2C3E50;           /* 진한 텍스트 */
+    --text-gray: #64748B;           /* 중간 회색 */
+    --text-light: #94A3B8;          /* 연한 회색 */
+    --shadow-soft: 0 4px 20px rgba(26, 43, 74, 0.08);
+    --shadow-medium: 0 8px 30px rgba(26, 43, 74, 0.12);
+    --border-light: rgba(232, 244, 248, 0.8);
+    
+    /* 그라데이션 */
+    --gradient-primary: linear-gradient(135deg, var(--primary-navy) 0%, #2D4A6D 100%);
+    --gradient-accent: linear-gradient(135deg, var(--accent-teal) 0%, #4A90A4 100%);
+    --gradient-light: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+}
+
+/* ==============================
+   1. 리셋 및 기본 스타일
+   ============================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', sans-serif;
+    background: var(--gradient-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==============================
+   2. 개선된 헤더 디자인
+   ============================== */
+
+.clean-header {
+    background: var(--gradient-primary);
+    padding: 40px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 헤더 배경 패턴 (미니멀) */
+.clean-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.08)"/></svg>');
+    opacity: 0.3;
+}
+
+.clean-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.clean-logo {
+    width: 80px;
+    height: 80px;
+    background: var(--pure-white);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-medium);
+    transition: transform 0.3s ease;
+}
+
+.clean-logo:hover {
+    transform: translateY(-2px);
+}
+
+.clean-logo img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.clean-brand-text {
+    text-align: left;
+}
+
+.clean-brand-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--pure-white);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.clean-brand-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--pure-white);
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+}
+
+.clean-brand-subtitle {
+    font-size: 1rem;
+    color: var(--light-blue);
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    backdrop-filter: blur(10px);
+}
+
+/* ==============================
+   3. 개선된 브랜드 메시지
+   ============================== */
+
+.clean-hero-section {
+    background: var(--pure-white);
+    padding: 60px 0;
+    margin: -40px 0 0 0;
+    border-radius: 24px 24px 0 0;
+    position: relative;
+    z-index: 3;
+}
+
+.clean-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.clean-hero-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--primary-navy);
+    margin-bottom: 16px;
+    line-height: 1.2;
+}
+
+.clean-hero-subtitle {
+    font-size: 1.3rem;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.clean-hero-description {
+    font-size: 1.1rem;
+    color: var(--text-gray);
+    line-height: 1.7;
+    margin-bottom: 24px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.clean-brand-promise {
+    font-size: 1.2rem;
+    color: var(--primary-navy);
+    font-weight: 700;
+    background: var(--light-blue);
+    padding: 16px 24px;
+    border-radius: 16px;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+/* ==============================
+   4. 개선된 탭 네비게이션
+   ============================== */
+
+.clean-tabs-container {
+    background: var(--pure-white);
+    padding: 40px 0;
+}
+
+.clean-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 40px;
+    padding: 0 20px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.clean-tab-button {
+    padding: 16px 32px;
+    background: var(--pure-white);
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
+    font-weight: 600;
+    color: var(--text-gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.clean-tab-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-accent);
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.clean-tab-button:hover {
+    border-color: var(--accent-teal);
+    color: var(--primary-navy);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+.clean-tab-button:hover::before {
+    left: 0;
+}
+
+.clean-tab-button.active {
+    background: var(--gradient-accent);
+    color: var(--pure-white);
+    border-color: var(--accent-teal);
+    box-shadow: var(--shadow-medium);
+}
+
+.clean-tab-button.active::before {
+    left: 0;
+}
+
+/* ==============================
+   5. 개선된 섹션 디자인
+   ============================== */
+
+.clean-section {
+    background: var(--pure-white);
+    border-radius: 20px;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 32px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.clean-section:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+}
+
+.clean-section-header {
+    background: var(--gradient-primary);
+    color: var(--pure-white);
+    padding: 24px 32px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.clean-section-description {
+    background: var(--light-blue);
+    color: var(--primary-navy);
+    padding: 20px 32px;
+    font-size: 1rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.clean-section-content {
+    padding: 32px;
+}
+
+/* ==============================
+   6. 개선된 카드 디자인
+   ============================== */
+
+.clean-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.clean-card {
+    background: var(--pure-white);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.clean-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-accent);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.clean-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--accent-teal);
+}
+
+.clean-card:hover::before {
+    transform: scaleX(1);
+}
+
+.clean-card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-navy);
+    margin-bottom: 12px;
+}
+
+.clean-card-code {
+    background: var(--primary-navy);
+    color: var(--pure-white);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.clean-card-info {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.clean-info-item {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+    background: var(--light-blue);
+    padding: 4px 12px;
+    border-radius: 12px;
+}
+
+.clean-pass-rate {
+    color: #DC2626;
+    font-weight: 600;
+}
+
+/* ==============================
+   7. 개선된 버튼 디자인
+   ============================== */
+
+.clean-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.clean-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.clean-button:hover::before {
+    left: 100%;
+}
+
+.clean-button-primary {
+    background: var(--gradient-accent);
+    color: var(--pure-white);
+    box-shadow: var(--shadow-soft);
+}
+
+.clean-button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.clean-button-outline {
+    background: transparent;
+    color: var(--accent-teal);
+    border: 2px solid var(--accent-teal);
+}
+
+.clean-button-outline:hover {
+    background: var(--accent-teal);
+    color: var(--pure-white);
+    transform: translateY(-2px);
+}
+
+/* ==============================
+   8. 반응형 디자인
+   ============================== */
+
+@media (max-width: 768px) {
+    .clean-logo-container {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .clean-brand-text {
+        text-align: center;
+    }
+    
+    .clean-hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .clean-hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .clean-tabs {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .clean-tab-button {
+        flex: 1;
+        min-width: 120px;
+        padding: 14px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .clean-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .clean-section-content {
+        padding: 24px 20px;
+    }
+    
+    .clean-section-header {
+        padding: 20px;
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .clean-header {
+        padding: 30px 0;
+    }
+    
+    .clean-hero-section {
+        padding: 40px 0;
+    }
+    
+    .clean-hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .clean-tab-button {
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .clean-card {
+        padding: 20px;
+    }
+}
+
+/* ==============================
+   9. 애니메이션 효과
+   ============================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.clean-fade-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* ==============================
+   10. 접근성 개선
+   ============================== */
+
+.clean-focus-visible:focus-visible {
+    outline: 2px solid var(--accent-teal);
+    outline-offset: 2px;
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+    :root {
+        --primary-navy: #000000;
+        --primary-blue: #0066CC;
+        --accent-teal: #0099FF;
+    }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-navy: #E2E8F0;
+        --primary-blue: #81C5E8;
+        --accent-teal: #5FB2C9;
+        --light-blue: #1A202C;
+        --pure-white: #1A202C;
+        --text-dark: #E2E8F0;
+        --text-gray: #A0AEC0;
+        --text-light: #718096;
+        --border-light: rgba(255, 255, 255, 0.1);
+    }
+    
+    body {
+        background: #0F172A;
+    }
+}

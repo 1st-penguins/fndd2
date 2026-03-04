@@ -1,0 +1,418 @@
+﻿/* HERO 섹션 스타일 */
+.hero-section .site-title {
+  text-align: center;
+  color: white;
+  margin-top: 1rem;
+}
+
+.hero-section .title-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #E8F4F8;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.hero-section .site-title h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.hero-section .site-title p {
+  font-size: 1.1rem;
+  color: #D1E7ED;
+  font-weight: 500;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(135deg, 
+    #1D2F4E 0%, 
+    #2A4A6B 25%, 
+    #3B5F7A 50%, 
+    #5FB2C9 75%, 
+    #A3D5E0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem 0;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(95,178,201,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-container {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.hero-logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+.hero-logo {
+  width: 280px;
+  height: 280px;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 10px 30px rgba(29, 47, 78, 0.3));
+  transition: transform 0.3s ease;
+}
+
+.hero-logo:hover {
+  transform: scale(1.05);
+}
+
+.hero-content {
+  text-align: left;
+  color: white;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #FFFFFF 0%, #E8F4F8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  animation: slideInRight 1s ease-out;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #E8F4F8;
+  opacity: 0.9;
+  animation: slideInRight 1s ease-out 0.2s both;
+}
+
+.hero-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  color: #D1E7ED;
+  opacity: 0.95;
+  animation: slideInRight 1s ease-out 0.4s both;
+}
+
+.hero-promise {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: slideInRight 1s ease-out 0.6s both;
+}
+
+.hero-cta {
+  margin-top: 3rem;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  animation: slideInUp 1s ease-out 0.8s both;
+}
+
+.hero-btn {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-btn-primary {
+  background: linear-gradient(135deg, #FFFFFF 0%, #E8F4F8 100%);
+  color: #1D2F4E;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+}
+
+.hero-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.4);
+}
+
+.hero-btn-secondary {
+  background: transparent;
+  color: #FFFFFF;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.hero-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+/* 애니메이션 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 배경 장식 요소들 */
+.hero-decoration {
+  position: absolute;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.hero-decoration-1 {
+  top: 10%;
+  left: 5%;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, #FFFFFF 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 4s ease-in-out infinite;
+}
+
+.hero-decoration-2 {
+  top: 20%;
+  right: 10%;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, #5FB2C9 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 3s ease-in-out infinite reverse;
+}
+
+.hero-decoration-3 {
+  bottom: 30%;
+  left: 15%;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, #A3D5E0 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 5s ease-in-out infinite;
+}
+
+.hero-decoration-4 {
+  bottom: 20%;
+  right: 20%;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, #FFFFFF 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 3.5s ease-in-out infinite reverse;
+}
+
+/* 스크롤 애니메이션 */
+.hero-section {
+  scroll-behavior: smooth;
+}
+
+.hero-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.hero-btn:hover::before {
+  left: 100%;
+}
+
+/* 스크롤 힌트 */
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  animation: bounce 2s infinite;
+  cursor: pointer;
+}
+
+.scroll-hint::after {
+  content: '↓';
+  display: block;
+  font-size: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  40% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+  60% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    text-align: center;
+  }
+  
+  .hero-content {
+    text-align: center;
+  }
+  
+  .hero-logo {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 80vh;
+    padding: 1rem 0;
+    /* 모바일 브라우저 viewport 변경 문제 해결 */
+    background-attachment: scroll;
+    /* 모바일에서 배경 크기 고정하여 확대 방지 (iOS Safari & Android Chrome) */
+    background-size: 100% auto;
+    /* Android Chrome 최적화 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  .hero-container {
+    padding: 0 1rem;
+    gap: 2rem;
+  }
+  
+  .hero-logo {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.3rem;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+  }
+  
+  .hero-cta {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hero-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    /* 모바일 브라우저 확대 방지: 배경 크기 고정 (iOS Safari & Android Chrome) */
+    background-size: 100% auto;
+    background-attachment: scroll;
+    /* Android Chrome 최적화 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .hero-logo {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .hero-promise {
+    font-size: 1rem;
+    padding: 1rem;
+  }
+}

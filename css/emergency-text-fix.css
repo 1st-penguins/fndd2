@@ -1,0 +1,173 @@
+﻿/* Emergency Text Fix - 하얀 배경에 하얀 글씨 완전 해결 */
+
+/* 1. 모든 텍스트 요소에 강제 색상 적용 (최우선) */
+[data-theme="light"] * {
+  color: var(--color-text-primary);
+}
+
+/* 2. 특정 요소들에 대한 강제 색상 */
+[data-theme="light"] body,
+[data-theme="light"] html,
+[data-theme="light"] div,
+[data-theme="light"] span,
+[data-theme="light"] p,
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6,
+[data-theme="light"] a,
+[data-theme="light"] button,
+[data-theme="light"] input,
+[data-theme="light"] label {
+  color: var(--color-text-primary);
+}
+
+/* 3. Linear 컴포넌트들 강제 색상 */
+[data-theme="light"] .linear-typography,
+[data-theme="light"] .linear-typography *,
+[data-theme="light"] .linear-button,
+[data-theme="light"] .linear-button *,
+[data-theme="light"] .linear-card,
+[data-theme="light"] .linear-card *,
+[data-theme="light"] .linear-navigation,
+[data-theme="light"] .linear-navigation * {
+  color: var(--color-text-primary);
+}
+
+/* 4. 특별한 경우 - 흰색 배경에서 강제 검은색 */
+[data-theme="light"] .hero-section,
+[data-theme="light"] .hero-section *,
+[data-theme="light"] .main-content,
+[data-theme="light"] .main-content *,
+[data-theme="light"] .container,
+[data-theme="light"] .container * {
+  color: var(--color-text-primary);
+}
+
+/* 5. 버튼 텍스트 강제 적용 */
+[data-theme="light"] .linear-button--primary {
+  color: white;
+}
+
+[data-theme="light"] .linear-button--secondary,
+[data-theme="light"] .linear-button--ghost,
+[data-theme="light"] .linear-button--outline {
+  color: var(--color-text-primary);
+}
+
+/* 6. 활성 탭 텍스트 */
+[data-theme="light"] .tab-button.active,
+[data-theme="light"] .sub-tab-button.active {
+  color: white;
+}
+
+/* 7. 링크 텍스트 */
+[data-theme="light"] a,
+[data-theme="light"] .link {
+  color: var(--color-brand);
+}
+
+/* 8. 폼 요소 */
+[data-theme="light"] input,
+[data-theme="light"] label,
+[data-theme="light"] .form-input {
+  color: var(--color-text-primary);
+}
+
+/* 9. 모달 텍스트 */
+[data-theme="light"] .modal,
+[data-theme="light"] .modal *,
+[data-theme="light"] .modal-content,
+[data-theme="light"] .modal-content * {
+  color: var(--color-text-primary);
+}
+
+/* 10. 푸터 텍스트 */
+[data-theme="light"] .linear-navigation--footer,
+[data-theme="light"] .linear-navigation--footer *,
+[data-theme="light"] .footer-content,
+[data-theme="light"] .footer-content * {
+  color: var(--color-text-secondary);
+}
+
+/* 11. 사용자 이름 */
+[data-theme="light"] #user-name {
+  color: var(--color-text-primary);
+}
+
+/* 12. 테마 스위처 */
+[data-theme="light"] .linear-theme-switcher {
+  color: var(--color-text-secondary);
+}
+
+/* 13. 로딩 텍스트 */
+[data-theme="light"] .notice-loading {
+  color: var(--color-text-secondary);
+}
+
+/* 14. 에러/성공 메시지 */
+[data-theme="light"] .error-message {
+  color: var(--color-error);
+}
+
+[data-theme="light"] .success-message {
+  color: var(--color-success);
+}
+
+/* 15. 특별한 배경에서의 텍스트 처리 */
+[data-theme="light"] .theme-gradient {
+  background: linear-gradient(135deg, var(--color-bg-level-1) 0%, var(--color-bg-level-2) 100%);
+}
+
+[data-theme="light"] .theme-gradient * {
+  color: var(--color-text-primary);
+}
+
+/* 16. 브랜드 색상 배경에서의 텍스트 */
+[data-theme="light"] .theme-gradient-brand {
+  background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-accent) 100%);
+}
+
+[data-theme="light"] .theme-gradient-brand * {
+  color: white;
+}
+
+/* 17. 투명 배경에서의 텍스트 */
+[data-theme="light"] .transparent-bg {
+  background: transparent;
+}
+
+[data-theme="light"] .transparent-bg * {
+  color: var(--color-text-primary);
+}
+
+/* 18. 최종 안전장치 - 모든 텍스트에 최소 대비 보장 */
+[data-theme="light"] {
+  --color-text-emergency: #000000;
+}
+
+[data-theme="light"] .emergency-text {
+  color: var(--color-text-emergency);
+}
+
+/* 19. 모바일에서 추가 가시성 보장 */
+@media (max-width: 768px) {
+  [data-theme="light"] * {
+    color: var(--color-text-primary);
+  }
+}
+
+/* 20. 고대비 모드 강제 적용 */
+@media (prefers-contrast: high) {
+  [data-theme="light"] {
+    --color-text-primary: #000000;
+    --color-text-secondary: #000000;
+    --color-text-tertiary: #333333;
+  }
+  
+  [data-theme="light"] * {
+    color: var(--color-text-primary);
+  }
+}

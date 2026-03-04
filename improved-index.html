@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>퍼스트펭귄 | 건강운동관리사 | 기출문제모음</title>
+  
+  <!-- 개선된 CSS 파일들 -->
+  <link rel="stylesheet" href="css/improved-design.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/notice.css" />
+  <link rel="stylesheet" href="css/login.css" />
+  <link rel="stylesheet" href="css/tabs.css" />
+  
+  <!-- 로거 스크립트 -->
+  <script src="js/logger.js"></script>
+
+  <!-- Firebase SDK v9 모듈식 임포트 -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  
+  <!-- 코어 모듈 -->
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  
+  <!-- 유틸리티 모듈 -->
+  <script type="module" src="js/utils/date-utils.js"></script>
+  <script type="module" src="js/utils/ui-utils.js"></script>
+  <script type="module" src="js/auth/auth-utils.js"></script>
+  <script type="module" src="js/data/firestore-utils.js"></script>
+  
+  <!-- 데이터 접근 모듈 -->
+  <script type="module" src="js/data/notice-repository.js"></script>
+  
+  <!-- UI 모듈 -->
+  <script type="module" src="js/auth/auth-ui.js"></script>
+  
+  <!-- 메인 애플리케이션 스크립트 -->
+  <script type="module">
+    import { initApp } from './js/app.js';
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+  
+  <!-- 로그인 기능 -->
+  <script type="module" src="js/login-page.js"></script>
+  
+  <!-- 브라우저 리다이렉트 스크립트 -->
+  <script type="module">
+    import { initBrowserRedirect } from "/js/utils/browser-redirect.js";
+    initBrowserRedirect();
+  </script>
+  
+  <!-- 페이지 전용 스크립트 -->
+  <script type="module" src="js/years/year-page.js"></script>
+  
+  <style>
+    /* 개선된 스타일 오버라이드 */
+    .pinned-notice {
+      border-left: 4px solid var(--accent-teal);
+      background-color: var(--light-blue);
+    }
+    
+    .login-required-message {
+      text-align: center;
+      padding: 2rem;
+      background: var(--light-blue);
+      border-radius: 16px;
+      margin: 1rem;
+      color: var(--text-gray);
+    }
+
+    .content-locked {
+      position: relative;
+    }
+
+    .content-locked::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.02);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- 로그인 버튼 (로그인 전 상태) -->
+  <div id="login-button-container">
+    <button class="clean-button clean-button-primary" data-action="show-login">로그인</button>
+  </div>
+  
+  <!-- 사용자 프로필 (로그인 후 상태) -->
+  <div id="user-profile-container" style="display:none; position: absolute; top: 20px; right: 20px; z-index: 1000;">
+    <div class="user-info">
+      <span id="user-name" class="user-name-link" data-action="go-to-mypage">사용자</span>
+    </div>
+    <button class="clean-button clean-button-outline" data-action="logout">로그아웃</button>
+  </div>
+
+  <!-- 개선된 헤더 -->
+  <header class="clean-header">
+    <div class="clean-logo-container">
+      <div class="clean-logo">
+        <img src="images/firstpenguin-logo2.png" alt="퍼스트펭귄 로고" />
+      </div>
+      <div class="clean-brand-text">
+        <div class="clean-brand-name">퍼스트펭귄</div>
+        <h1 class="clean-brand-title">건강운동관리사</h1>
+        <p class="clean-brand-subtitle">기출문제 모음</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- 개선된 히어로 섹션 -->
+  <section class="clean-hero-section">
+    <div class="clean-hero-content">
+      <h2 class="clean-hero-title">Fear Not, Deep Dive</h2>
+      <p class="clean-hero-subtitle">두려움을 넘어, 더 깊은 곳으로.</p>
+      <p class="clean-hero-description">
+        두렵고, 망설여지지만 괜찮아요.<br />
+        도전하고, 배우고, 성장하는<br />
+        과정 자체가 의미 있으니까요.
+      </p>
+      <div class="clean-brand-promise">
+        우리와 함께라면, 더 깊은 바다도 두렵지 않을 거예요.
+      </div>
+    </div>
+  </section>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <main class="clean-tabs-container">
+    <div class="container">
+      <!-- 개선된 탭 네비게이션 -->
+      <div class="clean-tabs">
+        <button class="clean-tab-button active" data-tab="notice-tab">공지</button>
+        <button class="clean-tab-button" data-tab="quiz-tab">문제풀기</button>
+        <button class="clean-tab-button" data-tab="lecture-tab">강의</button>
+        <button class="clean-tab-button" id="analytics-button" data-action="go-to-analytics">학습분석</button>
+      </div>
+
+      <!-- 공지 탭 -->
+      <div id="notice-tab" class="tab-content active">
+        <div class="clean-section">
+          <div class="clean-section-header">공지사항</div>
+          <div class="clean-section-description">
+            퍼스트펭귄 건강운동관리사 사이트의 소식과 업데이트 정보를 확인하세요.
+          </div>
+          <div class="clean-section-content">
+            <div class="notice-list" id="notice-list">
+              <div class="notice-item loading">
+                <div class="loading-text">공지사항을 불러오는 중입니다...</div>
+              </div>
+            </div>
+            <div class="notice-pages" id="notice-pagination">
+              <!-- 페이지 네비게이션 -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 문제풀기 탭 -->
+      <div id="quiz-tab" class="tab-content restricted-content">
+        <!-- 서브탭 -->
+        <div class="clean-tabs" style="margin-bottom: 40px;">
+          <button class="clean-tab-button active" data-subtab="subject-view">
+            과목별
+          </button>
+          <button class="clean-tab-button" data-subtab="year-view">
+            연도별
+          </button>
+          <button class="clean-tab-button" data-subtab="mockexam-view">
+            모의고사
+          </button>
+        </div>
+        
+        <!-- 과목별 보기 -->
+        <div id="subject-view" class="sub-tab-content active">
+          <!-- 로그인 필요 안내 오버레이 -->
+          <div class="login-required-overlay" id="subject-login-overlay">
+            <div class="login-required-content">
+              <div class="login-required-icon">🔐</div>
+              <h3>로그인이 필요한 서비스입니다</h3>
+              <p>퍼스트펭귄의 모든 기출문제와 학습 기능을 이용하려면<br>무료 회원가입 후 로그인해주세요.</p>
+              <div class="login-required-features">
+                <div class="feature-item">✓ 2019~2025년 모든 기출문제</div>
+                <div class="feature-item">✓ 과목별/연도별 문제 풀이</div>
+                <div class="feature-item">✓ 모의고사 및 학습 분석</div>
+                <div class="feature-item">✓ 개인별 학습 진도 관리</div>
+              </div>
+              <div class="login-required-actions">
+                <button class="clean-button clean-button-primary" onclick="window.showLoginModal()">
+                  로그인 / 회원가입
+                </button>
+                <button class="clean-button clean-button-outline" onclick="showPreviewContent()">
+                  미리보기
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 1교시 과목 -->
+          <div class="clean-section">
+            <div class="clean-section-header">1교시 과목</div>
+            <div class="clean-section-description">
+              건강운동관리사 자격증 시험 1교시 과목의 기출문제 모음입니다.
+            </div>
+            <div class="clean-section-content">
+              <ul class="clean-cards-grid">
+                <li class="clean-card restricted-link" data-href="subjects/subject_운동생리학.html">
+                  <div class="clean-card-title">운동생리학</div>
+                  <div class="clean-card-code">과목코드 70</div>
+                </li>
+                <li class="clean-card restricted-link" data-href="subjects/subject_건강체력평가.html">
+                  <div class="clean-card-title">건강체력평가</div>
+                  <div class="clean-card-code">과목코드 71</div>
+                </li>
+                <li class="clean-card restricted-link" data-href="subjects/subject_운동처방론.html">
+                  <div class="clean-card-title">운동처방론</div>
+                  <div class="clean-card-code">과목코드 72</div>
+                </li>
+                <li class="clean-card restricted-link" data-href="subjects/subject_운동부하검사.html">
+                  <div class="clean-card-title">운동부하검사</div>
+                  <div class="clean-card-code">과목코드 73</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- 2교시 과목 -->
+          <div class="clean-section">
+            <div class="clean-section-header">2교시 과목</div>
+            <div class="clean-section-description">
+              건강운동관리사 자격증 시험 2교시 과목의 기출문제 모음입니다.
+            </div>
+            <div class="clean-section-content">
+              <ul class="clean-cards-grid">
+                <li class="clean-card restricted-link" data-href="subjects/subject_운동상해.html">
+                  <div class="clean-card-title">운동상해</div>
+                  <div class="clean-card-code">과목코드 74</div>
+                </li>
+                <li class="clean-card restricted-link" data-href="subjects/subject_기능해부학.html">
+                  <div class="clean-card-title">기능해부학</div>
+                  <div class="clean-card-code">과목코드 75</div>
+                </li>
+                <li class="clean-card restricted-link" data-href="subjects/subject_병태생리학.html">
+                  <div class="clean-card-title">병태생리학</div>
+                  <div class="clean-card-code">과목코드 76</div>
+                </li>
+                <li class="clean-card restricted-link" data-href="subjects/subject_스포츠심리학.html">
+                  <div class="clean-card-title">스포츠심리학</div>
+                  <div class="clean-card-code">과목코드 77</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 연도별 보기 -->
+        <div id="year-view" class="sub-tab-content">
+          <!-- 로그인 필요 안내 오버레이 -->
+          <div class="login-required-overlay" id="year-login-overlay">
+            <div class="login-required-content">
+              <div class="login-required-icon">📚</div>
+              <h3>로그인이 필요한 서비스입니다</h3>
+              <p>2019년부터 2025년까지 모든 기출문제를<br>무료로 이용하실 수 있습니다.</p>
+              <div class="login-required-features">
+                <div class="feature-item">✓ 7년간 모든 기출문제 (2019~2025)</div>
+                <div class="feature-item">✓ 실제 시험과 동일한 환경</div>
+                <div class="feature-item">✓ 상세한 문제 해설</div>
+                <div class="feature-item">✓ 개인별 성적 분석</div>
+              </div>
+              <div class="login-required-actions">
+                <button class="clean-button clean-button-primary" onclick="window.showLoginModal()">
+                  로그인 / 회원가입
+                </button>
+                <button class="clean-button clean-button-outline" onclick="showPreviewContent()">
+                  미리보기
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="clean-section">
+            <div class="clean-section-header">연도별 기출문제</div>
+            <div class="clean-section-description">
+              연도별 건강운동관리사 자격증 시험 기출문제입니다.
+            </div>
+            <div class="clean-section-content">
+              <ul class="clean-cards-grid">
+                <li class="clean-card restricted-link" data-href="years/year_2025.html">
+                  <div class="clean-card-title">2025년 기출문제</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">8개 과목</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: -</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2024.html">
+                  <div class="clean-card-title">2024년 기출문제</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">8개 과목</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 9.98%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2023.html">
+                  <div class="clean-card-title">2023년 기출문제</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">8개 과목</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 30.08%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2022.html">
+                  <div class="clean-card-title">2022년 기출문제</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">8개 과목</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 10.72%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2021.html">
+                  <div class="clean-card-title">2021년 기출문제</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">8개 과목</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 23.67%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2020.html">
+                  <div class="clean-card-title">2020년 기출문제</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">8개 과목</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 15.74%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2019.html">
+                  <div class="clean-card-title">2019년 기출문제</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">8개 과목</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 26.32%</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 모의고사 보기 -->
+        <div id="mockexam-view" class="sub-tab-content">
+          <!-- 로그인 필요 안내 오버레이 -->
+          <div class="login-required-overlay" id="mockexam-login-overlay">
+            <div class="login-required-content">
+              <div class="login-required-icon">📝</div>
+              <h3>로그인이 필요한 서비스입니다</h3>
+              <p>실전과 동일한 모의고사로<br>최종 점검을 하세요.</p>
+              <div class="login-required-features">
+                <div class="feature-item">✓ 연도별 실전 모의고사 (2019~2025)</div>
+                <div class="feature-item">✓ 1교시 + 2교시 (각 80문제)</div>
+                <div class="feature-item">✓ 실제 시험 시간 측정</div>
+                <div class="feature-item">✓ 즉시 채점 및 성적 분석</div>
+              </div>
+              <div class="login-required-actions">
+                <button class="clean-button clean-button-primary" onclick="window.showLoginModal()">
+                  로그인 / 회원가입
+                </button>
+                <button class="clean-button clean-button-outline" onclick="showPreviewContent()">
+                  미리보기
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="clean-section">
+            <div class="clean-section-header">모의고사</div>
+            <div class="clean-section-description">
+              연도별 모의고사로 실전 감각을 익히세요. 각 교시는 80문제로 구성되어 있습니다.
+            </div>
+            <div class="clean-section-content">
+              <ul class="clean-cards-grid">
+                <li class="clean-card restricted-link" data-href="years/year_2025.html">
+                  <div class="clean-card-title">📝 2025년 모의고사</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: -</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2024.html">
+                  <div class="clean-card-title">📝 2024년 모의고사</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 9.98%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2023.html">
+                  <div class="clean-card-title">📝 2023년 모의고사</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 30.08%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2022.html">
+                  <div class="clean-card-title">📝 2022년 모의고사</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 10.72%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2021.html">
+                  <div class="clean-card-title">📝 2021년 모의고사</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 23.67%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2020.html">
+                  <div class="clean-card-title">📝 2020년 모의고사</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 15.74%</span>
+                  </div>
+                </li>
+                <li class="clean-card restricted-link" data-href="years/year_2019.html">
+                  <div class="clean-card-title">📝 2019년 모의고사</div>
+                  <div class="clean-card-info">
+                    <span class="clean-info-item">1교시 (80문제) + 2교시 (80문제)</span>
+                    <span class="clean-info-item clean-pass-rate">합격률: 26.32%</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 강의 탭 -->
+      <div id="lecture-tab" class="tab-content">
+        <div class="clean-section">
+          <div class="clean-section-header">강의 서비스</div>
+          <div class="clean-section-description">
+            전문가의 명쾌한 강의로 확실하게 준비하세요
+          </div>
+          <div class="clean-section-content" style="text-align: center; padding: 60px 40px;">
+            <div style="font-size: 80px; margin-bottom: 20px;">🚧</div>
+            <h2 style="color: var(--primary-navy); margin-bottom: 15px; font-size: 36px; font-weight: 700;">준비중입니다</h2>
+            <p style="font-size: 18px; margin-bottom: 20px; color: var(--text-gray);">더 나은 강의 서비스를 준비하고 있습니다</p>
+            <p style="font-size: 14px; color: var(--text-light);">곧 만나요! 🐧</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- 개선된 푸터 -->
+  <footer style="background: var(--gradient-primary); color: var(--pure-white); padding: 40px 0; text-align: center; margin-top: 60px;">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <img src="images/firstpenguin-logo.png" alt="퍼스트펭귄 로고" style="width: 30px; height: 30px;" />
+            <span style="font-size: 1.8rem; font-weight: 700;">퍼스트펭귄</span>
+          </a>
+        </div>
+        <div class="footer-nav" style="margin-top: 20px;">
+          <a href="index.html" style="color: var(--light-blue); margin: 0 15px; text-decoration: none; font-size: 0.95rem; transition: color 0.3s;">홈</a>
+          <a href="lectures.html" style="color: var(--light-blue); margin: 0 15px; text-decoration: none; font-size: 0.95rem; transition: color 0.3s;">강의</a>
+          <a href="company-info.html" style="color: var(--light-blue); margin: 0 15px; text-decoration: none; font-size: 0.95rem; transition: color 0.3s;">사업자정보</a>
+          <a href="refund-policy.html" style="color: var(--light-blue); margin: 0 15px; text-decoration: none; font-size: 0.95rem; transition: color 0.3s;">환불규정</a>
+          <a href="contact.html" style="color: var(--light-blue); margin: 0 15px; text-decoration: none; font-size: 0.95rem; transition: color 0.3s;">문의하기</a>
+          <a href="admin/dashboard.html" style="color: var(--light-blue); margin: 0 15px; text-decoration: none; font-size: 0.95rem; transition: color 0.3s;">관리자</a>
+        </div>
+        <div class="copyright" style="margin-top: 25px; font-size: 0.85rem; opacity: 0.7; color: var(--light-blue);">
+          &copy; 2025 퍼스트펭귄. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- 탭 핸들러 -->
+  <script type="module" src="js/tab-handler.js"></script>
+</body>
+</html>

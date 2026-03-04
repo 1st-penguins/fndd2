@@ -1,0 +1,292 @@
+﻿/* 텍스트 가시성 강화 - 하얀 배경에 하얀 글씨 문제 해결 */
+
+/* 1. 전역 텍스트 색상 강제 적용 */
+* {
+  color: inherit;
+}
+
+/* 2. 라이트 테마에서 텍스트 색상 강화 */
+[data-theme="light"] {
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #4a4a4a;
+  --color-text-tertiary: #6a6a6a;
+  --color-text-quaternary: #8a8a8a;
+}
+
+/* 3. 모든 텍스트 요소에 강제 색상 적용 */
+[data-theme="light"] body,
+[data-theme="light"] p,
+[data-theme="light"] span,
+[data-theme="light"] div,
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6 {
+  color: var(--color-text-primary);
+}
+
+/* 4. Linear Typography 컴포넌트 강화 */
+[data-theme="light"] .linear-typography {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .linear-typography--primary {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .linear-typography--secondary {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="light"] .linear-typography--tertiary {
+  color: var(--color-text-tertiary);
+}
+
+[data-theme="light"] .linear-typography--quaternary {
+  color: var(--color-text-quaternary);
+}
+
+/* 5. 특정 배경에서 텍스트 색상 강화 */
+[data-theme="light"] .linear-card,
+[data-theme="light"] .linear-card--default,
+[data-theme="light"] .linear-card--feature,
+[data-theme="light"] .linear-card--outlined {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .linear-card *,
+[data-theme="light"] .linear-card--default *,
+[data-theme="light"] .linear-card--feature *,
+[data-theme="light"] .linear-card--outlined * {
+  color: inherit;
+}
+
+/* 6. 히어로 섹션 텍스트 강화 */
+[data-theme="light"] .hero-section,
+[data-theme="light"] .hero-content,
+[data-theme="light"] .hero-text {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .hero-title {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .hero-subtitle {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="light"] .hero-description {
+  color: var(--color-text-tertiary);
+}
+
+[data-theme="light"] .hero-promise {
+  color: var(--color-text-primary);
+}
+
+/* 7. 네비게이션 텍스트 강화 */
+[data-theme="light"] .linear-navigation,
+[data-theme="light"] .linear-navigation__brand,
+[data-theme="light"] .linear-navigation__link {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .linear-navigation__link--active {
+  color: var(--color-brand);
+}
+
+/* 8. 탭 네비게이션 텍스트 강화 */
+[data-theme="light"] .tab-navigation,
+[data-theme="light"] .tab-button {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="light"] .tab-button.active {
+  color: white;
+}
+
+[data-theme="light"] .sub-navigation,
+[data-theme="light"] .sub-tab-button {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="light"] .sub-tab-button.active {
+  color: white;
+}
+
+/* 9. 공지사항 텍스트 강화 */
+[data-theme="light"] .notice-item,
+[data-theme="light"] .notice-header h3,
+[data-theme="light"] .notice-header p {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .notice-date {
+  color: var(--color-text-tertiary);
+}
+
+/* 10. 카드 텍스트 강화 */
+[data-theme="light"] .subject-card,
+[data-theme="light"] .year-card,
+[data-theme="light"] .mockexam-card {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .subject-card h4,
+[data-theme="light"] .year-card h4,
+[data-theme="light"] .mockexam-card h4 {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .subject-card p,
+[data-theme="light"] .year-card p,
+[data-theme="light"] .mockexam-card p {
+  color: var(--color-text-secondary);
+}
+
+/* 11. 푸터 텍스트 강화 */
+[data-theme="light"] .linear-navigation--footer,
+[data-theme="light"] .footer-content {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="light"] .footer-copyright {
+  color: var(--color-text-tertiary);
+}
+
+/* 12. 로그인 모달 텍스트 강화 */
+[data-theme="light"] .modal-content,
+[data-theme="light"] .modal-content h2,
+[data-theme="light"] .modal-content label {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .form-input {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-level-0);
+  border: 1px solid var(--color-border-primary);
+}
+
+/* 13. 로그인 오버레이 텍스트 강화 */
+[data-theme="light"] .login-required-card,
+[data-theme="light"] .login-required-card h3,
+[data-theme="light"] .login-required-card p {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .feature-item {
+  color: var(--color-text-primary);
+}
+
+/* 14. 섹션 헤더 텍스트 강화 */
+[data-theme="light"] .section-header h2,
+[data-theme="light"] .section-header h3 {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .section-header p {
+  color: var(--color-text-secondary);
+}
+
+/* 15. 로딩 텍스트 강화 */
+[data-theme="light"] .notice-loading {
+  color: var(--color-text-secondary);
+}
+
+/* 16. 링크 색상 강화 */
+[data-theme="light"] .link,
+[data-theme="light"] a {
+  color: var(--color-brand);
+}
+
+[data-theme="light"] .link:hover,
+[data-theme="light"] a:hover {
+  color: var(--color-accent);
+}
+
+/* 17. 버튼 텍스트 강화 */
+[data-theme="light"] .linear-button {
+  color: inherit;
+}
+
+[data-theme="light"] .linear-button--primary {
+  color: white;
+}
+
+[data-theme="light"] .linear-button--secondary {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .linear-button--ghost {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="light"] .linear-button--outline {
+  color: var(--color-text-primary);
+}
+
+/* 18. 사용자 이름 텍스트 강화 */
+[data-theme="light"] #user-name {
+  color: var(--color-text-primary);
+}
+
+/* 19. 테마 스위처 텍스트 강화 */
+[data-theme="light"] .linear-theme-switcher {
+  color: var(--color-text-secondary);
+}
+
+/* 20. 강의 섹션 텍스트 강화 */
+[data-theme="light"] .lecture-coming-soon,
+[data-theme="light"] .lecture-coming-soon h2,
+[data-theme="light"] .lecture-coming-soon p {
+  color: var(--color-text-primary);
+}
+
+/* 21. 다크 테마에서도 텍스트 가시성 보장 */
+[data-theme="dark"] {
+  --color-text-primary: #f7f8f8;
+  --color-text-secondary: #d0d6e0;
+  --color-text-tertiary: #8a8f98;
+  --color-text-quaternary: #62666d;
+}
+
+/* 22. 특별한 경우 - 흰색 배경에서 강제 검은색 텍스트 */
+.white-bg-text {
+  color: #1a1a1a;
+}
+
+/* 23. 특별한 경우 - 검은색 배경에서 강제 흰색 텍스트 */
+.dark-bg-text {
+  color: #f7f8f8;
+}
+
+/* 24. 투명도가 있는 배경에서의 텍스트 */
+.transparent-bg-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 25. 모바일에서 텍스트 가시성 추가 보장 */
+@media (max-width: 768px) {
+  [data-theme="light"] {
+    --color-text-primary: #000000;
+    --color-text-secondary: #333333;
+    --color-text-tertiary: #666666;
+  }
+}
+
+/* 26. 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  [data-theme="light"] {
+    --color-text-primary: #000000;
+    --color-text-secondary: #000000;
+    --color-text-tertiary: #333333;
+  }
+  
+  [data-theme="dark"] {
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #ffffff;
+    --color-text-tertiary: #cccccc;
+  }
+}

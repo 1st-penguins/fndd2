@@ -1,0 +1,397 @@
+/* attempts-history.css - 문제 풀이 기록 및 정오표 스타일 */
+
+/* 풀이 기록 컨테이너 */
+#recent-attempts {
+    padding: 10px 0;
+  }
+  
+  /* 로딩 및 오류 메시지 */
+  .loading-spinner,
+  .no-attempts,
+  .error-message {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .loading-spinner::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    border: 2px solid #ddd;
+    border-top-color: #2980b9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* 풀이 기록 카드 */
+  .attempt-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border-left: 4px solid #ddd;
+  }
+  
+  .attempt-card.passed {
+    border-left-color: #27ae60;
+  }
+  
+  .attempt-card.failed {
+    border-left-color: #e74c3c;
+  }
+  
+  .attempt-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .attempt-card.deleting {
+    opacity: 0;
+    transform: translateX(100px);
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  /* 카드 헤더 */
+  .attempt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .attempt-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .attempt-title h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .type-icon {
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  
+  .type-icon.mock-exam {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .type-icon.regular {
+    background-color: #9b59b6;
+    color: white;
+  }
+  
+  .attempt-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .attempt-actions button {
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .toggle-details-btn {
+    background-color: #f1f1f1;
+    color: #555;
+  }
+  
+  .toggle-details-btn:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .delete-attempt-btn {
+    background-color: #ffebee;
+    color: #e53935;
+  }
+  
+  .delete-attempt-btn:hover {
+    background-color: #ffcdd2;
+  }
+  
+  /* 카드 요약 정보 */
+  .attempt-summary {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .attempt-info {
+    flex: 1;
+  }
+  
+  .attempt-date {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #777;
+  }
+  
+  .attempt-stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+  }
+  
+  .score-badge {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  
+  .score-badge.pass {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  .score-badge.fail {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+  
+  .duration-badge {
+    font-size: 13px;
+    color: #555;
+    background-color: #f5f5f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  
+  /* 점수 그래프 */
+  .score-graph {
+    width: 50%;
+    margin-left: 20px;
+  }
+  
+  .score-bar-container {
+    width: 100%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .score-bar {
+    height: 100%;
+    background-color: #2ecc71;
+    transition: width 0.5s ease;
+  }
+  
+  .score-bar.fail {
+    background-color: #e74c3c;
+  }
+  
+  .score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+  }
+  
+  /* 과목별 점수 그래프 (모의고사) */
+  .subject-scores-graph {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .subject-score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .subject-name {
+    min-width: 100px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  
+  /* 정오표 섹션 */
+  .attempt-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+  }
+  
+  .attempt-details.expanded {
+    max-height: 1000px; /* 충분히 큰 값 */
+    padding: 16px;
+  }
+  
+  .attempt-details h4 {
+    margin: 0 0 12px 0;
+    font-size: 15px;
+    color: #333;
+  }
+  
+  /* 정오표 테이블 */
+  .answers-table-container {
+    overflow-x: auto;
+  }
+  
+  .answers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  
+  .answers-table th,
+  .answers-table td {
+    padding: 8px 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .answers-table th {
+    background-color: #f1f1f1;
+    color: #555;
+    font-weight: 600;
+  }
+  
+  .answers-table tr.correct {
+    background-color: rgba(46, 204, 113, 0.05);
+  }
+  
+  .answers-table tr.incorrect {
+    background-color: rgba(231, 76, 60, 0.05);
+  }
+  
+  .result-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: bold;
+  }
+  
+  .result-icon.correct {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  .result-icon.incorrect {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+  
+  /* 필터 컨트롤 */
+  .filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+  }
+  
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .filter-group label {
+    font-size: 13px;
+    color: #555;
+    font-weight: 500;
+  }
+  
+  .filter-select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    background-color: white;
+  }
+  
+  .filter-button {
+    padding: 6px 12px;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .filter-button:hover {
+    background-color: #3498db;
+  }
+  
+  /* 반응형 레이아웃 */
+  @media (max-width: 768px) {
+    .attempt-summary {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .score-graph,
+    .subject-scores-graph {
+      width: 100%;
+      margin: 15px 0 0 0;
+    }
+    
+    .filter-controls {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .filter-group {
+      width: 100%;
+    }
+    
+    .filter-select {
+      flex: 1;
+    }
+    
+    .filter-button {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }

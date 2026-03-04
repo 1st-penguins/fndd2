@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>문제 풀이 - 퍼스트펭귄 건강운동관리사</title>
+
+  <!-- PWA 및 테마 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1D2F4E">
+
+  <!-- 구글 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase 리소스 힌트 -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+
+  <!-- 외부 CSS 파일 연결 -->
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/linear-header.css" />
+  <link rel="stylesheet" href="../css/linear-footer.css" />
+  <link rel="stylesheet" href="../css/layout.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/pages/quiz.css" />
+  <link rel="stylesheet" href="../css/indicators.css" />
+  <link rel="stylesheet" href="../css/login.css" />
+
+  <!-- Firebase 관련 스크립트 -->
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  <script type="module" src="../js/auth/auth-ui.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+  <script type="module" src="../js/data/session-manager.js"></script>
+  <script type="module" src="../js/data/quiz-repository.js"></script>
+  <script type="module" src="../js/payment/subscription-manager.js"></script>
+</head>
+
+<body>
+  <header class="linear-header" id="linear-header">
+    <div class="linear-header__container">
+      <a href="../index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="../images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+      </a>
+
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="../index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../lectures.html" class="linear-header__nav-link">강의</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../contact.html" class="linear-header__nav-link">문의</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="linear-header__auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login">로그인</a>
+        <div id="user-profile-container" style="display: none;">
+          <div class="linear-header__user-profile">
+            <div class="linear-header__user-avatar" id="user-avatar">U</div>
+            <span class="linear-header__user-name" id="user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
+        </div>
+      </div>
+
+      <div class="linear-header__actions">
+        <!-- 개발 모드 토글 (개발 환경에서만 표시) -->
+        <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
+          <button id="dev-mode-btn" class="dev-mode-btn">
+            <span class="dev-mode-indicator"></span>
+            DEV
+          </button>
+        </div>
+
+        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <div class="mobile-cert-badge" id="mobile-cert-badge">
+        <span class="mobile-cert-badge__label">현재 선택</span>
+        <span class="mobile-cert-badge__name">문제풀기</span>
+      </div>
+      <a href="../index.html" class="linear-header__nav-link">홈</a>
+      <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="../index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="../lectures.html" class="linear-header__nav-link">강의</a>
+      <a href="../contact.html" class="linear-header__nav-link">문의</a>
+      <!-- 모바일 메뉴에 로그인/로그아웃 링크 추가 -->
+      <div class="mobile-menu-auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">
+          로그인
+        </a>
+        <div id="mobile-user-profile-container" style="display: none;">
+          <div class="mobile-user-info">
+            <div class="linear-header__user-avatar" id="mobile-user-avatar">U</div>
+            <span class="linear-header__user-name" id="mobile-user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">
+            로그아웃
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="header-content">
+      <a href="../index.html" class="back-link">
+        <span class="back-arrow">←</span>
+        <span>목록으로</span>
+      </a>
+      <div class="quiz-title">
+        <h1 id="quiz-title-text">문제 풀이</h1>
+        <div class="quiz-subtitle" id="quiz-subtitle">문제 정보 로딩 중...</div>
+      </div>
+    </div>
+    <div class="progress-container">
+      <div class="progress-header">
+        <div class="progress-info">
+          <div>진행 상황</div>
+          <div class="progress-count" id="progress-count">1 / 20</div>
+        </div>
+        <div class="timer-container">
+          <div class="timer">
+            <span class="timer-icon">⏱️</span>
+            <span id="timer">20:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress" id="progress-bar"></div>
+      </div>
+      <div class="question-indicators-container">
+        <div class="question-indicators" id="question-indicators">
+          <!-- 문제 인디케이터는 자바스크립트로 동적 생성됩니다 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content restricted-content" style="padding-top: 20px;">
+    <div class="container">
+      <div id="quiz-container">
+        <div class="loading-message" id="loading-message">
+          <div class="spinner"></div>
+          <p>문제를 불러오는 중...</p>
+        </div>
+
+        <div class="quiz-container" id="question-wrapper" style="display: none;">
+          <div class="question-number">문제 1</div>
+          <div id="question-tags" class="question-tags-container"></div>
+          <div id="question-container" class="question-image-container">
+            <!-- 문제 이미지가 여기에 로드됩니다 -->
+          </div>
+          <div class="option-buttons" id="option-buttons">
+            <button class="option-button" onclick="selectOption(0)">1</button>
+            <button class="option-button" onclick="selectOption(1)">2</button>
+            <button class="option-button" onclick="selectOption(2)">3</button>
+            <button class="option-button" onclick="selectOption(3)">4</button>
+          </div>
+          <div id="feedback" class="answer-feedback"></div>
+        </div>
+      </div>
+
+      <div class="navigation-buttons">
+        <button id="prev-button" class="nav-button prev-button disabled">
+          <span>이전</span>
+        </button>
+        <button id="check-button" class="nav-button check-button" onclick="showCurrentAnswer()">
+          <span>정답 보기</span>
+        </button>
+        <button id="next-button" class="nav-button next-button">
+          <span>다음</span>
+        </button>
+        <button id="submit-button" class="nav-button check-button" style="display: none;">
+          <span>결과 확인</span>
+        </button>
+      </div>
+
+      <div id="results-summary" class="results-summary" style="display: none;">
+        <!-- 결과 요약이 여기에 표시됩니다 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 통합 슬림 푸터 -->
+  <footer class="linear-footer linear-footer--slim">
+    <div class="linear-footer__container">
+      <div class="linear-footer__content">
+        <div class="linear-footer__brand">
+          <a href="../index.html" class="linear-footer__brand-logo">
+            <div class="linear-footer__brand-icon">
+              <img src="../images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" />
+            </div>
+            <span class="linear-footer__brand-text">퍼스트펭귄</span>
+          </a>
+        </div>
+
+        <nav class="linear-footer__nav-list" style="flex-direction: row; gap: 24px;">
+          <a href="../index.html" class="linear-footer__nav-link">홈</a>
+          <a href="../company-info.html" class="linear-footer__nav-link">소개</a>
+          <a href="../notices.html" class="linear-footer__nav-link">공지사항</a>
+          <a href="../contact.html" class="linear-footer__nav-link">문의하기</a>
+        </nav>
+
+        <div class="linear-footer__copyright">
+          © 2025 퍼스트펭귄. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 문제 불러오기 및 퀴즈 로직 -->
+  <script type="module">
+    import {
+      initializeQuiz,
+      loadQuestion,
+      selectOption,
+      checkAnswer,
+      calculateScore,
+      getIncorrectQuestions,
+      goToNextQuestion,
+      goToPreviousQuestion,
+      submitQuiz,
+      showCurrentAnswer,
+      extendedInitializeQuiz
+    } from '../js/quiz/quiz-core.js';
+
+    // window 객체에 함수 할당하여 HTML에서 직접 호출 가능하도록 설정
+    window.selectOption = (optionIndex) => {
+      selectOption(optionIndex);
+    };
+
+    window.checkAnswer = () => {
+      const result = checkAnswer();
+      if (result.status === 'no-answer') {
+        alert('답을 선택해주세요.');
+        return;
+      }
+
+      const feedback = document.getElementById('feedback');
+      feedback.className = `answer-feedback ${result.isCorrect ? 'correct-feedback' : 'incorrect-feedback'}`;
+      feedback.innerHTML = `
+        <div class="feedback-title">
+          <span class="feedback-icon">${result.isCorrect ? '✓' : '✗'}</span>
+          <span>${result.isCorrect ? '정답입니다!' : '오답입니다!'}</span>
+        </div>
+        ${!result.isCorrect ? `<div class="correct-answer">정답: ${parseInt(result.correctAnswerText) + 1}번</div>` : ''}
+        <div class="explanation">${result.explanation}</div>
+      `;
+      feedback.style.display = 'block';
+
+      // 인디케이터 업데이트
+      const indicators = document.querySelectorAll('.indicator');
+      if (indicators && window.currentQuestionIndex !== undefined && indicators[window.currentQuestionIndex]) {
+        indicators[window.currentQuestionIndex].classList.remove('correct', 'incorrect');
+        indicators[window.currentQuestionIndex].classList.add(result.isCorrect ? 'correct' : 'incorrect');
+      }
+
+      // 개별 문제 시도 저장
+      try {
+        if (typeof window.recordAttempt === 'function') {
+          const currentQuestion = window.questions[window.currentQuestionIndex];
+          const questionData = {
+            year: currentQuestion.year || '2024',
+            subject: currentQuestion.subject || document.querySelector('meta[name="quiz-subject"]')?.content || '운동심리학',
+            number: window.currentQuestionIndex + 1,
+            isFromMockExam: false,
+            sessionId: window.sessionManager?.getCurrentSessionId?.() || null,
+            correctAnswer: parseInt(result.correctAnswerText) || 0
+          };
+
+          window.recordAttempt(questionData, result.userAnswer, result.isCorrect);
+        }
+      } catch (error) {
+        console.error('시도 기록 저장 오류:', error);
+      }
+
+      return result;
+    };
+
+    window.goToNextQuestion = goToNextQuestion;
+    window.goToPreviousQuestion = goToPreviousQuestion;
+    window.submitQuiz = submitQuiz;
+    window.showCurrentAnswer = () => {
+      const result = checkAnswer();
+      if (result.status === 'no-answer') {
+        alert('답을 선택해주세요.');
+        return;
+      }
+
+      const feedback = document.getElementById('feedback');
+      feedback.className = `answer-feedback ${result.isCorrect ? 'correct-feedback' : 'incorrect-feedback'}`;
+      feedback.innerHTML = `
+        <div class="feedback-title">
+          <span class="feedback-icon">${result.isCorrect ? '✓' : '✗'}</span>
+          <span>${result.isCorrect ? '정답입니다!' : '오답입니다!'}</span>
+        </div>
+        ${!result.isCorrect ? `<div class="correct-answer">정답: ${parseInt(result.correctAnswerText) + 1}번</div>` : ''}
+        <div class="explanation">${result.explanation}</div>
+      `;
+      feedback.style.display = 'block';
+    };
+
+    // URL 파라미터 읽기 함수
+    function getParameterByName(name, url = window.location.href) {
+      name = name.replace(/[\[\]]/g, '\\$&');
+      const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    // 타이틀 설정 함수
+    function setQuizTitle(mode, subject, year) {
+      const titleElement = document.getElementById('quiz-title-text');
+      const subtitleElement = document.getElementById('quiz-subtitle');
+
+      if (mode === 'incorrect') {
+        titleElement.textContent = `${subject} 오답 학습`;
+        subtitleElement.textContent = '오답노트 학습 모드';
+      } else {
+        titleElement.textContent = `${year} ${subject} 기출문제`;
+        subtitleElement.textContent = '총 문제 수량 로딩 중...';
+      }
+
+      // 뒤로가기 링크 설정
+      const backLink = document.querySelector('.back-link');
+      if (backLink) {
+        if (mode === 'incorrect') {
+          // 오답노트 모드일 때는 분석 페이지로 이동
+          backLink.href = '../analytics.html';
+        } else {
+          // 일반 모드일 때는 과목 페이지로 이동
+          backLink.href = `../subjects/subject_${encodeURIComponent(subject)}.html`;
+        }
+      }
+    }
+
+    // 페이지 로드 시 퀴즈 초기화
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        console.log('퀴즈 초기화 중...');
+
+        // URL 파라미터 확인
+        const mode = getParameterByName('mode');
+        const subject = getParameterByName('subject') || '운동심리학';
+        const year = getParameterByName('year') || '2024';
+
+        // 메타 태그에 과목 정보 저장
+        const metaSubject = document.createElement('meta');
+        metaSubject.name = 'quiz-subject';
+        metaSubject.content = subject;
+        document.head.appendChild(metaSubject);
+
+        // 메타 태그에 연도 정보 저장
+        const metaYear = document.createElement('meta');
+        metaYear.name = 'quiz-year';
+        metaYear.content = year;
+        document.head.appendChild(metaYear);
+
+        // 타이틀 설정
+        setQuizTitle(mode, subject, year);
+
+        // 확장된 초기화 함수 호출 (오답노트 모드 지원)
+        const initialized = await extendedInitializeQuiz();
+
+        if (initialized) {
+          // 초기화 성공 시 로딩 메시지 숨기기
+          document.getElementById('loading-message').style.display = 'none';
+          document.getElementById('question-wrapper').style.display = 'block';
+
+          // 퀴즈 완료 후 자동으로 뒤로가기 링크를 설정하기 위한 이벤트 리스너
+          document.addEventListener('quizCompleted', () => {
+            const backLink = document.querySelector('.back-link');
+            if (backLink && mode === 'incorrect') {
+              backLink.href = '../analytics.html#incorrect-answers-tab';
+            }
+          });
+
+          // 문제 수량 업데이트
+          if (window.questions) {
+            const subtitleElement = document.getElementById('quiz-subtitle');
+            if (mode === 'incorrect') {
+              subtitleElement.textContent = `총 ${window.questions.length}문항 | 오답 복습`;
+            } else {
+              subtitleElement.textContent = `총 ${window.questions.length}문항 | 제한시간 20분`;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('퀴즈 초기화 실패:', error);
+        document.getElementById('loading-message').innerHTML = `
+          <div class="error-message">
+            <h3>문제를 불러올 수 없습니다</h3>
+            <p>${error.message || '알 수 없는 오류가 발생했습니다.'}</p>
+            <button onclick="location.reload()">다시 시도</button>
+          </div>
+        `;
+      }
+    });
+  </script>
+
+  <!-- Firebase 인증 상태 감지 -->
+  <script type="module">
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { auth } from "../js/core/firebase-core.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log("Firebase 인증 상태: 로그인됨", user.displayName || user.email);
+          localStorage.setItem("userLoggedIn", "true");
+          localStorage.setItem("userName", user.displayName || user.email || "사용자");
+        } else {
+          console.log("Firebase 인증 상태: 로그아웃됨");
+          localStorage.removeItem("userLoggedIn");
+          localStorage.removeItem("userName");
+        }
+      });
+    });
+  </script>
+
+  <style>
+    /* 추가 스타일 */
+    .loading-message {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 20px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: #0D5C80;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-message {
+      text-align: center;
+      color: #d32f2f;
+      padding: 20px;
+      background-color: #ffebee;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .error-message button {
+      background-color: #0D5C80;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+  <!-- Linear Header -->
+  <script src="../js/linear-header.js"></script>
+  <script type="module" src="../js/dev-mode-toggle.js"></script>
+</body>
+
+</html>

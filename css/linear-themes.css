@@ -1,0 +1,305 @@
+﻿/* Linear Design System - Theme Variables */
+
+/* Light Theme (Default) */
+:root {
+  /* Colors - Light Theme */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-level-0: #ffffff;
+  --color-bg-level-1: #f8f9fa;
+  --color-bg-level-2: #f1f3f4;
+  --color-bg-level-3: #e8eaed;
+  --color-bg-tertiary: #e8eaed;
+  --color-bg-quaternary: #dadce0;
+  --color-bg-quinary: #f8f9fa;
+  --color-bg-tint: #f8f9fa;
+  --color-bg-marketing: #ffffff;
+  --color-bg-translucent: rgba(255, 255, 255, 0.8);
+  
+  /* Text Colors - Light Theme (가시성 강화) */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #4a4a4a;
+  --color-text-tertiary: #6a6a6a;
+  --color-text-quaternary: #8a8a8a;
+  --color-text-brand: #1a1a1a;
+  
+  /* Border Colors - Light Theme */
+  --color-border-primary: #dadce0;
+  --color-border-secondary: #e8eaed;
+  --color-border-tertiary: #f1f3f4;
+  --color-border-translucent: rgba(255, 255, 255, 0.8);
+  
+  /* Line Colors - Light Theme */
+  --color-line-primary: #dadce0;
+  --color-line-secondary: #e8eaed;
+  --color-line-tertiary: #f1f3f4;
+  --color-line-quaternary: #f8f9fa;
+  --color-line-tint: #f8f9fa;
+  
+  /* Brand Colors (Same for both themes) */
+  --color-brand: #5e6ad2;
+  --color-accent: #7170ff;
+  --color-accent-hover: #828fff;
+  --color-accent-tint: #f0f0ff;
+  
+  /* Text on Brand Background */
+  --color-text-on-brand: #ffffff;
+  
+  /* Semantic Colors - Light Theme */
+  --color-success: #137333;
+  --color-warning: #ea8600;
+  --color-error: #d93025;
+  --color-info: #1a73e8;
+  
+  /* Selection Colors - Light Theme */
+  --color-selection-bg: #e8f0fe;
+  --color-selection-text: #202124;
+  --color-selection-dim: rgba(232, 240, 254, 0.8);
+  
+  /* Link Colors - Light Theme */
+  --color-link-primary: #1a73e8;
+  --color-link-hover: #1557b0;
+  
+  /* Shadow Colors - Light Theme */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-hover: rgba(0, 0, 0, 0.15);
+  
+  /* Overlay Colors - Light Theme */
+  --color-overlay-primary: rgba(0, 0, 0, 0.6);
+  --color-overlay-dim-rgb: 0, 0, 0;
+  
+  /* Focus Colors */
+  --focus-ring-color: #5e6ad2;
+  --focus-ring-outline: 2px solid #5e6ad2;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  /* Colors - Dark Theme */
+  --color-bg-primary: #08090a;
+  --color-bg-secondary: #1c1c1f;
+  --color-bg-level-0: #08090a;
+  --color-bg-level-1: #0f1011;
+  --color-bg-level-2: #141516;
+  --color-bg-level-3: #191a1b;
+  --color-bg-tertiary: #232326;
+  --color-bg-quaternary: #28282c;
+  --color-bg-quinary: #282828;
+  --color-bg-tint: #141516;
+  --color-bg-marketing: #010102;
+  --color-bg-translucent: rgba(255, 255, 255, 0.05);
+  
+  /* Text Colors - Dark Theme */
+  --color-text-primary: #f7f8f8;
+  --color-text-secondary: #d0d6e0;
+  --color-text-tertiary: #8a8f98;
+  --color-text-quaternary: #62666d;
+  --color-text-brand: #ffffff;
+  
+  /* Border Colors - Dark Theme */
+  --color-border-primary: #23252a;
+  --color-border-secondary: #34343a;
+  --color-border-tertiary: #3e3e44;
+  --color-border-translucent: rgba(255, 255, 255, 0.05);
+  
+  /* Line Colors - Dark Theme */
+  --color-line-primary: #37393a;
+  --color-line-secondary: #202122;
+  --color-line-tertiary: #18191a;
+  --color-line-quaternary: #141515;
+  --color-line-tint: #141516;
+  
+  /* Semantic Colors - Dark Theme */
+  --color-success: #4cb782;
+  --color-warning: #f2c94c;
+  --color-error: #eb5757;
+  --color-info: #4ea7fc;
+  
+  /* Selection Colors - Dark Theme */
+  --color-selection-bg: color-mix(in lch, #5e6ad2, black 10%);
+  --color-selection-text: #fff;
+  --color-selection-dim: color-mix(in lch, #5e6ad2, transparent 80%);
+  
+  /* Link Colors - Dark Theme */
+  --color-link-primary: #828fff;
+  --color-link-hover: #fff;
+  
+  /* Shadow Colors - Dark Theme */
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-color-hover: rgba(0, 0, 0, 0.4);
+  
+  /* Overlay Colors - Dark Theme */
+  --color-overlay-primary: rgba(0, 0, 0, 0.9);
+  --color-overlay-dim-rgb: 255, 255, 255;
+  
+  /* Focus Colors */
+  --focus-ring-color: #5e6ad2;
+  --focus-ring-outline: 2px solid #5e6ad2;
+  
+  /* Text on Brand Background */
+  --color-text-on-brand: #ffffff;
+}
+
+/* Theme Transition */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Light Theme Specific Styles */
+:root {
+  /* Scrollbar for Light Theme */
+  --scrollbar-color: rgba(0, 0, 0, 0.2);
+  --scrollbar-color-hover: rgba(0, 0, 0, 0.3);
+  --scrollbar-color-active: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] {
+  /* Scrollbar for Dark Theme */
+  --scrollbar-color: rgba(255, 255, 255, 0.1);
+  --scrollbar-color-hover: rgba(255, 255, 255, 0.2);
+  --scrollbar-color-active: rgba(255, 255, 255, 0.4);
+}
+
+/* Global Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-color-hover);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-color-active);
+}
+
+/* Selection Styling */
+::selection {
+  background: var(--color-selection-bg);
+  color: var(--color-selection-text);
+}
+
+/* Focus Styling */
+:focus-visible {
+  outline: var(--focus-ring-outline);
+  outline-offset: 2px;
+}
+
+/* Theme-aware gradients */
+.theme-gradient {
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-level-1) 100%);
+}
+
+.theme-gradient-brand {
+  background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-accent) 100%);
+}
+
+/* Theme-aware shadows */
+.theme-shadow-low {
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.theme-shadow-medium {
+  box-shadow: 0 4px 16px var(--shadow-color);
+}
+
+.theme-shadow-high {
+  box-shadow: 0 8px 32px var(--shadow-color-hover);
+}
+
+/* Theme-aware borders */
+.theme-border {
+  border: 1px solid var(--color-border-primary);
+}
+
+.theme-border-secondary {
+  border: 1px solid var(--color-border-secondary);
+}
+
+/* Auto theme detection */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg-primary: #08090a;
+    --color-bg-secondary: #1c1c1f;
+    --color-bg-level-0: #08090a;
+    --color-bg-level-1: #0f1011;
+    --color-bg-level-2: #141516;
+    --color-bg-level-3: #191a1b;
+    --color-bg-tertiary: #232326;
+    --color-bg-quaternary: #28282c;
+    --color-bg-quinary: #282828;
+    --color-bg-tint: #141516;
+    --color-bg-marketing: #010102;
+    --color-bg-translucent: rgba(255, 255, 255, 0.05);
+    
+    --color-text-primary: #f7f8f8;
+    --color-text-secondary: #d0d6e0;
+    --color-text-tertiary: #8a8f98;
+    --color-text-quaternary: #62666d;
+    --color-text-brand: #ffffff;
+    
+    --color-border-primary: #23252a;
+    --color-border-secondary: #34343a;
+    --color-border-tertiary: #3e3e44;
+    --color-border-translucent: rgba(255, 255, 255, 0.05);
+    
+    --color-line-primary: #37393a;
+    --color-line-secondary: #202122;
+    --color-line-tertiary: #18191a;
+    --color-line-quaternary: #141515;
+    --color-line-tint: #141516;
+    
+    --color-success: #4cb782;
+    --color-warning: #f2c94c;
+    --color-error: #eb5757;
+    --color-info: #4ea7fc;
+    
+    --color-selection-bg: color-mix(in lch, #5e6ad2, black 10%);
+    --color-selection-text: #fff;
+    --color-selection-dim: color-mix(in lch, #5e6ad2, transparent 80%);
+    
+    --color-link-primary: #828fff;
+    --color-link-hover: #fff;
+    
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-color-hover: rgba(0, 0, 0, 0.4);
+    
+    --color-overlay-primary: rgba(0, 0, 0, 0.9);
+    --color-overlay-dim-rgb: 255, 255, 255;
+    
+    --scrollbar-color: rgba(255, 255, 255, 0.1);
+    --scrollbar-color-hover: rgba(255, 255, 255, 0.2);
+    --scrollbar-color-active: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border-primary: #000000;
+    --color-border-secondary: #333333;
+  }
+  
+  [data-theme="dark"] {
+    --color-border-primary: #ffffff;
+    --color-border-secondary: #cccccc;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none;
+    animation: none;
+  }
+}

@@ -1,0 +1,179 @@
+﻿/* ==============================
+   1. 공통 레이아웃 및 컨테이너
+   ============================== */
+
+/* 헤더 컨테이너 정렬 */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    /* 좌우 패딩 통일 */
+    position: relative;
+    z-index: 4;
+}
+
+header {
+    position: relative;
+    overflow: hidden;
+    background-color: #1D2F4E;
+    /* Penguin Navy */
+    z-index: 1;
+}
+
+/* 메인 콘텐츠 영역 - Linear Style Update */
+.main-content {
+    position: relative;
+    z-index: 2;
+    margin-top: -60px;
+    /* 헤더 오버랩 줄임 */
+    background-color: #F8F9FA;
+    /* 회색 배경으로 변경하여 카드 강조 */
+    padding-top: 60px;
+    padding-bottom: 80px;
+    border-radius: 32px 32px 0 0;
+    /* 상단 둥근 모서리 */
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.05);
+    /* 상단 그림자 */
+    min-height: 80vh;
+}
+
+/* ==============================
+   2. 홈페이지 전용 스타일
+   ============================== */
+
+/* 접근 탭 스타일 (tabs.css에서 상세 정의됨) */
+.access-tabs {
+    /* 홈 화면에서는 하단 여백 추가 */
+    margin-bottom: 40px;
+}
+
+/* 탭 콘텐츠 표시 효과 */
+.tab-content {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==============================
+   3. 모바일 반응형 최적화
+   ============================== */
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-top: -40px;
+        border-radius: 24px 24px 0 0;
+        padding-top: 40px;
+    }
+
+    .container {
+        padding: 0 16px;
+    }
+}
+
+/* ==============================
+   4. 로그인/인증 스타일
+   ============================== */
+.login-with-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* ==============================
+   5. 펭귄 애니메이션 (레거시 코드 유지 - display:none)
+   ============================== */
+.penguin-ocean,
+.penguin-decoration {
+    display: none;
+}
+
+/* ==============================
+   6. 탭 콘텐츠 너비 일관성 (Standardized Tab Widths)
+   ============================== */
+
+/* 자격증 콘텐츠 기본 숨김 규칙 (명시적으로) */
+.cert-content {
+    display: none;
+}
+
+/* 활성화된 자격증 콘텐츠만 표시 */
+.cert-content.active,
+.cert-content[style*="display: block"] {
+    display: block;
+}
+
+/* 모든 메인 탭의 주요 콘텐츠 영역 너비를 800px로 제한하고 중앙 정렬 */
+.sub-tabs,
+.notice-section,
+.exam-section,
+.cert-content .sub-tabs,
+.analytics-dashboard-container,
+#lecture-tab>div,
+#lecture-coming-soon {
+    max-width: 800px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100%;
+}
+
+/* 서브탭 버튼 컨테이너 */
+.sub-tabs {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+}
+
+/* 공지사항 세부 스타일 조정 */
+.notice-section {
+    padding: 0 4px;
+    /* 카드 그림자 잘림 방지 */
+}
+
+/* 강의 탭 준비중 표시 중앙 정렬 보강 */
+#lecture-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#lecture-coming-soon {
+    width: 100%;
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* 모바일에서는 너비 제한 완화 */
+@media (max-width: 768px) {
+
+    .sub-tabs,
+    .notice-section,
+    .exam-section,
+    #lecture-tab>div {
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* 서브탭은 패딩을 제거하고 스크롤 가능하게 (tabs.css에서 처리) */
+    .sub-tabs {
+        justify-content: flex-start;
+    }
+}
