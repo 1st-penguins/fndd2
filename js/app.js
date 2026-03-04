@@ -563,6 +563,12 @@ function initTabs() {
       button.addEventListener('click', async function () {
         const tabId = this.getAttribute('data-tab');
 
+        // 강의 탭 클릭 시 외부 강의 페이지로 이동
+        if (tabId === 'lecture-tab') {
+          window.open('https://litt.ly/the1stpeng', '_blank', 'noopener');
+          return;
+        }
+
         // 학습분석 탭 클릭 시 특별 처리
         if (tabId === 'analytics-tab') {
           const result = await window.handleAnalyticsTabClick();

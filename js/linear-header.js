@@ -25,6 +25,7 @@ if (typeof window.LinearHeader === 'undefined') {
     init() {
       this.setupScrollEffect();
       this.setupMobileMenu();
+      this.removeContactLinks();
       this.setupActiveLink();
       this.setupAuthButtons();
       this.updateAuthState();
@@ -35,6 +36,27 @@ if (typeof window.LinearHeader === 'undefined') {
         this.mobileToggle.setAttribute('aria-label', this.mobileToggle.getAttribute('aria-label') || '메뉴');
         this.mobileToggle.setAttribute('aria-controls', this.mobileToggle.getAttribute('aria-controls') || 'mobile-menu');
         this.mobileToggle.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    // 문의 링크 제거 (네비/모바일 메뉴)
+    removeContactLinks() {
+      const removeLinks = (root = document) => {
+        const links = root.querySelectorAll('.linear-header__nav-link[href*="contact.html"]');
+        links.forEach(link => {
+          const listItem = link.closest('li');
+          if (listItem) {
+            listItem.remove();
+          } else {
+            link.remove();
+          }
+        });
+      };
+
+      removeLinks();
+
+      if (this.mobileMenu) {
+        removeLinks(this.mobileMenu);
       }
     }
 
