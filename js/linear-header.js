@@ -27,6 +27,7 @@ if (typeof window.LinearHeader === 'undefined') {
       this.setupMobileMenu();
       this.removeContactLinks();
       this.setupActiveLink();
+      this.setupHomeTabNavigation();
       this.setupAuthButtons();
       this.updateAuthState();
       this.setupCertificateBadge(); // 🎯 자격증 배지 초기화
@@ -250,6 +251,48 @@ if (typeof window.LinearHeader === 'undefined') {
           this.logout();
         });
       }
+    }
+
+    // 홈(index)에서 헤더 링크를 페이지 이동이 아닌 탭 전환으로 처리
+    setupHomeTabNavigation() {
+      const path = window.location.pathname || '/';
+      const isHomePage = path === '/' || path.endsWith('/index.html');
+      if (!isHomePage) return;
+
+      const navLinks = document.querySelectorAll('.linear-header__nav-link[href]');
+      navLinks.forEach(link => {
+        const rawHref = (link.getAttribute('href') || '').trim();
+        const href = rawHref.toLowerCase();
+
+        // 공지사항 링크: /notice, /notices, notices.html 모두 메인 공지 탭으로 이동
+        const isNoticeLink = href === '/notice' || href === '/notices'
+          || href.endsWith('/notices') || href.endsWith('/notice')
+          || href === 'notices.html' || href === '/notices.html';
+
+        // 문제풀기 링크: index.html#quiz-tab / #quiz-tab
+        const isQuizLink = href.includes('#quiz-tab');
+
+        if (!isNoticeLink && !isQuizLink) return;
+
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+
+          const targetTab = isNoticeLink ? 'notice-tab' : 'quiz-tab';
+          const tabButton = document.querySelector(`.access-tabs .tab-button[data-tab="${targetTab}"]`);
+          if (tabButton) {
+            tabButton.click();
+          }
+
+          const mainContent = document.querySelector('.main-content');
+          if (mainContent) {
+            mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+
+          if (this.isMenuOpen) {
+            this.closeMobileMenu();
+          }
+        });
+      });
     }
 
     // 로그인 모달 표시
