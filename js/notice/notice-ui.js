@@ -1,7 +1,7 @@
 // notice-ui.js - 공지사항 UI 관련 기능
 
 import { getNotices } from '../data/notice-repository.js';
-import { formatRelativeDate } from '../utils/date-utils.js';
+import { formatSimpleDate } from '../utils/date-utils.js';
 import { isAdmin } from '../auth/auth-utils.js';
 import { auth } from '../core/firebase-core.js';
 
@@ -23,7 +23,7 @@ export async function loadNotices(containerId = 'notice-container', options = {}
     showBadges: true,
     showDates: true,
     showPinned: true,
-    dateFn: formatRelativeDate
+    dateFn: formatSimpleDate
   };
 
   // 사용자 옵션과 기본 옵션 병합
@@ -118,7 +118,7 @@ export async function loadNoticesWithPagination(containerId = 'notice-container'
     showBadges: true,
     showDates: true,
     showPinned: true,
-    dateFn: formatRelativeDate,
+    dateFn: formatSimpleDate,
     paginationId: 'notice-pagination' // 페이지네이션 컨테이너 ID
   };
 
@@ -412,12 +412,12 @@ function createNoticeItem(notice, options) {
     badgeHTML = `<span class="notice-badge ${badgeClass}">${notice.badge}</span>`;
   }
 
-  // 일주일 이내의 공지인지 확인하여 NEW 배지 추가
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  // 30일 이내의 공지인지 확인하여 NEW 배지 추가
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
 
   const noticeDate = notice.timestamp || notice.createdAt;
-  const isNew = noticeDate && noticeDate > oneWeekAgo;
+  const isNew = noticeDate && noticeDate > oneMonthAgo;
 
   let newBadgeHTML = '';
   if (isNew) {

@@ -17,6 +17,8 @@ let totalTime = 20 * 60;    // 총 시간 (초 단위: 20분)
 let timeRemaining = totalTime;
 let reviewMode = false;     // 오답 리뷰 모드 여부
 let firstAttemptTracking = []; // 문제별 첫 시도 추적 배열
+let currentYear = '';
+let currentSubject = '';
 
 // HTML에서 접근할 수 있도록 전역 변수들을 window 객체에 추가
 window.questions = questions;
@@ -27,6 +29,48 @@ window.totalTime = totalTime;
 window.timeRemaining = timeRemaining;
 window.reviewMode = reviewMode;
 window.firstAttemptTracking = firstAttemptTracking;
+
+function getActiveSessionId() {
+  return localStorage.getItem('currentSessionId')
+    || localStorage.getItem('resumeSessionId')
+    || '';
+}
+
+function getProgressStorageKey() {
+  if (!currentYear || !currentSubject) return null;
+  const sessionId = getActiveSessionId() || 'no-session';
+  return `quiz_progress_${currentYear}_${encodeURIComponent(currentSubject)}_${sessionId}`;
+}
+
+function saveQuizProgress(lastQuestionIndex = currentQuestionIndex) {
+  try {
+    const storageKey = getProgressStorageKey();
+    if (!storageKey) return;
+    localStorage.setItem(storageKey, JSON.stringify({
+      answers: userAnswers,
+      perQuestionChecked,
+      lastQuestionIndex,
+      timestamp: Date.now()
+    }));
+  } catch (error) {
+    window.Logger?.warn('진행 상태 로컬 저장 실패:', error);
+  }
+}
+
+function restoreQuizProgress() {
+  try {
+    const storageKey = getProgressStorageKey();
+    if (!storageKey) return null;
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.answers)) return null;
+    return parsed;
+  } catch (error) {
+    window.Logger?.warn('진행 상태 로컬 복원 실패:', error);
+    return null;
+  }
+}
 
 /**
  * 퀴즈 초기화 함수
@@ -125,6 +169,8 @@ export async function initializeQuiz() {
         // 디코딩 실패 시 원본 사용
       }
     }
+    currentYear = year;
+    currentSubject = subject;
 
     // ✅ 일반 과목 시험인 경우 body에 data-current-subject 속성 추가
     // (CSS 스타일링을 위해 필요: indicators.css 등에서 사용)
@@ -189,6 +235,7 @@ export async function initializeQuiz() {
     perQuestionChecked = new Array(questions.length).fill(false);
     // 첫 시도 추적 배열 초기화
     firstAttemptTracking = new Array(questions.length).fill(true);
+    window.perQuestionChecked = perQuestionChecked;
 
     // ✅ 이어서 풀기: 세션에서 이전 답변 복원
     // urlParams와 isResume은 위에서 이미 선언됨
@@ -197,10 +244,37 @@ export async function initializeQuiz() {
     if (isResume) {
       window.Logger?.info('이어서 풀기 모드: 마지막 문제 위치 확인 중...');
       try {
+        // 1) 로컬 진행 상태 우선 복원 (끊김/새로고침 대응)
+        const restoredProgress = restoreQuizProgress();
+        if (restoredProgress) {
+          restoredProgress.answers.forEach((answer, index) => {
+            if (index < userAnswers.length && answer !== null && answer !== undefined) {
+              userAnswers[index] = answer;
+            }
+          });
+
+          if (Array.isArray(restoredProgress.perQuestionChecked)) {
+            restoredProgress.perQuestionChecked.forEach((checked, index) => {
+              if (index < perQuestionChecked.length) {
+                perQuestionChecked[index] = !!checked;
+              }
+            });
+            window.perQuestionChecked = perQuestionChecked;
+          }
+
+          if (typeof restoredProgress.lastQuestionIndex === 'number' && restoredProgress.lastQuestionIndex >= 0) {
+            lastQuestionNumber = restoredProgress.lastQuestionIndex + 1;
+          }
+
+          window.Logger?.info(`로컬 복원 완료: ${userAnswers.filter(a => a !== null).length}문제 답안`);
+        }
+
         // URL 파라미터나 로컬 스토리지에서 세션 ID 가져오기
         const sessionIdToRestore = resumeSessionId || localStorage.getItem('resumeSessionId');
-        // ✅ 답변 복원 없이 마지막 문제 번호만 가져오기
-        lastQuestionNumber = await getLastQuestionNumber(year, subject, sessionIdToRestore);
+        // 2) 로컬에 없을 때 서버의 마지막 위치로 보정
+        if (!lastQuestionNumber) {
+          lastQuestionNumber = await getLastQuestionNumber(year, subject, sessionIdToRestore);
+        }
         window.Logger?.info('마지막 풀었던 문제 번호:', lastQuestionNumber);
 
         // ✅ 이어서 풀기 모드에서 마지막 문제 번호로 currentQuestionIndex 초기화
@@ -222,6 +296,7 @@ export async function initializeQuiz() {
     window.questions = questions;
     window.userAnswers = userAnswers;
     window.firstAttemptTracking = firstAttemptTracking;
+    window.perQuestionChecked = perQuestionChecked;
 
     // 문제 초기화
     loadQuestion(currentQuestionIndex);
@@ -263,6 +338,7 @@ export async function initializeQuiz() {
         setTimeout(() => {
           updateSelectedOption();
           updateQuestionIndicators();
+          saveQuizProgress(currentQuestionIndex);
           window.Logger?.info('이어서 풀기: 답변 및 인디케이터 복원 완료');
         }, 100);
       }
@@ -283,6 +359,7 @@ export async function initializeQuiz() {
           setTimeout(() => {
             updateSelectedOption();
             updateQuestionIndicators();
+            saveQuizProgress(currentQuestionIndex);
             window.Logger?.info('이어서 풀기: 답변 및 인디케이터 복원 완료');
           }, 100);
         } else {
@@ -307,6 +384,13 @@ export async function initializeQuiz() {
 
     // 키보드 이벤트 리스너 등록
     document.addEventListener('keydown', handleKeyboardNavigation);
+
+    if (!window.__quizBeforeUnloadBound) {
+      window.addEventListener('beforeunload', () => {
+        saveQuizProgress(currentQuestionIndex);
+      });
+      window.__quizBeforeUnloadBound = true;
+    }
 
     window.Logger?.info('퀴즈 초기화 완료');
 
@@ -690,6 +774,7 @@ export function selectOption(optionIndex, questionIndex = currentQuestionIndex, 
 
   // window 객체 업데이트
   window.userAnswers = answers;
+  saveQuizProgress(questionIndex);
 
   // 현재 문제에 대한 답변인 경우만 UI 업데이트
   if (questionIndex === currentQuestionIndex) {
@@ -888,6 +973,7 @@ export function goToPreviousQuestion() {
   if (currentQuestionIndex > 0) {
     currentQuestionIndex--;
     window.currentQuestionIndex = currentQuestionIndex;
+    saveQuizProgress(currentQuestionIndex);
     loadQuestion(currentQuestionIndex);
   }
 }
@@ -899,6 +985,7 @@ export function goToNextQuestion() {
   if (currentQuestionIndex < questions.length - 1) {
     currentQuestionIndex++;
     window.currentQuestionIndex = currentQuestionIndex;
+    saveQuizProgress(currentQuestionIndex);
     loadQuestion(currentQuestionIndex);
   }
 }
@@ -1719,9 +1806,10 @@ export function showResults() {
     
     <div class="score-display">
       <div class="score-card">
-        <div class="score-label">My Score</div>
+        <div class="score-label">내 점수</div>
         <div class="score-value">${score}</div>
-        <div class="score-percent">${scorePercentage}% Success</div>
+        <div class="score-subvalue">총점 ${maxScore}점 기준</div>
+        <div class="score-percent">정답률 ${scorePercentage}%</div>
       </div>
     </div>
 
@@ -1735,6 +1823,13 @@ export function showResults() {
       <div style="margin-top: 12px; font-size: 0.95rem; opacity: 0.8;">
         정답: ${correctAnswers} / 전체: ${totalQuestions} 문항
       </div>
+    </div>
+
+    <div class="results-criteria">
+      <div class="results-criteria__title">채점 기준 안내</div>
+      <div class="results-criteria__item">합격 기준: 60점 이상</div>
+      <div class="results-criteria__item">과락 기준: 40점 미만</div>
+      <div class="results-criteria__item">현재 점수: ${score}점 (${scorePercentage}%)</div>
     </div>
     
     <div class="results-actions">
@@ -1861,6 +1956,8 @@ export function showCurrentAnswer() {
 
   // 현재 문제를 '확인됨'으로 표시하고 인디케이터에 즉시 반영
   perQuestionChecked[currentQuestionIndex] = true;
+  window.perQuestionChecked = perQuestionChecked;
+  saveQuizProgress(currentQuestionIndex);
   updateQuestionIndicators();
 }
 

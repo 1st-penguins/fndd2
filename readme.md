@@ -150,7 +150,6 @@ import { Navigation, NavigationItem } from 'linear-design-system';
   <ul className="linear-navigation__list">
     <NavigationItem href="/" active>홈</NavigationItem>
     <NavigationItem href="/about">소개</NavigationItem>
-    <NavigationItem href="/contact">연락처</NavigationItem>
   </ul>
   
   <div className="linear-navigation__actions">

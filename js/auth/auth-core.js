@@ -3,6 +3,8 @@
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
@@ -57,8 +59,24 @@ export async function initAuth() {
       };
     }
 
+    // redirect 로그인 복귀 결과 처리 (실패 원인 가시화)
+    try {
+      const redirectResult = await getRedirectResult(authInstance);
+      if (redirectResult?.user) {
+        console.log('✅ Redirect 로그인 복귀 성공:', redirectResult.user.email);
+      }
+    } catch (redirectError) {
+      console.error('❌ Redirect 로그인 복귀 오류:', redirectError);
+    }
+
     // 인증 상태 변경 감지 (모바일 환경 강화)
     onAuthStateChanged(authInstance, (user) => {
+      // auth 상태가 최소 1회 확정되었음을 전역 플래그로 기록
+      if (typeof window !== 'undefined') {
+        window.__authStateResolved = true;
+        window.__lastAuthState = !!user;
+      }
+
       if (window.Logger && window.Logger.isDev()) {
         console.log('🔄 Firebase 인증 상태 변경:', user ? '로그인 됨' : '로그아웃 상태');
         console.log('User:', user ? user.email : 'null');
@@ -68,6 +86,11 @@ export async function initAuth() {
       if (user) {
         // 로그인 상태 저장
         setLoggedIn(user);
+        
+        // 팝업/외부 탭 로그인 복귀 시 남아있는 로그인 모달 정리
+        if (typeof window.closeLoginModal === 'function') {
+          window.closeLoginModal();
+        }
 
         // 관리자 상태 확인 및 저장
         localStorage.setItem('isAdmin', isAdmin(user) ? 'true' : 'false');
@@ -206,11 +229,13 @@ export async function handleGoogleLogin() {
     // 인앱 브라우저 체크 추가
     if (isInAppBrowser()) {
       console.log('인앱 브라우저에서 구글 로그인 시도. 외부 브라우저로 리다이렉트 처리...');
-      handleExternalBrowserRedirect();
-      // 프로미스 반환 중단 (리다이렉트 처리됨)
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(null), 5000); // 타임아웃 처리
-      });
+      const redirected = handleExternalBrowserRedirect();
+      if (redirected) {
+        // 실제 리다이렉트가 일어난 경우에만 현재 흐름 중단
+        return null;
+      }
+      // 사용자가 리다이렉트를 취소한 경우 현재 탭에서 로그인 계속 진행
+      console.warn('외부 브라우저 리다이렉트가 실행되지 않아 현재 탭에서 로그인 진행');
     }
 
     // 로딩 표시 (auth-ui.js에서 처리하는 것이 더 적절함)
@@ -221,8 +246,26 @@ export async function handleGoogleLogin() {
     }
 
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    let user = null;
+    try {
+      const result = await signInWithPopup(auth, provider);
+      user = result.user;
+    } catch (popupError) {
+      const popupCode = popupError?.code || '';
+      const shouldFallbackToRedirect = popupCode === 'auth/popup-blocked'
+        || popupCode === 'auth/cancelled-popup-request'
+        || popupCode === 'auth/popup-closed-by-user';
+
+      if (!shouldFallbackToRedirect) {
+        throw popupError;
+      }
+
+      console.warn('팝업 로그인 실패, redirect 방식으로 재시도:', popupCode);
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
 
     if (window.Logger && window.Logger.isDev()) {
       console.log('Google 로그인 성공');
@@ -252,6 +295,13 @@ export async function handleGoogleLogin() {
     if (loginButton) {
       loginButton.innerHTML = '<span>G</span> Google로 로그인';
       loginButton.disabled = false;
+    }
+
+    if (error?.code === 'auth/unauthorized-domain') {
+      throw new Error('현재 도메인이 Firebase 인증 허용 도메인에 없습니다. Firebase Console > Authentication > Settings > Authorized domains에서 localhost를 추가해주세요.');
+    }
+    if (error?.code === 'auth/operation-not-allowed') {
+      throw new Error('Firebase Authentication에서 Google 로그인이 비활성화되어 있습니다. Sign-in method에서 Google을 활성화해주세요.');
     }
 
     throw error;

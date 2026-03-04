@@ -1,4 +1,4 @@
-﻿/* tabs.css - 프리미엄 세그먼트 컨트롤 스타일 (Linear Design) */
+/* tabs.css - 프리미엄 세그먼트 컨트롤 스타일 (Linear Design) */
 
 /* 메인 탭 컨테이너 - 세그먼트 컨트롤 스타일 */
 .access-tabs {
@@ -61,6 +61,15 @@
 
 /* 활성 탭 - 강조 스타일 */
 .tab-button.active {
+  background: #FFFFFF;
+  color: var(--penguin-navy);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-weight: 700;
+  transform: scale(1.02);
+}
+
+/* 외부 링크 탭(강의) 클릭 피드백 */
+.tab-button.link-clicked {
   background: #FFFFFF;
   color: var(--penguin-navy);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -217,6 +226,13 @@
   }
 
   .tab-button.active {
+    background: var(--penguin-navy);
+    color: #FFFFFF;
+    border-color: var(--penguin-navy);
+    box-shadow: 0 4px 10px rgba(29, 47, 78, 0.2);
+  }
+
+  .tab-button.link-clicked {
     background: var(--penguin-navy);
     color: #FFFFFF;
     border-color: var(--penguin-navy);

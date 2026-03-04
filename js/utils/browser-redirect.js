@@ -5,23 +5,22 @@
  * @returns {boolean} 내장 브라우저 여부
  */
 export function isInAppBrowser() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  
-  // 카카오톡 인앱 브라우저 감지
-  if (userAgent.indexOf('KAKAOTALK') > -1) return true;
-  
-  // 인스타그램 인앱 브라우저 감지
-  if (userAgent.indexOf('Instagram') > -1) return true;
-  
-  // 페이스북 인앱 브라우저 감지
-  if (userAgent.indexOf('FBAN') > -1 || userAgent.indexOf('FBAV') > -1) return true;
-  
-  // 라인 인앱 브라우저 감지
-  if (userAgent.indexOf('Line') > -1) return true;
-  
-  // 네이버 인앱 브라우저 감지
-  if (userAgent.indexOf('NAVER') > -1) return true;
-  
+  const userAgent = (navigator.userAgent || navigator.vendor || window.opera || '').toLowerCase();
+
+  // 데스크톱/에디터 내장 브라우저(Curor WebView 등) 오탐 방지:
+  // 인앱 브라우저 판정은 모바일 환경에서만 수행
+  const isMobile = /android|iphone|ipad|ipod/i.test(userAgent);
+  if (!isMobile) {
+    return false;
+  }
+
+  // 대표적인 모바일 인앱 브라우저 식별자
+  if (userAgent.includes('kakaotalk')) return true;
+  if (userAgent.includes('instagram')) return true;
+  if (userAgent.includes('fban') || userAgent.includes('fbav')) return true;
+  if (userAgent.includes('line/')) return true;
+  if (userAgent.includes('naver')) return true;
+
   return false;
 }
 
@@ -55,16 +54,19 @@ export function handleExternalBrowserRedirect() {
         setTimeout(function() {
           window.location.href = redirectUrl;
         }, 2000);
-      } 
+      }
       // 안드로이드의 경우
       else {
         window.location.href = 'intent://' + window.location.host + window.location.pathname + 
           window.location.search + '#Intent;scheme=https;package=com.android.chrome;end';
       }
+      return true;
     } else {
       console.log('사용자가 외부 브라우저 리다이렉트를 취소함');
+      return false;
     }
   }
+  return false;
 }
 
 /**

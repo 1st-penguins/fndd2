@@ -10,7 +10,8 @@ export const DEV_CONFIG = {
   isDevMode: (typeof window !== 'undefined' && 
               (window.location.hostname === 'localhost' || 
                window.location.hostname === '127.0.0.1' || 
-               window.location.hostname === '0.0.0.0')),
+               window.location.hostname === '0.0.0.0' ||
+               window.location.hostname === '::1')),
   
   // 개발 모드에서 사용할 가짜 사용자 정보
   mockUser: {
@@ -59,7 +60,8 @@ function hasTestParam() {
   if (typeof window === 'undefined') return false;
   const isLocalhost = window.location.hostname === 'localhost' ||
                       window.location.hostname === '127.0.0.1' ||
-                      window.location.hostname === '0.0.0.0';
+                      window.location.hostname === '0.0.0.0' ||
+                      window.location.hostname === '::1';
   if (!isLocalhost) return false;
   const params = new URLSearchParams(window.location.search);
   return params.get('test') === '1' || params.get('dev') === '1';
@@ -79,7 +81,8 @@ export function isDevMode() {
   // 로컬 환경이 아니면 false
   const isLocalhost = window.location.hostname === 'localhost' || 
                       window.location.hostname === '127.0.0.1' || 
-                      window.location.hostname === '0.0.0.0';
+                      window.location.hostname === '0.0.0.0' ||
+                      window.location.hostname === '::1';
   
   if (!isLocalhost) {
     return false;

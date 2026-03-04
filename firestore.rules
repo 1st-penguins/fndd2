@@ -75,13 +75,13 @@ service cloud.firestore {
     // 통합된 문제 풀이 기록
     match /attempts/{attemptId} {
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+      allow read, update, delete: if (isLoggedIn() && resource.data.userId == request.auth.uid) || isAdmin();
     }
     
     // 모의고사 결과
     match /mockExamResults/{resultId} {
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+      allow read, update, delete: if (isLoggedIn() && resource.data.userId == request.auth.uid) || isAdmin();
     }
     
     // 사용자 진행률 (User Progress)
@@ -97,11 +97,11 @@ service cloud.firestore {
     // 퀴즈/모의고사 세션 (중복 규칙 통합)
     match /quizSessions/{sessionId} {
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+      allow read, update, delete: if (isLoggedIn() && resource.data.userId == request.auth.uid) || isAdmin();
     }
     match /sessions/{sessionId} {
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+      allow read, update, delete: if (isLoggedIn() && resource.data.userId == request.auth.uid) || isAdmin();
     }
 
     // ============================================
@@ -122,7 +122,7 @@ service cloud.firestore {
     match /likes/{likeId} {
       allow read: if true;
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
-      allow delete: if isLoggedIn() && resource.data.userId == request.auth.uid || isAdmin();
+      allow delete: if (isLoggedIn() && resource.data.userId == request.auth.uid) || isAdmin();
     }
 
     // ============================================

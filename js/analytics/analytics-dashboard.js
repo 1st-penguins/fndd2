@@ -3,7 +3,7 @@
 
 import { getUserAttempts, getUserMockExamResults } from "../data/quiz-data-service.js";
 import { getUserProgress } from "../data/quiz-repository.js";
-import { db } from "../core/firebase-core.js";
+import { db, ADMIN_EMAILS, ensureAuthReady } from "../core/firebase-core.js";
 import { getCurrentCertificateType, getCertificateName, getCertificateEmoji } from "../utils/certificate-utils.js";
 import {
   collection,
@@ -1886,21 +1886,48 @@ async function loadAttemptsForSession(sessionId) {
     const sessionCard = window.sessionCards?.find(card => card.id === sessionId);
     if (sessionCard && sessionCard.attempts) {
       console.log(`[개발자 모드] 세션 ${sessionId}의 가상 attempts ${sessionCard.attempts.length}개 반환`);
-      return sessionCard.attempts.map((attempt, index) => ({
-        id: `mock-attempt-${sessionId}-${index}`,
-        userId: 'dev-user-123',
-        sessionId: sessionId,
-        timestamp: sessionCard.startTime || new Date(),
-        questionData: attempt.questionData || {
-          year: sessionCard.year,
-          subject: sessionCard.subject,
-          number: index + 1
-        },
-        userAnswer: attempt.userAnswer !== undefined ? attempt.userAnswer : Math.floor(Math.random() * 4),
-        isCorrect: attempt.isCorrect !== undefined ? attempt.isCorrect : Math.random() > 0.3,
-        certificateType: getCurrentCertificateType(),
-        questionNumber: attempt.questionData?.number || index + 1
-      }));
+      return sessionCard.attempts.map((attempt, index) => {
+        const userAnswerIndex = attempt.userAnswer !== undefined ? Number(attempt.userAnswer) : Math.floor(Math.random() * 4);
+        const isCorrect = attempt.isCorrect !== undefined ? attempt.isCorrect : Math.random() > 0.3;
+
+        let correctAnswerIndex = null;
+        if (attempt.correctAnswer !== undefined && attempt.correctAnswer !== null && !isNaN(attempt.correctAnswer)) {
+          correctAnswerIndex = Number(attempt.correctAnswer);
+        } else if (attempt.questionData?.correctAnswer !== undefined && attempt.questionData?.correctAnswer !== null && !isNaN(attempt.questionData.correctAnswer)) {
+          correctAnswerIndex = Number(attempt.questionData.correctAnswer);
+        } else if (attempt.questionData?.correctOption !== undefined && attempt.questionData?.correctOption !== null && !isNaN(attempt.questionData.correctOption)) {
+          correctAnswerIndex = Number(attempt.questionData.correctOption);
+        } else if (attempt.questionData?.correct !== undefined && attempt.questionData?.correct !== null && !isNaN(attempt.questionData.correct)) {
+          correctAnswerIndex = Number(attempt.questionData.correct);
+        }
+
+        // mock 데이터라도 정답 필드가 비어 보이지 않도록 보정
+        if (correctAnswerIndex === null || isNaN(correctAnswerIndex)) {
+          correctAnswerIndex = isCorrect
+            ? userAnswerIndex
+            : (userAnswerIndex + 1) % 4;
+        }
+
+        return {
+          ...attempt,
+          id: `mock-attempt-${sessionId}-${index}`,
+          userId: 'dev-user-123',
+          sessionId: sessionId,
+          timestamp: sessionCard.startTime || new Date(),
+          questionData: {
+            ...(attempt.questionData || {}),
+            year: attempt.questionData?.year || sessionCard.year,
+            subject: attempt.questionData?.subject || sessionCard.subject,
+            number: attempt.questionData?.number || index + 1,
+            correctAnswer: attempt.questionData?.correctAnswer ?? correctAnswerIndex
+          },
+          userAnswer: userAnswerIndex,
+          correctAnswer: attempt.correctAnswer ?? correctAnswerIndex,
+          isCorrect,
+          certificateType: getCurrentCertificateType(),
+          questionNumber: attempt.questionData?.number || index + 1
+        };
+      });
     }
     // 세션 카드가 없으면 빈 배열 반환
     console.warn(`[개발자 모드] 세션 ${sessionId}의 카드를 찾을 수 없습니다.`);
@@ -2833,132 +2860,212 @@ function createScoreModal(sessionData, attempts) {
   }
 
   // 정답 데이터 추출 유틸리티 함수
+  function toDisplayChoice(value) {
+    if (value === undefined || value === null) return null;
+    let numericValue = null;
+
+    if (typeof value === 'string') {
+      const matched = value.match(/\d+/);
+      if (matched) {
+        numericValue = Number(matched[0]);
+      }
+    } else if (!isNaN(value)) {
+      numericValue = Number(value);
+    }
+
+    if (numericValue === null || isNaN(numericValue)) return null;
+
+    // 기본 저장 포맷(0~3 인덱스) 우선 처리
+    if (numericValue >= 0 && numericValue <= 3) {
+      return numericValue + 1;
+    }
+
+    // 이미 1~4 번호로 저장된 데이터 호환
+    if (numericValue >= 1 && numericValue <= 4) {
+      return numericValue;
+    }
+
+    return numericValue;
+  }
+
   function getCorrectAnswer(attempt) {
-    if (attempt.correctAnswer !== undefined && attempt.correctAnswer !== null) {
-      return Number(attempt.correctAnswer) + 1;
+    const candidates = [
+      attempt.correctAnswer,
+      attempt.firstAttemptCorrectAnswer,
+      attempt.questionData?.correctAnswer,
+      attempt.questionData?.correctOption,
+      attempt.questionData?.correct
+    ];
+
+    for (const candidate of candidates) {
+      const parsed = toDisplayChoice(candidate);
+      if (parsed !== null) return parsed;
     }
 
-    if (attempt.questionData) {
-      if (attempt.questionData.correctAnswer !== undefined && attempt.questionData.correctAnswer !== null) {
-        return Number(attempt.questionData.correctAnswer) + 1;
-      }
-
-      if (attempt.questionData.correctOption !== undefined && attempt.questionData.correctOption !== null) {
-        return Number(attempt.questionData.correctOption) + 1;
-      }
-
-      if (attempt.questionData.correct !== undefined && attempt.questionData.correct !== null) {
-        return Number(attempt.questionData.correct) + 1;
-      }
+    const userDisplay = toDisplayChoice(attempt.userAnswer);
+    if (userDisplay !== null) {
+      // 데이터 누락 시 최소한 빈 값(-) 대신 표시 보장
+      if (attempt.isCorrect === true) return userDisplay;
+      return (userDisplay % 4) + 1;
     }
 
-    if (attempt.isCorrect === true && attempt.userAnswer !== undefined && attempt.userAnswer !== null) {
+    return '?';
+  }
+
+  function getDisplayQuestionNumber(attempt, fallbackIndex = 0) {
+    if (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null) {
+      return (attempt.questionData.globalIndex % 20) + 1;
+    }
+
+    if (attempt.questionNumber) {
+      return attempt.questionNumber > 20
+        ? ((attempt.questionNumber - 1) % 20) + 1
+        : attempt.questionNumber;
+    }
+
+    const fallbackNumber = attempt.questionData?.number || attempt.number || 0;
+    return fallbackNumber || (fallbackIndex + 1);
+  }
+
+  function getUserAnswer(attempt) {
+    if (attempt.userAnswer !== undefined && attempt.userAnswer !== null && !isNaN(attempt.userAnswer)) {
       return Number(attempt.userAnswer) + 1;
     }
-
+    if (attempt.answers && Object.keys(attempt.answers).length > 0) {
+      const firstValue = Object.values(attempt.answers)[0];
+      if (firstValue !== undefined && firstValue !== null && !isNaN(firstValue)) {
+        return Number(firstValue) + 1;
+      }
+    }
     return '-';
   }
 
+  function createQuestionRow(attempt, indexInList) {
+    const questionNumber = getDisplayQuestionNumber(attempt, indexInList);
+    const correctAnswer = getCorrectAnswer(attempt);
+    const userAnswer = getUserAnswer(attempt);
+    const isCorrect = attempt.isCorrect === true;
+    const statusText = isCorrect ? '정답' : '오답';
+    const statusBg = isCorrect ? '#ecfdf3' : '#fef2f2';
+    const statusColor = isCorrect ? '#047857' : '#b91c1c';
+    const subject = attempt.subject || attempt.questionData?.subject || sessionData?.subject || '';
+    const year = sessionData?.year || attempt.questionData?.year || '';
+
+    const row = document.createElement('div');
+    row.style.cssText = `
+      display: grid;
+      grid-template-columns: 86px 72px 1fr 92px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #eef2f7;
+    `;
+
+    row.innerHTML = `
+      <div style="font-size: 13px; font-weight: 700; color: #111827;">${questionNumber}번</div>
+      <div style="display: inline-flex; justify-content: center; align-items: center; width: 56px; padding: 4px 0; border-radius: 999px; background: ${statusBg}; color: ${statusColor}; font-size: 12px; font-weight: 700;">
+        ${statusText}
+      </div>
+      <div style="font-size: 12px; color: #374151; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        내 답 <strong style="color: #111827;">${userAnswer}</strong> / 정답 <strong style="color: #111827;">${correctAnswer}</strong>
+      </div>
+      <button type="button" style="justify-self: end; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 600; cursor: pointer;">
+        확인
+      </button>
+    `;
+
+    const confirmBtn = row.querySelector('button');
+    confirmBtn?.addEventListener('click', () => {
+      const url = `exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${questionNumber}`;
+      window.location.href = url;
+    });
+
+    return row;
+  }
+
+  function appendSection(container, sectionTitle, attemptList) {
+    if (!attemptList || attemptList.length === 0) return;
+
+    const section = document.createElement('div');
+    section.style.cssText = 'margin-top: 16px;';
+
+    const sectionHeader = document.createElement('div');
+    sectionHeader.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+      background: #f8fafc;
+    `;
+    const correctCountInSection = attemptList.filter(a => a.isCorrect === true).length;
+    sectionHeader.innerHTML = `
+      <div style="font-size: 14px; font-weight: 700; color: #1d2f4e;">${sectionTitle}</div>
+      <div style="font-size: 12px; color: #475569;">${correctCountInSection}/${attemptList.length} 정답</div>
+    `;
+
+    const list = document.createElement('div');
+    list.style.cssText = `
+      border: 1px solid #e2e8f0;
+      border-radius: 0 0 12px 12px;
+      overflow: hidden;
+      background: #ffffff;
+    `;
+
+    attemptList.forEach((attempt, index) => {
+      const row = createQuestionRow(attempt, index);
+      if (index === attemptList.length - 1) {
+        row.style.borderBottom = 'none';
+      }
+      list.appendChild(row);
+    });
+
+    section.appendChild(sectionHeader);
+    section.appendChild(list);
+    container.appendChild(section);
+  }
+
   // 모의고사 과목 매핑 (1교시/2교시 각 4과목 × 20문제 = 80문제)
-  // 1교시 과목
   const period1Subjects = {
     1: { name: '운동생리학', range: [1, 20] },
     2: { name: '건강체력평가', range: [21, 40] },
     3: { name: '운동처방론', range: [41, 60] },
     4: { name: '운동부하검사', range: [61, 80] }
   };
-
-  // 2교시 과목
   const period2Subjects = {
     1: { name: '운동상해', range: [1, 20] },
     2: { name: '기능해부학', range: [21, 40] },
     3: { name: '병태생리학', range: [41, 60] },
     4: { name: '스포츠심리학', range: [61, 80] }
   };
-
-  // 현재 교시 판단 (세션 데이터에서 확인)
   const isPeriod2 = sessionData?.hour === '2' ||
     sessionData?.subject?.includes('2교시') ||
     sessionData?.title?.includes('2교시');
-
   const mockExamSubjects = isPeriod2 ? period2Subjects : period1Subjects;
-
-  // 모의고사인지 확인
   const isMockExam = sessionData?.type === 'mockexam' || (sessionData?.title && sessionData.title.includes('모의고사'));
 
-  // 가로 그리드 컨테이너
-  const gridContainer = document.createElement('div');
-  gridContainer.style.cssText = `
-    margin-top: 16px;
-  `;
+  const resultContainer = document.createElement('div');
+  resultContainer.style.cssText = 'margin-top: 16px;';
 
   if (isMockExam && uniqueAttempts.length > 20) {
-    // 모의고사: 과목별로 구분해서 표시
     for (let subjectNum = 1; subjectNum <= 4; subjectNum++) {
       const subject = mockExamSubjects[subjectNum];
       const [start, end] = subject.range;
-
-      // 해당 과목의 문제들 필터링 (globalIndex 우선, +1 해서 1~80 범위)
       const subjectAttempts = uniqueAttempts.filter(attempt => {
-        let qNum;
-        if (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null) {
-          qNum = attempt.questionData.globalIndex + 1; // 0~79 → 1~80
-        } else {
-          qNum = attempt.questionNumber || attempt.questionData?.number || 0;
-        }
+        const qNum = (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null)
+          ? attempt.questionData.globalIndex + 1
+          : (attempt.questionNumber || attempt.questionData?.number || 0);
         return qNum >= start && qNum <= end;
       });
-
-      if (subjectAttempts.length === 0) continue;
-
-      // 과목 헤더 - 깔끔한 디자인
-      const subjectHeader = document.createElement('div');
-      subjectHeader.style.cssText = `
-        background: #f8fafc;
-        color: #1D2F4E;
-        padding: 16px 20px;
-        border-radius: 12px;
-        font-size: 15px;
-        font-weight: 600;
-        margin-top: ${subjectNum > 1 ? '32px' : '0'};
-        margin-bottom: 16px;
-        letter-spacing: -0.2px;
-        border: 1px solid #e2e8f0;
-      `;
-      subjectHeader.textContent = `${subject.name} (문제 1-20)`;
-      gridContainer.appendChild(subjectHeader);
-
-      // 해당 과목 문제 인라인 배치 - 한 줄로 주루룩
-      const subjectGrid = document.createElement('div');
-      subjectGrid.style.cssText = `
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        line-height: 1.8;
-      `;
-
-      // 과목별 문제 카드 생성
-      for (const attempt of subjectAttempts) {
-        const card = createQuestionCard(attempt, uniqueAttempts, sessionData);
-        subjectGrid.appendChild(card);
-      }
-
-      gridContainer.appendChild(subjectGrid);
+      appendSection(resultContainer, `${subject.name} (문제 1-20)`, subjectAttempts);
     }
   } else {
-    // 일반 문제: 인라인 배치 - 한 줄로 주루룩
-    gridContainer.style.display = 'flex';
-    gridContainer.style.flexWrap = 'wrap';
-    gridContainer.style.gap = '4px';
-    gridContainer.style.lineHeight = '1.8';
-
-    for (const attempt of uniqueAttempts) {
-      const card = createQuestionCard(attempt, uniqueAttempts, sessionData);
-      gridContainer.appendChild(card);
-    }
+    appendSection(resultContainer, '문제 정오표', uniqueAttempts);
   }
 
-  scrollableContent.appendChild(gridContainer);
+  scrollableContent.appendChild(resultContainer);
   modalContent.appendChild(scrollableContent);
 
   // 모달에 내용 추가
@@ -3052,18 +3159,19 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
   // 카드 생성 - 작고 깔끔한 인라인 디자인
   const card = document.createElement('div');
 
-  // 틀린 문제와 정답 문제를 색상으로만 구분
+  // 번호는 항상 검은색으로 고정하고, 정답/오답은 상태 아이콘으로 구분
   const isWrong = !isCorrect;
-  const textColor = isCorrect ? '#059669' : '#DC2626';
+  const statusColor = isCorrect ? '#059669' : '#DC2626';
+  const statusIcon = isCorrect ? '✓' : '✗';
 
   card.style.cssText = `
     display: inline-block;
-    padding: 2px 4px;
+    padding: 2px 6px;
     margin: 1px;
-    border-radius: 3px;
+    border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
-    color: ${textColor};
+    color: #111827;
     cursor: pointer;
     transition: all 0.15s ease;
     background: transparent;
@@ -3072,7 +3180,7 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
     white-space: nowrap;
   `;
 
-  // 호버 효과 - 약간의 배경색
+  // 호버 효과 - 상태에 따라 아주 약한 배경
   card.addEventListener('mouseenter', () => {
     card.style.backgroundColor = isCorrect ? 'rgba(5, 150, 105, 0.1)' : 'rgba(220, 38, 38, 0.1)';
   });
@@ -3093,22 +3201,22 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
     window.location.href = url;
   });
 
-  // 간단한 인라인 디자인 - 색상만으로 구분, 크기 일관성 유지
+  // 간단한 인라인 디자인 - 번호는 검은색, 상태는 체크/엑스 아이콘
   if (isWrong) {
-    // 틀린 문제: 문제번호(빨강) 내답(빨강) → 정답(초록)
+    // 오답: 번호 + 오답표시 + 내답 → 정답
     card.innerHTML = `
-      <span style="color: ${textColor}; font-size: 11px;">${questionNumber}</span>
-      <span style="color: ${textColor}; margin: 0 1px; font-size: 11px;">${userAnswer}</span>
+      <span style="color: #111827; font-size: 11px;">${questionNumber}</span>
+      <span style="color: ${statusColor}; margin: 0 2px; font-size: 10px; font-weight: 700;">${statusIcon}</span>
+      <span style="color: #DC2626; margin: 0 1px; font-size: 11px;">${userAnswer}</span>
       <span style="color: #94a3b8; margin: 0 1px; font-size: 10px;">→</span>
       <span style="color: #059669; font-size: 11px;">${correctAnswer}</span>
     `;
   } else {
-    // 정답인 경우: 문제번호(초록) 답(초록) - 틀린 문제와 동일한 구조로 크기 일관성 유지
+    // 정답: 번호 + 정답표시 + 내답
     card.innerHTML = `
-      <span style="color: ${textColor}; font-size: 11px;">${questionNumber}</span>
-      <span style="color: ${textColor}; margin-left: 1px; font-size: 11px;">${userAnswer}</span>
-      <span style="visibility: hidden; margin: 0 1px; font-size: 10px;">→</span>
-      <span style="visibility: hidden; font-size: 11px;">0</span>
+      <span style="color: #111827; font-size: 11px;">${questionNumber}</span>
+      <span style="color: ${statusColor}; margin: 0 2px; font-size: 10px; font-weight: 700;">${statusIcon}</span>
+      <span style="color: #374151; margin-left: 1px; font-size: 11px;">${userAnswer}</span>
     `;
   }
 
@@ -3391,10 +3499,8 @@ function renderAdminTab() {
     <div class="admin-filters">
       <div class="filter-group">
         <label for="admin-set-filter">문제풀이기록:</label>
-        <select id="admin-set-filter" class="filter-select">
-          <option value="all" selected>통합</option>
-          <option value="regular">일반 문제</option>
-          <option value="mockexam">모의고사</option>
+        <select id="admin-set-filter" class="filter-select" disabled>
+          <option value="all" selected>통합 (일반 + 모의고사)</option>
         </select>
       </div>
       <div class="filter-group">
@@ -3537,41 +3643,45 @@ function renderAdminTab() {
     }
     
     .section-title-admin {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--penguin-navy);
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid var(--iceberg-blue);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary-color, #1D2F4E);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color, #E2E8F0);
+      letter-spacing: -0.01em;
     }
     
     .reset-options {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 20px;
-      margin: 20px 0;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+      margin: 14px 0 8px;
     }
     
     .reset-option {
-      padding: 24px;
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
-      border: 1px solid #e0e0e0;
+      padding: 18px;
+      background: var(--background-card, #FFFFFF);
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      transition: all 0.25s ease;
+      border: 1px solid var(--border-color, #E2E8F0);
     }
     
     .reset-option:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      border-color: #cbd5e1;
     }
     
     .reset-all-option {
-      border-left: 4px solid #ef5350;
+      border-left: 3px solid var(--danger-color, #DC2626);
+      background: linear-gradient(180deg, rgba(220, 38, 38, 0.03) 0%, rgba(255, 255, 255, 1) 35%);
     }
     
     .reset-user-option {
-      border-left: 4px solid #ff9800;
+      border-left: 3px solid var(--warning-color, #D97706);
+      background: linear-gradient(180deg, rgba(217, 119, 6, 0.03) 0%, rgba(255, 255, 255, 1) 35%);
     }
     
     .reset-header {
@@ -3583,42 +3693,42 @@ function renderAdminTab() {
     
     .reset-header h4 {
       margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-primary, #1F2937);
+      letter-spacing: -0.01em;
     }
     
     .danger-badge, .warning-badge {
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
     }
     
     .danger-badge {
-      background: linear-gradient(135deg, #ef5350, #e53935);
-      color: white;
-      box-shadow: 0 2px 6px rgba(239, 83, 80, 0.3);
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--danger-color, #DC2626);
+      border-color: rgba(220, 38, 38, 0.25);
     }
     
     .warning-badge {
-      background: linear-gradient(135deg, #ff9800, #f57c00);
-      color: white;
-      box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
+      background: rgba(217, 119, 6, 0.1);
+      color: var(--warning-color, #D97706);
+      border-color: rgba(217, 119, 6, 0.25);
     }
     
     .warning-text {
-      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-      border-left: 4px solid #ff9800;
-      padding: 14px 16px;
-      margin-bottom: 18px;
-      color: #e65100;
-      border-radius: 6px;
-      font-size: 0.9rem;
+      background: rgba(220, 38, 38, 0.06);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      color: #991b1b;
+      border-radius: 10px;
+      font-size: 0.88rem;
       line-height: 1.6;
-      box-shadow: 0 2px 4px rgba(255, 152, 0, 0.1);
     }
     
     .input-group {
@@ -3628,46 +3738,46 @@ function renderAdminTab() {
     .input-group label {
       display: block;
       margin-bottom: 8px;
-      font-weight: 600;
-      color: #555;
-      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-secondary, #4B5563);
+      font-size: 0.88rem;
     }
     
     .admin-input {
       width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      transition: all 0.3s ease;
-      background: white;
+      padding: 11px 14px;
+      border: 1px solid var(--border-color, #E2E8F0);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      transition: all 0.25s ease;
+      background: #fff;
     }
     
     .admin-input:focus {
       outline: none;
-      border-color: var(--penguin-skyblue);
-      box-shadow: 0 0 0 3px rgba(95, 178, 201, 0.1);
+      border-color: var(--primary-light, #5FB2C9);
+      box-shadow: 0 0 0 3px rgba(95, 178, 201, 0.15);
     }
     
     .admin-action-button {
       width: 100%;
-      padding: 13px 24px;
-      border: none;
-      border-radius: 8px;
+      padding: 11px 16px;
+      border: 1px solid transparent;
+      border-radius: 10px;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: all 0.25s ease;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
     }
     
     .admin-action-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(15, 23, 42, 0.16);
     }
     
     .admin-action-button:active {
@@ -3675,21 +3785,21 @@ function renderAdminTab() {
     }
     
     .danger-button {
-      background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
-      color: white;
+      background: linear-gradient(135deg, var(--danger-color, #DC2626) 0%, #B91C1C 100%);
+      color: #fff;
     }
     
     .danger-button:hover {
-      background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+      background: linear-gradient(135deg, #B91C1C 0%, #991B1B 100%);
     }
     
     .warning-button {
-      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-      color: white;
+      background: linear-gradient(135deg, var(--warning-color, #D97706) 0%, #B45309 100%);
+      color: #fff;
     }
     
     .warning-button:hover {
-      background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
+      background: linear-gradient(135deg, #B45309 0%, #92400E 100%);
     }
     
     .status-message {
@@ -3714,16 +3824,16 @@ function renderAdminTab() {
     }
     
     .status-message.success {
-      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-      color: #2e7d32;
-      border: 2px solid #4caf50;
+      background: rgba(5, 150, 105, 0.08);
+      color: var(--success-color, #059669);
+      border: 1px solid rgba(5, 150, 105, 0.25);
       display: block;
     }
     
     .status-message.error {
-      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-      color: #c62828;
-      border: 2px solid #f44336;
+      background: rgba(220, 38, 38, 0.08);
+      color: #991b1b;
+      border: 1px solid rgba(220, 38, 38, 0.25);
       display: block;
     }
     
@@ -4019,12 +4129,14 @@ function updateUserResetStatus(message, className) {
 // 관리자 통계 불러오기 함수
 async function loadAdminStats(options = {}) {
   // UI에서 선택된 필터 값 가져오기
-  const setType = document.getElementById('admin-set-filter')?.value || 'all';
+  const setType = 'all'; // 관리자 통계는 항상 통합 집계
   const year = document.getElementById('year-filter')?.value || 'all';
-  const subject = document.getElementById('subject-filter')?.value || 'all';
+  const subject = document.getElementById('admin-subject-filter')?.value
+    || document.getElementById('subject-filter')?.value
+    || 'all';
 
   // options 객체에서 값 가져오기 (제공된 경우)
-  const setId = options.setId || setType;
+  const setId = 'all';
   const yearValue = options.year || year;
   const subjectValue = options.subject || subject;
 
@@ -4034,6 +4146,26 @@ async function loadAdminStats(options = {}) {
   showLoading('관리자 통계 로드 중...');
 
   try {
+    // 인증 상태 복원이 늦는 경우를 대비해 1회 대기
+    if (!auth?.currentUser) {
+      await ensureAuthReady();
+    }
+
+    const currentUser = auth?.currentUser || null;
+    if (!currentUser) {
+      hideLoading();
+      if (loader) loader.style.display = 'none';
+      showToast('로그인 상태를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.', 'error');
+
+      // UX 개선: 인증 세션이 없으면 로그인 모달 자동 호출
+      if (typeof window.lazyAuthAndShowLoginModal === 'function') {
+        window.lazyAuthAndShowLoginModal();
+      } else if (typeof window.showLoginModal === 'function') {
+        window.showLoginModal();
+      }
+      return;
+    }
+
     // 관리자 권한 확인
     if (!isAdmin()) {
       hideLoading();
@@ -4076,6 +4208,11 @@ async function loadAdminStats(options = {}) {
  */
 async function loadQuestionStatistics(year, subject, setType, container) {
   try {
+    const currentUser = auth?.currentUser || null;
+    const projectId = db?.app?.options?.projectId
+      || window.firebaseApp?.options?.projectId
+      || 'unknown';
+
     // 관리자 데이터 포함 여부
     const includeAdmin = document.getElementById('include-admin-data')?.checked || false;
 
@@ -4132,24 +4269,15 @@ async function loadQuestionStatistics(year, subject, setType, container) {
     // ✅ 관리자 데이터 필터링
     const includeAdminData = document.getElementById('include-admin-data')?.checked;
     if (!includeAdminData) {
-      const adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
       const beforeCount = attempts.length;
-      attempts = attempts.filter(a => !adminEmails.includes(a.userEmail));
+      attempts = attempts.filter(a => !ADMIN_EMAILS.includes(a.userEmail));
       console.log(`✅ 관리자 데이터 제외됨 (${beforeCount - attempts.length}개 제외)`);
     } else {
       console.log('✅ 관리자 데이터 포함');
     }
 
-    // ✅ 문제풀이기록 타입 필터링
-    if (setType === 'regular') {
-      attempts = attempts.filter(a => !a.questionData?.isFromMockExam);
-      console.log('✅ 일반 문제만 필터링');
-    } else if (setType === 'mockexam') {
-      attempts = attempts.filter(a => a.questionData?.isFromMockExam);
-      console.log('✅ 모의고사만 필터링');
-    } else {
-      console.log('✅ 전체 세트 (일반 + 모의고사 통합)');
-    }
+    // 관리자 통계는 항상 일반 + 모의고사 통합 집계
+    console.log('✅ 전체 세트 (일반 + 모의고사 통합)');
 
     console.log(`📊 Firebase reads: ${snapshot.size}개 (필터링 후: ${attempts.length}개)`)
 
@@ -4170,6 +4298,34 @@ async function loadQuestionStatistics(year, subject, setType, container) {
 
   } catch (error) {
     console.error('문제별 통계 로드 오류:', error);
+    const currentUser = auth?.currentUser || null;
+    const projectId = db?.app?.options?.projectId
+      || window.firebaseApp?.options?.projectId
+      || 'unknown';
+    const isPermissionDenied = error?.code === 'permission-denied';
+
+    if (isPermissionDenied) {
+      container.innerHTML = `
+        <div style="padding: 20px; border: 1px solid rgba(220,38,38,.25); background: rgba(220,38,38,.05); border-radius: 12px;">
+          <div style="font-size: 18px; font-weight: 700; color: #991b1b; margin-bottom: 10px;">⚠️ 관리자 통계 권한 없음</div>
+          <div style="font-size: 14px; color: #374151; line-height: 1.6;">
+            Firestore에서 <code>attempts</code> 전체 조회 권한이 거부되었습니다.<br />
+            아래 항목을 확인해주세요.
+          </div>
+          <ul style="margin: 12px 0 0 18px; color: #374151; font-size: 13px; line-height: 1.6;">
+            <li>로그인 이메일이 관리자 계정인지 확인</li>
+            <li>규칙이 <code>${projectId}</code> 프로젝트에 배포되었는지 확인</li>
+            <li><code>admins/${currentUser?.uid || 'YOUR_UID'}</code> 문서 존재 여부 확인</li>
+            <li>로그아웃/로그인으로 토큰 갱신 후 재시도</li>
+          </ul>
+          <div style="margin-top: 12px; padding: 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 12px; color: #4b5563;">
+            debug: projectId=<b>${projectId}</b>, email=<b>${currentUser?.email || 'null'}</b>, uid=<b>${currentUser?.uid || 'null'}</b>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
     container.innerHTML = `
       <div style="text-align: center; padding: 40px; color: #f44336;">
         <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
@@ -4234,7 +4390,9 @@ function renderQuestionStatsHTML(data, container) {
     const statsArray = Object.entries(questionStats);
 
     // 정렬 옵션 가져오기
-    const sortOption = document.getElementById('sort-filter')?.value || 'number';
+    const sortOption = document.getElementById('admin-sort-filter')?.value
+      || document.getElementById('sort-filter')?.value
+      || 'number';
 
     // 정렬 함수
     const sortStats = (stats) => {
@@ -4244,6 +4402,14 @@ function renderQuestionStatsHTML(data, container) {
           const accuracyA = a[1].correct / a[1].total;
           const accuracyB = b[1].correct / b[1].total;
           return accuracyB - accuracyA; // 높은 정답률부터 (내림차순)
+        });
+      } else if (sortOption === 'hardest') {
+        // 어려운 순 정렬 (정답률 낮은 순)
+        return stats.sort((a, b) => {
+          const accuracyA = a[1].correct / a[1].total;
+          const accuracyB = b[1].correct / b[1].total;
+          if (accuracyA !== accuracyB) return accuracyA - accuracyB;
+          return b[1].total - a[1].total; // 동률이면 표본 큰 순
         });
       } else {
         // 기본: 문제 번호순 정렬
@@ -4421,6 +4587,7 @@ function renderQuestionCard(stat) {
   const questionUrl = stat.isFromMockExam
     ? `../exam/${stat.year}_모의고사_${stat.mockExamPart || '1'}교시.html?question=${stat.number}`
     : `../exam/${stat.year}_${decodedSubject}.html?question=${stat.number}`;
+  const mostWrongOption = getMostSelectedWrongOption(stat);
 
   return `
     <div onclick="window.open('${questionUrl}', '_blank')" style="background: #fff; border: 2px solid ${color}; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
@@ -4443,7 +4610,14 @@ function renderQuestionCard(stat) {
       
       <div style="font-size: 12px; color: #666; text-align: center; line-height: 1.6;">
         <div style="margin-bottom: 4px;"><span style="font-weight: 600;">응시</span> ${stat.total}명</div>
-        <div style="color: ${color}; font-weight: bold; font-size: 16px;">${stat.correct}/${stat.total}</div>
+        <div style="color: ${color}; font-weight: bold; font-size: 14px; line-height: 1.5;">
+          정답 ${stat.correct}명 <span style="color: #94a3b8; font-weight: 500;">(정답률 ${accuracy}%)</span>
+        </div>
+      </div>
+      <div style="margin-top: 6px; text-align: center; font-size: 11px; color: #475569;">
+        ${mostWrongOption
+      ? `최다 오답: <strong style="color: #b91c1c;">${mostWrongOption.option}번</strong> (${mostWrongOption.rate}%, ${mostWrongOption.count}명)`
+      : '최다 오답: 데이터 부족'}
       </div>
       
       <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e0e0e0;">
@@ -4491,7 +4665,9 @@ function calculateQuestionStats(attempts) {
         fromBothTypes: false, // 일반+모의고사 둘 다 있는지 추적
         total: 0,
         correct: 0,
-        answers: { 0: 0, 1: 0, 2: 0, 3: 0 }
+        answers: { 0: 0, 1: 0, 2: 0, 3: 0 },
+        correctVotes: { 0: 0, 1: 0, 2: 0, 3: 0 },
+        correctAnswerIndex: null
       };
     }
 
@@ -4508,6 +4684,8 @@ function calculateQuestionStats(attempts) {
     const userAnswer = attempt.firstAttemptAnswer !== undefined
       ? attempt.firstAttemptAnswer
       : attempt.userAnswer;
+    const answerIndex = Number(userAnswer);
+    const correctAnswerIndex = extractCorrectAnswerIndex(attempt);
 
     stats[key].total++;
     if (isCorrect) {
@@ -4515,12 +4693,80 @@ function calculateQuestionStats(attempts) {
     }
 
     // 답안 선택 집계 (첫 시도 답변 사용)
-    if (userAnswer !== undefined && userAnswer !== null) {
-      stats[key].answers[userAnswer]++;
+    if (Number.isInteger(answerIndex) && answerIndex >= 0 && answerIndex <= 3) {
+      stats[key].answers[answerIndex]++;
+      if (isCorrect) {
+        stats[key].correctVotes[answerIndex]++;
+      }
+    }
+
+    // 명시된 정답 인덱스가 있으면 우선 반영
+    if (Number.isInteger(correctAnswerIndex) && correctAnswerIndex >= 0 && correctAnswerIndex <= 3) {
+      stats[key].correctAnswerIndex = correctAnswerIndex;
     }
   });
 
+  // 정답 정보가 없는 레거시 데이터는 정답으로 선택된 답안을 기반으로 추론
+  Object.values(stats).forEach((stat) => {
+    if (Number.isInteger(stat.correctAnswerIndex)) return;
+    let inferredIndex = null;
+    let maxVotes = 0;
+    [0, 1, 2, 3].forEach((idx) => {
+      const votes = stat.correctVotes[idx] || 0;
+      if (votes > maxVotes) {
+        maxVotes = votes;
+        inferredIndex = idx;
+      }
+    });
+    stat.correctAnswerIndex = maxVotes > 0 ? inferredIndex : null;
+  });
+
   return stats;
+}
+
+function extractCorrectAnswerIndex(attempt) {
+  const candidates = [
+    attempt?.correctAnswer,
+    attempt?.firstAttemptCorrectAnswer,
+    attempt?.questionData?.correctAnswer,
+    attempt?.questionData?.correctOption,
+    attempt?.questionData?.correct
+  ];
+
+  for (const raw of candidates) {
+    if (raw === undefined || raw === null || raw === '') continue;
+    const value = Number(raw);
+    if (!Number.isFinite(value)) continue;
+    if (value >= 0 && value <= 3) return Math.trunc(value);
+    if (value >= 1 && value <= 4) return Math.trunc(value) - 1;
+  }
+
+  return null;
+}
+
+function getMostSelectedWrongOption(stat) {
+  if (!stat || !stat.answers || stat.total <= 0) return null;
+  const correctIndex = Number.isInteger(stat.correctAnswerIndex) ? stat.correctAnswerIndex : null;
+  if (correctIndex === null) return null;
+
+  let bestIndex = null;
+  let bestCount = -1;
+
+  [0, 1, 2, 3].forEach((idx) => {
+    if (idx === correctIndex) return;
+    const count = stat.answers[idx] || 0;
+    if (count > bestCount) {
+      bestCount = count;
+      bestIndex = idx;
+    }
+  });
+
+  if (bestIndex === null || bestCount <= 0) return null;
+  return {
+    option: bestIndex + 1,
+    count: bestCount,
+    rate: ((bestCount / stat.total) * 100).toFixed(0)
+  };
 }
 
 /**

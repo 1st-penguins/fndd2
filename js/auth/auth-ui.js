@@ -17,6 +17,11 @@ import {
 import { Toast } from "../utils/toast.js";
 
 import { isDevMode } from "../config/dev-config.js";
+import {
+  canAccessRestrictedContent,
+  setupRestrictedLinkDelegation,
+  syncLoginOverlays
+} from "./access-guard.js";
 
 
 
@@ -219,10 +224,22 @@ function setupLoginModalEvents(modal) {
   const googleButton = modal.querySelector('.modern-google-button');
   if (googleButton) {
     googleButton.addEventListener('click', async () => {
+      const originalText = googleButton.innerHTML;
+      googleButton.disabled = true;
+      googleButton.innerHTML = '<span class="spinner"></span> Google 로그인 중...';
       try {
-        await handleGoogleLogin();
+        const result = await handleGoogleLogin();
+        // redirect 방식으로 전환된 경우 현재 페이지는 곧 이동/복귀됨
+        if (result === null) {
+          Toast.info('로그인 창으로 이동합니다. 완료 후 자동으로 반영됩니다.');
+        }
       } catch (error) {
         console.error('Google 로그인 오류:', error);
+        Toast.error(error?.message || 'Google 로그인에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      } finally {
+        // redirect로 페이지가 이동되지 않은 경우 버튼 상태 복구
+        googleButton.disabled = false;
+        googleButton.innerHTML = originalText;
       }
     });
   }
@@ -656,32 +673,26 @@ export function updateLoginUI() {
  * 제한된 콘텐츠 업데이트
  */
 export function updateRestrictedContent(isLoggedIn) {
-  // isLoggedIn이 undefined인 경우 isUserLoggedIn() 함수 결과 사용
-  if (isLoggedIn === undefined) {
-    isLoggedIn = isUserLoggedIn();
-  }
-
-  // 개발 모드에서는 항상 로그인된 상태로 처리
-  if (isDevMode()) {
-    isLoggedIn = true;
-  }
+  // 일부 호출부가 false를 넘겨도 실제 로그인 상태(프로필 표시/Firebase 상태)가 true면 우선 적용
+  const effectiveLoggedIn = isLoggedIn === true || canAccessRestrictedContent();
 
   // 제한된 콘텐츠 요소 업데이트
   const restrictedElements = document.querySelectorAll('.restricted-content');
   restrictedElements.forEach(el => {
-    if (isLoggedIn) {
+    if (effectiveLoggedIn) {
       el.classList.remove('content-blurred');
+      el.classList.remove('content-locked');
       el.style.filter = 'none';
       el.style.pointerEvents = 'auto';
     } else {
       el.classList.add('content-blurred');
-      el.style.filter = 'blur(5px)';
-      el.style.pointerEvents = 'none';
+      el.style.filter = '';
+      el.style.pointerEvents = 'auto';
     }
   });
 
   // 🚀 로그인 오버레이 클릭 이벤트 활성화 (모바일 UX 개선)
-  if (!isLoggedIn) {
+  if (!effectiveLoggedIn) {
     document.querySelectorAll('.login-required-overlay').forEach(overlay => {
       // 오버레이 자체 클릭 시 로그인 모달 표시
       overlay.style.cursor = 'pointer';
@@ -710,37 +721,8 @@ export function updateRestrictedContent(isLoggedIn) {
     });
   }
 
-  // 제한된 링크 처리
-  const restrictedLinks = document.querySelectorAll('.restricted-link');
-  restrictedLinks.forEach(link => {
-    // 기존 이벤트 제거 (중복 방지)
-    const clone = link.cloneNode(true);
-    // 인라인 onclick 이벤트가 있다면 제거 (로그인 체크 우회 방지)
-    clone.removeAttribute('onclick');
-    link.parentNode.replaceChild(clone, link);
-
-    if (isLoggedIn) {
-      // 로그인 시 제한된 링크 클래스 제거
-      clone.classList.remove('restricted-link');
-
-      // data-href 속성이 있으면 클릭 시 해당 주소로 이동하도록 설정
-      const href = clone.getAttribute('data-href');
-      if (href) {
-        clone.style.cursor = 'pointer';
-        clone.addEventListener('click', function (e) {
-          e.preventDefault();
-          window.location.href = href;
-        });
-      }
-    } else {
-      // 로그인 필요 모달 표시 이벤트 추가
-      clone.addEventListener('click', function (e) {
-        e.preventDefault();
-        showLoginModal();
-        return false;
-      });
-    }
-  });
+  setupRestrictedLinkDelegation(document);
+  syncLoginOverlays(document);
 }
 
 /**

@@ -1,4 +1,4 @@
-﻿/* 퀴즈 페이지 전용 스타일 */
+/* 퀴즈 페이지 전용 스타일 */
 
 /* main 안의 기존 푸터 숨기기 (Linear Footer와 중복 방지) */
 /* 사용 금지 - 선택자 구체성으로 해결 */
@@ -687,7 +687,7 @@ header::before {
 }
 
 .score-card {
-    background: linear-gradient(135deg, #1D2F4E 0%, #5FB2C9 100%);
+    background: #1D2F4E;
     color: #FFFFFF;
     padding: 40px 60px;
     border-radius: 24px;
@@ -715,6 +715,13 @@ header::before {
     font-weight: 800;
     line-height: 1;
     margin-bottom: 4px;
+}
+
+.score-subvalue {
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0.82;
+    margin-bottom: 8px;
 }
 
 .score-percent {
@@ -745,6 +752,29 @@ header::before {
     padding: 24px;
     border-radius: 16px;
     margin: 32px 0;
+}
+
+.results-criteria {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: left;
+    max-width: 540px;
+    margin: 0 auto 28px;
+}
+
+.results-criteria__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1E293B;
+    margin-bottom: 8px;
+}
+
+.results-criteria__item {
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.5;
 }
 
 .results-actions {

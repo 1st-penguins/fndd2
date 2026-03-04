@@ -29,13 +29,15 @@ export async function ensureFirebase() {
   initPromise = (async () => {
     if (app && auth && db) return { app, auth, db };
     try {
-      const [{ initializeApp }, { getAuth }, { getFirestore }] = await Promise.all([
+      const [{ initializeApp }, { getAuth, setPersistence, browserLocalPersistence }, { getFirestore }] = await Promise.all([
         import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js'),
         import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js'),
         import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js')
       ]);
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
+      // redirect/popup 복귀 후 세션 복원을 안정화
+      await setPersistence(auth, browserLocalPersistence);
       db = getFirestore(app);
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         console.log('Firebase v9 동적 초기화 완료');
@@ -87,7 +89,9 @@ if (typeof window !== 'undefined') {
   }
 
   // Service Worker 등록 (오프라인 캐시)
-  if ('serviceWorker' in navigator) {
+  // 로컬 개발 환경에서는 캐시로 인해 최신 스크립트가 반영되지 않는 문제가 잦아 비활성화
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if ('serviceWorker' in navigator && !isLocalhost) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js?v=' + (document.querySelector('meta[name="app-version"]')?.content || new Date().toISOString().split('T')[0].replace(/-/g, '')))
         .then((registration) => {
@@ -115,6 +119,11 @@ if (typeof window !== 'undefined') {
           console.warn('Service Worker 등록 실패:', err);
         });
     });
+  } else if ('serviceWorker' in navigator && isLocalhost) {
+    // 개발 중에는 기존 SW도 제거해서 캐시 영향 제거
+    navigator.serviceWorker.getRegistrations()
+      .then((regs) => Promise.all(regs.map((reg) => reg.unregister())))
+      .catch((err) => console.warn('로컬 SW 해제 실패:', err));
   }
 }
 

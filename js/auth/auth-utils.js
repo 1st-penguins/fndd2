@@ -39,7 +39,22 @@ export function isUserLoggedIn() {
   if (isDevMode()) {
     return true;
   }
-  return localStorage.getItem('userLoggedIn') === 'true';
+  const localLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+
+  // Firebase Auth가 실제 로그인 상태면 true
+  if (auth?.currentUser) {
+    return true;
+  }
+
+  // auth 상태가 이미 확정되었는데 currentUser가 없고 localStorage만 true면
+  // 오래된 로그인 캐시로 판단하여 정리한다.
+  if (localLoggedIn && window.__authStateResolved === true) {
+    clearLoginState();
+    return false;
+  }
+
+  // auth 상태가 아직 확정 전이면 기존 로컬 상태를 임시로 허용
+  return localLoggedIn;
 }
 
 /**
@@ -50,6 +65,9 @@ export function getCurrentUserName() {
   // 개발 모드에서는 가짜 사용자 이름 반환
   if (isDevMode()) {
     return getMockUser().displayName;
+  }
+  if (auth?.currentUser?.displayName || auth?.currentUser?.email) {
+    return auth.currentUser.displayName || auth.currentUser.email;
   }
   return localStorage.getItem('userName') || '사용자';
 }

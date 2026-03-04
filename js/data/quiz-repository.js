@@ -1,6 +1,6 @@
 // quiz-repository.js - 퀴즈 데이터 저장소 모듈 (세션 기반 업데이트 버전)
 
-import { db, auth } from '../core/firebase-core.js';
+import { db, auth, ensureAuthReady } from '../core/firebase-core.js';
 import {
   collection,
   doc,
@@ -42,10 +42,19 @@ function getDeviceType() {
  */
 export async function recordAttempt(questionData, userAnswer, isCorrect) {
   try {
-    // 사용자 정보 확인
-    const user = auth.currentUser;
+    // 사용자 정보 확인 (Firebase auth 초기 복원 타이밍 보정)
+    let user = auth?.currentUser || null;
     if (!user) {
-      console.warn('사용자가 로그인되어 있지 않습니다.');
+      try {
+        user = await ensureAuthReady();
+      } catch (authError) {
+        window.Logger?.warn('인증 상태 확인 실패:', authError);
+      }
+    }
+
+    if (!user) {
+      // 로그인 UI 상태와 Firebase 인증 복원 타이밍이 어긋날 수 있어 warning 대신 debug 처리
+      window.Logger?.debug('recordAttempt 스킵: 인증 사용자 없음');
       return { success: false, reason: 'not-logged-in' };
     }
 

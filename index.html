@@ -38,7 +38,7 @@
   }
   </script>
   <!-- 캐시 버스팅을 위한 버전 메타 태그 -->
-  <meta name="app-version" content="20250121">
+  <meta name="app-version" content="2026030405">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="//www.gstatic.com">
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
@@ -412,16 +412,15 @@
 
       <!-- 콘텐츠 영역 (H1: 검색 키워드 포함, H2: 슬로건) -->
       <div class="linear-hero__content animate-premium">
-        <h1 class="linear-hero__title">건운사(건강운동관리사) · 2급 생활스포츠지도사 기출문제·문제풀이</h1>
-        <h2 class="linear-hero__subtitle">Fear Not, Deep Dive – 두려움을 넘어, 더 깊은 곳으로.</h2>
-        <p class="linear-hero__description">
-          두렵고, 망설여지지만 괜찮아요.<br />
-          도전하고, 배우고, 성장하는<br />
-          과정 자체가 의미 있으니까요.
-        </p>
+        <h1 class="linear-hero__title">
+          <span class="linear-hero__title-line linear-hero__title-line--primary">건강운동관리사 / 건운사</span>
+          <span class="linear-hero__title-line linear-hero__title-line--secondary">2급 생활스포츠지도사</span>
+          <span class="linear-hero__title-line linear-hero__title-line--tertiary">기출문제 · 문제풀이</span>
+        </h1>
+        <p class="linear-hero__description">기출문제로 실전처럼 연습하고, 취약 과목을 빠르게 보완하세요.</p>
         <div class="linear-hero__highlight">
-          우리와 함께라면,<br />
-          더 깊은 바다도 두렵지 않을 거예요.
+          <span class="linear-hero__highlight-title">Fear Not, Deep Dive</span>
+          <span class="linear-hero__highlight-subtitle">두려움을 넘어, 더 깊은 곳으로</span>
         </div>
         <div class="linear-hero__actions">
           <button id="hero-start-quiz-health" class="btn-premium animate-premium delay-100" data-cert="health-manager">
@@ -463,8 +462,8 @@
       <div class="access-tabs">
         <button class="tab-button active" data-tab="notice-tab">공지</button>
         <button class="tab-button" data-tab="quiz-tab">문제풀기</button>
-        <button class="tab-button" data-tab="lecture-tab">강의</button>
         <button class="tab-button" data-tab="analytics-tab">학습분석</button>
+        <button class="tab-button" data-tab="lecture-tab">강의</button>
       </div>
       <div id="analytics-tab" class="tab-content">
         <!-- 학습 분석 대시보드 컨테이너 -->
@@ -707,6 +706,7 @@
                     <select id="admin-sort-filter" class="filter-select">
                       <option value="number">문제순</option>
                       <option value="accuracy">정답률순 (높은 순)</option>
+                      <option value="hardest">어려운순 (정답률 낮은 순)</option>
                     </select>
                   </div>
                   <button id="load-admin-stats" class="admin-button">통계 불러오기</button>
@@ -781,7 +781,8 @@
             </a>
           </div>
           <div class="section-description">
-            퍼스트펭귄 건강운동관리사 사이트의 소식과 업데이트 정보를 확인하세요.
+            퍼스트펭귄 건강운동관리사 사이트의 소식과 업데이트 정보를 확인하세요.<br>
+            문제풀이 콘텐츠를 상시 점검·업데이트하고 있습니다.
           </div>
         </div>
         <div class="notice-list" id="notice-list">
@@ -1676,16 +1677,21 @@
         });
       }
 
-      // 🎯 URL 해시로 탭 이동 처리
-      if (window.location.hash === '#quiz-tab') {
-        const quizTabBtn = document.querySelector('[data-tab="quiz-tab"]');
-        if (quizTabBtn) {
-          setTimeout(() => {
-            quizTabBtn.click();
-            document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
-          }, 100);
+      // 🎯 URL 해시로 탭 이동 처리 (초기 로드 + hash 변경 대응)
+      function handleTabHashNavigation() {
+        if (window.location.hash === '#quiz-tab') {
+          const quizTabBtn = document.querySelector('[data-tab="quiz-tab"]');
+          if (quizTabBtn) {
+            setTimeout(() => {
+              quizTabBtn.click();
+              document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
         }
       }
+
+      handleTabHashNavigation();
+      window.addEventListener('hashchange', handleTabHashNavigation);
 
       // 🎯 Hero 버튼 이벤트 리스너
       const heroHealthBtn = document.getElementById('hero-start-quiz-health');
@@ -1773,7 +1779,7 @@
   <!-- Linear Header -->
 
   <script src="js/linear-header.js"></script>
-  <script type="module" src="js/dev-mode-toggle.js"></script>
+  <script type="module" src="js/dev-mode-toggle.js?v=20260304-devfix"></script>
 
   <!-- Deploy timestamp: 2025-10-21 12:30 -->
 </body>

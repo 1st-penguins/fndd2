@@ -198,7 +198,6 @@ export const Demo: React.FC = () => {
                 <ul className="linear-navigation__list">
                   <NavigationItem href="/home">홈</NavigationItem>
                   <NavigationItem href="/about" active>소개</NavigationItem>
-                  <NavigationItem href="/contact">연락처</NavigationItem>
                 </ul>
               </Navigation>
             </div>

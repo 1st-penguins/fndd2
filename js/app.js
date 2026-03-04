@@ -1,11 +1,15 @@
 // app.js - 메인 애플리케이션 스크립트
 // 인덱스 페이지의 초기화 및 UI 기능 관리
 
-import { updateLoginUI } from './auth/auth-ui.js';
+import { updateLoginUI, updateRestrictedContent as updateAuthRestrictedContent } from './auth/auth-ui.js';
 import { loadNotices } from './notice/notice-ui.js';
-import { formatRelativeDate } from './utils/date-utils.js';
+import { formatSimpleDate } from './utils/date-utils.js';
 import { addScrollUpButton } from './utils/ui-utils.js';
-import { isDevMode } from './config/dev-config.js';
+import {
+  guardTabAccess,
+  setupRestrictedLinkDelegation,
+  syncLoginOverlays
+} from './auth/access-guard.js';
 
 /**
  * 홈 페이지 클래스 추가 (모바일 푸터 제어용)
@@ -27,6 +31,11 @@ function addHomePageClass() {
 
 // 전역 상태 관리
 let currentTab = 'notice-tab';
+
+function getAppVersion() {
+  return document.querySelector('meta[name="app-version"]')?.content
+    || new Date().toISOString().split('T')[0].replace(/-/g, '');
+}
 
 // 관리자 이메일 목록
 const ADMIN_EMAILS = [
@@ -123,6 +132,9 @@ window.updateTagSearchLinkVisibility = updateTagSearchLinkVisibility;
  * 문서 로드 완료 시 실행되는 초기화 함수
  */
 function initApp() {
+  if (window.__homeAppInitialized) return;
+  window.__homeAppInitialized = true;
+
   // 홈 페이지 클래스 추가 (모바일 푸터 제어용)
   addHomePageClass();
 
@@ -137,7 +149,23 @@ function initApp() {
     defaultTab.style.display = 'block';
   }
 
-  // 초기 렌더 시에는 인증 모듈을 로드하지 않음 (사용자 상호작용 시 로드)
+  // 인증 상태를 앱 시작 시 선초기화해서
+  // redirect 로그인 복귀 후에도 currentUser/localStorage 동기화를 보장
+  (async () => {
+    try {
+      const [{ ensureAuthReady }, authMod] = await Promise.all([
+        import('./core/firebase-core.js'),
+        import('./auth/auth-core.js')
+      ]);
+
+      if (authMod && typeof authMod.initAuth === 'function') {
+        await authMod.initAuth();
+      }
+      await ensureAuthReady();
+    } catch (e) {
+      console.warn('초기 인증 동기화 실패:', e);
+    }
+  })();
 
   // 탭 초기화
   initTabs();
@@ -165,6 +193,7 @@ function initApp() {
 
   // 로그인 상태에 따른 콘텐츠 제어
   updateRestrictedContent(isUserLoggedIn());
+  setupRestrictedLinkDelegation(document);
 
   // 강의 탭 표시 제어
   updateLectureTabVisibility();
@@ -266,78 +295,7 @@ function initApp() {
  * 로그인 상태에 따른 오버레이 표시/숨김
  */
 function updateLoginOverlays() {
-  // 모바일에서 더 안정적인 로그인 상태 확인
-  let isLoggedIn = false;
-
-  try {
-    // 1차: localStorage 확인
-    if (localStorage && localStorage.getItem) {
-      isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-    }
-    // 2차: Firebase 인증 상태 확인 (로드된 경우, 더 확실히)
-    if (window.auth) {
-      const currentUser = window.auth.currentUser;
-      if (currentUser) {
-        isLoggedIn = true;
-        // localStorage 동기화 (혹시 모를 불일치 방지)
-        localStorage.setItem('userLoggedIn', 'true');
-      }
-    }
-    // 3차: isUserLoggedIn 함수 확인 (최종 확인)
-    if (typeof window.isUserLoggedIn === 'function') {
-      const funcResult = window.isUserLoggedIn();
-      if (funcResult) {
-        isLoggedIn = true;
-      }
-    }
-  } catch (error) {
-    window.Logger?.error('로그인 상태 확인 중 오류:', error);
-    isLoggedIn = false;
-  }
-
-  // 로그인 상태 디버그 로그
-  window.Logger?.debug('오버레이 업데이트', {
-    isLoggedIn,
-    userAgent: navigator.userAgent,
-    localStorageState: localStorage.getItem('userLoggedIn')
-  });
-
-  if (isLoggedIn) {
-    document.body.classList.add('logged-in');
-
-    // 로그인 상태: 오버레이 숨기기
-    const overlays = document.querySelectorAll('.login-required-overlay');
-    window.Logger?.debug('오버레이 숨김', { count: overlays.length });
-
-    overlays.forEach((overlay) => {
-      overlay.style.display = 'none';
-      overlay.style.visibility = 'hidden';
-      overlay.style.opacity = '0';
-      overlay.style.pointerEvents = 'none';
-    });
-
-    window.Logger?.info('로그인 상태: 오버레이 모두 숨김');
-  } else {
-    document.body.classList.remove('logged-in');
-
-    // 비로그인 상태: 오버레이 표시
-    const overlays = document.querySelectorAll('.login-required-overlay');
-    window.Logger?.debug('오버레이 표시', { count: overlays.length });
-
-    overlays.forEach((overlay) => {
-      overlay.style.display = 'flex';
-      overlay.style.visibility = 'visible';
-      overlay.style.opacity = '1';
-      overlay.style.pointerEvents = 'auto';
-    });
-
-    window.Logger?.info('비로그인 상태: 오버레이 모두 표시');
-  }
-
-  // 오버레이 상태 확인 (디버그)
-  window.Logger?.debug('현재 오버레이 상태', {
-    count: document.querySelectorAll('.login-required-overlay').length
-  });
+  syncLoginOverlays(document);
 }
 
 /**
@@ -512,7 +470,7 @@ window.handleAnalyticsTabClick = async function () {
 
     // 로그인 상태: 대시보드 모듈 동적 로드 및 초기화
     try {
-      const dashboardModule = await import('./analytics/analytics-dashboard.js');
+      const dashboardModule = await import(`./analytics/analytics-dashboard.js?v=${getAppVersion()}`);
 
       // 임시 로더 제거
       const tempLoader = document.getElementById('temp-analytics-loader');
@@ -562,12 +520,6 @@ function initTabs() {
     if (!button.hasAttribute('onclick')) {  // onclick이 없는 버튼만 처리
       button.addEventListener('click', async function () {
         const tabId = this.getAttribute('data-tab');
-
-        // 강의 탭 클릭 시 외부 강의 페이지로 이동
-        if (tabId === 'lecture-tab') {
-          window.open('https://litt.ly/the1stpeng', '_blank', 'noopener');
-          return;
-        }
 
         // 학습분석 탭 클릭 시 특별 처리
         if (tabId === 'analytics-tab') {
@@ -636,7 +588,7 @@ function initNotices() {
   loadNotices('notice-list', {
     showBadges: true,
     showDates: true,
-    dateFn: formatRelativeDate
+    dateFn: formatSimpleDate
   })
     .then(() => {
       // 페이지네이션 처리가 필요할 경우 여기에 코드 추가
@@ -693,32 +645,9 @@ function initIcebergAnimation() {
  * @param {string} tabId - 탭 ID
  */
 function showTab(tabId) {
-  // 전역 isUserLoggedIn 함수가 있으면 사용, 없으면 localStorage 직접 확인
-  const isLoggedIn = (typeof window.isUserLoggedIn === 'function')
-    ? window.isUserLoggedIn()
-    : localStorage.getItem('userLoggedIn') === 'true';
-
-  // 로그인이 필요한 탭들
-  const restrictedTabs = ['subject-tab', 'year-tab'];
-
-  // 제한된 탭을 클릭했는데 로그인하지 않은 경우
-  if (restrictedTabs.includes(tabId) && !isLoggedIn && !isDevMode()) {
-    let message = '';
-
-    if (tabId === 'subject-tab') {
-      message = '과목별 목차 기능을 이용하려면 로그인이 필요합니다.\n로그인하시겠습니까?';
-    } else if (tabId === 'year-tab') {
-      message = '연도별 목차 기능을 이용하려면 로그인이 필요합니다.\n로그인하시겠습니까?';
-    }
-
-    if (confirm(message)) {
-      if (typeof window.showLoginModal === 'function') {
-        window.showLoginModal();
-      } else {
-        window.location.href = 'login.html';
-      }
-    }
-    return; // 탭 전환하지 않음
+  // 제한 탭 접근 제어
+  if (!guardTabAccess(tabId)) {
+    return;
   }
 
   // 모든 탭 내용 숨기기
@@ -748,7 +677,7 @@ function showTab(tabId) {
     if (tabId === 'analytics-tab') {
       setTimeout(async () => {
         try {
-          const dashboardModule = await import('./analytics/analytics-dashboard.js');
+          const dashboardModule = await import(`./analytics/analytics-dashboard.js?v=${getAppVersion()}`);
           if (dashboardModule && typeof dashboardModule.initAnalyticsSubTabs === 'function') {
             // 탭이 실제로 표시된 후 초기화
             dashboardModule.initAnalyticsSubTabs();
@@ -773,121 +702,19 @@ function showTab(tabId) {
  * @param {boolean} isLoggedIn - 로그인 상태
  */
 function updateRestrictedContent(isLoggedIn) {
-  // 제한된 콘텐츠 요소들
-  const restrictedContents = document.querySelectorAll('.restricted-content');
-
-  restrictedContents.forEach(content => {
-    if (isLoggedIn) {
-      // 로그인 상태면 원래 콘텐츠 표시
-      if (content.getAttribute('data-original-content')) {
-        content.innerHTML = content.getAttribute('data-original-content');
-      }
-      content.classList.remove('content-locked');
-    } else {
-      // 비로그인 상태면 제한된 콘텐츠 표시 (개발 모드가 아닐 때만)
-      if (!isDevMode()) {
-        if (!content.classList.contains('content-locked')) {
-          // 원본 내용 저장 (아직 저장되지 않은 경우)
-          if (!content.getAttribute('data-original-content')) {
-            content.setAttribute('data-original-content', content.innerHTML);
-          }
-          content.innerHTML = `
-            <div class="login-required-message">
-              <span>이 내용을 보려면 로그인이 필요합니다.</span>
-              <button class="login-button" onclick="window.showLoginModal && window.showLoginModal()">
-                로그인하기
-              </button>
-            </div>
-          `;
-          content.classList.add('content-locked');
-        }
-      }
-    }
-  });
-
-  // 제한된 링크 이벤트 처리
-  const restrictedLinks = document.querySelectorAll('.restricted-link');
-
-  restrictedLinks.forEach(link => {
-    const href = link.getAttribute('data-href');
-    const isPremiumOnly = link.classList.contains('premium-only');
-    const clone = link.cloneNode(true);
-    link.parentNode.replaceChild(clone, link);
-
-    // 원래 스타일 및 커서 설정
-    clone.style.cursor = 'pointer';
-
-    // 클릭 이벤트 핸들러 추가
-    clone.addEventListener('click', async function (e) {
-      e.preventDefault();
-
-      if (!isLoggedIn && !isDevMode()) {
-        // 로그인 필요 모달 표시 (개발 모드가 아닐 때만)
-        const loginRequiredModal = document.getElementById('login-required-modal');
-        if (loginRequiredModal) {
-          loginRequiredModal.style.display = 'flex';
-
-          // 모달 닫기 버튼에 이벤트 추가
-          const closeButton = loginRequiredModal.querySelector('.login-modal-close');
-          if (closeButton) {
-            closeButton.onclick = function () {
-              loginRequiredModal.style.display = 'none';
-            };
-          }
-        }
-        return;
-      }
-
-      // 프리미엄 전용 콘텐츠 확인 (현재 사용 안함)
-      // 2025년 문제도 무료 회원 접근 가능
-      if (isPremiumOnly) {
-        // 구독 상태 확인
-        const isPremium = window.subscriptionManager?.isPremium() || false;
-
-        if (!isPremium) {
-          // 프리미엄 안내는 표시하지 않고 바로 접근 허용
-          // (필요시 나중에 다시 활성화 가능)
-        }
-      }
-
-      // 로그인 상태이고 권한이 있으면 페이지 이동
-      if (href) {
-        window.location.href = href;
-      }
-    });
-  });
+  if (isLoggedIn === undefined) {
+    isLoggedIn = isUserLoggedIn();
+  }
+  updateAuthRestrictedContent(isLoggedIn);
+  syncLoginOverlays(document);
+  setupRestrictedLinkDelegation(document);
 }
 
 /**
  * 콘텐츠 접근 제어 적용
  */
 function applyContentRestrictions() {
-  const isLoggedIn = window.isUserLoggedIn ? window.isUserLoggedIn() : false;
-
-  // 제한된 링크 이벤트 리스너 설정
-  const links = document.querySelectorAll('.restricted-link');
-
-  links.forEach(link => {
-    const clone = link.cloneNode(true);
-    link.parentNode.replaceChild(clone, link);
-
-    if (!isLoggedIn && !isDevMode()) {
-      clone.addEventListener('click', function (e) {
-        e.preventDefault();
-        const loginRequiredModal = document.getElementById('login-required-modal');
-        if (loginRequiredModal) {
-          loginRequiredModal.style.display = 'flex';
-
-          const closeButton = loginRequiredModal.querySelector('.login-modal-close');
-          if (closeButton) {
-            closeButton.onclick = function () {
-              loginRequiredModal.style.display = 'none';
-            };
-          }
-        }
-      });
-    }
-  });
+  updateRestrictedContent(isUserLoggedIn());
 }
 
 // DOM 로드 시 앱 초기화
@@ -895,6 +722,7 @@ document.addEventListener('DOMContentLoaded', initApp);
 
 // 인증 상태 변경 이벤트 리스너
 document.addEventListener('authStateChanged', function (e) {
+  window.__lastAuthState = !!e.detail.user;
   // 로그인 UI 업데이트
   updateLoginUI();
 
@@ -903,6 +731,13 @@ document.addEventListener('authStateChanged', function (e) {
 
   // 플로팅 버튼 표시 여부 업데이트
   updateFloatingButtonsVisibility();
+});
+
+window.addEventListener('loginStateChanged', function (e) {
+  const isLoggedIn = !!e.detail?.isLoggedIn;
+  window.__lastAuthState = isLoggedIn;
+  updateRestrictedContent(isLoggedIn);
+  updateLoginOverlays();
 });
 
 /**

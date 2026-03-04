@@ -4,6 +4,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/fi
 import { auth } from "../core/firebase-core.js";
 import { isUserLoggedIn } from "../auth/auth-utils.js";
 import { showLoginModal, closeLoginModal, updateLoginUI, updateRestrictedContent } from "../auth/auth-ui.js";
+import { navigateWithAccessGuard, setupRestrictedLinkDelegation } from "../auth/access-guard.js";
 import { addScrollUpButton } from "../utils/ui-utils.js";
 
 /**
@@ -67,30 +68,14 @@ function startSecurityInterception() {
  * @param {string} url - 이동할 URL
  */
 function secureNavigate(url) {
-  if (isUserLoggedIn()) {
-    window.location.href = url;
-  } else {
-    showLoginModal();
-  }
+  navigateWithAccessGuard(url);
 }
 
 /**
  * 제한된 링크에 이벤트 핸들러 등록
  */
 function setupRestrictedLinks() {
-  // .restricted-link 클래스를 가진 요소들에 대한 통합 처리
-  // 상위 요소나 body에 위임
-  document.body.addEventListener('click', function (e) {
-    // .restricted-link 클릭 감지
-    const link = e.target.closest('.restricted-link');
-    if (link) {
-      e.preventDefault();
-      const href = link.getAttribute('data-href');
-      if (href) {
-        secureNavigate(href);
-      }
-    }
-  });
+  setupRestrictedLinkDelegation(document);
 }
 
 /**
