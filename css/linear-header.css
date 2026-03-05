@@ -18,6 +18,7 @@
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
   height: 48px;
   padding: 0;
+  overflow: visible; /* 모바일 드롭다운 메뉴가 잘리지 않도록 */
 }
 
 .linear-header--scrolled {
@@ -430,10 +431,13 @@
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.3s ease;
   transform-origin: top;
+  z-index: 1003; /* 헤더 액션(1002) 위에 표시, 아래 콘텐츠 위에 확실히 표시 */
 }
 
 .linear-header__mobile-menu--active {
   display: flex;
+  visibility: visible;
+  opacity: 1;
 }
 
 /* 반응형 디자인 */

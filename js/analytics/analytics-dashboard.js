@@ -2789,20 +2789,26 @@ function createScoreModal(sessionData, attempts) {
   const processedQuestions = new Set();
   const skippedQuestions = [];
 
+  const totalCount = sortedAttempts.length;
   for (const attempt of sortedAttempts) {
-    // globalIndex 우선, 없으면 subject+number 조합으로 고유 ID 생성
-    // 중복 제거 시에는 원본 값 사용 (0~79), 표시할 때만 +1
+    // globalIndex 우선, 없으면 1-based 번호를 0-based로 통일해 동일 문제 중복 제거
+    // (예: globalIndex 0과 questionNumber 1이 같은 "1번"으로 인식되도록)
     let questionId;
 
     if (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null) {
       questionId = `g_${attempt.questionData.globalIndex}`; // "g_0", "g_1", ..., "g_79"
-    } else if (attempt.questionNumber) {
-      questionId = attempt.questionNumber;
+    } else if (attempt.questionNumber != null && attempt.questionNumber !== '') {
+      // questionNumber 1 = 문제 1 → g_0 로 통일 (정오표에서 1~20 다음에 1이 또 나오는 현상 방지)
+      questionId = `g_${Number(attempt.questionNumber) - 1}`;
     } else {
-      // globalIndex 없으면 subject+number 조합 (예: "스포츠심리학_20")
       const subject = attempt.subject || attempt.questionData?.subject || '';
-      const number = attempt.questionData?.number || attempt.number || 0;
-      questionId = `${subject}_${number}`;
+      const number = Number(attempt.questionData?.number ?? attempt.number ?? 0);
+      // 20문제 세트: number 1~20 → g_0~g_19 로 통일
+      if (totalCount <= 20 && number >= 1 && number <= 20) {
+        questionId = `g_${number - 1}`;
+      } else {
+        questionId = `${subject}_${number}`;
+      }
     }
 
     if (questionId && processedQuestions.has(questionId)) {
@@ -2830,10 +2836,13 @@ function createScoreModal(sessionData, attempts) {
   }
 
   const sortedIds = Array.from(processedQuestions).sort((a, b) => {
-    // 숫자와 문자열 혼합 정렬
-    const aNum = typeof a === 'number' ? a : parseInt(a) || 999;
-    const bNum = typeof b === 'number' ? b : parseInt(b) || 999;
-    return aNum - bNum;
+    const toNum = (id) => {
+      if (typeof id === 'number') return id;
+      if (typeof id === 'string' && id.startsWith('g_')) return parseInt(id.substring(2), 10);
+      const parsed = parseInt(id, 10);
+      return isNaN(parsed) ? 999 : parsed;
+    };
+    return toNum(a) - toNum(b);
   });
   console.log('고유 문제 ID들 (정렬됨):', sortedIds);
 

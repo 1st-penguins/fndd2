@@ -1105,6 +1105,10 @@ function updateQuestionIndicators() {
       } else {
         indicator.classList.add('answered');
       }
+    } else if (perQuestionChecked[index]) {
+      // 정답보기만 누르고 넘어간 경우(선택 없이): 풀린 문제로 표시
+      indicator.classList.add('answered');
+      indicator.classList.add('checked-correct');
     }
   });
 }

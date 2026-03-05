@@ -114,12 +114,22 @@ if (typeof window.LinearHeader === 'undefined') {
       this.mobileToggle.parentNode.replaceChild(newToggle, this.mobileToggle);
       this.mobileToggle = newToggle;
 
-      this.mobileToggle.addEventListener('click', (e) => {
+      let lastToggleTime = 0;
+      const handleToggle = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('🍔 햄버거 버튼 클릭됨');
+        const now = Date.now();
+        if (now - lastToggleTime < 400) return; /* 터치 시 touchend + click 중복 방지 */
+        lastToggleTime = now;
         this.toggleMobileMenu();
-      });
+      };
+
+      this.mobileToggle.addEventListener('click', handleToggle);
+      // 모바일 터치 기기에서 클릭이 누락되거나 지연되는 경우 대비 (preventDefault로 합성 click 중복 방지)
+      this.mobileToggle.addEventListener('touchend', (e) => {
+        if (e.cancelable) e.preventDefault();
+        handleToggle(e);
+      }, { passive: false });
 
       // 모바일 메뉴 링크 클릭 시 메뉴 닫기
       const mobileLinks = this.mobileMenu.querySelectorAll('.linear-header__nav-link');

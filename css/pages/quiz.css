@@ -518,16 +518,13 @@ header::before {
 
 @media (max-width: 576px) {
     .quiz-container {
-        padding: 50px 20px 30px;
-        /* 상단 패딩 늘려서 문제 번호 공간 확보 */
+        padding: 20px 20px 30px;
         border-radius: 16px;
     }
 
+    /* 모바일에서 문제 번호 뱃지 숨김 (잘림 방지) */
     .question-number {
-        top: 10px;
-        left: 15px;
-        padding: 4px 10px;
-        font-size: 0.75rem;
+        display: none;
     }
 }
 
@@ -656,6 +653,51 @@ header::before {
     filter: grayscale(1);
     cursor: not-allowed;
     pointer-events: none;
+}
+
+/* 네비게이션 버튼 - 모바일에서 잘리지 않도록 */
+@media (max-width: 768px) {
+    .navigation-buttons {
+        gap: 10px;
+        margin: 28px 12px;
+        padding: 0 4px;
+        box-sizing: border-box;
+    }
+
+    .nav-button {
+        min-width: 0;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        flex: 1;
+        max-width: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .navigation-buttons {
+        gap: 8px;
+        margin: 24px 8px;
+        padding: 0 2px;
+    }
+
+    .nav-button {
+        padding: 12px 10px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .navigation-buttons {
+        gap: 6px;
+        margin: 20px 6px;
+        padding: 0;
+    }
+
+    .nav-button {
+        padding: 11px 8px;
+        font-size: 0.8rem;
+        border-radius: 10px;
+    }
 }
 
 /* 결과 요약 - Premium Dashboard Style */
@@ -995,13 +1037,6 @@ box-shadow: 0 4px 8px rgba(29, 47, 78, 0.3);
         overflow: visible;
         max-width: 100%;
         display: inline-block;
-    }
-
-    .question-number {
-        left: 15px;
-        padding: 4px 10px;
-        font-size: 0.8rem;
-        top: -10px;
     }
 
     .option-buttons {

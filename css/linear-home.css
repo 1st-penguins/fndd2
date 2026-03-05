@@ -1,4 +1,4 @@
-﻿/* Linear Design System - Homepage Styles */
+/* Linear Design System - Homepage Styles */
 
 /* Linear Homepage Styles - Theme variables are defined in linear-themes.css */
 
@@ -498,12 +498,53 @@ body {
     box-sizing: border-box;
   }
   
+  /* 탭을 한 줄에 맞춰 한눈에 보이도록 (모바일에서 양끝 잘림 방지) */
   .tab-navigation {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    min-width: 0;
   }
-  
+
+  .tab-navigation .tab-button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 6px;
+    font-size: 13px;
+  }
+
+  .tab-navigation .tab-button .linear-typography {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .sub-navigation {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    min-width: 0;
+  }
+
+  .sub-navigation .sub-tab-button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+
+  .sub-navigation .sub-tab-button .linear-typography {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   .exam-section {

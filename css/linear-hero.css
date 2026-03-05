@@ -310,7 +310,7 @@
 
 @media (max-width: 768px) {
   .linear-hero__scroll-hint {
-    bottom: max(92px, calc(78px + env(safe-area-inset-bottom)));
+    bottom: max(24px, calc(16px + env(safe-area-inset-bottom)));
     font-size: 13px;
     gap: 6px;
   }
@@ -319,6 +319,11 @@
     width: 22px;
     height: 22px;
     font-size: 11px;
+  }
+
+  /* 공지사항 버튼과 더 알아보기 겹침 방지: 액션 아래 여백 확보 */
+  .linear-hero__actions {
+    margin-bottom: 64px;
   }
 }
 
