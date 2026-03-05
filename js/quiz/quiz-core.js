@@ -42,6 +42,50 @@ function getProgressStorageKey() {
   return `quiz_progress_${currentYear}_${encodeURIComponent(currentSubject)}_${sessionId}`;
 }
 
+function buildRegularSessionMetadata(year, subject, totalQuestions = 20) {
+  return {
+    type: 'regular',
+    year: year || '',
+    subject: subject || '',
+    title: year && subject ? `${year}년 ${subject} 기출문제` : (subject || '일반 문제풀이'),
+    totalQuestions: totalQuestions > 0 ? totalQuestions : 20,
+    examType: '일반문제',
+    isActive: true
+  };
+}
+
+async function ensureRegularSessionForPage({ year, subject, isResume, resumeSessionId, totalQuestions = 20 }) {
+  try {
+    // 이어풀기 모드라면 기존 세션을 그대로 사용
+    if (isResume && resumeSessionId) {
+      localStorage.setItem('currentSessionId', resumeSessionId);
+      return;
+    }
+
+    const manager = window.sessionManager || sessionManager;
+    if (!manager || typeof manager.startNewSession !== 'function') {
+      return;
+    }
+
+    const existingSession = manager.currentSession;
+    const isSameRegularSession = !!(
+      existingSession &&
+      existingSession.type === 'regular' &&
+      existingSession.year === year &&
+      existingSession.subject === subject &&
+      existingSession.isActive !== false
+    );
+
+    // 다른 과목/연도의 세션을 재사용하지 않도록 현재 페이지 기준으로 새 세션 시작
+    if (!isSameRegularSession) {
+      const metadata = buildRegularSessionMetadata(year, subject, totalQuestions);
+      await manager.startNewSession(metadata);
+    }
+  } catch (error) {
+    window.Logger?.warn('일반문제 세션 준비 실패:', error);
+  }
+}
+
 function saveQuizProgress(lastQuestionIndex = currentQuestionIndex) {
   try {
     const storageKey = getProgressStorageKey();
@@ -87,57 +131,10 @@ export async function initializeQuiz() {
     const isResume = urlParams.get('resume') === 'true';
     const resumeSessionId = urlParams.get('sessionId') || localStorage.getItem('resumeSessionId');
 
-    // 세션 초기화 추가
-    try {
-      // 이어서 풀기 모드인 경우 기존 세션 사용
-      if (isResume && resumeSessionId) {
-        window.Logger?.debug('이어서 풀기 모드: 기존 세션 사용:', resumeSessionId);
-        localStorage.setItem('currentSessionId', resumeSessionId);
-        // resumeSessionId는 나중에 사용하므로 제거하지 않음
-      } else {
-        // 1. 세션 매니저 확인
-        if (window.sessionManager) {
-          window.Logger?.debug('window.sessionManager를 사용하여 세션 초기화');
-
-          // 현재 세션이 있는지 확인
-          if (!window.sessionManager.currentSession || !window.sessionManager.currentSession.id) {
-            window.Logger?.debug('유효한 세션이 없어 새로 시작합니다.');
-            // 세션 시작 전 인증 대기 (Race Condition 방지)
-            const { ensureAuthReady } = await import('../core/firebase-core.js');
-            await ensureAuthReady();
-
-            const session = await window.sessionManager.startNewSession();
-            window.Logger?.debug('새 세션이 시작되었습니다:', session);
-          } else {
-            window.Logger?.debug('기존 세션이 유효합니다:', window.sessionManager.currentSession);
-          }
-        } else if (sessionManager) {
-          window.Logger?.debug('임포트된 sessionManager를 사용하여 세션 초기화');
-
-          // 현재 세션이 있는지 확인
-          if (!sessionManager.currentSession || !sessionManager.currentSession.id) {
-            window.Logger?.debug('유효한 세션이 없어 새로 시작합니다.');
-            const session = await sessionManager.startNewSession();
-            window.Logger?.debug('새 세션이 시작되었습니다:', session);
-          } else {
-            window.Logger?.debug('기존 세션이 유효합니다:', sessionManager.currentSession);
-          }
-        } else {
-          window.Logger?.warn('세션 매니저를 찾을 수 없습니다. 로컬 스토리지를 사용합니다.');
-
-          // 로컬 스토리지에서 세션 ID 확인
-          let localSessionId = localStorage.getItem('currentSessionId');
-          if (!localSessionId) {
-            window.Logger?.debug('로컬 스토리지에 세션 ID가 없어 새로 생성합니다.');
-            localSessionId = generateSessionId();
-            localStorage.setItem('currentSessionId', localSessionId);
-          }
-          window.Logger?.debug('로컬 스토리지 세션 ID:', localSessionId);
-        }
-      }
-    } catch (error) {
-      window.Logger?.error('세션 초기화 오류:', error);
-      // 세션 초기화 실패는 치명적 오류가 아니므로 계속 진행
+    // 세션 초기화: 이어풀기 세션만 우선 유지
+    if (isResume && resumeSessionId) {
+      window.Logger?.debug('이어서 풀기 모드: 기존 세션 사용:', resumeSessionId);
+      localStorage.setItem('currentSessionId', resumeSessionId);
     }
 
     // 현재 파일 이름에서 년도와 과목 정보 추출
@@ -171,6 +168,15 @@ export async function initializeQuiz() {
     }
     currentYear = year;
     currentSubject = subject;
+
+    // 일반문제 세션을 페이지 단위로 분리해 누적 혼합(예: 160/160) 방지
+    await ensureRegularSessionForPage({
+      year,
+      subject,
+      isResume,
+      resumeSessionId,
+      totalQuestions: 20
+    });
 
     // ✅ 일반 과목 시험인 경우 body에 data-current-subject 속성 추가
     // (CSS 스타일링을 위해 필요: indicators.css 등에서 사용)
@@ -1415,6 +1421,30 @@ export async function submitQuiz() {
     console.warn("사용자가 로그인하지 않아 결과가 저장되지 않습니다.");
   }
 
+  // 일반문제 제출 완료 시 세션 종료 (다음 풀이와 세션 분리)
+  try {
+    const manager = window.sessionManager || sessionManager;
+    if (manager && typeof manager.endSession === 'function') {
+      const correctAnswers = calculateScore();
+      const totalQuestions = questions.length;
+      const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+
+      await manager.endSession({
+        totalQuestions,
+        attemptedQuestions: userAnswers.filter(answer => answer !== null).length,
+        correctAnswers,
+        accuracy: score,
+        title: `${currentYear}년 ${currentSubject} 기출문제`,
+        year: currentYear,
+        subject: currentSubject,
+        type: 'regular',
+        completedAt: new Date()
+      });
+    }
+  } catch (error) {
+    console.warn('일반문제 세션 종료 오류 (무시됨):', error);
+  }
+
   // 결과 화면 표시
   showResults();
 }
@@ -1442,6 +1472,19 @@ function generateSessionId() {
  * 퀴즈 재시작
  */
 export function resetQuiz() {
+  // 재도전 시 새로운 일반문제 세션 시작
+  try {
+    const manager = window.sessionManager || sessionManager;
+    if (manager && typeof manager.startNewSession === 'function') {
+      const metadata = buildRegularSessionMetadata(currentYear, currentSubject, questions.length || 20);
+      manager.startNewSession(metadata).catch(error => {
+        window.Logger?.warn('재도전 세션 시작 실패:', error);
+      });
+    }
+  } catch (error) {
+    window.Logger?.warn('재도전 세션 준비 오류:', error);
+  }
+
   currentQuestionIndex = 0;
   userAnswers = new Array(questions.length).fill(null);
   timeRemaining = totalTime;

@@ -1,8 +1,10 @@
 // notice-detail.js - 공지사항 상세 페이지 컨트롤러
 
-import { getNoticeById } from "../data/notice-repository.js";
+import { getNoticeById, incrementNoticeViewCount } from "../data/notice-repository.js";
 import { formatSimpleDate } from "../utils/date-utils.js";
 import { initComments } from "../data/comment-ui.js";
+import { isAdmin } from "../auth/auth-utils.js";
+import { auth } from "../core/firebase-core.js";
 
 // 상세 페이지 배지 스타일 동적 추가
 function addBadgeStyles() {
@@ -60,6 +62,9 @@ function initNoticePage() {
  */
 async function loadNotice(noticeId) {
   try {
+    // 상세 진입 시 조회수 증가 (실패해도 상세 로딩은 계속 진행)
+    await incrementNoticeViewCount(noticeId);
+
     // 데이터 로드
     const notice = await getNoticeById(noticeId);
     
@@ -95,6 +100,17 @@ function updateNoticeContent(notice) {
   
   // 날짜 포맷팅
   document.getElementById('notice-date').textContent = formatSimpleDate(notice.timestamp);
+
+  // 관리자에게만 조회수 표시
+  const viewCountElement = document.getElementById('notice-view-count');
+  if (viewCountElement) {
+    if (isAdmin(auth.currentUser)) {
+      viewCountElement.textContent = `조회 ${notice.viewCount || 0}`;
+      viewCountElement.style.display = 'inline-block';
+    } else {
+      viewCountElement.style.display = 'none';
+    }
+  }
   
   // 배지 설정
   const badgeElement = document.getElementById('notice-badge');

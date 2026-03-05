@@ -113,6 +113,16 @@
   font-weight: 400;
 }
 
+.notice-views {
+  font-family: "Inter Variable", sans-serif;
+  font-size: 0.82rem;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-weight: 500;
+}
+
 /* 배지 스타일 */
 .notice-badge {
   font-family: "Inter Variable", sans-serif;
@@ -181,6 +191,16 @@
   min-height: 40px;
 }
 
+.notice-pagination-wrap {
+  width: 100%;
+}
+
+.notice-pagination-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .pagination-button {
   min-width: 36px;
   height: 36px;
@@ -213,11 +233,9 @@
   cursor: not-allowed;
 }
 
-/* 관리자 글쓰기 버튼 (Floating style) */
+/* 관리자 글쓰기 버튼 (인라인 배치) */
 .write-notice-btn {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
+  position: static;
   background: #1D2F4E;
   color: white;
   padding: 12px 20px;
@@ -238,6 +256,42 @@
   box-shadow: 0 6px 16px rgba(29, 47, 78, 0.35);
   background: #2a4366;
   opacity: 1 !important;
+}
+
+/* 관리자 전용 통계 패널 */
+.admin-usage-panel {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-usage-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.admin-usage-label {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.admin-usage-value {
+  margin-top: 4px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1D2F4E;
+}
+
+.admin-usage-empty {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+  font-size: 0.9rem;
 }
 
 /* ============================================
@@ -294,6 +348,10 @@
     margin-top: 8px;
   }
 
+  .admin-usage-panel {
+    grid-template-columns: 1fr;
+  }
+
   /* 페이지네이션 중앙 정렬 보장 */
   .notice-pagination {
     margin-top: 24px;
@@ -301,11 +359,13 @@
     justify-content: center;
   }
 
-  /* 모바일에서 작성 버튼 위치 조정 */
+  /* 모바일에서 작성 버튼 크기 조정 */
   .write-notice-btn {
-    bottom: 20px;
-    right: 20px;
     padding: 10px 16px;
     font-size: 0.9rem;
+  }
+
+  .notice-pagination-actions {
+    justify-content: center;
   }
 }

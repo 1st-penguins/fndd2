@@ -111,6 +111,118 @@ export async function getNoticeById(id) {
 }
 
 /**
+ * 공지사항 조회수 증가
+ * @param {string} id - 공지사항 ID
+ * @returns {Promise<number|null>} 증가 후 조회수 (실패 시 null)
+ */
+export async function incrementNoticeViewCount(id) {
+  try {
+    const { db } = await ensureFirebase();
+    const { doc, runTransaction, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+    const docRef = doc(db, NOTICES_COLLECTION, id);
+    const nextCount = await runTransaction(db, async (transaction) => {
+      const docSnap = await transaction.get(docRef);
+      if (!docSnap.exists()) {
+        throw new Error("존재하지 않는 공지사항입니다.");
+      }
+
+      const data = docSnap.data() || {};
+      const currentCount = Number.isFinite(data.viewCount) ? data.viewCount : 0;
+      const updatedCount = currentCount + 1;
+
+      transaction.update(docRef, {
+        viewCount: updatedCount,
+        lastViewedAt: serverTimestamp()
+      });
+
+      return updatedCount;
+    });
+
+    return nextCount;
+  } catch (error) {
+    console.error("공지사항 조회수 증가 오류:", error);
+    return null;
+  }
+}
+
+/**
+ * 공지사항/방문자 사용 통계 조회 (관리자 전용)
+ * 방문자 수는 attempts 기준 활성 사용자 수로 계산한다.
+ * @param {number} days - 최근 집계 기간(일)
+ * @returns {Promise<Object|null>} 통계 객체
+ */
+export async function getNoticeUsageStats(days = 30) {
+  try {
+    if (!isAdmin()) {
+      throw new Error("관리자 권한이 필요합니다.");
+    }
+
+    const { db } = await ensureFirebase();
+    const {
+      collection,
+      query,
+      where,
+      getDocs,
+      Timestamp
+    } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+    // 1) 공지 조회수 합계
+    const noticesSnap = await getDocs(collection(db, NOTICES_COLLECTION));
+    let totalNoticeViews = 0;
+    noticesSnap.forEach((docSnap) => {
+      const data = docSnap.data() || {};
+      totalNoticeViews += Number.isFinite(data.viewCount) ? data.viewCount : 0;
+    });
+
+    // 2) 방문자(활성 사용자) 집계 - attempts 컬렉션 userId 기준
+    const now = new Date();
+    const start30 = new Date(now);
+    start30.setDate(start30.getDate() - Math.max(1, days));
+
+    const startToday = new Date(now);
+    startToday.setHours(0, 0, 0, 0);
+
+    const attemptsRef = collection(db, 'attempts');
+    const attempts30Q = query(
+      attemptsRef,
+      where('timestamp', '>=', Timestamp.fromDate(start30))
+    );
+    const attemptsTodayQ = query(
+      attemptsRef,
+      where('timestamp', '>=', Timestamp.fromDate(startToday))
+    );
+
+    const [attempts30Snap, attemptsTodaySnap] = await Promise.all([
+      getDocs(attempts30Q),
+      getDocs(attemptsTodayQ)
+    ]);
+
+    const unique30 = new Set();
+    attempts30Snap.forEach((docSnap) => {
+      const userId = docSnap.data()?.userId;
+      if (userId) unique30.add(userId);
+    });
+
+    const uniqueToday = new Set();
+    attemptsTodaySnap.forEach((docSnap) => {
+      const userId = docSnap.data()?.userId;
+      if (userId) uniqueToday.add(userId);
+    });
+
+    return {
+      totalNotices: noticesSnap.size,
+      totalNoticeViews,
+      activeUsersLast30Days: unique30.size,
+      activeUsersToday: uniqueToday.size
+    };
+  } catch (error) {
+    console.error("공지사항 사용 통계 조회 오류:", error);
+    return null;
+  }
+}
+
+/**
  * 공지사항 생성
  * @param {Object} noticeData - 공지사항 데이터
  * @returns {Promise<Object>} 생성된 공지사항
@@ -357,6 +469,8 @@ if (typeof window !== 'undefined') {
 export default {
   getNotices,
   getNoticeById,
+  incrementNoticeViewCount,
+  getNoticeUsageStats,
   createNotice,
   updateNotice,
   deleteNotice,

@@ -63,6 +63,7 @@
           <img src="images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
         </div>
         <span class="linear-header__brand-text">퍼스트펭귄</span>
+        <span class="cert-badge" id="header-cert-badge">건강운동관리사</span>
       </a>
 
       <nav class="linear-header__nav">
@@ -83,8 +84,10 @@
       </nav>
 
       <div class="linear-header__auth">
-        <a href="#" class="linear-header__nav-link" data-action="show-login">로그인</a>
-        <div id="user-profile-container" style="display: none;">
+        <div id="login-button-container">
+          <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
+        </div>
+        <div id="user-profile-container" class="linear-header__user-profile" style="display: none;">
           <div class="linear-header__user-profile">
             <div class="linear-header__user-avatar" id="user-avatar">U</div>
             <span class="linear-header__user-name" id="user-name">사용자</span>
@@ -94,7 +97,8 @@
       </div>
 
       <div class="linear-header__actions">
-        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
+          aria-expanded="false">
           <span class="linear-header__mobile-toggle-line"></span>
           <span class="linear-header__mobile-toggle-line"></span>
           <span class="linear-header__mobile-toggle-line"></span>
@@ -282,6 +286,7 @@
   </footer>
 
   <!-- 스크립트 -->
+  <script src="js/linear-header.js"></script>
   <script type="module" src="js/tag-search.js"></script>
 </body>
 

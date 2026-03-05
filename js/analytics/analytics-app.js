@@ -260,14 +260,15 @@ function checkLoginStatus() {
 function setupAuthStateListener() {
   onAuthStateChanged(auth, user => {
     console.log('인증 상태 변경:', user ? '로그인됨' : '로그아웃 상태');
+    const devMode = typeof isDevMode === 'function' && isDevMode();
     
-    if (user) {
+    if (user || devMode) {
       // 로그인 상태
       document.getElementById('login-required').style.display = 'none';
       document.getElementById('analytics-dashboard').style.display = 'block';
       
       // 관리자 확인 및 관리자 탭 표시
-      if (isAdmin(user)) {
+      if ((user && isAdmin(user)) || devMode) {
         document.querySelectorAll('.admin-only').forEach(el => {
           el.style.display = 'block';
         });
@@ -280,8 +281,9 @@ function setupAuthStateListener() {
         // 대시보드 초기화
         initDashboard();
         
-        // 분석 데이터 로드
-        loadAnalyticsData(user);
+        // 분석 데이터 로드 (개발모드는 목 사용자로 처리)
+        const analyticsUser = user || (typeof getMockUser === 'function' ? getMockUser() : null);
+        loadAnalyticsData(analyticsUser);
       }
     } else {
       // 로그아웃 상태

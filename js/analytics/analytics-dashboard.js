@@ -1584,7 +1584,22 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
         }
 
         // 세션 시도 기록 처리
-        const sessionAttempts = attemptsBySession[sessionId] || [];
+        let sessionAttempts = attemptsBySession[sessionId] || [];
+
+        // 일반문제는 세션 메타(subject/year)와 일치하는 시도만 집계해
+        // 과거 혼합 세션(여러 과목이 한 세션에 누적된 경우) 표시 왜곡을 방지
+        if (sessionData.type !== 'mockexam') {
+          sessionAttempts = sessionAttempts.filter((attempt) => {
+            const attemptYear = attempt?.year || attempt?.questionData?.year || '';
+            const attemptSubject = attempt?.subject || attempt?.questionData?.subject || '';
+
+            const yearMatches = !sessionData.year || !attemptYear || attemptYear === sessionData.year;
+            const subjectMatches = !sessionData.subject || !attemptSubject || attemptSubject === sessionData.subject;
+
+            return yearMatches && subjectMatches;
+          });
+        }
+
         const rawAttemptCount = sessionAttempts.length;
         
         // ✅ 빈 세션 필터링: 시도 기록이 없는 세션은 모두 제외
@@ -1657,13 +1672,14 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
         if (sessionData.type === 'mockexam') {
           totalQuestions = 80; // 모의고사는 항상 80문제
         } else {
-          totalQuestions = sessionData.totalQuestions || Math.max(attemptCount, 20);
+          // 일반문제는 항상 20문항 기준으로 표시 (과거 오염 데이터 방어)
+          totalQuestions = 20;
         }
         
         // ✅ completed는 실제 풀린 문제 수지만, 모의고사인 경우 최대 80으로 제한
         const completed = sessionData.type === 'mockexam' 
           ? Math.min(attemptCount, 80)  // 모의고사는 최대 80문제
-          : attemptCount;  // 일반 문제는 실제 시도 횟수
+          : Math.min(attemptCount, totalQuestions);  // 일반 문제는 전체 문항 수를 넘지 않도록 제한
         
         // ✅ 이어서 풀기 조건: 활성 세션이고, 풀이한 문제 수가 전체 문제 수보다 적을 때만
         const canResume = isActive && completed > 0 && completed < totalQuestions;
@@ -1772,6 +1788,22 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
               console.warn('세션 ID 파싱 오류:', error);
               sessionTitle = `세션 (${displayDate})`;
             }
+          }
+        }
+
+        // 제목-타입 불일치 방어: 과거 오염 세션의 제목을 강제 정규화
+        if (sessionData.type === 'regular' && sessionTitle.includes('모의고사')) {
+          if (sessionData.year && sessionData.subject) {
+            sessionTitle = `${sessionData.year}년 ${sessionData.subject} 기출문제`;
+          } else if (sessionData.subject) {
+            sessionTitle = `${sessionData.subject} 기출문제`;
+          }
+        } else if (sessionData.type === 'mockexam' && sessionTitle.includes('기출문제')) {
+          const displayHour = sessionData.hour || sessionData.mockExamPart || '';
+          if (sessionData.year && displayHour) {
+            sessionTitle = `${sessionData.year}년 ${displayHour}교시 모의고사`;
+          } else if (sessionData.year) {
+            sessionTitle = `${sessionData.year}년 모의고사`;
           }
         }
 

@@ -418,6 +418,15 @@ window.showPreviewContent = function () {
  * 홈 화면 내에서 대시보드 로드
  */
 window.handleAnalyticsTabClick = async function () {
+  // 개발 모드 확인
+  let isDevModeActive = false;
+  try {
+    const { isDevMode } = await import('./config/dev-config.js');
+    isDevModeActive = isDevMode();
+  } catch (e) {
+    console.warn('개발 모드 확인 실패:', e);
+  }
+
   // 전역 isUserLoggedIn 함수가 있으면 사용, 없으면 localStorage 직접 확인
   let isLoggedIn = (typeof window.isUserLoggedIn === 'function')
     ? window.isUserLoggedIn()
@@ -432,6 +441,11 @@ window.handleAnalyticsTabClick = async function () {
     }
   } catch (e) {
     console.warn('Firebase auth 확인 실패:', e);
+  }
+
+  // 개발 모드일 경우 로그인 상태로 간주
+  if (isDevModeActive) {
+    isLoggedIn = true;
   }
 
   // 서브탭 초기화는 탭이 실제로 표시될 때만 실행하도록 변경

@@ -490,30 +490,57 @@ export function addScrollUpButton(showAfter = 300) {
   style.textContent = `
     #scroll-up-button {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
+      bottom: 24px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background-color: #4285F4;
-      color: white;
-      border: none;
-      font-size: 20px;
+      background: linear-gradient(145deg, rgba(29, 47, 78, 0.72), rgba(42, 67, 102, 0.62));
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
       cursor: pointer;
       display: none;
       opacity: 0;
-      transition: opacity 0.3s;
+      transform: translateY(8px) scale(0.96);
+      transition: opacity 0.28s ease, transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
       z-index: 999;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      -webkit-backdrop-filter: blur(10px) saturate(125%);
+      backdrop-filter: blur(10px) saturate(125%);
     }
     
     #scroll-up-button.visible {
       display: block;
       opacity: 1;
+      transform: translateY(0) scale(1);
     }
     
     #scroll-up-button:hover {
-      background-color: #3367d6;
+      background: linear-gradient(145deg, rgba(29, 47, 78, 0.84), rgba(42, 67, 102, 0.74));
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    #scroll-up-button:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    @media (max-width: 768px) {
+      #scroll-up-button {
+        bottom: 18px;
+        right: 18px;
+        width: 42px;
+        height: 42px;
+      }
+    }
+
+    @supports not ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
+      #scroll-up-button {
+        background: rgba(29, 47, 78, 0.92);
+      }
     }
   `;
   

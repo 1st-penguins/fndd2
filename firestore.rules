@@ -27,6 +27,13 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // 공지 조회수 증가 전용 업데이트 허용 (비관리자)
+    function canIncrementNoticeView() {
+      let oldCount = resource.data.viewCount is int ? resource.data.viewCount : 0;
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(['viewCount', 'lastViewedAt']) &&
+             request.resource.data.viewCount == oldCount + 1;
+    }
+
     // ============================================
     // 👤 사용자 데이터 (Users)
     // ============================================
@@ -109,7 +116,8 @@ service cloud.firestore {
     // ============================================
     match /notices/{noticeId} {
       allow read: if true; // 공개
-      allow write: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || canIncrementNoticeView();
     }
     
     match /comments/{commentId} {

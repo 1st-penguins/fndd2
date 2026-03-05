@@ -26,6 +26,15 @@
   // 개발 모드 확인
   const isDevMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
+  // 현재 선택된 자격증 타입 추정 (분석 페이지 필터와 동일하게 맞추기 위함)
+  function getActiveCertificateType() {
+    const stored =
+      localStorage.getItem('selectedCertificateType') ||
+      localStorage.getItem('certificateType') ||
+      'health-manager';
+    return stored === 'sports-instructor' ? 'sports-instructor' : 'health-manager';
+  }
+
   // 개발 모드에서만 로그 출력하는 유틸리티 함수
   const log = (message, type = 'log') => {
     // 개발 모드이고, 타입이 'debug'가 아니거나 명시적으로 디버그 모드가 활성화된 경우에만 로그 출력
@@ -2047,7 +2056,7 @@
           subjectResults: subjectResults,
           completionTime: completionTime,
           examTitle: `${year}년 ${hour}교시 모의고사`,
-          certificateType: 'health-manager' // 건강운동관리사
+          certificateType: getActiveCertificateType()
         };
 
         console.log('모의고사 결과를 mockExamResults에 저장합니다:', mockExamResultData);

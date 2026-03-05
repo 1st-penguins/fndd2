@@ -197,32 +197,13 @@
   text-decoration: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
   white-space: nowrap;
   /* Prevent text wrapping to two lines */
 }
 
-.linear-header__nav-link::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--penguin-skyblue);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  border-radius: var(--radius-6, 6px);
-}
-
 .linear-header__nav-link:hover {
   color: var(--penguin-navy);
-  background: rgba(95, 178, 201, 0.08);
-  transform: translateY(-1px);
-}
-
-.linear-header__nav-link:hover::before {
-  opacity: 0.1;
+  background: rgba(95, 178, 201, 0.12);
 }
 
 .linear-header__nav-link--active {
@@ -337,6 +318,12 @@
   font-weight: 510;
   font-size: 14px;
   color: var(--penguin-navy);
+}
+
+/* 사용자 요청: 헤더에서는 이름만 표시하고 원형 이니셜 아바타는 숨김 */
+.linear-header__user-profile .linear-header__user-avatar,
+.mobile-user-info .linear-header__user-avatar {
+  display: none;
 }
 
 /* 로그인/로그아웃 상태 관리 */

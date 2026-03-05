@@ -12,6 +12,7 @@ export function renderProgressTabStandalone() {
   // 데이터 가져오기
   const userProgress = window.state?.userProgress || {};
   const mockExamResults = window.state?.mockExamResults || [];
+  const attempts = window.userAttempts || window.state?.attempts || [];
 
   // 연도 정보 (실제 파일 존재하는 연도만 표시)
   const years = ['2025', '2024', '2023', '2022', '2021', '2020', '2019'];
@@ -88,10 +89,74 @@ export function renderProgressTabStandalone() {
       });
     }
   });
+
+  // 3. attempts(문제풀이 시도) 기반 보완
+  // mockExamResults 저장이 누락/지연된 경우에도 모의고사 응시를 반영하기 위한 fallback
+  const attemptSessions = {};
+  attempts.forEach(attempt => {
+    const q = attempt?.questionData || {};
+    const isMock = q.isFromMockExam === true || q.mockExamHour != null || q.mockExamPart != null;
+    if (!isMock) return;
+
+    const year = q.year ? String(q.year) : null;
+    const hour = String(q.mockExamHour || q.mockExamPart || q.hour || '1');
+    if (!year || !hour) return;
+
+    const sessionId = attempt?.sessionId || q?.sessionId || `${year}_${hour}_unknown`;
+    const groupKey = `${year}_${hour}_${sessionId}`;
+
+    if (!attemptSessions[groupKey]) {
+      attemptSessions[groupKey] = {
+        year,
+        hour,
+        sessionId,
+        total: 0,
+        correct: 0,
+        latestTs: 0
+      };
+    }
+
+    attemptSessions[groupKey].total += 1;
+    if (attempt?.isCorrect === true) {
+      attemptSessions[groupKey].correct += 1;
+    }
+
+    const rawTs = attempt?.timestamp || q?.timestamp;
+    const ts = rawTs instanceof Date
+      ? rawTs.getTime()
+      : (rawTs?.toDate ? rawTs.toDate().getTime() : Date.now());
+    if (ts > attemptSessions[groupKey].latestTs) {
+      attemptSessions[groupKey].latestTs = ts;
+    }
+  });
+
+  // year/hour별 최신 세션 기준 점수 계산
+  const latestSessionByYearHour = {};
+  Object.values(attemptSessions).forEach(session => {
+    const key = `${session.year}_${session.hour}`;
+    if (!latestSessionByYearHour[key] || session.latestTs > latestSessionByYearHour[key].latestTs) {
+      latestSessionByYearHour[key] = session;
+    }
+  });
+
+  Object.entries(latestSessionByYearHour).forEach(([key, session]) => {
+    if (bestScores[key]) return; // 이미 더 신뢰도 높은 데이터가 있으면 유지
+    if (!session.total || session.total <= 0) return;
+
+    const score = Math.round((session.correct / session.total) * 100);
+    bestScores[key] = {
+      score,
+      id: session.sessionId || null,
+      timestamp: session.latestTs ? new Date(session.latestTs) : null,
+      correctCount: session.correct,
+      totalQuestions: session.total
+    };
+  });
   
   // 디버깅: 매칭된 기록 로그
   console.log('[학습진행률] 모의고사 기록 매칭 결과:', {
     mockExamResultsCount: mockExamResults.length,
+    attemptsCount: attempts.length,
     yearlyMockExamsKeys: Object.keys(yearlyMockExams),
     bestScoresKeys: Object.keys(bestScores),
     bestScores: bestScores,

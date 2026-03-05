@@ -1,6 +1,6 @@
 // notice-ui.js - 공지사항 UI 관련 기능
 
-import { getNotices } from '../data/notice-repository.js';
+import { getNotices, getNoticeUsageStats } from '../data/notice-repository.js';
 import { formatSimpleDate } from '../utils/date-utils.js';
 import { isAdmin } from '../auth/auth-utils.js';
 import { auth } from '../core/firebase-core.js';
@@ -23,6 +23,7 @@ export async function loadNotices(containerId = 'notice-container', options = {}
     showBadges: true,
     showDates: true,
     showPinned: true,
+    showViewCount: isAdmin(auth.currentUser),
     dateFn: formatSimpleDate
   };
 
@@ -118,6 +119,7 @@ export async function loadNoticesWithPagination(containerId = 'notice-container'
     showBadges: true,
     showDates: true,
     showPinned: true,
+    showViewCount: isAdmin(auth.currentUser),
     dateFn: formatSimpleDate,
     paginationId: 'notice-pagination' // 페이지네이션 컨테이너 ID
   };
@@ -198,6 +200,9 @@ export async function loadNoticesWithPagination(containerId = 'notice-container'
     // HTML 삽입
     container.innerHTML = noticesHTML;
 
+    // 관리자 통계 패널 렌더링 (notices.html에서만 표시)
+    await renderAdminUsagePanel();
+
     // 페이지네이션 생성
     createPagination(opts.paginationId, currentPage, totalPages, containerId, opts);
 
@@ -236,7 +241,7 @@ function createPagination(paginationId, currentPage, totalPages, containerId, op
     startPage = Math.max(1, endPage - 4);
   }
 
-  let paginationHTML = '<div class="notice-pagination">';
+  let paginationHTML = '<div class="notice-pagination-wrap"><div class="notice-pagination">';
 
   // 이전 페이지 버튼
   if (currentPage > 1) {
@@ -277,7 +282,7 @@ function createPagination(paginationId, currentPage, totalPages, containerId, op
     paginationHTML += `<button class="pagination-button next-btn" disabled>다음</button>`;
   }
 
-  paginationHTML += '</div>';
+  paginationHTML += '</div><div class="notice-pagination-actions"></div></div>';
 
   // 페이지네이션 HTML 삽입
   paginationContainer.innerHTML = paginationHTML;
@@ -313,20 +318,23 @@ async function checkAndAddWriteButton(paginationContainer) {
     const currentUser = auth.currentUser;
 
     // 이미 작성하기 버튼이 있으면 제거
-    const existingBtn = document.querySelector('.write-notice-btn');
+    const existingBtn = paginationContainer.querySelector('.write-notice-btn');
     if (existingBtn) {
       existingBtn.remove();
     }
 
     // 관리자 확인
     if (currentUser && isAdmin(currentUser)) {
+      const actionContainer = paginationContainer.querySelector('.notice-pagination-actions');
+      if (!actionContainer) return;
+
       const writeBtn = document.createElement('a');
       writeBtn.href = 'admin/notices.html';
       writeBtn.className = 'write-notice-btn';
       writeBtn.innerHTML = '<span>✏️</span> 작성하기';
 
-      // body에 직접 추가 (fixed positioning을 위해)
-      document.body.appendChild(writeBtn);
+      // 페이지네이션 액션 영역에 배치 (스크롤 따라다님 방지)
+      actionContainer.appendChild(writeBtn);
     }
   } catch (error) {
     console.error('관리자 권한 확인 오류:', error);
@@ -440,10 +448,68 @@ function createNoticeItem(notice, options) {
           </div>
           <div class="notice-meta">
             <span class="notice-date">${formattedDate}</span>
+            ${options.showViewCount ? `<span class="notice-views">조회 ${notice.viewCount || 0}</span>` : ''}
           </div>
         </div>
         ${notice.pinned ? '<span class="pin-icon"></span>' : ''}
       </a>
+    </div>
+  `;
+}
+
+/**
+ * 관리자 전용 공지/방문 통계 카드 렌더링
+ */
+async function renderAdminUsagePanel() {
+  const header = document.querySelector('.notices-header');
+  if (!header) return;
+
+  const existingPanel = document.getElementById('admin-usage-panel');
+  if (existingPanel) {
+    existingPanel.remove();
+  }
+
+  if (!isAdmin(auth.currentUser)) {
+    return;
+  }
+
+  const panel = document.createElement('div');
+  panel.id = 'admin-usage-panel';
+  panel.className = 'admin-usage-panel';
+  panel.innerHTML = `
+    <div class="admin-usage-item">
+      <div class="admin-usage-label">공지 누적 조회수</div>
+      <div class="admin-usage-value">집계 중...</div>
+    </div>
+    <div class="admin-usage-item">
+      <div class="admin-usage-label">오늘 방문자</div>
+      <div class="admin-usage-value">집계 중...</div>
+    </div>
+    <div class="admin-usage-item">
+      <div class="admin-usage-label">최근 30일 방문자</div>
+      <div class="admin-usage-value">집계 중...</div>
+    </div>
+  `;
+  header.appendChild(panel);
+
+  const stats = await getNoticeUsageStats(30);
+  if (!stats) {
+    panel.innerHTML = `<div class="admin-usage-empty">통계를 불러오지 못했습니다.</div>`;
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="admin-usage-item">
+      <div class="admin-usage-label">공지 누적 조회수</div>
+      <div class="admin-usage-value">${stats.totalNoticeViews}</div>
+    </div>
+    <div class="admin-usage-item">
+      <div class="admin-usage-label">오늘 방문자</div>
+      <div class="admin-usage-value">${stats.activeUsersToday}</div>
+    </div>
+    <div class="admin-usage-item">
+      <div class="admin-usage-label">최근 30일 방문자</div>
+      <div class="admin-usage-value">${stats.activeUsersLast30Days}</div>
     </div>
   `;
 }
@@ -669,6 +735,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const paginationContainer = document.getElementById('notice-pagination');
         if (paginationContainer) {
           checkAndAddWriteButton(paginationContainer);
+        }
+        if (typeof window.reloadNotices === 'function') {
+          window.reloadNotices();
         }
       });
     });
