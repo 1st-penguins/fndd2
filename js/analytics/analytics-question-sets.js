@@ -4,6 +4,19 @@ import { getScoreColor, getWeaknessColor } from './chart-utils.js';
 import { analyzeWeaknesses, generateRecommendations } from './user-analytics.js';
 import { getCurrentCertificateType } from '../utils/certificate-utils.js';
 
+function normalizeSetProgress(completed, total) {
+  const safeTotal = Math.max(0, Number(total) || 0);
+  const rawCompleted = Math.max(0, Number(completed) || 0);
+  const normalizedCompleted = safeTotal > 0 ? Math.min(rawCompleted, safeTotal) : rawCompleted;
+  const percentage = safeTotal > 0 ? Math.round((normalizedCompleted / safeTotal) * 100) : 0;
+
+  return {
+    total: safeTotal,
+    completed: normalizedCompleted,
+    percentage
+  };
+}
+
 /**
  * 문제풀이기록 탭 렌더링
  * @param {Object} cachedData - 캐시된 분석 데이터
@@ -59,7 +72,8 @@ export async function renderFilteredQuestionSets(cachedData, typeFilter, subject
     let html = '';
 
     filteredSets.forEach(set => {
-      const percentage = set.total > 0 ? Math.round((set.completed / set.total) * 100) : 0;
+      const normalizedProgress = normalizeSetProgress(set.completed, set.total);
+      const { completed, total, percentage } = normalizedProgress;
       const color = getScoreColor(set.score || 0);
 
       html += `
@@ -74,7 +88,7 @@ export async function renderFilteredQuestionSets(cachedData, typeFilter, subject
             </div>
             <div class="progress-text">
               <span>학습 진행률</span>
-              <span>${set.completed || 0}/${set.total || 0} (${percentage}%)</span>
+              <span>${completed}/${total} (${percentage}%)</span>
             </div>
           </div>
           <div class="set-score">
@@ -361,6 +375,11 @@ export function showSetScorecard(setData) {
   modal.style.display = 'flex';
   modal.style.zIndex = '10000'; // 최상위 보장
 
+  const normalizedProgress = normalizeSetProgress(setData?.completed, setData?.total);
+  const summaryCompleted = normalizedProgress.completed;
+  const summaryTotal = normalizedProgress.total;
+  const summaryPercent = normalizedProgress.percentage;
+
   // 문제 데이터가 있는 경우 (세부 기록)
   let cardsHtml = '';
   
@@ -499,11 +518,11 @@ export function showSetScorecard(setData) {
         </div>
         <div class="summary-item" style="background: white; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
           <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px;">맞은 문제</div>
-          <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">${setData.completed} / ${setData.total}</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">${summaryCompleted} / ${summaryTotal}</div>
         </div>
         <div class="summary-item" style="background: white; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
           <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px;">정답률</div>
-          <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">${setData.total > 0 ? Math.round((setData.completed / setData.total) * 100) : 0}%</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">${summaryPercent}%</div>
         </div>
       </div>
       

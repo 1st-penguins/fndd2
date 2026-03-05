@@ -64,6 +64,7 @@ class SessionManager {
         const existingSession = await this.findRecentSession(24);
         if (existingSession) {
           this.currentSessionId = existingSession.id;
+          this.currentSession = existingSession;
         }
       }
 
@@ -499,6 +500,8 @@ class SessionManager {
       const sessionId = this.getCurrentSessionId();
       if (!sessionId) {
         console.warn('종료할 세션이 없습니다.');
+        this.currentSession = null;
+        localStorage.removeItem('currentSessionId');
         return false;
       }
 
@@ -509,6 +512,10 @@ class SessionManager {
       const sessionDoc = await getDoc(sessionRef);
       if (!sessionDoc.exists()) {
         console.warn(`세션 ${sessionId}이 존재하지 않습니다.`);
+        // 잘못된 세션 ID가 재사용되지 않도록 즉시 정리
+        this.currentSessionId = null;
+        this.currentSession = null;
+        localStorage.removeItem('currentSessionId');
         return false;
       }
 
@@ -524,6 +531,7 @@ class SessionManager {
 
       // 세션 카운터 초기화
       this.currentSessionId = null;
+      this.currentSession = null;
       localStorage.removeItem('currentSessionId');
 
       return true;

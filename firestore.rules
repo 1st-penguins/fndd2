@@ -34,6 +34,30 @@ service cloud.firestore {
              request.resource.data.viewCount == oldCount + 1;
     }
 
+    // visits 문서 유효성 검사 (공지 방문 집계용)
+    function isValidVisitPayload() {
+      return request.resource.data.keys().hasOnly(['page', 'dateKey', 'visitorId', 'userId', 'isLoggedIn', 'visitedAt']) &&
+             request.resource.data.page is string &&
+             request.resource.data.page == 'notices' &&
+             request.resource.data.dateKey is string &&
+             request.resource.data.dateKey.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+             request.resource.data.visitorId is string &&
+             request.resource.data.visitorId.size() >= 8 &&
+             request.resource.data.visitorId.size() <= 80 &&
+             request.resource.data.isLoggedIn is bool &&
+             request.resource.data.visitedAt is timestamp &&
+             (request.resource.data.userId == null || request.resource.data.userId is string) &&
+             (
+               (request.auth == null && request.resource.data.userId == null && request.resource.data.isLoggedIn == false) ||
+               (request.auth != null && request.resource.data.userId == request.auth.uid && request.resource.data.isLoggedIn == true)
+             );
+    }
+
+    function canWriteVisit(visitId) {
+      return isValidVisitPayload() &&
+             visitId == request.resource.data.page + "_" + request.resource.data.dateKey + "_" + request.resource.data.visitorId;
+    }
+
     // ============================================
     // 👤 사용자 데이터 (Users)
     // ============================================
@@ -118,6 +142,16 @@ service cloud.firestore {
       allow read: if true; // 공개
       allow create, delete: if isAdmin();
       allow update: if isAdmin() || canIncrementNoticeView();
+    }
+
+    match /visits/{visitId} {
+      allow create: if canWriteVisit(visitId);
+      allow update: if canWriteVisit(visitId) &&
+                    request.resource.data.page == resource.data.page &&
+                    request.resource.data.dateKey == resource.data.dateKey &&
+                    request.resource.data.visitorId == resource.data.visitorId;
+      allow read: if isAdmin();
+      allow delete: if isAdmin();
     }
     
     match /comments/{commentId} {

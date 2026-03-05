@@ -1,6 +1,6 @@
 // notice-detail.js - 공지사항 상세 페이지 컨트롤러
 
-import { getNoticeById, incrementNoticeViewCount } from "../data/notice-repository.js";
+import { getNoticeById, incrementNoticeViewCount, trackNoticeBoardVisit } from "../data/notice-repository.js";
 import { formatSimpleDate } from "../utils/date-utils.js";
 import { initComments } from "../data/comment-ui.js";
 import { isAdmin } from "../auth/auth-utils.js";
@@ -34,6 +34,9 @@ function addBadgeStyles() {
  */
 function initNoticePage() {
   console.log('공지사항 상세 페이지 초기화...');
+
+  // 상세 직접 진입도 방문자로 집계되도록 기록
+  trackNoticeBoardVisit();
   
   // 배지 스타일 추가
   addBadgeStyles();

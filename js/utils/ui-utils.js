@@ -482,64 +482,103 @@ export function addScrollUpButton(showAfter = 300) {
   // 버튼 요소 생성
   const button = document.createElement('button');
   button.id = 'scroll-up-button';
-  button.innerHTML = '↑';
+  button.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 14L12 8L18 14"></path>
+    </svg>
+  `;
   button.title = '맨 위로 이동';
+  button.setAttribute('aria-label', '맨 위로 이동');
   
   // 버튼 스타일 추가
   const style = document.createElement('style');
   style.textContent = `
     #scroll-up-button {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, rgba(29, 47, 78, 0.72), rgba(42, 67, 102, 0.62));
-      color: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)),
+        rgba(15, 23, 42, 0.55);
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, 0.38);
       cursor: pointer;
-      display: none;
+      display: grid;
+      place-items: center;
       opacity: 0;
-      transform: translateY(8px) scale(0.96);
-      transition: opacity 0.28s ease, transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(10px) scale(0.92);
+      transition: opacity 0.24s ease, transform 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
       z-index: 999;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      -webkit-backdrop-filter: blur(10px) saturate(125%);
-      backdrop-filter: blur(10px) saturate(125%);
+      box-shadow: 0 14px 34px rgba(2, 6, 23, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      backdrop-filter: blur(14px) saturate(140%);
+    }
+
+    #scroll-up-button svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
     
     #scroll-up-button.visible {
-      display: block;
       opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
       transform: translateY(0) scale(1);
     }
     
     #scroll-up-button:hover {
-      background: linear-gradient(145deg, rgba(29, 47, 78, 0.84), rgba(42, 67, 102, 0.74));
-      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-      transform: translateY(-2px) scale(1.03);
+      background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08)),
+        rgba(15, 23, 42, 0.68);
+      box-shadow: 0 18px 38px rgba(2, 6, 23, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.26);
+      transform: translateY(-2px) scale(1.04);
     }
 
     #scroll-up-button:active {
-      transform: translateY(0) scale(0.98);
+      transform: translateY(0) scale(0.97);
+    }
+
+    #scroll-up-button:focus-visible {
+      outline: 2px solid rgba(125, 211, 252, 0.85);
+      outline-offset: 3px;
     }
 
     @media (max-width: 768px) {
       #scroll-up-button {
-        bottom: 18px;
-        right: 18px;
-        width: 42px;
-        height: 42px;
+        bottom: 16px;
+        right: 16px;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #scroll-up-button {
+        transition: opacity 0.1s ease;
+        transform: none;
+      }
+
+      #scroll-up-button.visible,
+      #scroll-up-button:hover,
+      #scroll-up-button:active {
+        transform: none;
       }
     }
 
     @supports not ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
       #scroll-up-button {
-        background: rgba(29, 47, 78, 0.92);
+        background: rgba(15, 23, 42, 0.94);
       }
     }
   `;

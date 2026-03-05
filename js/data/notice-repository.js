@@ -6,6 +6,26 @@ import { convertTimestamps } from "./firestore-utils.js";
 
 // 공지사항 컬렉션 이름
 const NOTICES_COLLECTION = 'notices';
+const VISITS_COLLECTION = 'visits';
+const VISITOR_ID_KEY = 'fp_visitor_id';
+
+function getDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getOrCreateVisitorId() {
+  let visitorId = localStorage.getItem(VISITOR_ID_KEY);
+  if (!visitorId) {
+    visitorId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `v_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem(VISITOR_ID_KEY, visitorId);
+  }
+  return visitorId;
+}
 
 /**
  * 공지사항 목록 가져오기 (최신순)
@@ -175,50 +195,70 @@ export async function getNoticeUsageStats(days = 30) {
       totalNoticeViews += Number.isFinite(data.viewCount) ? data.viewCount : 0;
     });
 
-    // 2) 방문자(활성 사용자) 집계 - attempts 컬렉션 userId 기준
+    // 2) 방문자 집계 - visits 컬렉션(페이지 방문 기준) 사용
     const now = new Date();
-    const start30 = new Date(now);
-    start30.setDate(start30.getDate() - Math.max(1, days));
+    const todayKey = getDateKey(now);
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - Math.max(1, days) + 1);
+    const startKey = getDateKey(startDate);
 
-    const startToday = new Date(now);
-    startToday.setHours(0, 0, 0, 0);
-
-    const attemptsRef = collection(db, 'attempts');
-    const attempts30Q = query(
-      attemptsRef,
-      where('timestamp', '>=', Timestamp.fromDate(start30))
+    const visitsRef = collection(db, VISITS_COLLECTION);
+    const visits30Q = query(
+      visitsRef,
+      where('page', '==', 'notices'),
+      where('dateKey', '>=', startKey),
+      where('dateKey', '<=', todayKey)
     );
-    const attemptsTodayQ = query(
-      attemptsRef,
-      where('timestamp', '>=', Timestamp.fromDate(startToday))
+    const visitsTodayQ = query(
+      visitsRef,
+      where('page', '==', 'notices'),
+      where('dateKey', '==', todayKey)
     );
 
-    const [attempts30Snap, attemptsTodaySnap] = await Promise.all([
-      getDocs(attempts30Q),
-      getDocs(attemptsTodayQ)
+    const [visits30Snap, visitsTodaySnap] = await Promise.all([
+      getDocs(visits30Q),
+      getDocs(visitsTodayQ)
     ]);
-
-    const unique30 = new Set();
-    attempts30Snap.forEach((docSnap) => {
-      const userId = docSnap.data()?.userId;
-      if (userId) unique30.add(userId);
-    });
-
-    const uniqueToday = new Set();
-    attemptsTodaySnap.forEach((docSnap) => {
-      const userId = docSnap.data()?.userId;
-      if (userId) uniqueToday.add(userId);
-    });
 
     return {
       totalNotices: noticesSnap.size,
       totalNoticeViews,
-      activeUsersLast30Days: unique30.size,
-      activeUsersToday: uniqueToday.size
+      activeUsersLast30Days: visits30Snap.size,
+      activeUsersToday: visitsTodaySnap.size
     };
   } catch (error) {
     console.error("공지사항 사용 통계 조회 오류:", error);
     return null;
+  }
+}
+
+/**
+ * 공지 게시판 방문 기록 (일자+방문자 기준 1회)
+ * @returns {Promise<boolean>} 성공 여부
+ */
+export async function trackNoticeBoardVisit() {
+  try {
+    const { db, auth } = await ensureFirebase();
+    const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+    const visitorId = getOrCreateVisitorId();
+    const dateKey = getDateKey();
+    const user = auth?.currentUser || null;
+    const visitId = `notices_${dateKey}_${visitorId}`;
+
+    await setDoc(doc(db, VISITS_COLLECTION, visitId), {
+      page: 'notices',
+      dateKey,
+      visitorId,
+      userId: user ? user.uid : null,
+      isLoggedIn: !!user,
+      visitedAt: serverTimestamp()
+    }, { merge: true });
+
+    return true;
+  } catch (error) {
+    console.error("공지 방문 기록 오류:", error);
+    return false;
   }
 }
 
@@ -471,6 +511,7 @@ export default {
   getNoticeById,
   incrementNoticeViewCount,
   getNoticeUsageStats,
+  trackNoticeBoardVisit,
   createNotice,
   updateNotice,
   deleteNotice,

@@ -13,6 +13,17 @@ import { isDevMode, getMockUser } from "../config/dev-config.js";
 // 전역 상태
 let dashboardInitialized = false;
 let currentTab = 'overview-tab';
+const devParams = new URLSearchParams(window.location.search);
+const hasDevBypassParam = devParams.get('test') === '1' || devParams.get('dev') === '1';
+
+function enforceDevBypassVisibility() {
+  if (!hasDevBypassParam) return;
+
+  applyVisibilityState({
+    canViewDashboard: true,
+    canViewAdmin: true
+  });
+}
 
 /**
  * 학습 분석 페이지 초기화
@@ -28,6 +39,11 @@ function initAnalyticsPage() {
   
   // 로그인 상태 확인
   checkLoginStatus();
+
+  // 개발 점검 파라미터가 있으면 auth 리스너 이후에도 표시 상태 유지
+  enforceDevBypassVisibility();
+  setTimeout(enforceDevBypassVisibility, 300);
+  setTimeout(enforceDevBypassVisibility, 1200);
   
   console.log('학습 분석 페이지 초기화 완료');
 }
@@ -217,22 +233,31 @@ function handleDashboardReady(e) {
 /**
  * 로그인 상태 확인 및 처리
  */
+function applyVisibilityState({ canViewDashboard, canViewAdmin }) {
+  const loginRequired = document.getElementById('login-required');
+  const analyticsDashboard = document.getElementById('analytics-dashboard');
+
+  if (loginRequired) {
+    loginRequired.style.display = canViewDashboard ? 'none' : 'block';
+  }
+
+  if (analyticsDashboard) {
+    analyticsDashboard.style.display = canViewDashboard ? 'block' : 'none';
+  }
+
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = canViewAdmin ? 'block' : 'none';
+  });
+}
+
 function checkLoginStatus() {
   const loggedIn = isUserLoggedIn();
-  const devMode = typeof isDevMode === 'function' && isDevMode();
+  const devMode = hasDevBypassParam || (typeof isDevMode === 'function' && isDevMode());
   
   if (loggedIn || devMode) {
-    // 로그인 상태 또는 개발자 모드: 대시보드 표시
-    document.getElementById('login-required').style.display = 'none';
-    document.getElementById('analytics-dashboard').style.display = 'block';
-    
-    // 관리자 확인 및 관리자 탭 표시
-    auth.onAuthStateChanged((user) => {
-      if ((user && isAdmin(user)) || devMode) {
-        document.querySelectorAll('.admin-only').forEach(el => {
-          el.style.display = 'block';
-        });
-      }
+    applyVisibilityState({
+      canViewDashboard: true,
+      canViewAdmin: devMode || (auth?.currentUser ? isAdmin(auth.currentUser) : false)
     });
     
     // 개발자 모드일 때도 데이터 로드
@@ -243,13 +268,9 @@ function checkLoginStatus() {
       loadAnalyticsData(mockUser);
     }
   } else {
-    // 비로그인 상태: 로그인 필요 화면 표시
-    document.getElementById('analytics-dashboard').style.display = 'none';
-    document.getElementById('login-required').style.display = 'block';
-    
-    // 관리자 탭 숨기기
-    document.querySelectorAll('.admin-only').forEach(el => {
-      el.style.display = 'none';
+    applyVisibilityState({
+      canViewDashboard: false,
+      canViewAdmin: false
     });
   }
 }
@@ -258,21 +279,17 @@ function checkLoginStatus() {
  * 인증 상태 변경 감지 및 처리
  */
 function setupAuthStateListener() {
+  const devModeLocked = hasDevBypassParam || (typeof isDevMode === 'function' && isDevMode());
+
   onAuthStateChanged(auth, user => {
     console.log('인증 상태 변경:', user ? '로그인됨' : '로그아웃 상태');
-    const devMode = typeof isDevMode === 'function' && isDevMode();
+    const devMode = devModeLocked || (typeof isDevMode === 'function' && isDevMode());
     
     if (user || devMode) {
-      // 로그인 상태
-      document.getElementById('login-required').style.display = 'none';
-      document.getElementById('analytics-dashboard').style.display = 'block';
-      
-      // 관리자 확인 및 관리자 탭 표시
-      if ((user && isAdmin(user)) || devMode) {
-        document.querySelectorAll('.admin-only').forEach(el => {
-          el.style.display = 'block';
-        });
-      }
+      applyVisibilityState({
+        canViewDashboard: true,
+        canViewAdmin: devMode || (user ? isAdmin(user) : false)
+      });
       
       // 아직 초기화되지 않은 경우만 실행
       if (!dashboardInitialized) {
@@ -286,13 +303,9 @@ function setupAuthStateListener() {
         loadAnalyticsData(analyticsUser);
       }
     } else {
-      // 로그아웃 상태
-      document.getElementById('analytics-dashboard').style.display = 'none';
-      document.getElementById('login-required').style.display = 'block';
-      
-      // 관리자 탭 숨기기
-      document.querySelectorAll('.admin-only').forEach(el => {
-        el.style.display = 'none';
+      applyVisibilityState({
+        canViewDashboard: false,
+        canViewAdmin: false
       });
       
       // 대시보드 초기화 상태 리셋

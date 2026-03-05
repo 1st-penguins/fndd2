@@ -67,9 +67,14 @@ async function ensureRegularSessionForPage({ year, subject, isResume, resumeSess
       return;
     }
 
+    const activeSessionId = typeof manager.getCurrentSessionId === 'function'
+      ? manager.getCurrentSessionId()
+      : (localStorage.getItem('currentSessionId') || '');
     const existingSession = manager.currentSession;
     const isSameRegularSession = !!(
+      activeSessionId &&
       existingSession &&
+      existingSession.id === activeSessionId &&
       existingSession.type === 'regular' &&
       existingSession.year === year &&
       existingSession.subject === subject &&
@@ -1256,7 +1261,11 @@ export async function submitQuiz() {
       // 1. 세션 매니저 확인 및 세션 유효성 검사 추가
       if (window.sessionManager) {
         // 현재 세션이 없거나 유효하지 않은 경우 새 세션 시작
-        if (!window.sessionManager.currentSession || !window.sessionManager.currentSession.id) {
+        const current = window.sessionManager.currentSession;
+        const currentSessionId = window.sessionManager.getCurrentSessionId?.() || localStorage.getItem('currentSessionId');
+        const needsNewSession = !current || !current.id || !currentSessionId;
+
+        if (needsNewSession) {
           console.log("유효한 세션이 없어 새로 시작합니다.");
           try {
             await window.sessionManager.startNewSession();
@@ -1282,7 +1291,11 @@ export async function submitQuiz() {
         console.log("저장에 사용할 세션 ID:", sessionId);
       } else if (sessionManager) {
         // 임포트된 객체를 사용하는 경우
-        if (!sessionManager.currentSession || !sessionManager.currentSession.id) {
+        const current = sessionManager.currentSession;
+        const currentSessionId = sessionManager.getCurrentSessionId?.() || localStorage.getItem('currentSessionId');
+        const needsNewSession = !current || !current.id || !currentSessionId;
+
+        if (needsNewSession) {
           console.log("유효한 세션이 없어 새로 시작합니다 (임포트된 객체 사용).");
           try {
             await sessionManager.startNewSession();

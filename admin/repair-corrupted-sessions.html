@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>세션 오염 복구 | 관리자 | 퍼스트펭귄</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      padding: 28px;
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      color: #0f172a;
+    }
+
+    .subtitle {
+      margin: 0 0 20px 0;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .box {
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .box-warning {
+      background: #fff7ed;
+      border-left: 4px solid #f97316;
+    }
+
+    .box-info {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin: 16px 0 20px 0;
+    }
+
+    .stat {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .progress-wrap {
+      display: none;
+      margin-bottom: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 22px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563eb, #22c55e);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: width 0.2s ease;
+    }
+
+    .preview {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+      max-height: 240px;
+      overflow: auto;
+      display: none;
+      background: #f8fafc;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: #0f172a;
+      white-space: pre-wrap;
+    }
+
+    .logs {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      max-height: 300px;
+      overflow: auto;
+      background: #0b1220;
+      color: #dbeafe;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .line-info { color: #93c5fd; }
+    .line-warn { color: #fcd34d; }
+    .line-error { color: #fca5a5; }
+    .line-ok { color: #86efac; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛠️ 세션 오염 복구 도구</h1>
+    <p class="subtitle">비정상 누적 세션(예: 160/160)을 스캔하고, 세션 단위로 분할 복구합니다.</p>
+
+    <div class="box box-warning">
+      <strong>주의:</strong> 실제 복구는 Firestore 데이터를 변경합니다. 먼저 <strong>스캔</strong>으로 미리보기 확인 후 실행하세요.
+    </div>
+    <div class="box box-info">
+      복구 방식: 오염 세션의 시도 기록을 시간순으로 분석해, 일반문제는 20문항 단위 / 모의고사는 80문항 단위로 세션을 분할합니다.
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="sessions-total">0</div>
+        <div class="stat-label">전체 세션 수</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="attempts-total">0</div>
+        <div class="stat-label">전체 시도 수</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="corrupted-total">0</div>
+        <div class="stat-label">오염 세션 수</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="split-total">0</div>
+        <div class="stat-label">예상 분할 세션 수</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="scan-btn">1) 오염 세션 스캔</button>
+      <button class="btn btn-danger" id="repair-btn" disabled>2) 분할 복구 실행</button>
+      <button class="btn btn-ghost" id="home-btn">돌아가기</button>
+    </div>
+
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill">0%</div>
+      </div>
+    </div>
+
+    <div class="preview" id="preview"></div>
+    <div class="logs" id="logs"></div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from '../js/core/firebase-core.js';
+    import { isAdmin } from '../js/auth/auth-utils.js';
+    import {
+      collection,
+      getDocs,
+      doc,
+      writeBatch,
+      serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const UI = {
+      scanBtn: document.getElementById('scan-btn'),
+      repairBtn: document.getElementById('repair-btn'),
+      homeBtn: document.getElementById('home-btn'),
+      logs: document.getElementById('logs'),
+      preview: document.getElementById('preview'),
+      progressWrap: document.getElementById('progress-wrap'),
+      progressFill: document.getElementById('progress-fill'),
+      totalSessions: document.getElementById('sessions-total'),
+      totalAttempts: document.getElementById('attempts-total'),
+      corruptedTotal: document.getElementById('corrupted-total'),
+      splitTotal: document.getElementById('split-total')
+    };
+
+    let scanState = {
+      ready: false,
+      sessionsById: {},
+      attemptsBySession: {},
+      candidates: []
+    };
+
+    function log(message, type = 'info') {
+      const line = document.createElement('div');
+      line.className = `line-${type}`;
+      line.textContent = `[${new Date().toLocaleTimeString('ko-KR')}] ${message}`;
+      UI.logs.appendChild(line);
+      UI.logs.scrollTop = UI.logs.scrollHeight;
+      console.log(message);
+    }
+
+    function setBusy(isBusy) {
+      UI.scanBtn.disabled = isBusy;
+      UI.repairBtn.disabled = isBusy || scanState.candidates.length === 0;
+    }
+
+    function setProgress(current, total) {
+      UI.progressWrap.style.display = 'block';
+      const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+      UI.progressFill.style.width = `${pct}%`;
+      UI.progressFill.textContent = `${pct}%`;
+    }
+
+    function getTimestampMs(ts) {
+      if (!ts) return 0;
+      if (typeof ts?.toDate === 'function') return ts.toDate().getTime();
+      if (ts instanceof Date) return ts.getTime();
+      const d = new Date(ts);
+      return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+    }
+
+    function getQuestionKey(attempt) {
+      const q = attempt?.questionData || {};
+      if (q.globalIndex !== undefined && q.globalIndex !== null) return `g_${q.globalIndex}`;
+      if (q.number !== undefined && q.number !== null) return `n_${q.number}`;
+      if (attempt?.questionNumber !== undefined && attempt?.questionNumber !== null) return `q_${attempt.questionNumber}`;
+      const subject = q.subject || attempt.subject || 'unknown';
+      const fallbackNum = q.number ?? attempt.questionNumber ?? attempt.id ?? Math.random();
+      return `${subject}_${fallbackNum}`;
+    }
+
+    function getSessionCap(sessionData) {
+      return sessionData?.type === 'mockexam' ? 80 : 20;
+    }
+
+    function toSortedAttempts(attempts = []) {
+      return [...attempts].sort((a, b) => getTimestampMs(a.timestamp) - getTimestampMs(b.timestamp));
+    }
+
+    function splitAttemptsByCap(sortedAttempts, cap) {
+      const chunks = [];
+      let current = { attempts: [], unique: new Set() };
+
+      for (const attempt of sortedAttempts) {
+        const key = getQuestionKey(attempt);
+        const needsNewChunk = !current.unique.has(key) && current.unique.size >= cap;
+
+        if (needsNewChunk) {
+          chunks.push(current);
+          current = { attempts: [], unique: new Set() };
+        }
+
+        current.attempts.push(attempt);
+        current.unique.add(key);
+      }
+
+      if (current.attempts.length > 0) {
+        chunks.push(current);
+      }
+
+      return chunks;
+    }
+
+    function summarizeChunk(chunk, cap) {
+      const latestByQuestion = new Map();
+
+      for (const attempt of chunk.attempts) {
+        const key = getQuestionKey(attempt);
+        const prev = latestByQuestion.get(key);
+        if (!prev || getTimestampMs(attempt.timestamp) >= getTimestampMs(prev.timestamp)) {
+          latestByQuestion.set(key, attempt);
+        }
+      }
+
+      const dedup = Array.from(latestByQuestion.values());
+      const completed = Math.min(dedup.length, cap);
+      const correct = dedup.filter(a => (a.firstAttemptIsCorrect !== undefined ? a.firstAttemptIsCorrect === true : a.isCorrect === true)).length;
+      const accuracy = completed > 0 ? Math.round((correct / completed) * 100) : 0;
+
+      let lastQuestionNumber = 0;
+      dedup.forEach(a => {
+        const q = a.questionData || {};
+        const n = (q.globalIndex !== undefined && q.globalIndex !== null)
+          ? Number(q.globalIndex) + 1
+          : Number(q.number || a.questionNumber || 0);
+        if (n > lastQuestionNumber) lastQuestionNumber = n;
+      });
+
+      const sorted = toSortedAttempts(chunk.attempts);
+      const startTs = sorted[0]?.timestamp || null;
+      const endTs = sorted[sorted.length - 1]?.timestamp || null;
+
+      return { completed, correct, accuracy, lastQuestionNumber, startTs, endTs };
+    }
+
+    function safeSessionTitle(baseTitle, chunkIndex, chunkCount) {
+      const root = (baseTitle || '문제풀이기록').trim();
+      if (chunkCount <= 1) return root;
+      return `${root} (복구 ${chunkIndex}/${chunkCount})`;
+    }
+
+    async function flushOps(ops) {
+      if (ops.length === 0) return 0;
+      let committed = 0;
+      const chunkSize = 400;
+
+      for (let i = 0; i < ops.length; i += chunkSize) {
+        const batch = writeBatch(db);
+        const part = ops.slice(i, i + chunkSize);
+
+        part.forEach(op => {
+          if (op.type === 'set') {
+            batch.set(op.ref, op.data, op.options || {});
+          } else if (op.type === 'update') {
+            batch.update(op.ref, op.data);
+          }
+        });
+
+        await batch.commit();
+        committed += part.length;
+      }
+
+      return committed;
+    }
+
+    async function runScan() {
+      setBusy(true);
+      UI.preview.style.display = 'none';
+      UI.preview.textContent = '';
+      UI.repairBtn.disabled = true;
+      scanState = { ready: false, sessionsById: {}, attemptsBySession: {}, candidates: [] };
+      log('오염 세션 스캔 시작...', 'info');
+
+      try {
+        const [sessionsSnap, attemptsSnap] = await Promise.all([
+          getDocs(collection(db, 'sessions')),
+          getDocs(collection(db, 'attempts'))
+        ]);
+
+        const sessionsById = {};
+        sessionsSnap.forEach(s => {
+          sessionsById[s.id] = s.data();
+        });
+
+        const attemptsBySession = {};
+        attemptsSnap.forEach(a => {
+          const data = a.data();
+          const sessionId = data.sessionId || data?.questionData?.sessionId;
+          if (!sessionId) return;
+          if (!attemptsBySession[sessionId]) attemptsBySession[sessionId] = [];
+          attemptsBySession[sessionId].push({ id: a.id, ...data });
+        });
+
+        const candidates = [];
+        let splitCount = 0;
+
+        Object.entries(sessionsById).forEach(([sessionId, sessionData]) => {
+          const cap = getSessionCap(sessionData);
+          const attempts = attemptsBySession[sessionId] || [];
+          if (attempts.length === 0) return;
+
+          const unique = new Set(attempts.map(getQuestionKey));
+          const uniqueCount = unique.size;
+          if (uniqueCount <= cap) return;
+
+          const sorted = toSortedAttempts(attempts);
+          const chunks = splitAttemptsByCap(sorted, cap);
+          if (chunks.length <= 1) return;
+
+          splitCount += (chunks.length - 1);
+          candidates.push({
+            sessionId,
+            cap,
+            uniqueCount,
+            rawAttempts: attempts.length,
+            chunks: chunks.map((c, idx) => ({
+              index: idx + 1,
+              attempts: c.attempts.length,
+              unique: c.unique.size
+            }))
+          });
+        });
+
+        scanState = { ready: true, sessionsById, attemptsBySession, candidates };
+
+        UI.totalSessions.textContent = sessionsSnap.size.toLocaleString();
+        UI.totalAttempts.textContent = attemptsSnap.size.toLocaleString();
+        UI.corruptedTotal.textContent = candidates.length.toLocaleString();
+        UI.splitTotal.textContent = splitCount.toLocaleString();
+
+        if (candidates.length > 0) {
+          UI.preview.style.display = 'block';
+          UI.preview.textContent = candidates
+            .slice(0, 30)
+            .map(c => `- ${c.sessionId} | 고유 ${c.uniqueCount}문항 / 기준 ${c.cap} | 분할 ${c.chunks.length}개`)
+            .join('\n');
+          log(`오염 세션 ${candidates.length}개 발견, 추가 생성 세션 예상 ${splitCount}개`, 'warn');
+          UI.repairBtn.disabled = false;
+        } else {
+          log('오염 세션을 찾지 못했습니다.', 'ok');
+        }
+      } catch (error) {
+        console.error(error);
+        log(`스캔 오류: ${error.message}`, 'error');
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function runRepair() {
+      if (!scanState.ready || scanState.candidates.length === 0) {
+        alert('먼저 스캔을 실행하세요.');
+        return;
+      }
+
+      const confirmMsg = [
+        `오염 세션 ${scanState.candidates.length}개를 분할 복구합니다.`,
+        '',
+        '- 기존 세션은 유지하고, 초과분은 신규 세션으로 이동',
+        '- attempts.sessionId가 갱신됩니다.',
+        '',
+        '계속하시겠습니까?'
+      ].join('\n');
+
+      if (!confirm(confirmMsg)) return;
+
+      setBusy(true);
+      setProgress(0, scanState.candidates.length);
+      log('분할 복구 시작...', 'warn');
+
+      let repairedSessions = 0;
+      let createdSessions = 0;
+      let movedAttempts = 0;
+      let committedOps = 0;
+
+      try {
+        for (let i = 0; i < scanState.candidates.length; i++) {
+          const candidate = scanState.candidates[i];
+          const sessionId = candidate.sessionId;
+          const sessionData = scanState.sessionsById[sessionId] || {};
+          const allAttempts = scanState.attemptsBySession[sessionId] || [];
+          const sorted = toSortedAttempts(allAttempts);
+          const cap = getSessionCap(sessionData);
+          const chunks = splitAttemptsByCap(sorted, cap);
+
+          if (chunks.length <= 1) {
+            setProgress(i + 1, scanState.candidates.length);
+            continue;
+          }
+
+          const ops = [];
+          const now = Date.now();
+
+          for (let chunkIdx = 0; chunkIdx < chunks.length; chunkIdx++) {
+            const chunk = chunks[chunkIdx];
+            const summary = summarizeChunk(chunk, cap);
+            const chunkNo = chunkIdx + 1;
+            const chunkCount = chunks.length;
+
+            const chunkTitle = safeSessionTitle(
+              sessionData.title ||
+              (sessionData.type === 'mockexam'
+                ? `${sessionData.year || ''}년 ${sessionData.hour || sessionData.mockExamHour || '1'}교시 모의고사`
+                : `${sessionData.year || ''}년 ${sessionData.subject || '일반문제'} 기출문제`),
+              chunkNo,
+              chunkCount
+            );
+
+            const basePayload = {
+              userId: sessionData.userId || '',
+              userName: sessionData.userName || '',
+              userEmail: sessionData.userEmail || '',
+              type: sessionData.type || 'regular',
+              year: sessionData.year || '',
+              subject: sessionData.subject || '',
+              hour: sessionData.hour || null,
+              mockExamHour: sessionData.mockExamHour || sessionData.hour || null,
+              examType: sessionData.examType || (sessionData.type === 'mockexam' ? '모의고사' : '일반문제'),
+              title: chunkTitle,
+              totalQuestions: cap,
+              isActive: false,
+              startTime: summary.startTs || sessionData.startTime || null,
+              endTime: summary.endTs || sessionData.endTime || summary.startTs || null,
+              stats: {
+                totalQuestions: cap,
+                attemptedQuestions: summary.completed,
+                correctAnswers: summary.correct,
+                accuracy: summary.accuracy,
+                lastQuestionNumber: summary.lastQuestionNumber
+              },
+              repair: {
+                applied: true,
+                originalSessionId: sessionId,
+                chunkIndex: chunkNo,
+                chunkCount: chunkCount,
+                repairedAt: new Date().toISOString()
+              },
+              repairedAt: serverTimestamp()
+            };
+
+            if (chunkIdx === 0) {
+              ops.push({
+                type: 'update',
+                ref: doc(db, 'sessions', sessionId),
+                data: basePayload
+              });
+              continue;
+            }
+
+            const newSessionId = `${sessionId}_split_${chunkNo}_${String(now).slice(-6)}`;
+            createdSessions += 1;
+
+            ops.push({
+              type: 'set',
+              ref: doc(db, 'sessions', newSessionId),
+              data: basePayload,
+              options: { merge: true }
+            });
+
+            chunk.attempts.forEach(attempt => {
+              movedAttempts += 1;
+              ops.push({
+                type: 'update',
+                ref: doc(db, 'attempts', attempt.id),
+                data: {
+                  sessionId: newSessionId,
+                  repairedFromSessionId: sessionId,
+                  repairedAt: serverTimestamp()
+                }
+              });
+            });
+          }
+
+          committedOps += await flushOps(ops);
+          repairedSessions += 1;
+          setProgress(i + 1, scanState.candidates.length);
+          log(`복구 완료: ${sessionId} (${chunks.length}개 세션으로 분할)`, 'ok');
+        }
+
+        log(
+          `전체 완료: 세션 ${repairedSessions}개 복구, 신규 세션 ${createdSessions}개 생성, 시도 ${movedAttempts}개 재배치`,
+          'ok'
+        );
+        log(`총 배치 작업 수: ${committedOps}`, 'info');
+        alert('복구가 완료되었습니다. 다시 스캔하여 결과를 확인하세요.');
+      } catch (error) {
+        console.error(error);
+        log(`복구 오류: ${error.message}`, 'error');
+        alert(`복구 중 오류가 발생했습니다.\n${error.message}`);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    UI.scanBtn.addEventListener('click', runScan);
+    UI.repairBtn.addEventListener('click', runRepair);
+    UI.homeBtn.addEventListener('click', () => {
+      window.location.href = '../index.html';
+    });
+
+    auth.onAuthStateChanged((user) => {
+      if (!user || !isAdmin(user)) {
+        alert('관리자 권한이 필요합니다.');
+        window.location.href = '../index.html';
+        return;
+      }
+      log(`관리자 인증 완료: ${user.email || user.uid}`, 'ok');
+      log('먼저 "오염 세션 스캔"을 눌러 대상 세션을 확인하세요.', 'info');
+    });
+  </script>
+</body>
+</html>

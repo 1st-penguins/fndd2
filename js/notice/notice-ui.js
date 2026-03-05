@@ -1,6 +1,6 @@
 // notice-ui.js - 공지사항 UI 관련 기능
 
-import { getNotices, getNoticeUsageStats } from '../data/notice-repository.js';
+import { getNotices, getNoticeUsageStats, trackNoticeBoardVisit } from '../data/notice-repository.js';
 import { formatSimpleDate } from '../utils/date-utils.js';
 import { isAdmin } from '../auth/auth-utils.js';
 import { auth } from '../core/firebase-core.js';
@@ -708,6 +708,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // 공지사항 컨테이너가 있을 경우 (notice-list로 수정)
   const noticeContainer = document.getElementById('notice-list');
   if (noticeContainer) {
+    // 공지 게시판 방문 기록 (하루 1회/방문자 기준)
+    trackNoticeBoardVisit();
+
     // Firebase가 초기화될 때까지 약간 지연
     setTimeout(() => {
       // 페이지네이션 기능으로 공지사항 로드 (notice-list로 수정)

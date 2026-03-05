@@ -49,6 +49,169 @@ const state = {
   lastRefreshTime: null
 };
 
+// 과거 오염 세션 정리(1회성) 버전 키
+const LEGACY_SESSION_CLEANUP_VERSION = 'v1';
+
+function getLegacyCleanupStorageKey(userId) {
+  return `analytics_legacy_session_cleanup_${LEGACY_SESSION_CLEANUP_VERSION}_${userId}`;
+}
+
+function isLegacyCleanupDone(userId) {
+  if (!userId) return false;
+  try {
+    return localStorage.getItem(getLegacyCleanupStorageKey(userId)) === 'done';
+  } catch (error) {
+    return false;
+  }
+}
+
+function markLegacyCleanupDone(userId) {
+  if (!userId) return;
+  try {
+    localStorage.setItem(getLegacyCleanupStorageKey(userId), 'done');
+  } catch (error) {
+    // localStorage 접근 실패 시 무시
+  }
+}
+
+function shouldExcludeAttemptFromAnalytics(attempt) {
+  return attempt?.excludedFromAnalytics === true;
+}
+
+function isAttemptContaminatedBySession(sessionData, attempt) {
+  if (!sessionData || !attempt) return false;
+
+  const q = attempt.questionData || {};
+  const sessionType = sessionData.type === 'mockexam' ? 'mockexam' : 'regular';
+  const sessionYear = sessionData.year ? String(sessionData.year) : '';
+  const sessionSubject = (sessionData.subject || '').trim();
+  const sessionHour = String(sessionData.hour || sessionData.mockExamPart || '');
+
+  const attemptIsMock = q.isFromMockExam === true ||
+    q.mockExamHour != null ||
+    q.mockExamPart != null ||
+    q.hour != null ||
+    attempt.setType === 'mockexam';
+
+  const attemptYear = String(attempt.year || q.year || '');
+  const attemptSubject = (attempt.subject || q.subject || '').trim();
+  const attemptHour = String(q.mockExamHour || q.mockExamPart || q.hour || '');
+
+  if (sessionType === 'mockexam') {
+    if (!attemptIsMock) return true;
+    if (sessionYear && attemptYear !== sessionYear) return true;
+    if (sessionHour && attemptHour && attemptHour !== sessionHour) return true;
+    return false;
+  }
+
+  // regular 세션은 mock 데이터 제외 + year/subject 메타 일치 강제
+  if (attemptIsMock) return true;
+  if (sessionYear && attemptYear !== sessionYear) return true;
+  if (sessionSubject && attemptSubject !== sessionSubject) return true;
+  return false;
+}
+
+async function runOneTimeLegacySessionCleanup(user) {
+  if (!user?.uid) {
+    return { skipped: true, reason: 'no-user' };
+  }
+
+  if (isLegacyCleanupDone(user.uid)) {
+    return { skipped: true, reason: 'already-done' };
+  }
+
+  try {
+    const sessionsRef = collection(db, 'sessions');
+    let sessionsQuery;
+
+    try {
+      sessionsQuery = query(
+        sessionsRef,
+        where('userId', '==', user.uid),
+        orderBy('startTime', 'desc'),
+        limit(100)
+      );
+    } catch (error) {
+      sessionsQuery = query(
+        sessionsRef,
+        where('userId', '==', user.uid),
+        limit(100)
+      );
+    }
+
+    const sessionsSnapshot = await getDocs(sessionsQuery);
+    if (sessionsSnapshot.empty) {
+      markLegacyCleanupDone(user.uid);
+      return { updatedCount: 0 };
+    }
+
+    const sessionsById = {};
+    const sessionIds = [];
+    sessionsSnapshot.forEach((sessionDoc) => {
+      sessionsById[sessionDoc.id] = sessionDoc.data();
+      sessionIds.push(sessionDoc.id);
+    });
+
+    const batchSize = 10;
+    let write = writeBatch(db);
+    let pendingWrites = 0;
+    let updatedCount = 0;
+
+    const flush = async () => {
+      if (pendingWrites === 0) return;
+      await write.commit();
+      write = writeBatch(db);
+      pendingWrites = 0;
+    };
+
+    for (let i = 0; i < sessionIds.length; i += batchSize) {
+      const batchSessionIds = sessionIds.slice(i, i + batchSize);
+      const attemptsQuery = query(
+        collection(db, 'attempts'),
+        where('userId', '==', user.uid),
+        where('sessionId', 'in', batchSessionIds)
+      );
+      const attemptsSnapshot = await getDocs(attemptsQuery);
+
+      attemptsSnapshot.forEach((attemptDoc) => {
+        const attemptData = attemptDoc.data();
+        if (shouldExcludeAttemptFromAnalytics(attemptData)) return;
+
+        const sessionId = attemptData.sessionId;
+        const sessionData = sessionsById[sessionId];
+        if (!sessionData) return;
+
+        if (!isAttemptContaminatedBySession(sessionData, attemptData)) return;
+
+        write.update(attemptDoc.ref, {
+          excludedFromAnalytics: true,
+          excludedReason: 'legacy-session-contamination',
+          excludedAt: serverTimestamp(),
+          cleanupVersion: LEGACY_SESSION_CLEANUP_VERSION
+        });
+        pendingWrites += 1;
+        updatedCount += 1;
+      });
+
+      if (pendingWrites >= 400) {
+        await flush();
+      }
+    }
+
+    await flush();
+    markLegacyCleanupDone(user.uid);
+
+    if (updatedCount > 0) {
+      showToast(`과거 오염 기록 ${updatedCount}건을 정리했습니다.`);
+    }
+
+    return { updatedCount };
+  } catch (error) {
+    console.warn('오염 세션 1회 정리 중 오류:', error);
+    return { skipped: true, reason: 'error', error };
+  }
+}
+
 // 과목 색상 매핑
 const subjectColors = {
   '운동생리학': '#4285F4',
@@ -473,10 +636,16 @@ export async function loadAnalyticsData(user) {
         window.Logger?.warn('⚠️ 로그인된 사용자가 없습니다. 기본 통계만 표시합니다.');
       }
 
+      // 과거에 혼합 저장된 시도 기록 1회 정리 (플래그 기반, 비파괴)
+      if (finalUser) {
+        await runOneTimeLegacySessionCleanup(finalUser);
+      }
+
       window.Logger?.info(`📊 [${certName}] 학습 데이터 로드 시작...`);
 
       // 문제 풀이 기록 가져오기 (최근 1000개, 자격증 필터링)
       state.attempts = await getUserAttempts(1000, currentCertType);
+      state.attempts = state.attempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
       window.Logger?.debug(`📊 [${certName}] 문제 풀이 기록: ${state.attempts.length}개`);
 
       // 모의고사 결과 가져오기 (최근 30개, 자격증 필터링)
@@ -1509,6 +1678,9 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
         // 결과를 세션별로 분류
         attemptsSnapshot.forEach(doc => {
           const attemptData = doc.data();
+          if (shouldExcludeAttemptFromAnalytics(attemptData)) {
+            return;
+          }
           const sessionId = attemptData.sessionId;
 
           if (sessionId) {
@@ -1585,20 +1757,41 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
 
         // 세션 시도 기록 처리
         let sessionAttempts = attemptsBySession[sessionId] || [];
+        sessionAttempts = sessionAttempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
 
-        // 일반문제는 세션 메타(subject/year)와 일치하는 시도만 집계해
-        // 과거 혼합 세션(여러 과목이 한 세션에 누적된 경우) 표시 왜곡을 방지
-        if (sessionData.type !== 'mockexam') {
-          sessionAttempts = sessionAttempts.filter((attempt) => {
-            const attemptYear = attempt?.year || attempt?.questionData?.year || '';
-            const attemptSubject = attempt?.subject || attempt?.questionData?.subject || '';
+        // 카드 집계 오염 방지:
+        // 1) 세션 타입/메타(year, subject, hour)와 맞지 않는 시도 제외
+        // 2) 같은 문제의 중복 시도는 최신 1개만 사용
+        const sessionType = sessionData.type === 'mockexam' ? 'mockexam' : 'regular';
+        const sessionYear = sessionData.year ? String(sessionData.year) : '';
+        const sessionSubject = (sessionData.subject || '').trim();
+        const sessionHour = String(sessionData.hour || sessionData.mockExamPart || '');
 
-            const yearMatches = !sessionData.year || !attemptYear || attemptYear === sessionData.year;
-            const subjectMatches = !sessionData.subject || !attemptSubject || attemptSubject === sessionData.subject;
+        sessionAttempts = sessionAttempts.filter((attempt) => {
+          const q = attempt?.questionData || {};
+          const attemptIsMock = q.isFromMockExam === true ||
+            q.mockExamHour != null ||
+            q.mockExamPart != null ||
+            q.hour != null ||
+            attempt?.setType === 'mockexam';
 
-            return yearMatches && subjectMatches;
-          });
-        }
+          const attemptYear = String(attempt?.year || q.year || '');
+          const attemptSubject = (attempt?.subject || q.subject || '').trim();
+          const attemptHour = String(q.mockExamHour || q.mockExamPart || q.hour || '');
+
+          if (sessionType === 'mockexam') {
+            if (!attemptIsMock) return false;
+            if (sessionYear && attemptYear !== sessionYear) return false;
+            if (sessionHour && attemptHour && attemptHour !== sessionHour) return false;
+            return true;
+          }
+
+          // regular 세션은 mock 데이터 제외 + 세션 메타와 정확히 일치
+          if (attemptIsMock) return false;
+          if (sessionYear && attemptYear !== sessionYear) return false;
+          if (sessionSubject && attemptSubject !== sessionSubject) return false;
+          return true;
+        });
 
         const rawAttemptCount = sessionAttempts.length;
         
@@ -1612,35 +1805,48 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
           continue;
         }
         
-        // ✅ 모의고사인 경우: 같은 문제를 여러 번 풀었을 수 있으므로 고유 문제만 카운트
+        // ✅ 같은 문제를 여러 번 푼 경우 최신 시도만 집계
         let uniqueQuestionCount = rawAttemptCount;
         let uniqueAttempts = sessionAttempts;
-        
+
+        const getAttemptTimeMs = (attempt) => {
+          const ts = attempt?.timestamp;
+          if (ts?.toDate) return ts.toDate().getTime();
+          if (ts instanceof Date) return ts.getTime();
+          const parsed = new Date(ts);
+          return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+        };
+
+        const uniqueQuestions = new Map();
+        sessionAttempts.forEach((attempt) => {
+          let questionId;
+          if (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null) {
+            questionId = `g_${attempt.questionData.globalIndex}`;
+          } else if (attempt.questionData?.number !== undefined && attempt.questionData?.number !== null) {
+            questionId = `n_${attempt.questionData.number}`;
+          } else if (attempt.questionNumber !== undefined && attempt.questionNumber !== null) {
+            questionId = `q_${attempt.questionNumber}`;
+          } else {
+            const subject = attempt.subject || attempt.questionData?.subject || '';
+            const number = attempt.questionData?.number || attempt.questionNumber || 0;
+            questionId = `${subject}_${number}`;
+          }
+
+          if (!questionId) return;
+
+          const existing = uniqueQuestions.get(questionId);
+          if (!existing || getAttemptTimeMs(attempt) >= getAttemptTimeMs(existing)) {
+            uniqueQuestions.set(questionId, attempt);
+          }
+        });
+
+        uniqueAttempts = Array.from(uniqueQuestions.values());
+        uniqueQuestionCount = uniqueAttempts.length;
+
         if (sessionData.type === 'mockexam') {
-          // 고유 문제 ID로 중복 제거 (globalIndex 우선)
-          const uniqueQuestions = new Map();
-          sessionAttempts.forEach(attempt => {
-            let questionId;
-            if (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null) {
-              questionId = `g_${attempt.questionData.globalIndex}`;
-            } else if (attempt.questionNumber !== undefined && attempt.questionNumber !== null) {
-              questionId = `q_${attempt.questionNumber}`;
-            } else {
-              const subject = attempt.subject || attempt.questionData?.subject || '';
-              const number = attempt.questionData?.number || attempt.questionNumber || 0;
-              questionId = `${subject}_${number}`;
-            }
-            
-            // 같은 문제가 없으면 추가 (있으면 첫 번째만 유지)
-            if (questionId && !uniqueQuestions.has(questionId)) {
-              uniqueQuestions.set(questionId, attempt);
-            }
-          });
-          
-          uniqueAttempts = Array.from(uniqueQuestions.values());
-          uniqueQuestionCount = uniqueAttempts.length;
-          
           console.log(`세션 ${sessionId} (모의고사): ${rawAttemptCount}개 시도 → ${uniqueQuestionCount}개 고유 문제`);
+        } else {
+          console.log(`세션 ${sessionId} (일반): ${rawAttemptCount}개 시도 → ${uniqueQuestionCount}개 고유 문제`);
         }
         
         // ✅ 첫 시도 답변 우선 사용 (통계 정확성을 위해)
@@ -1791,21 +1997,15 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
           }
         }
 
-        // 제목-타입 불일치 방어: 과거 오염 세션의 제목을 강제 정규화
-        if (sessionData.type === 'regular' && sessionTitle.includes('모의고사')) {
-          if (sessionData.year && sessionData.subject) {
-            sessionTitle = `${sessionData.year}년 ${sessionData.subject} 기출문제`;
-          } else if (sessionData.subject) {
-            sessionTitle = `${sessionData.subject} 기출문제`;
-          }
-        } else if (sessionData.type === 'mockexam' && sessionTitle.includes('기출문제')) {
-          const displayHour = sessionData.hour || sessionData.mockExamPart || '';
-          if (sessionData.year && displayHour) {
-            sessionTitle = `${sessionData.year}년 ${displayHour}교시 모의고사`;
-          } else if (sessionData.year) {
-            sessionTitle = `${sessionData.year}년 모의고사`;
-          }
-        }
+        // 제목-타입 불일치 방어: 표시 직전에 일관된 값으로 정규화
+        const normalizedSession = normalizeSessionPresentation({
+          type: sessionData.type,
+          title: sessionTitle,
+          year: sessionData.year,
+          subject: sessionData.subject,
+          hour: sessionData.hour || sessionData.mockExamPart || null
+        });
+        sessionTitle = normalizedSession.title;
 
         // 정확도 계산
         const accuracy = attemptCount > 0 ? Math.round((correctCount / attemptCount) * 100) : 0;
@@ -1822,16 +2022,8 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
         const shouldShowCard = (typeMatches && subjectMatches && yearMatches);
 
         if (shouldShowCard) {
-          // 세션 타입 결정 (title에서도 모의고사 감지)
-          let sessionType = sessionData.type;
-          if (!sessionType || sessionType === 'regular') {
-            // title에 "모의고사"가 포함되어 있으면 mockexam으로 변경
-            if (sessionTitle && (sessionTitle.includes('모의고사') || sessionData.title?.includes('모의고사'))) {
-              sessionType = 'mockexam';
-            } else {
-              sessionType = 'regular';
-            }
-          }
+          // 세션 타입도 제목과 동일한 정규화 결과 사용
+          const sessionType = normalizedSession.type;
           
           // 세션 카드 데이터 생성
           sessionCards.push({
@@ -2007,9 +2199,13 @@ async function loadAttemptsForSession(sessionId) {
 
     const attempts = [];
     attemptsSnapshot.forEach(doc => {
+      const data = doc.data();
+      if (shouldExcludeAttemptFromAnalytics(data)) {
+        return;
+      }
       attempts.push({
         id: doc.id,
-        ...doc.data()
+        ...data
       });
     });
 
@@ -3396,9 +3592,9 @@ function createProSessionCard(session) {
   // 날짜 파싱
   let dateStr = session.displayDate || '날짜 없음';
 
-  // 뱃지 클래스 (title에서도 모의고사 감지)
-  const isMockExam = session.type === 'mockexam' || 
-                     (session.title && session.title.includes('모의고사'));
+  // 표시 전 타입/제목 정규화(오염 데이터 방어)
+  const normalized = normalizeSessionPresentation(session);
+  const isMockExam = normalized.type === 'mockexam';
   const badgeClass = isMockExam ? 'mockexam' : 'regular';
   const badgeText = isMockExam ? '모의고사' : '일반문제';
 
@@ -3406,7 +3602,7 @@ function createProSessionCard(session) {
     <div class="session-info">
       <div class="session-badge ${badgeClass}">${badgeText}</div>
       <div class="session-title-wrapper">
-        <div class="session-title">${session.title}</div>
+        <div class="session-title">${normalized.title}</div>
         <div class="session-date">${dateStr}</div>
       </div>
     </div>
@@ -3467,6 +3663,54 @@ function createProSessionCard(session) {
   }
 
   return el;
+}
+
+/**
+ * 세션 카드 표시용 타입/제목 정규화
+ * - 데이터 오염으로 type/title이 불일치해도 UI에는 일관된 값만 노출
+ */
+function normalizeSessionPresentation(session) {
+  const rawType = session?.type === 'mockexam' || session?.type === 'regular'
+    ? session.type
+    : null;
+  const rawTitle = typeof session?.title === 'string' ? session.title : '';
+  const hasMockKeyword = rawTitle.includes('모의고사');
+  const hasRegularKeyword = rawTitle.includes('기출문제');
+
+  const type = rawType || (hasMockKeyword ? 'mockexam' : 'regular');
+  let title = rawTitle;
+
+  if (type === 'regular' && hasMockKeyword) {
+    if (session?.year && session?.subject) {
+      title = `${session.year}년 ${session.subject} 기출문제`;
+    } else if (session?.subject) {
+      title = `${session.subject} 기출문제`;
+    } else {
+      title = '일반 문제풀이';
+    }
+  } else if (type === 'mockexam' && hasRegularKeyword) {
+    const hour = session?.hour || session?.mockExamPart || '';
+    if (session?.year && hour) {
+      title = `${session.year}년 ${hour}교시 모의고사`;
+    } else if (session?.year) {
+      title = `${session.year}년 모의고사`;
+    } else {
+      title = '모의고사';
+    }
+  } else if (!title) {
+    if (type === 'mockexam') {
+      const hour = session?.hour || session?.mockExamPart || '';
+      title = session?.year
+        ? `${session.year}년 ${hour ? `${hour}교시 ` : ''}모의고사`
+        : '모의고사';
+    } else {
+      title = session?.year && session?.subject
+        ? `${session.year}년 ${session.subject} 기출문제`
+        : (session?.subject ? `${session.subject} 기출문제` : '일반 문제풀이');
+    }
+  }
+
+  return { type, title };
 }
 
 

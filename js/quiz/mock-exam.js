@@ -28,10 +28,30 @@
 
   // 현재 선택된 자격증 타입 추정 (분석 페이지 필터와 동일하게 맞추기 위함)
   function getActiveCertificateType() {
+    // URL/경로 우선 판별
+    const params = new URLSearchParams(window.location.search);
+    const urlCert = params.get('cert');
+    if (urlCert === 'sports-instructor' || urlCert === 'health-manager') {
+      return urlCert;
+    }
+
+    const path = window.location.pathname || '';
+    if (
+      path.includes('exam-sports/') ||
+      path.includes('subjects-sports/') ||
+      path.includes('years-sports/')
+    ) {
+      return 'sports-instructor';
+    }
+
+    // certificate-utils와 동일 키 우선순위로 동기화
     const stored =
+      localStorage.getItem('currentCertificateType') ||
+      localStorage.getItem('selectedCertificate') ||
       localStorage.getItem('selectedCertificateType') ||
       localStorage.getItem('certificateType') ||
       'health-manager';
+
     return stored === 'sports-instructor' ? 'sports-instructor' : 'health-manager';
   }
 
