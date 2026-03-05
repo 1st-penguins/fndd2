@@ -264,21 +264,26 @@
 /* 모의고사 보기 그리드 */
 #mockexam-view .subjects-list,
 #sports-mockexam-view .subjects-list {
-  grid-template-columns: 1fr;
-  /* 모의고사는 크게 한 줄 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* 연도/과목 카드와 동일한 카드 그리드 */
 }
 
 #mockexam-view .subject-item,
 #sports-mockexam-view .subject-item {
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 16px;
-  /* 패딩 줄임 */
-  min-height: auto;
-  /* 최소 높이 제거 */
-  flex-wrap: wrap;
-  /* pass-rate를 아래로 배치 */
+  justify-content: center;
+  text-align: center;
+  min-height: 132px;
+  gap: 10px;
+}
+
+#mockexam-view .subject-code,
+#sports-mockexam-view .subject-code {
+  white-space: normal;
+  line-height: 1.35;
+  text-align: center;
+  word-break: keep-all;
 }
 
 /* ============================================
@@ -342,7 +347,10 @@
   .subject-code {
     font-size: 0.8rem;
     padding: 6px 12px;
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.35;
+    text-align: center;
+    word-break: keep-all;
     flex-shrink: 0;
     /* 크기 고정 */
   }

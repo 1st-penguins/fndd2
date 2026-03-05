@@ -140,9 +140,7 @@
     } else if (event.key === 'ArrowRight') {
       // 오른쪽 화살표: 다음 문제
       const nextButton = document.getElementById('next-button');
-      if (nextButton && 
-          nextButton.style.display !== 'none' && 
-          !nextButton.disabled) {
+      if (nextButton && !nextButton.disabled) {
         event.preventDefault();
         log("오른쪽 화살표 키 입력 감지 - 다음 문제로 이동", 'debug');
         goToNextQuestion();

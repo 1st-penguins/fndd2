@@ -2095,9 +2095,7 @@ export function handleKeyboardNavigation(event) {
   } else if (event.key === 'ArrowRight') {
     // 오른쪽 화살표: 다음 문제
     const nextButton = document.getElementById('next-button');
-    if (nextButton && 
-        nextButton.style.display !== 'none' && 
-        !nextButton.disabled) {
+    if (nextButton && !nextButton.disabled) {
       event.preventDefault();
       window.Logger?.debug("오른쪽 화살표 키 입력 감지 - 다음 문제로 이동");
       // 리뷰 모드에서는 다음 오답으로, 아니면 다음 문제로

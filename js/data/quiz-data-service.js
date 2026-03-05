@@ -704,6 +704,14 @@ function calculateDurationFromCompletionTime(completionTime) {
  */
 async function updateUserProgress(userId, mockExamData) {
   try {
+    // 레거시/혼합 포맷 대응: "1", 1, "1교시", "교시1" -> "1"/"2"
+    const normalizeMockHour = (value) => {
+      if (value == null) return "1";
+      const str = String(value).trim();
+      const match = str.match(/[12]/);
+      return match ? match[0] : "1";
+    };
+
     const progressRef = doc(db, "userProgress", userId);
     const progressDoc = await getDoc(progressRef);
 
@@ -714,7 +722,7 @@ async function updateUserProgress(userId, mockExamData) {
     const yearlyMockExams = progressData.yearlyMockExams || {};
     const year = mockExamData.year || new Date().getFullYear().toString();
     // ✅ 기존 데이터 호환성: 여러 필드명 확인 (mockExamHour, hour, mockExamPart 등)
-    const mockHour = String(mockExamData.mockExamHour || mockExamData.hour || mockExamData.mockExamPart || "1");
+    const mockHour = normalizeMockHour(mockExamData.mockExamHour || mockExamData.hour || mockExamData.mockExamPart);
 
     // 해당 연도 데이터가 없으면 생성
     if (!yearlyMockExams[year]) {

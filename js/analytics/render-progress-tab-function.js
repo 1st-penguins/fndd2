@@ -9,6 +9,22 @@ export function renderProgressTabStandalone() {
   const container = document.getElementById('progress-tab');
   if (!container) return;
 
+  // 레거시/혼합 포맷 대응: year/hour 값을 표시용 표준값으로 정규화
+  const normalizeYear = (value) => {
+    if (value == null) return null;
+    const str = String(value);
+    const match = str.match(/(20\d{2})/);
+    return match ? match[1] : null;
+  };
+
+  const normalizeHour = (value) => {
+    if (value == null) return null;
+    const str = String(value).trim();
+    const match = str.match(/[12]/);
+    if (!match) return null;
+    return match[0];
+  };
+
   // 데이터 가져오기
   const userProgress = window.state?.userProgress || {};
   const mockExamResults = window.state?.mockExamResults || [];
@@ -22,15 +38,11 @@ export function renderProgressTabStandalone() {
   
   // 1. mockExamResults에서 점수 정보 가져오기
   mockExamResults.forEach(result => {
-    const year = result.year;
+    const year = normalizeYear(result.year);
     // ✅ 기존 데이터 호환성: 여러 필드명 확인 (mockExamHour, hour, mockExamPart 등)
-    // 숫자/문자열 모두 처리
-    let hour = result.mockExamHour || result.hour || result.mockExamPart;
-    if (hour != null) {
-      hour = String(hour); // 숫자면 문자열로 변환
-    } else {
-      hour = "1"; // 기본값
-    }
+    // "1", 1, "1교시", "교시1" 등 모두 1/2로 정규화
+    let hour = normalizeHour(result.mockExamHour || result.hour || result.mockExamPart);
+    if (!hour) hour = "1"; // 기본값
     
     // year와 hour가 유효한지 확인
     if (!year || !hour) {
@@ -59,15 +71,9 @@ export function renderProgressTabStandalone() {
     if (yearData && typeof yearData === 'object') {
       // ✅ 기존 데이터 호환성: 교시1, 교시2뿐만 아니라 모든 키 확인
       Object.keys(yearData).forEach(partKey => {
-        // "교시1", "교시2" 형식 또는 "1", "2" 형식 모두 처리
-        let hour = null;
-        if (partKey.startsWith('교시')) {
-          hour = partKey.replace('교시', '');
-        } else if (/^[12]$/.test(partKey)) {
-          hour = partKey;
-        } else {
-          return; // 다른 형식은 건너뛰기
-        }
+        // "교시1", "1교시", "1", 1 등 다양한 포맷 허용
+        const hour = normalizeHour(partKey);
+        if (!hour) return;
         
         const partData = yearData[partKey];
         // ✅ completed가 true이거나, score가 있으면 응시한 것으로 간주
@@ -98,8 +104,8 @@ export function renderProgressTabStandalone() {
     const isMock = q.isFromMockExam === true || q.mockExamHour != null || q.mockExamPart != null;
     if (!isMock) return;
 
-    const year = q.year ? String(q.year) : null;
-    const hour = String(q.mockExamHour || q.mockExamPart || q.hour || '1');
+    const year = normalizeYear(q.year);
+    const hour = normalizeHour(q.mockExamHour || q.mockExamPart || q.hour || '1');
     if (!year || !hour) return;
 
     const sessionId = attempt?.sessionId || q?.sessionId || `${year}_${hour}_unknown`;

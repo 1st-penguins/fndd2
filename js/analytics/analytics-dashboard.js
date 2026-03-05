@@ -3723,8 +3723,14 @@ function renderProgressTab() {
   if (!window.state) {
     window.state = {};
   }
-  if (!window.state.userProgress && state.userProgress) {
+  if (state.userProgress) {
     window.state.userProgress = state.userProgress;
+  }
+  if (state.mockExamResults) {
+    window.state.mockExamResults = state.mockExamResults;
+  }
+  if (state.attempts) {
+    window.userAttempts = state.attempts;
   }
 
   // renderProgressTabStandalone 함수가 전역으로 정의되어 있다고 가정
