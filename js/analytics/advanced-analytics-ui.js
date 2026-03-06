@@ -136,7 +136,7 @@ export function renderWeakQuestions(attempts) {
       <span style="font-size: 1.2rem;">⚠️</span>
       <span style="font-size: 0.95rem; font-weight: 600;">집중 공략: 정답률 50% 미만 문제들을 모았습니다.</span>
     </div>
-    <div class="weak-question-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+    <div class="weak-question-grid">
   `;
 
   weakQuestions.forEach((q) => {
@@ -148,31 +148,27 @@ export function renderWeakQuestions(attempts) {
     const displayNum = q.number > 20 ? ((q.number - 1) % 20) + 1 : q.number;
 
     html += `
-      <div class="glass-card" style="padding: 24px; border-left: 5px solid ${borderColor}; background: linear-gradient(135deg, ${bgColor}, rgba(255,255,255,0.8)); transition: transform 0.2s, box-shadow 0.2s;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+      <div class="weak-question-card" style="border-left-color: ${borderColor}; background: linear-gradient(135deg, ${bgColor}, rgba(255,255,255,0.8));">
+        <div class="weak-question-header">
           <div>
-            <div style="font-size: 0.85rem; color: var(--text-tertiary); font-weight: 700; margin-bottom: 4px;">${q.year}년 기출</div>
-            <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">${q.subject}</div>
+            <div class="weak-question-year">${q.year}년 기출</div>
+            <div class="weak-question-subject">${q.subject}</div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-size: 1.5rem; font-weight: 800; color: ${borderColor}; line-height: 1;">${accuracy}%</div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">정답률</div>
-          </div>
+          <div class="weak-question-accuracy" style="color: ${borderColor};">${accuracy}%<span class="weak-question-accuracy-label">정답률</span></div>
         </div>
-        
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 8px;">
-          <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary);">
-            Q. ${displayNum}번
-          </div>
-          <div style="height: 12px; width: 1px; background: #ddd;"></div>
-          <div style="font-size: 0.85rem; color: var(--text-secondary);">
-            <strong style="color: var(--text-primary);">${q.attempts}</strong>번 시도 중 <strong style="color: var(--danger-color);">${q.attempts - q.correct}</strong>번 오답
-          </div>
+
+        <div class="weak-question-meta">
+          <span class="weak-question-num">Q. ${displayNum}번</span>
+          <span class="weak-question-divider"></span>
+          <span class="weak-question-stat">
+            <strong>${q.attempts}</strong>번 시도 중 <strong class="weak-question-wrong">${q.attempts - q.correct}</strong>번 오답
+          </span>
         </div>
-        
-        <button 
-          onclick="window.location.href='exam/quiz.html?year=${q.year}&subject=${encodeURIComponent(q.subject)}&question=${q.number}'"
-          style="width: 100%; padding: 12px; border: none; border-radius: 10px; background: linear-gradient(90deg, ${borderColor}, ${borderColor}dd); color: white; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+
+        <button
+          class="weak-question-btn"
+          style="background: linear-gradient(90deg, ${borderColor}, ${borderColor}dd);"
+          onclick="window.location.href='exam/quiz.html?year=${q.year}&subject=${encodeURIComponent(q.subject)}&question=${q.number}'">
           ⚡ 다시 풀기
         </button>
       </div>

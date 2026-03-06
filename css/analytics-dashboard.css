@@ -1139,6 +1139,80 @@
   cursor: pointer;
   font-weight: 700;
   margin-top: 16px;
+  font-size: 1rem;
+  min-height: 44px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.weak-question-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.weak-question-btn:active {
+  transform: scale(0.98);
+}
+
+/* 취약 문제 카드 내부 레이아웃 */
+.weak-question-year {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.weak-question-subject {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.weak-question-accuracy {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: right;
+}
+
+.weak-question-accuracy-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.weak-question-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 10px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 8px;
+}
+
+.weak-question-num {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.weak-question-divider {
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  background: #ddd;
+}
+
+.weak-question-stat {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.weak-question-wrong {
+  color: var(--danger-color);
 }/* 정오표 그리드 스타일 */
 .scorecard-grid {
     display: grid;
