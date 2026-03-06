@@ -167,6 +167,7 @@ export function renderWeakQuestions(attempts) {
           <span class="weak-question-stat">
             <strong>${q.attempts}</strong>번 시도 중 <strong class="weak-question-wrong">${q.attempts - q.correct}</strong>번 오답
           </span>
+          ${q.consecutiveWrong >= 2 ? `<span style="background:#fee2e2; color:#dc2626; padding:2px 7px; border-radius:99px; font-size:0.72rem; font-weight:700; margin-left:4px;">${q.consecutiveWrong}연속 오답</span>` : ''}
         </div>
 
         <button
@@ -206,7 +207,7 @@ export function renderReviewRecommendations(attempts) {
 
   let html = `
     <div style="margin-bottom: 20px; padding: 12px 16px; background: var(--info-bg); border-radius: var(--radius-md); font-size: 0.9rem; color: var(--info-color); border-left: 4px solid var(--info-color);">
-      <strong>📚 에빙하우스 복습:</strong> 7일 이상 지났거나 틀렸던 문제를 다시 확인해보세요.
+      <strong>📚 에빙하우스 간격 복습:</strong> 연속 정답 횟수에 따라 3일→7일→14일→30일 간격으로 복습 시점을 계산합니다.
     </div>
     <div class="review-grid">
   `;
@@ -214,13 +215,21 @@ export function renderReviewRecommendations(attempts) {
   recommendations.forEach((q) => {
     const daysSince = Math.floor((new Date() - new Date(q.lastAttempt)) / (1000 * 60 * 60 * 24));
 
-    // Status Badge
+    // 상태 뱃지
     let statusBadge = '';
     if (!q.lastCorrect) {
       statusBadge = `<span style="background: var(--danger-bg); color: var(--danger-color); padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;">오답</span>`;
     } else {
-      statusBadge = `<span style="background: var(--warning-bg); color: var(--warning-color); padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;">${daysSince}일 전</span>`;
+      const intervalDays = q.reviewIntervalDays || 7;
+      const overdueDays = daysSince - intervalDays;
+      const overdueText = overdueDays > 0 ? ` (+${overdueDays}일 초과)` : '';
+      statusBadge = `<span style="background: var(--warning-bg); color: var(--warning-color); padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;">${daysSince}일 경과${overdueText}</span>`;
     }
+
+    // 복습 주기 표시
+    const intervalLabel = q.reviewIntervalDays
+      ? `<div style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 2px;">${q.reviewIntervalDays}일 주기 (${q.consecutiveCorrect}연속 정답)</div>`
+      : '';
 
     const displayNum = q.number > 20 ? ((q.number - 1) % 20) + 1 : q.number;
 
@@ -230,8 +239,8 @@ export function renderReviewRecommendations(attempts) {
         <div class="review-title">
           ${q.subject} ${displayNum}번
         </div>
-        <div class="review-status">${statusBadge}</div>
-        <a 
+        <div class="review-status">${statusBadge}${intervalLabel}</div>
+        <a
           href="exam/quiz.html?year=${q.year}&subject=${encodeURIComponent(q.subject)}&question=${q.number}"
           class="review-btn">
           복습하기

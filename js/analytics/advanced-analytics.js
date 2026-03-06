@@ -6,35 +6,58 @@
  * @returns {Array} 취약 문제 목록
  */
 export function analyzeWeakQuestions(attempts) {
-  const questionMap = {};
-  
+  // 문제별 시도 기록을 시간순으로 수집
+  const questionHistory = {};
+
   attempts.forEach(attempt => {
     const qData = attempt.questionData;
     if (!qData) return;
-    
+
     const key = `${qData.year}_${qData.subject}_${qData.number}`;
-    
-    if (!questionMap[key]) {
-      questionMap[key] = {
+    if (!questionHistory[key]) {
+      questionHistory[key] = {
         year: qData.year,
         subject: qData.subject,
         number: qData.number,
-        attempts: 0,
-        correct: 0,
-        lastAttempt: null
+        history: []
       };
     }
-    
-    questionMap[key].attempts++;
-    if (attempt.isCorrect) {
-      questionMap[key].correct++;
-    }
-    
-    if (!questionMap[key].lastAttempt || new Date(attempt.timestamp) > new Date(questionMap[key].lastAttempt)) {
-      questionMap[key].lastAttempt = attempt.timestamp;
-    }
+    questionHistory[key].history.push({
+      timestamp: attempt.timestamp,
+      isCorrect: attempt.isCorrect
+    });
   });
-  
+
+  // 각 문제별로 시간순 정렬 후 통계 계산
+  const questionMap = {};
+  Object.entries(questionHistory).forEach(([key, q]) => {
+    q.history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    const totalAttempts = q.history.length;
+    const totalCorrect = q.history.filter(h => h.isCorrect).length;
+    const lastAttempt = q.history[totalAttempts - 1].timestamp;
+
+    // 현재 연속 오답 수 (최근 기록부터 역방향)
+    let consecutiveWrong = 0;
+    for (let i = totalAttempts - 1; i >= 0; i--) {
+      if (!q.history[i].isCorrect) {
+        consecutiveWrong++;
+      } else {
+        break;
+      }
+    }
+
+    questionMap[key] = {
+      year: q.year,
+      subject: q.subject,
+      number: q.number,
+      attempts: totalAttempts,
+      correct: totalCorrect,
+      lastAttempt,
+      consecutiveWrong
+    };
+  });
+
   // 취약 문제: 정답률 50% 미만 또는 2회 이상 틀린 문제
   const weakQuestions = Object.values(questionMap)
     .filter(q => {
@@ -42,16 +65,21 @@ export function analyzeWeakQuestions(attempts) {
       return accuracy < 50 || (q.attempts >= 2 && q.correct === 0);
     })
     .sort((a, b) => {
-      // 정답률이 낮을수록, 최근 시도일수록 우선
+      // 1순위: 연속 오답 많은 순
+      if (b.consecutiveWrong !== a.consecutiveWrong) {
+        return b.consecutiveWrong - a.consecutiveWrong;
+      }
+      // 2순위: 정답률 낮은 순
       const accA = a.correct / a.attempts;
       const accB = b.correct / b.attempts;
-      if (Math.abs(accA - accB) > 0.1) {
+      if (Math.abs(accA - accB) > 0.05) {
         return accA - accB;
       }
+      // 3순위: 최근 시도 순
       return new Date(b.lastAttempt) - new Date(a.lastAttempt);
     })
-    .slice(0, 10); // 상위 10개
-  
+    .slice(0, 10);
+
   return weakQuestions;
 }
 
@@ -60,60 +88,91 @@ export function analyzeWeakQuestions(attempts) {
  * @param {Array} attempts - 문제 풀이 기록
  * @returns {Array} 복습 추천 문제
  */
+// 연속 정답 횟수 → 에빙하우스 복습 권장 간격(일)
+function getReviewIntervalDays(consecutiveCorrect) {
+  if (consecutiveCorrect <= 0) return 0;   // 마지막이 오답 → 즉시
+  if (consecutiveCorrect === 1) return 3;  // 1연속 정답 → 3일
+  if (consecutiveCorrect === 2) return 7;  // 2연속 정답 → 7일
+  if (consecutiveCorrect === 3) return 14; // 3연속 정답 → 14일
+  return 30;                               // 4회 이상 → 30일
+}
+
 export function recommendReviewQuestions(attempts) {
   const now = new Date();
-  const questionMap = {};
-  
+
+  // 문제별 시도 기록 수집 (시간순)
+  const questionHistory = {};
+
   attempts.forEach(attempt => {
     const qData = attempt.questionData;
     if (!qData) return;
-    
+
     const key = `${qData.year}_${qData.subject}_${qData.number}`;
-    
-    if (!questionMap[key]) {
-      questionMap[key] = {
+    if (!questionHistory[key]) {
+      questionHistory[key] = {
         year: qData.year,
         subject: qData.subject,
         number: qData.number,
-        lastAttempt: null,
-        correct: 0,
-        attempts: 0,
-        lastCorrect: false
+        history: []
       };
     }
-    
-    questionMap[key].attempts++;
-    if (attempt.isCorrect) {
-      questionMap[key].correct++;
-      questionMap[key].lastCorrect = true;
-    } else {
-      questionMap[key].lastCorrect = false;
-    }
-    
-    if (!questionMap[key].lastAttempt || new Date(attempt.timestamp) > new Date(questionMap[key].lastAttempt)) {
-      questionMap[key].lastAttempt = attempt.timestamp;
-    }
+    questionHistory[key].history.push({
+      timestamp: attempt.timestamp,
+      isCorrect: attempt.isCorrect
+    });
   });
-  
-  // 복습 추천: 마지막으로 맞춘 지 7일 이상 지난 문제 또는 마지막 시도가 틀린 문제
+
+  const questionMap = {};
+  Object.entries(questionHistory).forEach(([key, q]) => {
+    q.history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    const totalAttempts = q.history.length;
+    const lastAttempt = q.history[totalAttempts - 1].timestamp;
+    const lastCorrect = q.history[totalAttempts - 1].isCorrect;
+
+    // 현재 연속 정답 수 (최근부터 역방향)
+    let consecutiveCorrect = 0;
+    for (let i = totalAttempts - 1; i >= 0; i--) {
+      if (q.history[i].isCorrect) {
+        consecutiveCorrect++;
+      } else {
+        break;
+      }
+    }
+
+    const reviewIntervalDays = getReviewIntervalDays(consecutiveCorrect);
+
+    questionMap[key] = {
+      year: q.year,
+      subject: q.subject,
+      number: q.number,
+      attempts: totalAttempts,
+      correct: q.history.filter(h => h.isCorrect).length,
+      lastAttempt,
+      lastCorrect,
+      consecutiveCorrect,
+      reviewIntervalDays
+    };
+  });
+
   const recommendations = Object.values(questionMap)
     .filter(q => {
       if (!q.lastAttempt) return false;
-      
-      const daysSinceLastAttempt = (now - new Date(q.lastAttempt)) / (1000 * 60 * 60 * 24);
-      
-      // 마지막 시도가 틀렸거나, 7일 이상 지난 경우
-      return !q.lastCorrect || daysSinceLastAttempt >= 7;
+      const daysSince = (now - new Date(q.lastAttempt)) / (1000 * 60 * 60 * 24);
+      // 오답이면 즉시, 정답이면 간격 기준 초과 시 복습 대상
+      return !q.lastCorrect || daysSince >= q.reviewIntervalDays;
     })
     .sort((a, b) => {
-      // 마지막 시도가 틀린 문제 우선, 그 다음 오래된 문제
-      if (a.lastCorrect !== b.lastCorrect) {
-        return a.lastCorrect ? 1 : -1;
-      }
-      return new Date(a.lastAttempt) - new Date(b.lastAttempt);
+      // 1순위: 오답 먼저
+      if (a.lastCorrect !== b.lastCorrect) return a.lastCorrect ? 1 : -1;
+      // 2순위: 간격 대비 경과일이 많을수록 (복습이 더 급한 순)
+      const nowMs = now.getTime();
+      const overdueA = (nowMs - new Date(a.lastAttempt)) / (1000 * 60 * 60 * 24) - a.reviewIntervalDays;
+      const overdueB = (nowMs - new Date(b.lastAttempt)) / (1000 * 60 * 60 * 24) - b.reviewIntervalDays;
+      return overdueB - overdueA;
     })
-    .slice(0, 15); // 상위 15개
-  
+    .slice(0, 15);
+
   return recommendations;
 }
 
