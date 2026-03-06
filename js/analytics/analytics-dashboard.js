@@ -3720,41 +3720,11 @@ function normalizeSessionPresentation(session) {
  * 학습 진행률 탭 렌더링
  */
 function renderProgressTab() {
-  // 이 기능은 render-progress-tab-function.js에서 구현되어 있음
-  // window.state가 설정되어 있는지 확인
-  if (!window.state) {
-    window.state = {};
-  }
-  if (state.userProgress) {
-    window.state.userProgress = state.userProgress;
-  }
-  if (state.mockExamResults) {
-    window.state.mockExamResults = state.mockExamResults;
-  }
-  if (state.attempts) {
-    window.userAttempts = state.attempts;
-  }
-
-  // renderProgressTabStandalone 함수가 전역으로 정의되어 있다고 가정
-  try {
-    if (typeof renderProgressTabStandalone === 'function') {
-      renderProgressTabStandalone();
-    } else {
-      console.error('진행률 표시 기능을 불러올 수 없습니다.');
-      const container = document.getElementById('progress-tab');
-      if (container) {
-        container.innerHTML =
-          '<div class="no-data-message">진행률 표시 기능을 불러올 수 없습니다.<br>새로고침을 해주세요.</div>';
-      }
-    }
-  } catch (e) {
-    console.error('진행률 탭 렌더링 오류:', e);
-    const container = document.getElementById('progress-tab');
-    if (container) {
-      container.innerHTML =
-        '<div class="no-data-message">진행률 탭 렌더링 중 오류가 발생했습니다.<br>새로고침을 해주세요.</div>';
-    }
-  }
+  renderProgressTabStandalone({
+    userProgress:    state.userProgress,
+    mockExamResults: state.mockExamResults,
+    attempts:        state.attempts,
+  });
 }
 
 /**

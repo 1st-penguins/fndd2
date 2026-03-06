@@ -1,0 +1,214 @@
+/* progress.css - 학습 진행률 탭 스타일 */
+
+.progress-container {
+  padding: 20px 0;
+}
+
+.progress-header-section {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.progress-header-section h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--penguin-navy);
+  margin-bottom: 8px;
+}
+
+.progress-header-section p {
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.95rem;
+}
+
+/* 카드 그리드 */
+.mockexam-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+
+/* 카드 */
+.progress-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(29, 47, 78, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+}
+
+.progress-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(29, 47, 78, 0.13);
+}
+
+.progress-card.completed {
+  border-top: 4px solid var(--success-color, #059669);
+}
+
+.progress-card.not-taken {
+  border-top: 4px solid #e0e0e0;
+  background-color: #fcfcfc;
+}
+
+/* 뱃지 */
+.card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.badge-done {
+  background: var(--success-bg, #ecfdf5);
+  color: var(--success-color, #059669);
+}
+
+.badge-yet {
+  background: #f5f5f5;
+  color: #9e9e9e;
+}
+
+/* 카드 내용 */
+.card-year-session {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.year-text {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--penguin-navy);
+}
+
+.session-text {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6b7280);
+  margin-top: 2px;
+}
+
+/* 점수 영역 */
+.card-score-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  min-height: 80px;
+}
+
+.score-display {
+  text-align: center;
+}
+
+.score-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--penguin-skyblue);
+}
+
+.score-unit {
+  font-size: 1rem;
+  color: var(--penguin-skyblue);
+  margin-left: 2px;
+}
+
+.score-detail {
+  font-size: 0.85rem;
+  color: var(--text-tertiary, #9ca3af);
+  margin-top: 4px;
+}
+
+.score-placeholder {
+  color: #d1d5db;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* 버튼 */
+.card-footer {
+  margin-top: auto;
+}
+
+.progress-action-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.progress-action-btn.btn-retry {
+  background: #f0f7ff;
+  color: var(--penguin-skyblue);
+  border: 1px solid var(--penguin-skyblue);
+}
+
+.progress-action-btn.btn-retry:hover {
+  background: var(--penguin-skyblue);
+  color: #ffffff;
+}
+
+.progress-action-btn.btn-start {
+  background: var(--penguin-navy);
+  color: #ffffff;
+  border: 1px solid var(--penguin-navy);
+}
+
+.progress-action-btn.btn-start:hover {
+  background: var(--penguin-skyblue);
+  border-color: var(--penguin-skyblue);
+}
+
+/* 모바일 */
+@media (max-width: 640px) {
+  .mockexam-cards-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 4px;
+  }
+
+  .progress-card {
+    padding: 14px 12px;
+  }
+
+  .year-text {
+    font-size: 1rem;
+  }
+
+  .session-text {
+    font-size: 0.75rem;
+  }
+
+  .score-value {
+    font-size: 1.8rem;
+  }
+
+  .card-score-section {
+    min-height: 60px;
+  }
+}
+
+@media (max-width: 360px) {
+  .mockexam-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
