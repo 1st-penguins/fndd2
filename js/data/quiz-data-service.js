@@ -18,6 +18,12 @@ import {
 import { db, auth } from "../core/firebase-core.js";
 import { isUserLoggedIn } from "../auth/auth-utils.js";
 
+function compactObject(obj = {}) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== undefined)
+  );
+}
+
 /**
  * 단일 문제 풀이 결과 기록 (향상된 버전)
  * @param {Object} questionData - 문제 데이터 (과목, 번호 등)
@@ -42,13 +48,33 @@ export async function recordAttempt(questionData, userAnswer, isCorrect) {
       return { success: false, error: "필수 데이터가 누락되었습니다." };
     }
 
+    const detectedMockExam =
+      questionData.isFromMockExam === true ||
+      questionData.type === "mockexam" ||
+      questionData.mockExamHour != null ||
+      questionData.mockExamPart != null ||
+      questionData.hour != null ||
+      questionData.examHour != null;
+
+    const normalizedHour = String(
+      questionData.mockExamHour ??
+      questionData.mockExamPart ??
+      questionData.hour ??
+      questionData.examHour ??
+      ""
+    );
+
     // 필드 데이터 정규화 (undefined 및 null 값 처리)
     const normalizedData = {
       year: questionData.year || new Date().getFullYear().toString(),
       subject: questionData.subject || "알 수 없음",
       number: questionData.number || 0,
-      isFromMockExam: questionData.isFromMockExam || false,
-      mockExamPart: questionData.mockExamPart || null
+      isFromMockExam: detectedMockExam,
+      mockExamPart: normalizedHour || null,
+      mockExamHour: normalizedHour || null,
+      hour: normalizedHour || null,
+      type: detectedMockExam ? "mockexam" : "regular",
+      globalIndex: questionData.globalIndex ?? null
     };
 
     // ✅ 세션 ID 가져오기 (같은 세션에서 업데이트하기 위해 필요)
@@ -58,6 +84,25 @@ export async function recordAttempt(questionData, userAnswer, isCorrect) {
     }
     if (!sessionId) {
       sessionId = localStorage.getItem('currentSessionId');
+    }
+    if (!sessionId && window.sessionManager?.startNewSession) {
+      const sessionMetadata = compactObject({
+        subject: normalizedData.subject,
+        year: normalizedData.year,
+        type: detectedMockExam ? "mockexam" : "regular",
+        hour: normalizedHour || undefined,
+        certificateType: questionData.certificateType || "health-manager",
+        setId: questionData.setId,
+        questionNumber: normalizedData.number
+      });
+      try {
+        const session = await window.sessionManager.startNewSession(sessionMetadata);
+        if (session?.id) {
+          sessionId = session.id;
+        }
+      } catch (sessionError) {
+        console.warn("[quiz-data-service] 세션 생성 실패, 세션 없이 시도 기록 저장:", sessionError);
+      }
     }
 
     // ✅ 첫 시도 여부 확인
@@ -75,8 +120,10 @@ export async function recordAttempt(questionData, userAnswer, isCorrect) {
       sessionId: sessionId, // ✅ 세션 ID 추가
       // ✅ 첫 시도 답변 저장 (통계 정확성을 위해)
       isFirstAttempt: isFirstAttempt,
-      firstAttemptAnswer: isFirstAttempt ? (userAnswer !== undefined ? userAnswer : -1) : undefined,
-      firstAttemptIsCorrect: isFirstAttempt ? !!isCorrect : undefined,
+      ...(isFirstAttempt ? {
+        firstAttemptAnswer: userAnswer !== undefined ? userAnswer : -1,
+        firstAttemptIsCorrect: !!isCorrect
+      } : {}),
       // 메타데이터
       userName: user.displayName || user.email || "알 수 없음",
       userEmail: user.email || "",
@@ -84,7 +131,7 @@ export async function recordAttempt(questionData, userAnswer, isCorrect) {
       source: window.location.pathname,
       // 세트 데이터 - 있을 경우 문제풀이기록 세트 정보 기록
       setId: questionData.setId || null,
-      setType: questionData.setType || (questionData.isFromMockExam ? "mockexam" : "regular")
+      setType: questionData.setType || (detectedMockExam ? "mockexam" : "regular")
     };
 
     console.log('[quiz-data-service] Firestore에 저장할 데이터:', attemptData);
@@ -374,6 +421,7 @@ export async function recordMockExamResults(resultData) {
       examId: examId,
       year: resultData.year || new Date().getFullYear().toString(),
       mockExamHour: resultData.hour || "1",
+      certificateType: resultData.certificateType || "health-manager",
       completionTime: resultData.completionTime || "00:00",
       subjectResults: resultData.subjectResults || {},
       subjects: resultData.subjects || []
@@ -695,8 +743,16 @@ export async function getUserQuestionSets() {
 function calculateDurationFromCompletionTime(completionTime) {
   if (!completionTime) return 0;
 
-  const [minutes, seconds] = completionTime.split(':').map(Number);
-  return (minutes * 60) + seconds;
+  const parts = completionTime.split(':').map(Number);
+  if (parts.length === 3) {
+    const [hours, minutes, seconds] = parts;
+    return (hours * 3600) + (minutes * 60) + seconds;
+  }
+  if (parts.length === 2) {
+    const [minutes, seconds] = parts;
+    return (minutes * 60) + seconds;
+  }
+  return 0;
 }
 
 /**

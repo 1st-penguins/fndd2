@@ -3331,8 +3331,6 @@ function createProSessionCard(session) {
   try { dateStr = formatRelativeDate(session.startTime) || dateStr; } catch (_) {}
 
   el.innerHTML = `
-    <div class="session-card-accent ${scoreClass}"></div>
-
     <div class="session-card-body">
       <div class="session-card-header">
         <span class="session-badge ${badgeClass}">${badgeText}</span>
@@ -3367,14 +3365,15 @@ function createProSessionCard(session) {
   if (resumeBtn) {
     resumeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      location.href = `exam/quiz.html?year=${session.year}&subject=${encodeURIComponent(session.subject)}&number=${session.lastQuestionNumber + 1}`;
+      // 세션 타입별 라우팅은 공통 resumeSession 함수에서 처리
+      resumeSession(session.id);
     });
   }
 
   // 기록보기
   el.querySelector('.session-btn-record').addEventListener('click', (e) => {
     e.stopPropagation();
-    showSessionScorecard(session);
+    viewSessionDetails(session.id);
   });
 
   // 삭제
@@ -5872,7 +5871,7 @@ function resumeSession(sessionId) {
       }
       // 모의고사는 globalIndex 기준 (0-79)이므로 그대로 사용
       // lastQuestionNumber는 이미 1-based이므로 그대로 사용
-      url = `exam/${year}_모의고사_${hour}교시.html?question=${lastQuestionNumber}&resume=true`;
+      url = `exam/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}&question=${lastQuestionNumber}&resume=true`;
     } else {
       // 일반 문제 URL 생성
       if (!subject) {
@@ -6132,6 +6131,8 @@ function showMockExamScorecard(sessionId) {
           const correctAnswer = getCorrectAnswer(attempt);
 
           row.className = isCorrect ? 'correct-row' : 'incorrect-row';
+          row.style.cursor = 'pointer';
+          row.title = '클릭하면 해당 문제로 이동합니다.';
 
           row.innerHTML = `
             <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${displayNumber}</td>
@@ -6142,6 +6143,24 @@ function showMockExamScorecard(sessionId) {
               ${isCorrect ? '정답' : '오답'}
             </td>
           `;
+
+          // 정오표에서 해당 문제로 이동 (모의고사 페이지)
+          row.addEventListener('click', () => {
+            try {
+              const subjectIdx = subjectNames.indexOf(attempt.questionData.subject);
+              const numberInSubject = Number(attempt.questionData.number || 1);
+              const questionNumber = (attempt.questionData.globalIndex !== undefined && attempt.questionData.globalIndex !== null)
+                ? Number(attempt.questionData.globalIndex) + 1
+                : (subjectIdx >= 0 ? (subjectIdx * 20) + numberInSubject : numberInSubject);
+
+              const encodedYear = encodeURIComponent(String(year));
+              const encodedHour = encodeURIComponent(String(hour));
+              const targetUrl = `exam/${encodedYear}_모의고사_${encodedHour}교시.html?year=${encodedYear}&hour=${encodedHour}&question=${questionNumber}&resume=true`;
+              window.location.href = targetUrl;
+            } catch (moveError) {
+              console.warn('정오표 문제 이동 실패:', moveError);
+            }
+          });
 
           tbody.appendChild(row);
         });
@@ -6469,11 +6488,195 @@ async function loadMockExamAttemptsForSession(sessionId) {
 
     console.log(`세션 ID ${sessionId}에 대한 모의고사 시도 기록을 로드합니다...`);
 
+    const toTimeMs = (value) => {
+      if (!value) return 0;
+      if (typeof value?.toDate === 'function') return value.toDate().getTime();
+      if (value instanceof Date) return value.getTime();
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+    };
+
+    // 같은 문제의 여러 기록 중 "정답 정보/채점 정보가 더 완전한" 최신 1건만 유지
+    const sanitizeMockAttempts = (rawAttempts, sessionMeta = null) => {
+      if (!Array.isArray(rawAttempts)) return [];
+
+      const sessionYear = String(sessionMeta?.year || '');
+      const extractHour = (value) => {
+        const m = String(value || '').match(/[12]/);
+        return m ? m[0] : '';
+      };
+
+      const inferHourFromAttempts = (attempts) => {
+        const hourVotes = { '1': 0, '2': 0 };
+        const subjectVotes = { '1': 0, '2': 0 };
+        const hour1Subjects = new Set(["운동생리학", "건강체력평가", "운동처방론", "운동부하검사"]);
+        const hour2Subjects = new Set(["운동상해", "기능해부학", "병태생리학", "스포츠심리학"]);
+
+        attempts.forEach((attempt) => {
+          const q = attempt?.questionData || {};
+          const h = extractHour(q.mockExamHour || q.mockExamPart || q.hour);
+          if (h === '1' || h === '2') hourVotes[h] += 1;
+
+          const s = String(q.subject || attempt?.subject || '').trim();
+          if (hour1Subjects.has(s)) subjectVotes['1'] += 1;
+          if (hour2Subjects.has(s)) subjectVotes['2'] += 1;
+        });
+
+        if (hourVotes['1'] !== hourVotes['2']) {
+          return hourVotes['1'] > hourVotes['2'] ? '1' : '2';
+        }
+        if (subjectVotes['1'] !== subjectVotes['2']) {
+          return subjectVotes['1'] > subjectVotes['2'] ? '1' : '2';
+        }
+        return '';
+      };
+
+      const rawSessionHour = extractHour(sessionMeta?.hour || sessionMeta?.mockExamPart || '');
+      const titleHour = extractHour(sessionMeta?.title || '');
+      const inferredHour = inferHourFromAttempts(rawAttempts);
+      const sessionHour = rawSessionHour || titleHour || inferredHour;
+      const hour1Subjects = ["운동생리학", "건강체력평가", "운동처방론", "운동부하검사"];
+      const hour2Subjects = ["운동상해", "기능해부학", "병태생리학", "스포츠심리학"];
+      const allowedSubjects = sessionHour === '1'
+        ? hour1Subjects
+        : sessionHour === '2'
+          ? hour2Subjects
+          : [...hour1Subjects, ...hour2Subjects];
+
+      const subjectStartMap = sessionHour === '1'
+        ? { "운동생리학": 1, "건강체력평가": 21, "운동처방론": 41, "운동부하검사": 61 }
+        : sessionHour === '2'
+          ? { "운동상해": 1, "기능해부학": 21, "병태생리학": 41, "스포츠심리학": 61 }
+          : {};
+
+      const normalizeSubjectNumber = (subjectRaw, numberRaw) => {
+        const subject = String(subjectRaw || '').trim();
+        const number = Number(numberRaw);
+        if (!subject || !Number.isInteger(number) || number < 1) return null;
+        if (sessionHour && !allowedSubjects.includes(subject)) return null;
+
+        // 표준 형식: 과목별 1~20
+        if (number <= 20) return { subject, number };
+
+        // 레거시 형식: 전체 1~80을 과목과 함께 저장한 경우 (예: 기능해부학 21~40)
+        const start = subjectStartMap[subject];
+        if (start && number >= start && number < start + 20) {
+          return { subject, number: number - start + 1 };
+        }
+        return null;
+      };
+
+      const canonicalFromGlobalIndex = (globalIndex) => {
+        const idx = Number(globalIndex);
+        if (!Number.isInteger(idx) || idx < 0 || idx >= 80) return null;
+        const subject = sessionHour ? allowedSubjects[Math.floor(idx / 20)] : null;
+        const number = (idx % 20) + 1;
+        return subject ? `${subject}|${number}` : `g_${idx}`;
+      };
+
+      const canonicalFromSubjectNumber = (subjectRaw, numberRaw) => {
+        const normalized = normalizeSubjectNumber(subjectRaw, numberRaw);
+        if (!normalized) return null;
+        return `${normalized.subject}|${normalized.number}`;
+      };
+
+      const filtered = rawAttempts.filter((attempt) => {
+        const q = attempt?.questionData || {};
+        const isMock = q.isFromMockExam === true || q.mockExamHour != null || q.mockExamPart != null || q.hour != null;
+        if (!isMock) return false;
+
+        const attemptYear = String(attempt?.year || q.year || '');
+        const attemptHourRaw = String(q.mockExamHour || q.mockExamPart || q.hour || '');
+        const attemptHour = extractHour(attemptHourRaw);
+        if (sessionYear && attemptYear && attemptYear !== sessionYear) return false;
+        if (sessionHour && attemptHour && attemptHour !== sessionHour) return false;
+        return true;
+      });
+
+      const bestByQuestion = new Map();
+      for (const attempt of filtered) {
+        const q = attempt?.questionData || {};
+        const keyFromGlobal = q.globalIndex != null ? canonicalFromGlobalIndex(q.globalIndex) : null;
+        const keyFromSubject = canonicalFromSubjectNumber(
+          q.subject || attempt?.subject,
+          q.number ?? attempt?.number
+        );
+        const questionKey = keyFromGlobal || keyFromSubject;
+
+        if (!questionKey) continue;
+
+        const existing = bestByQuestion.get(questionKey);
+        if (!existing) {
+          bestByQuestion.set(questionKey, attempt);
+          continue;
+        }
+
+        const hasCorrectAnswer = (item) => {
+          const qq = item?.questionData || {};
+          return qq.correctAnswer != null || item?.correctAnswer != null || qq.correctOption != null || qq.correct != null;
+        };
+        const hasScoredResult = (item) => item?.firstAttemptIsCorrect != null || item?.isCorrect != null;
+        const quality = (item) => (hasCorrectAnswer(item) ? 2 : 0) + (hasScoredResult(item) ? 1 : 0);
+
+        const existingQ = quality(existing);
+        const currentQ = quality(attempt);
+        if (currentQ > existingQ) {
+          bestByQuestion.set(questionKey, attempt);
+          continue;
+        }
+        if (currentQ === existingQ && toTimeMs(attempt?.timestamp) >= toTimeMs(existing?.timestamp)) {
+          bestByQuestion.set(questionKey, attempt);
+        }
+      }
+
+      const questionOrder = (attempt) => {
+        const q = attempt?.questionData || {};
+        const byGlobal = q.globalIndex != null ? canonicalFromGlobalIndex(q.globalIndex) : null;
+        if (byGlobal && byGlobal.startsWith('g_')) {
+          const idx = Number(byGlobal.replace('g_', ''));
+          return Number.isFinite(idx) ? idx + 1 : 999;
+        }
+
+        const normalized = normalizeSubjectNumber(
+          q.subject || attempt?.subject,
+          q.number ?? attempt?.number
+        );
+        const subject = normalized?.subject || String(q.subject || attempt?.subject || '').trim();
+        const number = normalized?.number ?? Number(q.number ?? attempt?.number ?? 999);
+        const subjectIdx = allowedSubjects.indexOf(subject);
+        if (subjectIdx >= 0 && Number.isFinite(number)) {
+          return subjectIdx * 20 + number;
+        }
+        return 999;
+      };
+
+      const sanitized = Array.from(bestByQuestion.values()).sort((a, b) => {
+        const aOrder = questionOrder(a);
+        const bOrder = questionOrder(b);
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        return toTimeMs(a?.timestamp) - toTimeMs(b?.timestamp);
+      });
+
+      return sanitized;
+    };
+
+    // 세션 메타데이터(연도/교시) 조회 - 오염 데이터 필터링 기준
+    let sessionMeta = null;
+    try {
+      const sessionSnap = await getDoc(doc(db, 'sessions', sessionId));
+      if (sessionSnap.exists()) {
+        sessionMeta = sessionSnap.data();
+      }
+    } catch (metaError) {
+      console.warn('세션 메타데이터 조회 실패 (무시됨):', metaError);
+    }
+
     // 캐시된 데이터 확인
     if (window.attemptsBySession && window.attemptsBySession[sessionId]) {
       const cachedAttempts = window.attemptsBySession[sessionId];
-      console.log(`세션 ID ${sessionId}에 대한 시도 기록 ${cachedAttempts.length}개를 캐시에서 로드했습니다.`);
-      return cachedAttempts;
+      const sanitizedCached = sanitizeMockAttempts(cachedAttempts, sessionMeta);
+      console.log(`세션 ID ${sessionId} 시도 기록 캐시 로드: ${cachedAttempts.length}개 → 정제 후 ${sanitizedCached.length}개`);
+      return sanitizedCached;
     }
 
     // Firebase에서 직접 쿼리
@@ -6482,8 +6685,7 @@ async function loadMockExamAttemptsForSession(sessionId) {
       attemptsRef,
       where("userId", "==", user.uid),
       where("sessionId", "==", sessionId),
-      orderBy("timestamp", "asc"),
-      limit(100) // 모의고사는 최대 80문제지만 여유 있게 100개까지 로드
+      orderBy("timestamp", "asc")
     );
 
     const attemptsSnapshot = await getDocs(attemptsQuery);
@@ -6501,13 +6703,14 @@ async function loadMockExamAttemptsForSession(sessionId) {
       });
     });
 
-    console.log(`${attempts.length}개의 모의고사 시도 기록을 찾았습니다.`);
+    const sanitizedAttempts = sanitizeMockAttempts(attempts, sessionMeta);
+    console.log(`${attempts.length}개의 모의고사 시도 기록을 찾았습니다. (정제 후 ${sanitizedAttempts.length}개)`);
 
     // 결과를 캐시에 저장
     if (!window.attemptsBySession) window.attemptsBySession = {};
-    window.attemptsBySession[sessionId] = attempts;
+    window.attemptsBySession[sessionId] = sanitizedAttempts;
 
-    return attempts;
+    return sanitizedAttempts;
   } catch (error) {
     console.error('모의고사 시도 기록 로드 오류:', error);
     return [];

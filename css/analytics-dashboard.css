@@ -517,10 +517,10 @@
   gap: 10px;
 }
 
-/* 카드 전체 — 4열 그리드: 악센트바 | 본문 | 점수 | 액션 */
+/* 카드 전체 — 3열 그리드: 본문 | 점수 | 액션 */
 .session-card {
   display: grid;
-  grid-template-columns: 4px 1fr 72px auto;
+  grid-template-columns: 1fr 72px auto;
   align-items: stretch;
   background: #ffffff;
   border-radius: 14px;
@@ -534,13 +534,6 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(29, 47, 78, 0.13);
 }
-
-/* 왼쪽 컬러 악센트 바 */
-.session-card-accent               { align-self: stretch; }
-.session-card-accent.score-high    { background: #059669; }
-.session-card-accent.score-good    { background: var(--penguin-skyblue, #5FB2C9); }
-.session-card-accent.score-mid     { background: #F59E0B; }
-.session-card-accent.score-low     { background: #EF4444; }
 
 /* 카드 본문 */
 .session-card-body {
@@ -703,17 +696,13 @@
 /* 모바일 반응형 */
 @media (max-width: 640px) {
   .session-card {
-    grid-template-columns: 4px 1fr;
+    grid-template-columns: 1fr;
     grid-template-rows: auto auto;
-  }
-
-  .session-card-accent {
-    grid-row: 1 / 3;
   }
 
   .session-card-body {
     padding: 14px 14px 8px;
-    grid-column: 2;
+    grid-column: 1;
   }
 
   .session-card-score {
@@ -721,7 +710,7 @@
   }
 
   .session-card-actions {
-    grid-column: 2;
+    grid-column: 1;
     flex-direction: row;
     padding: 0 14px 14px;
     gap: 8px;

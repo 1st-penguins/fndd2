@@ -124,7 +124,7 @@ export function renderProgressTabStandalone(data) {
       const key         = `${year}_${hour}`;
       const best        = bestScores[key];
       const isCompleted = !!best;
-      const examUrl     = `exam/${year}_모의고사_${hour}교시.html`;
+      const examUrl     = `exam/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}`;
 
       cardsHtml += `
         <div class="progress-card ${isCompleted ? 'completed' : 'not-taken'}">

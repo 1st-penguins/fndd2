@@ -171,7 +171,13 @@
   // 모의고사 정보 추출 함수
   function extractMockExamInfo() {
     const currentPath = window.location.pathname;
-    const filename = currentPath.split('/').pop();
+    const rawFilename = currentPath.split('/').pop() || '';
+    let filename = rawFilename;
+    try {
+      filename = decodeURIComponent(rawFilename);
+    } catch (_) {
+      filename = rawFilename;
+    }
 
     let year = '2025'; // 기본값
     let hour = '1';    // 기본값
@@ -183,14 +189,23 @@
       hour = fileMatch[2];
     }
 
-    // 2. 페이지 제목에서 추출 시도 (파일명에서 실패했을 경우)
+    // 2. 페이지 제목/H1에서 추출 시도 (파일명에서 실패했을 경우)
     if (year === '2025') {
-      const titleElement = document.querySelector('.quiz-title h1');
+      const titleElement = document.querySelector('.page-title h1, .quiz-title h1, h1');
       if (titleElement) {
         const titleMatch = titleElement.textContent.match(/(\d{4}).*?(\d)교시/);
         if (titleMatch) {
           year = titleMatch[1];
           hour = titleMatch[2];
+        }
+      }
+
+      // DOM에서 찾지 못하면 document.title 기반으로 한 번 더 시도
+      if (year === '2025') {
+        const docTitleMatch = (document.title || '').match(/(\d{4}).*?(\d)교시/);
+        if (docTitleMatch) {
+          year = docTitleMatch[1];
+          hour = docTitleMatch[2];
         }
       }
     }
@@ -1896,24 +1911,42 @@
       }
 
       if (!sessionId) {
-        // 세션 ID가 없으면 새로 생성 시도
+        // 세션 ID가 없으면 모의고사 메타데이터로 세션 생성 시도
+        const pathForSession = window.location.pathname;
+        const fileForSession = pathForSession.split('/').pop() || '';
+        const matchForSession = fileForSession.match(/(\d{4}).*?(\d)교시/);
+        const sessionYear = matchForSession?.[1] || '2025';
+        const sessionHour = matchForSession?.[2] || '1';
+        const sessionMetadata = {
+          year: sessionYear,
+          hour: sessionHour,
+          type: 'mockexam',
+          title: `${sessionYear}년 ${sessionHour}교시 모의고사`,
+          totalQuestions: 80
+        };
         if (window.sessionManager) {
-          const newSession = await window.sessionManager.startNewSession();
-          sessionId = newSession.id;
+          const newSession = await window.sessionManager.startNewSession(sessionMetadata, true);
+          sessionId = newSession?.id || null;
         } else if (sessionManager) {
-          const newSession = await sessionManager.startNewSession();
-          sessionId = newSession.id;
+          const newSession = await sessionManager.startNewSession(sessionMetadata, true);
+          sessionId = newSession?.id || null;
         }
       }
     } catch (error) {
       console.log('세션 ID 가져오기 오류:', error);
-      // 오류 발생 시 임시 세션 ID 생성
-      sessionId = 'temp-session-' + Date.now();
+      // 임시 세션 ID는 분석 데이터 오염을 유발하므로 사용하지 않음
+      sessionId = null;
     }
 
     // 현재 파일 이름에서 모의고사 정보 추출
     const currentPath = window.location.pathname;
-    const filename = currentPath.split('/').pop();
+    const rawFilename = currentPath.split('/').pop() || '';
+    let filename = rawFilename;
+    try {
+      filename = decodeURIComponent(rawFilename);
+    } catch (_) {
+      filename = rawFilename;
+    }
 
     // 모의고사 정보 추출
     let year = '2025';
@@ -1924,12 +1957,20 @@
       year = fileMatch[1];
       hour = fileMatch[2];
     } else {
-      const titleElement = document.querySelector('.quiz-title h1');
+      const titleElement = document.querySelector('.page-title h1, .quiz-title h1, h1');
       if (titleElement) {
         const titleMatch = titleElement.textContent.match(/(\d{4}).*?(\d)교시/);
         if (titleMatch) {
           year = titleMatch[1];
           hour = titleMatch[2];
+        }
+      }
+
+      if (year === '2025') {
+        const docTitleMatch = (document.title || '').match(/(\d{4}).*?(\d)교시/);
+        if (docTitleMatch) {
+          year = docTitleMatch[1];
+          hour = docTitleMatch[2];
         }
       }
     }
@@ -2110,6 +2151,8 @@
       console.warn('배치 저장 함수를 찾을 수 없거나 저장할 데이터가 없습니다.');
     }
 
+    let mockExamResultSaved = false;
+
     // ✅ 모의고사 결과를 mockExamResults 컬렉션에 저장
     try {
       if (typeof window.recordMockExamResults === 'function') {
@@ -2137,6 +2180,7 @@
         const saveResult = await window.recordMockExamResults(mockExamResultData);
         
         if (saveResult && saveResult.success) {
+          mockExamResultSaved = true;
           console.log('모의고사 결과 저장 성공:', saveResult);
         } else {
           console.warn('모의고사 결과 저장 실패:', saveResult);
@@ -2150,7 +2194,7 @@
 
     // 세션 종료 및 메타데이터 업데이트
     try {
-      if (window.sessionManager && sessionId) {
+      if (!mockExamResultSaved && window.sessionManager && sessionId) {
         // 세션 통계 정보 업데이트
         const sessionStats = {
           totalQuestions: questions.length,
@@ -2169,6 +2213,8 @@
         // 세션 종료
         await window.sessionManager.endSession(sessionStats);
         console.log('모의고사 세션이 종료되었습니다.');
+      } else if (mockExamResultSaved) {
+        console.log('모의고사 결과 저장 과정에서 세션 종료가 이미 완료되어 중복 종료를 건너뜁니다.');
       }
     } catch (error) {
       console.warn('세션 종료 오류 (무시됨):', error);

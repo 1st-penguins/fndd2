@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(for f in lectures.html notices.html login.html contact.html)",
+      "Bash(do echo \"=== $f ===\")",
+      "Read(//c/Users/Pc/Desktop/fndd2/**)",
+      "Bash(done)",
+      "Bash(for f in exam/quiz.html)",
+      "Bash(grep:*)",
+      "Bash(rm:*)",
+      "Bash(for f in exam/2019_운동생리학.html exam/2022_운동생리학.html exam/2025_운동생리학.html exam/2025_모의고사_1교시.html)",
+      "Bash(python3:*)",
+      "Bash(py:*)"
+    ]
+  }
+}

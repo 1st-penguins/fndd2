@@ -19,6 +19,43 @@ import {
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 import { sessionManager } from './session-manager.js';
 
+function compactObject(obj = {}) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== undefined)
+  );
+}
+
+const sessionCompatibilityCache = new Map();
+
+function getAttemptContext(questionData = {}) {
+  const isMock = questionData?.isFromMockExam === true || questionData?.type === 'mockexam';
+  const year = String(questionData?.year || '');
+  const hour = String(questionData?.hour || questionData?.mockExamHour || questionData?.examHour || '');
+  const subject = String(questionData?.subject || '');
+  return { isMock, year, hour, subject };
+}
+
+function isSessionCompatibleWithAttempt(sessionData = {}, attemptCtx) {
+  if (!attemptCtx) return true;
+
+  const sessionType = sessionData?.type === 'mockexam' ? 'mockexam' : 'regular';
+  const sessionYear = String(sessionData?.year || '');
+  const sessionHour = String(sessionData?.hour || sessionData?.mockExamPart || '');
+  const sessionSubject = String(sessionData?.subject || '');
+
+  if (attemptCtx.isMock) {
+    if (sessionType !== 'mockexam') return false;
+    if (attemptCtx.year && sessionYear && attemptCtx.year !== sessionYear) return false;
+    if (attemptCtx.hour && sessionHour && attemptCtx.hour !== sessionHour) return false;
+    return true;
+  }
+
+  if (sessionType === 'mockexam') return false;
+  if (attemptCtx.year && sessionYear && attemptCtx.year !== sessionYear) return false;
+  if (attemptCtx.subject && sessionSubject && attemptCtx.subject !== sessionSubject) return false;
+  return true;
+}
+
 /**
  * 디바이스 타입 감지
  * @returns {string} 'mobile' | 'tablet' | 'desktop'
@@ -65,18 +102,55 @@ export async function recordAttempt(questionData, userAnswer, isCorrect) {
       window.Logger?.debug('현재 세션 ID:', sessionId);
     }
 
+    const attemptCtx = getAttemptContext(questionData);
+    const attemptCtxKey = `${attemptCtx.isMock ? 'mock' : 'regular'}|${attemptCtx.year}|${attemptCtx.hour}|${attemptCtx.subject}`;
+
+    // 기존 세션이 있어도 현재 문제 문맥과 맞지 않으면 새 세션으로 교체
+    if (sessionId) {
+      const cacheKey = `${sessionId}|${attemptCtxKey}`;
+      const cachedCompatibility = sessionCompatibilityCache.get(cacheKey);
+      let isCompatible = cachedCompatibility;
+
+      if (typeof isCompatible !== 'boolean') {
+        try {
+          const sessionRef = doc(db, 'sessions', sessionId);
+          const sessionSnap = await getDoc(sessionRef);
+          if (!sessionSnap.exists()) {
+            isCompatible = false;
+          } else {
+            const sessionData = sessionSnap.data();
+            isCompatible = isSessionCompatibleWithAttempt(sessionData, attemptCtx);
+          }
+        } catch (sessionReadError) {
+          window.Logger?.warn('기존 세션 검증 실패, 새 세션 생성으로 진행:', sessionReadError);
+          isCompatible = false;
+        }
+        sessionCompatibilityCache.set(cacheKey, isCompatible);
+      }
+
+      if (!isCompatible) {
+        window.Logger?.warn('기존 세션이 현재 문제 문맥과 맞지 않아 새 세션을 생성합니다.', {
+          sessionId,
+          attemptCtx
+        });
+        sessionId = null;
+      }
+    }
+
     if (!sessionId) {
       window.Logger?.warn('유효한 세션 ID가 없습니다. 세션을 시작합니다.');
       try {
+        const isMockExam = attemptCtx.isMock;
         // ✅ questionData를 메타데이터로 전달하여 유효한 세션 생성
-        const sessionMetadata = {
+        const sessionMetadata = compactObject({
           subject: questionData?.subject,
           year: questionData?.year,
-          type: questionData?.isFromMockExam ? 'mockexam' : 'regular',
+          type: isMockExam ? 'mockexam' : 'regular',
+          hour: questionData?.hour || questionData?.mockExamHour || questionData?.examHour,
           certificateType: questionData?.certificateType || 'health-manager',
           setId: questionData?.setId,
           questionNumber: questionData?.number
-        };
+        });
         
         const session = await window.sessionManager.startNewSession(sessionMetadata);
         
@@ -126,8 +200,10 @@ export async function recordAttempt(questionData, userAnswer, isCorrect) {
 
       // ✅ 첫 시도 답변 저장 (통계 정확성을 위해)
       isFirstAttempt: isFirstAttempt,
-      firstAttemptAnswer: isFirstAttempt ? userAnswer : undefined,
-      firstAttemptIsCorrect: isFirstAttempt ? isCorrect : undefined,
+      ...(isFirstAttempt ? {
+        firstAttemptAnswer: userAnswer,
+        firstAttemptIsCorrect: isCorrect
+      } : {}),
 
       // 📊 학습 분석용 추가 데이터
       timeSpent: questionData?.timeSpent || 0,  // 문제 풀이 소요 시간 (초)
@@ -338,8 +414,10 @@ export async function batchRecordAttempts(attempts) {
 
         // ✅ 첫 시도 답변 저장 (통계 정확성을 위해)
         isFirstAttempt: isFirstAttempt,
-        firstAttemptAnswer: isFirstAttempt ? attempt.userAnswer : undefined,
-        firstAttemptIsCorrect: isFirstAttempt ? attempt.isCorrect : undefined,
+        ...(isFirstAttempt ? {
+          firstAttemptAnswer: attempt.userAnswer,
+          firstAttemptIsCorrect: attempt.isCorrect
+        } : {}),
 
         // 📊 학습 분석용 추가 데이터
         timeSpent: attempt.timeSpent || 0,  // 문제 풀이 소요 시간 (초)

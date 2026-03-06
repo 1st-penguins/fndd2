@@ -133,6 +133,11 @@ class SessionManager {
    */
   async startNewSession(metadata = {}, allowResume = false) {
     try {
+      // Firestore는 undefined 필드를 허용하지 않으므로 사전에 제거
+      const cleanedMetadata = Object.fromEntries(
+        Object.entries(metadata || {}).filter(([, value]) => value !== undefined)
+      );
+
       // ✅ Firebase 초기화 확인
       await this.ensureFirebaseReady();
 
@@ -154,11 +159,11 @@ class SessionManager {
       }
 
       // 모의고사인 경우 기존 세션 복구 시도 (5분 이내 세션)
-      if (allowResume && metadata.type === 'mockexam' && metadata.year && metadata.hour) {
+      if (allowResume && cleanedMetadata.type === 'mockexam' && cleanedMetadata.year && cleanedMetadata.hour) {
         const existingSession = await this.findActiveSessionByFilters({
           type: 'mockexam',
-          year: metadata.year,
-          hour: metadata.hour
+          year: cleanedMetadata.year,
+          hour: cleanedMetadata.hour
         }, 5 / 60); // 5분 이내 세션 (시간 단위로 변환)
 
         if (existingSession) {
@@ -209,23 +214,23 @@ class SessionManager {
       }
 
       // 최종 과목/년도 정보 확정
-      const finalSubject = subject || metadata.subject || '';
-      const finalYear = year || metadata.year || '';
-      const finalType = metadata.type || 'regular';
+      const finalSubject = subject || cleanedMetadata.subject || '';
+      const finalYear = year || cleanedMetadata.year || '';
+      const finalType = cleanedMetadata.type || 'regular';
 
       // ✅ 유효성 검사: 유효한 세션 정보가 있는지 확인
       // 유효하지 않은 타이틀 목록
       const invalidTitles = ['학습 세트', '일반문제', '진행도', '점수', '기록보기', '0/20', '0점'];
-      const providedTitle = metadata.title || '';
+      const providedTitle = cleanedMetadata.title || '';
       const hasInvalidTitle = invalidTitles.includes(providedTitle) || 
                              providedTitle.includes('오후') || providedTitle.includes('오전') || 
                              (providedTitle.length > 0 && providedTitle.length < 3);
       
       // 모의고사인 경우: 년도와 교시 정보가 있어야 함
       if (finalType === 'mockexam') {
-        const hasMockExamInfo = (finalYear && (metadata.hour || metadata.mockExamHour));
+        const hasMockExamInfo = (finalYear && (cleanedMetadata.hour || cleanedMetadata.mockExamHour));
         if (!hasMockExamInfo && (hasInvalidTitle || !providedTitle)) {
-          console.warn('세션 저장 거부: 모의고사 정보가 부족하거나 유효하지 않은 타이틀입니다.', metadata);
+          console.warn('세션 저장 거부: 모의고사 정보가 부족하거나 유효하지 않은 타이틀입니다.', cleanedMetadata);
           return null; // 유효하지 않은 세션은 저장하지 않음
         }
       }
@@ -237,7 +242,7 @@ class SessionManager {
             subject: finalSubject, 
             year: finalYear, 
             title: providedTitle,
-            metadata 
+            metadata: cleanedMetadata
           });
           return null; // 유효하지 않은 세션은 저장하지 않음
         }
@@ -260,20 +265,20 @@ class SessionManager {
         // ✅ 타이틀 생성 로직 개선 (2025-12-27)
         title: (() => {
           // 제공된 타이틀이 있고 유효한 경우 사용
-          if (metadata.title) {
+          if (cleanedMetadata.title) {
             const invalidTitles = ['학습 세트', '일반문제', '진행도', '점수', '기록보기', '0/20', '0점'];
-            if (!invalidTitles.includes(metadata.title) && 
-                !metadata.title.includes('오후') && 
-                !metadata.title.includes('오전') &&
-                metadata.title.length >= 3) {
-              return metadata.title;
+            if (!invalidTitles.includes(cleanedMetadata.title) &&
+                !cleanedMetadata.title.includes('오후') &&
+                !cleanedMetadata.title.includes('오전') &&
+                cleanedMetadata.title.length >= 3) {
+              return cleanedMetadata.title;
             }
           }
           
           // 모의고사인 경우
           if (finalType === 'mockexam' || finalSubject.includes('모의고사')) {
             const mYear = finalYear || '2025';
-            const mHour = metadata.hour || metadata.mockExamHour || '1';
+            const mHour = cleanedMetadata.hour || cleanedMetadata.mockExamHour || '1';
             return `${mYear}년 ${mHour}교시 모의고사`;
           }
           // 일반 과목인 경우
@@ -291,7 +296,7 @@ class SessionManager {
           return `문제풀이 ${new Date().toLocaleDateString()}`;
         })(),
         type: finalType,
-        ...metadata
+        ...cleanedMetadata
       };
 
       // Firestore에 세션 데이터 저장

@@ -42,10 +42,12 @@ export function syncLoginOverlays(root = document) {
   root.body?.classList.toggle("logged-in", isLoggedIn);
 
   overlays.forEach((overlay) => {
-    overlay.style.display = isLoggedIn ? "none" : "flex";
-    overlay.style.visibility = isLoggedIn ? "hidden" : "visible";
-    overlay.style.opacity = isLoggedIn ? "0" : "1";
-    overlay.style.pointerEvents = isLoggedIn ? "none" : "auto";
+    // UX 요청: 로그인 전에도 콘텐츠 오버레이는 노출하지 않음.
+    // 접근 제한은 restricted-link 클릭 가드에서만 처리.
+    overlay.style.display = "none";
+    overlay.style.visibility = "hidden";
+    overlay.style.opacity = "0";
+    overlay.style.pointerEvents = "none";
   });
 }
 

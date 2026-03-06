@@ -165,17 +165,11 @@ export function updateRestrictedContent() {
   // 제한된 콘텐츠 요소 업데이트
   const restrictedElements = document.querySelectorAll('.restricted-content');
   restrictedElements.forEach(el => {
-    if (isLoggedIn) {
-      // ✅ 로그인만 되어 있으면 즉시 전체 기능 사용 가능
-      el.classList.remove('content-blurred');
-      el.style.filter = 'none';
-      el.style.pointerEvents = 'auto';
-    } else {
-      // 로그인하지 않은 경우에만 차단
-      el.classList.add('content-blurred');
-      el.style.filter = 'blur(5px)';
-      el.style.pointerEvents = 'none';
-    }
+    // 화면 오버레이/블러 없이 콘텐츠는 항상 동일하게 보이도록 유지
+    // 실제 접근 차단은 restricted-link 클릭 가드에서 처리한다.
+    el.classList.remove('content-blurred');
+    el.style.filter = 'none';
+    el.style.pointerEvents = 'auto';
   });
   
   // 제한된 링크 이벤트 처리
