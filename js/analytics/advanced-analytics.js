@@ -158,33 +158,62 @@ export function analyzeLearningPattern(attempts) {
   
   // 연속 학습 일수
   const sortedDates = Object.keys(dateMap).sort((a, b) => new Date(a) - new Date(b));
-  let currentStreak = 0;
+  let tempStreak = 0;
   let maxStreak = 0;
-  
+
   for (let i = 0; i < sortedDates.length; i++) {
     if (i === 0) {
-      currentStreak = 1;
+      tempStreak = 1;
     } else {
       const prevDate = new Date(sortedDates[i - 1]);
       const currDate = new Date(sortedDates[i]);
       const dayDiff = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
-      
       if (dayDiff === 1) {
-        currentStreak++;
+        tempStreak++;
       } else {
-        maxStreak = Math.max(maxStreak, currentStreak);
-        currentStreak = 1;
+        maxStreak = Math.max(maxStreak, tempStreak);
+        tempStreak = 1;
       }
     }
   }
-  maxStreak = Math.max(maxStreak, currentStreak);
-  
+  maxStreak = Math.max(maxStreak, tempStreak);
+
+  // 현재 연속 학습일 — 가장 최근 날짜가 오늘/어제인 경우만 유효
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  let currentStreak = 0;
+  if (sortedDates.length > 0) {
+    const mostRecent = new Date(sortedDates[sortedDates.length - 1]);
+    mostRecent.setHours(0, 0, 0, 0);
+    const diffFromToday = Math.round((today - mostRecent) / (1000 * 60 * 60 * 24));
+
+    if (diffFromToday <= 1) { // 오늘 또는 어제까지 공부한 경우
+      currentStreak = 1;
+      for (let i = sortedDates.length - 2; i >= 0; i--) {
+        const curr = new Date(sortedDates[i + 1]);
+        const prev = new Date(sortedDates[i]);
+        curr.setHours(0, 0, 0, 0);
+        prev.setHours(0, 0, 0, 0);
+        const dayDiff = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+        if (dayDiff === 1) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
   // 평균 세션 길이 (일일 평균 문제 수)
   const averageSessionLength = Math.round(attempts.length / sortedDates.length);
-  
+
   return {
     mostActiveTime,
-    studyStreak: maxStreak,
+    studyStreak: currentStreak,   // 현재 연속 학습일
+    maxStreak,                     // 역대 최고 연속 학습일
     averageSessionLength,
     totalStudyDays: sortedDates.length
   };
@@ -217,29 +246,42 @@ export function calculateExpectedScore(attempts) {
     }
   });
   
+  // 전체 평균 정답률 (미응시 과목 추정에 사용)
+  const totalCorrectAll = attempts.filter(a => a.isCorrect).length;
+  const overallAccuracy = attempts.length > 0 ? totalCorrectAll / attempts.length : 0.5;
+
   // 과목별 예상 점수 (각 과목 25문제, 4점)
   let total1stScore = 0;
   let total2ndScore = 0;
-  
+  const estimatedSubjects = []; // 추정값 사용된 과목 목록
+
   const firstSubjects = ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사'];
   const secondSubjects = ['운동상해', '기능해부학', '병태생리학', '스포츠심리학'];
-  
+
   firstSubjects.forEach(subject => {
     const stat = subjectStats[subject];
-    if (stat.total >= 5) { // 최소 5문제 이상 풀어야 신뢰도 있음
-      const accuracy = stat.correct / stat.total;
-      total1stScore += accuracy * 25 * 4; // 25문제 * 4점
+    let accuracy;
+    if (stat.total >= 5) {
+      accuracy = stat.correct / stat.total;
+    } else {
+      accuracy = overallAccuracy; // 데이터 부족 시 전체 평균으로 추정
+      estimatedSubjects.push(subject);
     }
+    total1stScore += accuracy * 25 * 4; // 25문제 * 4점
   });
-  
+
   secondSubjects.forEach(subject => {
     const stat = subjectStats[subject];
+    let accuracy;
     if (stat.total >= 5) {
-      const accuracy = stat.correct / stat.total;
-      total2ndScore += accuracy * 25 * 4;
+      accuracy = stat.correct / stat.total;
+    } else {
+      accuracy = overallAccuracy;
+      estimatedSubjects.push(subject);
     }
+    total2ndScore += accuracy * 25 * 4;
   });
-  
+
   // 신뢰도 계산 (충분한 문제를 풀었는지)
   const totalSolvedProblems = attempts.length;
   let reliability = '낮음';
@@ -248,13 +290,14 @@ export function calculateExpectedScore(attempts) {
   } else if (totalSolvedProblems >= 100) {
     reliability = '보통';
   }
-  
+
   return {
     firstExamScore: Math.round(total1stScore),
     secondExamScore: Math.round(total2ndScore),
     totalScore: Math.round(total1stScore + total2ndScore),
     reliability,
-    totalAttempts: totalSolvedProblems
+    totalAttempts: totalSolvedProblems,
+    estimatedSubjects // 추정값 사용된 과목들
   };
 }
 

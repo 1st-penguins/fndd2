@@ -58,7 +58,11 @@ export function renderExpectedScore(attempts) {
       </div>
     </div>
     
-    <div style="margin-top: 20px; padding: 16px; background: var(--warning-bg); border-radius: var(--radius-md); color: #B45309; font-size: 0.9rem; line-height: 1.5;">
+    ${scoreData.estimatedSubjects?.length > 0 ? `
+    <div style="margin-top: 12px; padding: 12px 16px; background: rgba(59,130,246,0.08); border-radius: var(--radius-md); color: #1D4ED8; font-size: 0.85rem; line-height: 1.5;">
+      <strong>📊 추정 과목:</strong> ${scoreData.estimatedSubjects.join(', ')} — 데이터 5문제 미만으로 전체 평균 정답률로 추정됩니다.
+    </div>` : ''}
+    <div style="margin-top: 12px; padding: 16px; background: var(--warning-bg); border-radius: var(--radius-md); color: #B45309; font-size: 0.9rem; line-height: 1.5;">
       <strong>💡 참고:</strong> 예상 점수는 현재까지의 학습 데이터를 기반으로 단순 계산됩니다. 실제 시험 결과와 다를 수 있으며, 합격 기준은 총점 240점(과락 40점)입니다.
     </div>
   `;
@@ -263,8 +267,9 @@ export function renderLearningPattern(attempts) {
       </div>
       
       <div class="score-card score-card-secondary">
-        <div style="opacity: 0.9; margin-bottom: 8px;">연속 학습일</div>
+        <div style="opacity: 0.9; margin-bottom: 8px;">현재 연속 학습일</div>
         <div class="score-value-large">${patternData.studyStreak}<span style="font-size:0.5em">일</span></div>
+        <div style="font-size: 0.8rem; opacity: 0.75; margin-top: 4px;">최고 ${patternData.maxStreak}일</div>
       </div>
       
       <div class="score-card score-card-info">

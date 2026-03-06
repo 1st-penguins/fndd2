@@ -1387,11 +1387,13 @@ function renderSubjectProgress() {
     const color = subjectColors[subject] || '#4285F4';
     const emoji = subjectEmojis[subject] || '📚';
 
-    // 취약도 판단
+    // 레벨 뱃지 (5문제 이상부터 표시)
     let weaknessBadge = '';
-    if (attempts >= 10) {
-      if (percentage < 40) weaknessBadge = `<span style="background:var(--danger-bg); color:var(--danger-color); font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">취약</span>`;
-      else if (percentage >= 80) weaknessBadge = `<span style="background:var(--success-bg); color:var(--success-color); font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">우수</span>`;
+    if (attempts >= 5) {
+      if (percentage < 40)      weaknessBadge = `<span style="background:var(--danger-bg); color:var(--danger-color); font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">취약</span>`;
+      else if (percentage < 60) weaknessBadge = `<span style="background:rgba(251,191,36,0.15); color:#B45309; font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">보통</span>`;
+      else if (percentage < 80) weaknessBadge = `<span style="background:rgba(16,185,129,0.12); color:#059669; font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">양호</span>`;
+      else                       weaknessBadge = `<span style="background:var(--success-bg); color:var(--success-color); font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">우수</span>`;
     }
 
     html += `
