@@ -1,17 +1,14 @@
 // analytics-loader.js - 학습 분석 데이터 로더 및 초기화 (패치 버전)
 
 import {
-  getUserAttempts,
-  getUserMockExamResults,
-  getUserProgress,
-  getUserStatistics,
-  getUserQuestionSets,
   getUserLearningStatus
 } from '../data/quiz-data-service.js';
 
 import { getScoreColor, getWeaknessColor, getRandomColor } from '../analytics/chart-utils.js';
 import { formatSimpleDate, formatRelativeDate } from '../utils/date-utils.js';
 import { isUserLoggedIn } from "../auth/auth-utils.js";
+import { auth } from "../core/firebase-core.js";
+import { showLoading, hideLoading, showError } from "../utils/ui-utils.js";
 import { 
   getCurrentCertificateType, 
   getCertificateName,
@@ -29,14 +26,44 @@ let lastRefreshTime = null;
 
 // 🎯 데이터 캐시 (자격증별로 관리)
 let cachedData = {
-  attempts: [],           // 전체 attempts (필터링 전)
-  mockExamResults: [],    // 전체 mockExamResults (필터링 전)
+  attempts: [],
+  mockExamResults: [],
   userProgress: null,
   userStats: null,
   questionSets: [],
   lastUpdated: null,
-  lastCertificateType: null  // 마지막으로 로드한 자격증
+  lastCertificateType: null
 };
+
+// localStorage 캐시 버전 (구조 변경 시 bump)
+const CACHE_VERSION = 'v2';
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10분
+
+function getLocalCacheKey(userId) {
+  return `analyticsCache_${CACHE_VERSION}_${userId}`;
+}
+
+function saveToLocalCache(userId, data) {
+  try {
+    const payload = { ...data, _timestamp: Date.now(), _userId: userId };
+    localStorage.setItem(getLocalCacheKey(userId), JSON.stringify(payload));
+  } catch (e) {
+    // localStorage 용량 초과 등 무시
+  }
+}
+
+function loadFromLocalCache(userId) {
+  try {
+    const raw = localStorage.getItem(getLocalCacheKey(userId));
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data._timestamp) return null;
+    if (Date.now() - data._timestamp > CACHE_TTL_MS) return null;
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
 
 // 과목별 색상 매핑 - 일관성을 위해 전역으로 유지
 const subjectColors = {
@@ -401,77 +428,80 @@ function checkLoginStatus() {
 }
 
 /**
- * 분석 데이터 로드
- * @param {Object} user - 현재 사용자 정보
+ * 분석 데이터 로드 (stale-while-revalidate 패턴)
+ * - 캐시가 있으면 즉시 렌더링 후 백그라운드 갱신
+ * - 캐시 없으면 로딩 표시 후 Firestore 요청
  */
 export async function loadAnalyticsData() {
   window.Logger?.info('[analytics-loader] 분석 데이터 로드 시작');
-  
+
+  const userId = auth?.currentUser?.uid || null;
+
+  // ── stale-while-revalidate: 캐시 즉시 렌더링 ──
+  if (userId) {
+    const cached = loadFromLocalCache(userId);
+    if (cached) {
+      cachedData = {
+        attempts: cached.attempts || [],
+        mockExamResults: cached.mockExamResults || [],
+        userProgress: cached.userProgress || null,
+        userStats: cached.userStats || null,
+        questionSets: cached.questionSets || [],
+        lastUpdated: new Date(cached._timestamp)
+      };
+      hideLoading();
+      renderDashboard();
+      // 백그라운드에서 신선한 데이터 갱신 (UI는 즉시 표시됨)
+      _fetchAndCacheFresh(userId).catch(() => {});
+      return true;
+    }
+  }
+
+  // ── 캐시 없음: 로딩 표시 후 Firestore 요청 ──
   try {
-    // 로딩 상태 표시
     showLoading('학습 데이터를 불러오는 중...');
     isDataLoading = true;
-    
-    // 통합 API를 사용한 학습 상태 데이터 가져오기
-    const userData = await getUserLearningStatus();
-    
-    if (!userData || !userData.success) {
-      throw new Error(userData?.error || '데이터를 불러오는 중 오류가 발생했습니다.');
-    }
-    
-    // 개별 데이터 추출
-    cachedData = {
-      attempts: userData.attempts || [],
-      mockExamResults: userData.mockExamResults || [],
-      userProgress: userData.userProgress || null,
-      userStats: userData.userStats || null,
-      lastUpdated: new Date()
-    };
-    
-    // 문제풀이기록 데이터 가져오기 (아직 통합 API에 포함되지 않음)
-    try {
-      cachedData.questionSets = await getUserQuestionSets();
-    } catch (setError) {
-      window.Logger?.error('문제풀이기록 데이터 로드 오류:', setError);
-      cachedData.questionSets = [];
-    }
-    
-    window.Logger?.debug('데이터 로드 완료', {
-      attempts: cachedData.attempts.length,
-      mockExamResults: cachedData.mockExamResults.length,
-      hasProgress: !!cachedData.userProgress,
-      hasStats: !!cachedData.userStats,
-      questionSets: cachedData.questionSets.length
-    });
-    
-    // 마지막 새로고침 시간 업데이트
-    lastRefreshTime = Date.now();
-    
-    // 대시보드 렌더링
-    renderDashboard();
-    
-    // 이벤트 디스패치
-    document.dispatchEvent(new CustomEvent('dashboardReady', {
-      detail: { success: true }
-    }));
-    
-    return true;
+    return await _fetchAndCacheFresh(userId);
   } catch (error) {
     window.Logger?.error('분석 데이터 로드 오류:', error);
-    
-    // 오류 표시
     showError(error.message || '데이터를 불러오는 중 오류가 발생했습니다.');
-    
-    document.dispatchEvent(new CustomEvent('dashboardError', {
-      detail: { error: error.message }
-    }));
-    
+    document.dispatchEvent(new CustomEvent('dashboardError', { detail: { error: error.message } }));
     return false;
   } finally {
-    // 로딩 상태 해제
     isDataLoading = false;
     hideLoading();
   }
+}
+
+/**
+ * Firestore에서 최신 데이터 가져와 캐시 저장 + 렌더링
+ */
+async function _fetchAndCacheFresh(userId) {
+  const userData = await getUserLearningStatus();
+
+  if (!userData || !userData.success) {
+    throw new Error(userData?.error || '데이터를 불러오는 중 오류가 발생했습니다.');
+  }
+
+  cachedData = {
+    attempts: userData.attempts || [],
+    mockExamResults: userData.mockExamResults || [],
+    userProgress: userData.userProgress || null,
+    userStats: userData.userStats || null,
+    questionSets: userData.questionSets || [],  // 이제 getUserLearningStatus에서 포함됨
+    lastUpdated: new Date()
+  };
+
+  // localStorage에 캐시 저장
+  if (userId) {
+    saveToLocalCache(userId, cachedData);
+  }
+
+  lastRefreshTime = Date.now();
+  renderDashboard();
+
+  document.dispatchEvent(new CustomEvent('dashboardReady', { detail: { success: true } }));
+  return true;
 }
 
 /**
@@ -625,19 +655,20 @@ function renderOverviewStats() {
     </div>
   `;
   
+  const accuracyColor = correctPercentage < 50 ? 'var(--danger-color)' : 'var(--penguin-navy)';
   const html = certHeader + `
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-      <div class="stat-item" style="${cardBase}">
-        <div class="stat-value" style="${valueBase}; color: var(--penguin-navy); font-size: 26px;">${totalAttempts}</div>
-        <div class="stat-label" style="${labelBase}">풀이한 문제</div>
+    <div class="overview-stats-grid">
+      <div class="overview-stat-item">
+        <div class="overview-stat-value">${totalAttempts}</div>
+        <div class="overview-stat-label">풀이한 문제</div>
       </div>
-      <div class="stat-item" style="${cardBase}">
-        <div class="stat-value" style="${valueBase}; color: ${correctPercentage < 50 ? '#e11d48' : 'var(--penguin-navy)'}; font-size: 26px;">${correctPercentage}%</div>
-        <div class="stat-label" style="${labelBase}">정답률</div>
+      <div class="overview-stat-item">
+        <div class="overview-stat-value" style="color: ${accuracyColor};">${correctPercentage}%</div>
+        <div class="overview-stat-label">정답률</div>
       </div>
-      <div class="stat-item" style="${cardBase}">
-        <div class="stat-value" style="${valueBase}; color: var(--penguin-navy); font-size: 22px;">${lastActivity}</div>
-        <div class="stat-label" style="${labelBase}">최근 학습일</div>
+      <div class="overview-stat-item">
+        <div class="overview-stat-value" style="font-size: 1.4rem;">${lastActivity}</div>
+        <div class="overview-stat-label">최근 학습일</div>
       </div>
     </div>
   `;

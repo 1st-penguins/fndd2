@@ -422,12 +422,13 @@ export async function getUserLearningStatus() {
       return { success: false, error: "사용자가 로그인하지 않았습니다." };
     }
 
-    // 병렬로 사용자 관련 데이터 가져오기
-    const [attempts, mockExamResults, userProgress, userStats] = await Promise.all([
-      getUserAttempts(100),
+    // 모든 쿼리를 한 번에 병렬 실행 (순차 호출 제거)
+    const [attempts, mockExamResults, userProgress, userStats, questionSets] = await Promise.all([
+      getUserAttempts(60),         // 100 → 60: 분석에 충분하며 payload 감소
       getUserMockExamResults(20),
       getUserProgress(),
-      getUserStatistics()
+      getUserStatistics(),
+      getUserQuestionSets()         // 기존: 별도 순차 호출 → 병렬로 통합
     ]);
 
     return {
@@ -436,6 +437,7 @@ export async function getUserLearningStatus() {
       mockExamResults,
       userProgress,
       userStats,
+      questionSets,                 // questionSets도 함께 반환
       lastUpdated: new Date()
     };
   } catch (error) {
