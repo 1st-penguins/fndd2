@@ -2410,8 +2410,6 @@ async function deleteSession(sessionId, typeFilter = 'all', subjectFilter = 'all
  */
 function showSessionScorecard(sessionIdOrData) {
   try {
-    console.log('정오표 표시 함수 호출:', sessionIdOrData);
-
     // 기존 모달 제거
     const existingModals = document.querySelectorAll('.scorecard-modal');
     existingModals.forEach(modal => {
@@ -2446,10 +2444,6 @@ function showSessionScorecard(sessionIdOrData) {
 
     // 모의고사라면 1교시+2교시 데이터를 모두 로드
     if (isMockExam) {
-      console.log('모의고사 정오표: 1교시+2교시 데이터 로드 시작');
-      console.log('세션 ID:', sessionId);
-      console.log('세션 데이터:', sessionData);
-
       // 먼저 현재 세션의 attempts를 로드해서 year 정보 얻기
       loadAttemptsForSession(sessionId).then(currentAttempts => {
         if (currentAttempts.length === 0) {
@@ -2464,12 +2458,7 @@ function showSessionScorecard(sessionIdOrData) {
           sessionData?.year ||
           '2024';
 
-        console.log('모의고사 년도:', year);
-        console.log('현재 세션 문제 수:', currentAttempts.length);
-
-        // 이미 40개 이상이면 그대로 사용
         if (currentAttempts.length >= 40) {
-          console.log('이미 충분한 문제가 있음 (40개 이상)');
           hideLoading();
 
           // 정렬
@@ -2484,7 +2473,6 @@ function showSessionScorecard(sessionIdOrData) {
         }
 
         // 40개 미만이면 다른 세션도 조회
-        console.log('추가 세션 조회 시작...');
 
         const user = auth.currentUser;
         if (!user) {
@@ -2511,16 +2499,12 @@ function showSessionScorecard(sessionIdOrData) {
             }
           });
 
-          console.log(`${year}년 모의고사 세션 ${sessionIds.length}개 발견:`, sessionIds);
-
           // 모든 세션의 attempts 로드
           const allAttemptsPromises = sessionIds.map(sid => loadAttemptsForSession(sid));
           const allAttemptsArrays = await Promise.all(allAttemptsPromises);
 
           // 합치기
           const allAttempts = allAttemptsArrays.flat();
-
-          console.log(`총 ${allAttempts.length}개 문제 로드 완료`);
 
           hideLoading();
 
@@ -2567,8 +2551,6 @@ function showSessionScorecard(sessionIdOrData) {
         hideLoading();
 
         if (attempts && attempts.length > 0) {
-          console.log(`세션 ${sessionId}에 대한 시도 기록 ${attempts.length}개를 로드했습니다.`);
-
           // 기본 세션 데이터 생성
           if (!sessionData) {
             sessionData = {
@@ -2596,7 +2578,6 @@ function showSessionScorecard(sessionIdOrData) {
           // 정오표 모달 생성
           createScoreModal(sessionData, attempts);
         } else {
-          console.log('시도 기록을 찾을 수 없습니다.');
           showToast('이 세션에는 시도 기록이 없습니다.');
         }
       }).catch(error => {
@@ -2657,64 +2638,19 @@ function getSessionTitle(sessionId) {
  * 정오표 모달 생성 함수 (개선된 버전)
  */
 function createScoreModal(sessionData, attempts) {
-  // 아무 시도 기록이 없는 경우 처리
   if (!attempts || attempts.length === 0) {
-    console.warn('showSessionScorecard: 세트에 시도 기록이 없습니다.');
     showToast('이 세션에는 시도 기록이 없습니다.');
     return;
   }
 
-  // 첫 번째 시도의 데이터 구조 로깅 (디버깅용)
-  console.log('시도 기록 데이터 구조 확인:', JSON.stringify(attempts[0], null, 2));
-
-  // 모달 컨테이너 생성 - 모던한 디자인
   const modal = document.createElement('div');
-  modal.className = 'scorecard-modal';
-  modal.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  `;
+  modal.className = 'sc-modal scorecard-modal';
 
-  // 모달 내용 컨테이너 - 깔끔한 디자인
   const modalContent = document.createElement('div');
-  modalContent.className = 'scorecard-modal-content';
-  modalContent.style.cssText = `
-    background-color: #ffffff;
-    border-radius: 24px;
-    padding: 0;
-    width: 90%;
-    max-width: 920px;
-    max-height: 90vh;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    display: flex;
-    flex-direction: column;
-  `;
+  modalContent.className = 'sc-modal-content scorecard-modal-content';
 
-  // 헤더 생성 - 테마에 맞는 깔끔한 디자인
   const header = document.createElement('div');
-  header.style.cssText = `
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px 32px;
-    background: linear-gradient(135deg, #1D2F4E 0%, #2a4570 100%);
-    color: white;
-    border-radius: 24px 24px 0 0;
-  `;
+  header.className = 'sc-modal-header';
 
   // 과목 및 연도 정보 추출
   let subject = '';
@@ -2772,74 +2708,27 @@ function createScoreModal(sessionData, attempts) {
     }
   }
 
-  // 제목 - 모던한 타이포그래피
   const title = document.createElement('h3');
-  title.innerHTML = `${fullTitle}`;
-  title.style.cssText = `
-    margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: white;
-    letter-spacing: -0.3px;
-  `;
+  title.className = 'sc-modal-title';
+  title.textContent = fullTitle;
 
-  // 닫기 버튼 - 깔끔한 디자인
   const closeBtn = document.createElement('button');
-  closeBtn.innerHTML = '×';
-  closeBtn.className = 'scorecard-modal-close';
-  closeBtn.style.cssText = `
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    font-size: 24px;
-    font-weight: 300;
-    cursor: pointer;
-    color: white;
-    line-height: 1;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-  `;
-  closeBtn.addEventListener('mouseenter', () => {
-    closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
-    closeBtn.style.transform = 'rotate(90deg)';
-  });
-  closeBtn.addEventListener('mouseleave', () => {
-    closeBtn.style.background = 'rgba(255, 255, 255, 0.1)';
-    closeBtn.style.transform = 'rotate(0deg)';
-  });
+  closeBtn.innerHTML = '&times;';
+  closeBtn.className = 'sc-modal-close scorecard-modal-close';
   closeBtn.addEventListener('click', () => {
-    // 페이드 아웃 애니메이션
     modal.style.opacity = '0';
-    setTimeout(() => {
-      if (modal.parentNode) {
-        modal.parentNode.removeChild(modal);
-      }
-    }, 300);
+    setTimeout(() => { if (modal.parentNode) modal.parentNode.removeChild(modal); }, 300);
   });
 
   header.appendChild(title);
   header.appendChild(closeBtn);
   modalContent.appendChild(header);
 
-  // 스크롤 가능한 컨텐츠 영역
   const scrollableContent = document.createElement('div');
-  scrollableContent.style.cssText = `
-    padding: 32px;
-    overflow-y: auto;
-    flex: 1;
-  `;
+  scrollableContent.className = 'sc-modal-body';
 
-  // 세션 요약 정보 - 모던하고 깔끔한 디자인
   const summary = document.createElement('div');
-  summary.className = 'scorecard-summary';
-  summary.style.cssText = `
-    margin-bottom: 32px;
-  `;
+  summary.className = 'sc-summary scorecard-summary';
 
   // ✅ 정답률 계산 (첫 시도 답변 우선 사용)
   const correctCount = attempts.filter(a => {
@@ -2871,38 +2760,31 @@ function createScoreModal(sessionData, attempts) {
         displayDate = new Date(attempts[0].timestamp).toLocaleString();
       }
     }
-  } catch (e) {
-    console.warn('날짜 처리 오류:', e);
-  }
+  } catch (_) { /* 날짜 포맷 오류 무시 */ }
 
-  // 요약 정보 내용 - 모던하고 깔끔한 디자인 (채도는 숫자에만)
   summary.innerHTML = `
-    <div style="background: #ffffff; border-radius: 16px; padding: 28px; border: 1px solid #e2e8f0;">
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px;">
-        <div style="text-align: center;">
-          <div style="font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: 500; letter-spacing: 0.2px;">총 문제</div>
-          <div style="font-size: 32px; font-weight: 700; color: #1D2F4E; line-height: 1.2;">${totalQuestions}</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: 500; letter-spacing: 0.2px;">정답</div>
-          <div style="font-size: 32px; font-weight: 700; color: #059669; line-height: 1.2;">${correctCount}</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: 500; letter-spacing: 0.2px;">오답</div>
-          <div style="font-size: 32px; font-weight: 700; color: #DC2626; line-height: 1.2;">${wrongCount}</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: 500; letter-spacing: 0.2px;">정답률</div>
-          <div style="font-size: 32px; font-weight: 700; color: #1D2F4E; line-height: 1.2;">${accuracy}%</div>
-        </div>
+    <div class="sc-stats-row">
+      <div class="sc-stat">
+        <div class="sc-stat-label">총 문제</div>
+        <div class="sc-stat-value">${totalQuestions}</div>
       </div>
-      <div style="height: 8px; background: #f1f5f9; border-radius: 999px; overflow: hidden; margin-bottom: 16px;">
-        <div style="height: 100%; width: ${accuracy}%; background: linear-gradient(90deg, #059669 0%, #10b981 100%); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 999px;"></div>
+      <div class="sc-stat">
+        <div class="sc-stat-label">정답</div>
+        <div class="sc-stat-value green">${correctCount}</div>
       </div>
-      <div style="font-size: 13px; color: #94a3b8; text-align: center; font-weight: 400;">
-        ${displayDate}
+      <div class="sc-stat">
+        <div class="sc-stat-label">오답</div>
+        <div class="sc-stat-value red">${wrongCount}</div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat-label">정답률</div>
+        <div class="sc-stat-value">${accuracy}%</div>
       </div>
     </div>
+    <div class="sc-progress-bar-wrap">
+      <div class="sc-progress-bar-fill" style="width:${accuracy}%"></div>
+    </div>
+    <div class="sc-date">${displayDate}</div>
   `;
 
   scrollableContent.appendChild(summary);
@@ -2943,62 +2825,6 @@ function createScoreModal(sessionData, attempts) {
     return aNum - bNum;
   });
 
-  console.log(`정렬 후 처음 5개:`,
-    sortedAttempts.slice(0, 5).map(a => ({
-      globalIndex: a.questionData?.globalIndex,
-      questionNumber: a.questionNumber,
-      number: a.questionData?.number,
-      subject: a.subject
-    }))
-  );
-  console.log(`정렬 후 마지막 5개:`,
-    sortedAttempts.slice(-5).map(a => ({
-      globalIndex: a.questionData?.globalIndex,
-      questionNumber: a.questionNumber,
-      number: a.questionData?.number,
-      subject: a.subject
-    }))
-  );
-
-  // 전체 globalIndex 목록 확인 (0도 포함)
-  const allGlobalIndexes = sortedAttempts
-    .map(a => a.questionData?.globalIndex)
-    .filter(idx => idx !== undefined && idx !== null);
-  console.log(`전체 globalIndex 개수: ${allGlobalIndexes.length}개, 값들:`, allGlobalIndexes);
-
-  // globalIndex 없는 문제들 찾기 (0도 유효한 값으로 처리)
-  const attemptsWithoutGlobalIndex = sortedAttempts.filter(a =>
-    a.questionData?.globalIndex === undefined || a.questionData?.globalIndex === null
-  );
-  if (attemptsWithoutGlobalIndex.length > 0) {
-    console.log('⚠️ globalIndex 없는 문제들:', attemptsWithoutGlobalIndex.length + '개');
-    console.log('상세:', attemptsWithoutGlobalIndex.map(a => {
-      const subject = a.subject || a.questionData?.subject || '';
-      const number = a.questionData?.number || a.number || 0;
-      const subjectStarts = {
-        '운동생리학': 1, '건강체력평가': 21, '운동처방론': 41, '운동부하검사': 61,
-        '운동상해': 1, '기능해부학': 21, '병태생리학': 41, '스포츠심리학': 61
-      };
-      const startNum = subjectStarts[subject] || 0;
-      const calculatedNumber = startNum > 0 ? startNum + number - 1 : '?';
-
-      return {
-        questionNumber: a.questionNumber,
-        number: number,
-        subject: subject,
-        globalIndex: a.questionData?.globalIndex,
-        계산된번호: calculatedNumber
-      };
-    }));
-  }
-
-  // 80번 문제가 있는지 확인
-  const question80 = sortedAttempts.find(a =>
-    (a.questionData?.globalIndex === 80) ||
-    (a.questionNumber === 80) ||
-    (a.questionData?.number === 20 && a.subject?.includes('스포츠심리학'))
-  );
-  console.log('80번 문제 존재 여부:', question80 ? '있음' : '없음', question80);
 
   // 중복 제거 (globalIndex 우선, 없으면 subject+number 조합)
   const uniqueAttempts = [];
@@ -3045,44 +2871,6 @@ function createScoreModal(sessionData, attempts) {
     uniqueAttempts.push(attempt);
   }
 
-  console.log(`중복 제거 후: ${uniqueAttempts.length}개 문제 (원본: ${attempts.length}개)`);
-  if (skippedQuestions.length > 0) {
-    console.log('⚠️ 중복으로 제거된 문제들:', skippedQuestions);
-    console.log('중복 문제 상세:', skippedQuestions.map(q => `문제 ${q.questionId} (globalIndex: ${q.globalIndex})`));
-  }
-
-  const sortedIds = Array.from(processedQuestions).sort((a, b) => {
-    const toNum = (id) => {
-      if (typeof id === 'number') return id;
-      if (typeof id === 'string' && id.startsWith('g_')) return parseInt(id.substring(2), 10);
-      const parsed = parseInt(id, 10);
-      return isNaN(parsed) ? 999 : parsed;
-    };
-    return toNum(a) - toNum(b);
-  });
-  console.log('고유 문제 ID들 (정렬됨):', sortedIds);
-
-  // 실제로 빠진 번호 확인 (globalIndex는 0~79이므로 1~80으로 변환해서 체크)
-  const numericIds = sortedIds.map(id => {
-    if (typeof id === 'string' && id.startsWith('g_')) {
-      return parseInt(id.substring(2)) + 1; // "g_0" → 1, "g_79" → 80
-    } else if (typeof id === 'number') {
-      return id;
-    }
-    return null;
-  }).filter(id => id !== null);
-
-  const missingIds = [];
-  for (let i = 1; i <= 80; i++) {
-    if (!numericIds.includes(i)) {
-      missingIds.push(i);
-    }
-  }
-  if (missingIds.length > 0) {
-    console.log('⚠️ 빠진 문제 번호들:', missingIds);
-  } else {
-    console.log('✅ 모든 문제가 포함되었습니다! (총 80개)');
-  }
 
   // 정답 데이터 추출 유틸리티 함수
   function toDisplayChoice(value) {
@@ -3170,39 +2958,20 @@ function createScoreModal(sessionData, attempts) {
     const correctAnswer = getCorrectAnswer(attempt);
     const userAnswer = getUserAnswer(attempt);
     const isCorrect = attempt.isCorrect === true;
-    const statusText = isCorrect ? '정답' : '오답';
-    const statusBg = isCorrect ? '#ecfdf3' : '#fef2f2';
-    const statusColor = isCorrect ? '#047857' : '#b91c1c';
     const subject = attempt.subject || attempt.questionData?.subject || sessionData?.subject || '';
     const year = sessionData?.year || attempt.questionData?.year || '';
 
     const row = document.createElement('div');
-    row.style.cssText = `
-      display: grid;
-      grid-template-columns: 86px 72px 1fr 92px;
-      gap: 10px;
-      align-items: center;
-      padding: 10px 12px;
-      border-bottom: 1px solid #eef2f7;
-    `;
-
+    row.className = 'sc-row';
     row.innerHTML = `
-      <div style="font-size: 13px; font-weight: 700; color: #111827;">${questionNumber}번</div>
-      <div style="display: inline-flex; justify-content: center; align-items: center; width: 56px; padding: 4px 0; border-radius: 999px; background: ${statusBg}; color: ${statusColor}; font-size: 12px; font-weight: 700;">
-        ${statusText}
-      </div>
-      <div style="font-size: 12px; color: #374151; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-        내 답 <strong style="color: #111827;">${userAnswer}</strong> / 정답 <strong style="color: #111827;">${correctAnswer}</strong>
-      </div>
-      <button type="button" style="justify-self: end; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 600; cursor: pointer;">
-        확인
-      </button>
+      <div class="sc-row-num">${questionNumber}번</div>
+      <div class="sc-status-badge ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? '정답' : '오답'}</div>
+      <div class="sc-answer-text">내 답 <strong>${userAnswer}</strong> / 정답 <strong>${correctAnswer}</strong></div>
+      <button type="button" class="sc-check-btn">확인</button>
     `;
 
-    const confirmBtn = row.querySelector('button');
-    confirmBtn?.addEventListener('click', () => {
-      const url = `exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${questionNumber}`;
-      window.location.href = url;
+    row.querySelector('.sc-check-btn')?.addEventListener('click', () => {
+      window.location.href = `exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${questionNumber}`;
     });
 
     return row;
@@ -3211,43 +2980,20 @@ function createScoreModal(sessionData, attempts) {
   function appendSection(container, sectionTitle, attemptList) {
     if (!attemptList || attemptList.length === 0) return;
 
-    const section = document.createElement('div');
-    section.style.cssText = 'margin-top: 16px;';
-
-    const sectionHeader = document.createElement('div');
-    sectionHeader.style.cssText = `
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      border: 1px solid #e2e8f0;
-      border-bottom: none;
-      border-radius: 12px 12px 0 0;
-      background: #f8fafc;
-    `;
     const correctCountInSection = attemptList.filter(a => a.isCorrect === true).length;
-    sectionHeader.innerHTML = `
-      <div style="font-size: 14px; font-weight: 700; color: #1d2f4e;">${sectionTitle}</div>
-      <div style="font-size: 12px; color: #475569;">${correctCountInSection}/${attemptList.length} 정답</div>
+    const section = document.createElement('div');
+    section.className = 'sc-section';
+    section.innerHTML = `
+      <div class="sc-section-header">
+        <span class="sc-section-title">${sectionTitle}</span>
+        <span class="sc-section-count">${correctCountInSection}/${attemptList.length} 정답</span>
+      </div>
     `;
 
     const list = document.createElement('div');
-    list.style.cssText = `
-      border: 1px solid #e2e8f0;
-      border-radius: 0 0 12px 12px;
-      overflow: hidden;
-      background: #ffffff;
-    `;
+    list.className = 'sc-list';
+    attemptList.forEach((attempt, index) => list.appendChild(createQuestionRow(attempt, index)));
 
-    attemptList.forEach((attempt, index) => {
-      const row = createQuestionRow(attempt, index);
-      if (index === attemptList.length - 1) {
-        row.style.borderBottom = 'none';
-      }
-      list.appendChild(row);
-    });
-
-    section.appendChild(sectionHeader);
     section.appendChild(list);
     container.appendChild(section);
   }
@@ -3272,7 +3018,6 @@ function createScoreModal(sessionData, attempts) {
   const isMockExam = sessionData?.type === 'mockexam' || (sessionData?.title && sessionData.title.includes('모의고사'));
 
   const resultContainer = document.createElement('div');
-  resultContainer.style.cssText = 'margin-top: 16px;';
 
   if (isMockExam && uniqueAttempts.length > 20) {
     for (let subjectNum = 1; subjectNum <= 4; subjectNum++) {
@@ -3352,16 +3097,6 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
   let questionNumber = '-';
   const isMockExam = sessionData?.type === 'mockexam' || (sessionData?.title && sessionData.title.includes('모의고사'));
 
-  // 디버그 로그 (첫 번째 카드만)
-  if (uniqueAttempts.indexOf(attempt) === 0) {
-    console.log('🔍 문제 카드 생성 디버그:', {
-      isMockExam,
-      sessionType: sessionData?.type,
-      sessionTitle: sessionData?.title,
-      globalIndex: attempt.questionData?.globalIndex
-    });
-  }
-
   if (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null) {
     // 모의고사/일반 문제 모두 과목 내 번호(1-20)로 표시
     questionNumber = (attempt.questionData.globalIndex % 20) + 1;
@@ -3422,7 +3157,6 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
     // URL 생성 (통일: quiz.html 사용)
     const url = `exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${questionNumber}`;
 
-    console.log('문제로 이동:', url);
     window.location.href = url;
   });
 
@@ -6018,12 +5752,10 @@ function attachCardEventListeners(container, typeFilter, subjectFilter, yearFilt
 
   // 정오표 버튼 이벤트 등록
   const scorecardBtns = container.querySelectorAll('.scorecard-btn');
-  console.log(`📊 정오표 버튼 ${scorecardBtns.length}개 발견`);
   scorecardBtns.forEach(btn => {
     const cardId = btn.dataset.cardId;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('📊 정오표 보기 클릭:', cardId);
       showSessionScorecard(cardId);
     });
 
