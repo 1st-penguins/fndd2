@@ -201,6 +201,32 @@
 
     .recommendation-list {
         grid-template-columns: 1fr;
-        /* 모바일은 1열 */
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .stats-card.stat-item {
+        padding: 12px 10px;
+    }
+
+    .stats-value {
+        font-size: 1.25rem;
+    }
+
+    .stats-label {
+        font-size: 0.78rem;
+    }
+
+    .analytics-section {
+        padding: 16px;
+    }
+
+    .chart-container {
+        height: 200px;
     }
 }

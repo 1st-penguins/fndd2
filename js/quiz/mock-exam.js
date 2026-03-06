@@ -20,6 +20,8 @@
   let subjectAccentColors = {}; // 과목별 색상 - 동적으로 설정됨
   let firstAttemptTracking = []; // 첫 시도 추적 배열
   let keyboardEventsRegistered = false; // 키보드 이벤트 등록 여부 추적
+  let mockExamSavePromise = null; // 제출 후 저장 진행 상태 추적
+  let isSubmitInProgress = false; // 제출 중복 실행 방지
   let year = '2025'; // 모의고사 년도 (전역 변수)
   let hour = '1';    // 모의고사 교시 (전역 변수)
 
@@ -1754,8 +1756,34 @@
     timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
+  function setSubmitInProgress(inProgress) {
+    const submitButton = document.getElementById('submit-button');
+    if (!submitButton) return;
+
+    if (inProgress) {
+      if (!submitButton.dataset.originalText) {
+        submitButton.dataset.originalText = submitButton.textContent || '결과 확인';
+      }
+      submitButton.disabled = true;
+      submitButton.classList.add('disabled');
+      submitButton.textContent = '제출 중...';
+      return;
+    }
+
+    submitButton.disabled = false;
+    submitButton.classList.remove('disabled');
+    if (submitButton.dataset.originalText) {
+      submitButton.textContent = submitButton.dataset.originalText;
+    }
+  }
+
   /* ===== 최종 결과 및 제출 함수 ===== */
   function submitQuiz() {
+    if (isSubmitInProgress) {
+      log('이미 제출 처리 중입니다.', 'warn');
+      return;
+    }
+
     clearInterval(timerInterval);
 
     // 미응답 문제 확인
@@ -1767,6 +1795,9 @@
         return;
       }
     }
+
+    isSubmitInProgress = true;
+    setSubmitInProgress(true);
 
     // 개별 탭에서 전체 탭으로 전환
     if (currentSubject !== 'all') {
@@ -1787,8 +1818,33 @@
     // 결과 표시
     showResults();
 
-    // 모의고사 결과를 한 번에 저장
-    saveMockExamResults();
+    // 모의고사 결과 저장 시작 (페이지 이탈 시 대기할 수 있도록 Promise 보관)
+    mockExamSavePromise = saveMockExamResults()
+      .finally(() => {
+        isSubmitInProgress = false;
+        setSubmitInProgress(false);
+      });
+  }
+
+  /**
+   * 제출 직후 즉시 페이지 이동 시 저장 누락을 줄이기 위해
+   * 짧은 시간 동안 저장 완료를 대기합니다.
+   */
+  async function waitForMockExamSave(timeoutMs = 6000) {
+    if (!mockExamSavePromise) return;
+    try {
+      await Promise.race([
+        mockExamSavePromise,
+        new Promise(resolve => setTimeout(resolve, timeoutMs))
+      ]);
+    } catch (error) {
+      console.warn('모의고사 저장 대기 중 오류(이동은 계속 진행):', error);
+    }
+  }
+
+  async function goHomeAfterSave() {
+    await waitForMockExamSave();
+    window.location.href = '../index.html';
   }
 
   /**
@@ -2509,6 +2565,7 @@
   window.goToPreviousQuestion = goToPreviousQuestion;
   window.goToNextQuestion = goToNextQuestion;
   window.submitQuiz = submitQuiz;
+  window.goHomeAfterSave = goHomeAfterSave;
   window.reviewSubjectIncorrect = reviewSubjectIncorrect;
   window.exitReviewMode = exitReviewMode;
 
@@ -2725,7 +2782,7 @@
           <p>모든 문제를 맞혔습니다! 축하합니다! 🎉</p>
         </div>
         <div class="action-buttons">
-          <button onclick="location.href='../index.html'" class="action-button">처음으로 돌아가기</button>
+          <button onclick="goHomeAfterSave()" class="action-button">처음으로 돌아가기</button>
           <button onclick="resetQuiz()" class="action-button retry-button">다시 풀기</button>
         </div>
       `;
@@ -2734,7 +2791,7 @@
       resultsActions.innerHTML = `
         <button onclick="reviewQuiz()" class="action-button review-button">전체 오답 확인</button>
         <div class="action-buttons">
-          <button onclick="location.href='../index.html'" class="action-button">처음으로 돌아가기</button>
+          <button onclick="goHomeAfterSave()" class="action-button">처음으로 돌아가기</button>
           <button onclick="resetQuiz()" class="action-button retry-button">다시 풀기</button>
         </div>
       `;

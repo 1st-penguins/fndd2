@@ -852,7 +852,6 @@ header::before {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-box-shadow: 0 4px 8px rgba(29, 47, 78, 0.3);
 }
 
 /* 오답 리뷰 모드 */
@@ -1041,7 +1040,6 @@ box-shadow: 0 4px 8px rgba(29, 47, 78, 0.3);
 
     .option-buttons {
         flex-wrap: wrap;
-        gap: 5px;
         gap: 10px;
     }
 
@@ -1058,7 +1056,37 @@ box-shadow: 0 4px 8px rgba(29, 47, 78, 0.3);
 
     .progress-container {
         padding: 8px 4px;
-        /* 좌우 패딩 최소화 */
         margin: 20px 0;
+    }
+
+    /* 결과 페이지 모바일 */
+    .results-summary {
+        padding: 24px 16px;
+        border-radius: 20px;
+        margin: 20px 0;
+    }
+
+    .results-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .score-value {
+        font-size: 3rem;
+    }
+
+    .score-card {
+        padding: 24px 32px;
+    }
+
+    .action-button {
+        min-width: 0;
+        padding: 14px 20px;
+        flex: 1;
+        font-size: 0.95rem;
+    }
+
+    .results-actions {
+        gap: 10px;
     }
 }
