@@ -509,166 +509,243 @@
   align-items: flex-end;
 }
 
-/* Clean Session List */
+/* ── 문제풀이기록 세션 카드 ─────────────────────────────── */
+
 .session-list-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-.session-list-item {
+/* 카드 전체 — 4열 그리드: 악센트바 | 본문 | 점수 | 액션 */
+.session-card {
+  display: grid;
+  grid-template-columns: 4px 1fr 72px auto;
+  align-items: stretch;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #eef2f7;
+  box-shadow: 0 2px 8px rgba(29, 47, 78, 0.06);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.session-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(29, 47, 78, 0.13);
+}
+
+/* 왼쪽 컬러 악센트 바 */
+.session-card-accent               { align-self: stretch; }
+.session-card-accent.score-high    { background: #059669; }
+.session-card-accent.score-good    { background: var(--penguin-skyblue, #5FB2C9); }
+.session-card-accent.score-mid     { background: #F59E0B; }
+.session-card-accent.score-low     { background: #EF4444; }
+
+/* 카드 본문 */
+.session-card-body {
+  padding: 16px 18px;
+  min-width: 0;
+}
+
+.session-card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: white;
-  padding: 16px 24px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
-}
-
-.session-list-item:hover {
-  border-color: var(--primary-light);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.session-info {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
 }
 
 .session-badge {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.72rem;
   font-weight: 800;
-  text-transform: uppercase;
+  letter-spacing: 0.2px;
   white-space: nowrap;
 }
 
-.session-badge.regular {
-  background: #E0F2FE;
-  color: #0369A1;
-}
+.session-badge.regular  { background: #EFF6FF; color: #1D4ED8; }
+.session-badge.mockexam { background: #F5F3FF; color: #6D28D9; }
 
-.session-badge.mockexam {
-  background: #F3E8FF;
-  color: #7E22CE;
-}
-
-.session-title-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.session-title {
-  font-size: 1rem;
+.session-badge-resume {
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-primary);
+  background: #FEF3C7;
+  color: #92400E;
+  white-space: nowrap;
 }
 
-.session-date {
-  font-size: 0.8rem;
-  color: var(--text-tertiary);
+.session-card-date {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #9ca3af);
+  margin-left: auto;
+  white-space: nowrap;
 }
 
-.session-stats {
+.session-card-title {
+  font-size: 0.97rem;
+  font-weight: 700;
+  color: var(--penguin-navy, #1D2F4E);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 10px;
+}
+
+/* 진행률 바 */
+.session-progress-wrap {
   display: flex;
   align-items: center;
-  gap: 24px;
-  margin: 0 24px;
+  gap: 10px;
 }
 
-.session-stat {
-  text-align: right;
+.session-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 99px;
+  overflow: hidden;
 }
 
-.session-stat-value {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--primary-color);
+.session-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.session-progress-fill.score-high { background: #059669; }
+.session-progress-fill.score-good { background: var(--penguin-skyblue, #5FB2C9); }
+.session-progress-fill.score-mid  { background: #F59E0B; }
+.session-progress-fill.score-low  { background: #EF4444; }
+
+.session-progress-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 점수 영역 */
+.session-card-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  border-left: 1px solid #f1f5f9;
+}
+
+.session-score-value {
+  font-size: 1.6rem;
+  font-weight: 900;
   line-height: 1;
 }
 
-.session-stat-label {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
+.session-score-value.score-high { color: #059669; }
+.session-score-value.score-good { color: var(--penguin-skyblue, #5FB2C9); }
+.session-score-value.score-mid  { color: #F59E0B; }
+.session-score-value.score-low  { color: #EF4444; }
 
-.session-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.session-action-btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+.session-score-label {
+  font-size: 0.7rem;
+  color: var(--text-tertiary, #9ca3af);
+  margin-top: 3px;
   font-weight: 600;
+}
+
+/* 액션 버튼 */
+.session-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 14px 14px 8px;
+  justify-content: center;
+}
+
+.session-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.2s;
+  border: none;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+  text-align: center;
 }
 
-.session-action-btn.primary {
-  background: var(--primary-color);
-  color: white;
-}
+.session-btn:active { transform: scale(0.97); }
 
-.session-action-btn.primary:hover {
-  background: var(--primary-dark);
+.session-btn-resume {
+  background: var(--penguin-navy, #1D2F4E);
+  color: #ffffff;
 }
+.session-btn-resume:hover { background: var(--penguin-skyblue, #5FB2C9); }
 
-.session-action-btn.secondary {
-  background: white;
-  border-color: var(--border-color);
-  color: var(--text-secondary);
+.session-btn-record {
+  background: #f0f7ff;
+  color: var(--penguin-navy, #1D2F4E);
+  border: 1px solid #d0e4f7;
 }
+.session-btn-record:hover { background: #ddeeff; }
 
-.session-action-btn.secondary:hover {
-  border-color: var(--text-secondary);
-  background: #f9fafb;
-}
-
-.session-action-btn.danger {
-  color: var(--danger-color);
-  padding: 8px;
+.session-btn-delete {
   background: transparent;
+  color: #c4c9d4;
+  font-size: 1rem;
+  padding: 6px;
 }
+.session-btn-delete:hover { background: #fff1f2; color: #EF4444; }
 
-.session-action-btn.danger:hover {
-  background: var(--danger-bg);
-}
-
-@media (max-width: 768px) {
-  .session-list-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+/* 모바일 반응형 */
+@media (max-width: 640px) {
+  .session-card {
+    grid-template-columns: 4px 1fr;
+    grid-template-rows: auto auto;
   }
 
-  .session-stats {
-    margin: 0;
-    width: 100%;
-    justify-content: space-between;
+  .session-card-accent {
+    grid-row: 1 / 3;
   }
 
-  .session-stat {
-    text-align: left;
+  .session-card-body {
+    padding: 14px 14px 8px;
+    grid-column: 2;
   }
 
-  .session-actions {
-    width: 100%;
+  .session-card-score {
+    display: none;
   }
 
-  .session-action-btn {
+  .session-card-actions {
+    grid-column: 2;
+    flex-direction: row;
+    padding: 0 14px 14px;
+    gap: 8px;
+  }
+
+  .session-btn-resume,
+  .session-btn-record {
     flex: 1;
-    text-align: center;
+  }
+
+  .session-btn-delete {
+    flex-shrink: 0;
+  }
+
+  .session-card-title {
+    font-size: 0.88rem;
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .session-btn {
+    padding: 8px 10px;
+    font-size: 0.76rem;
   }
 }
 
@@ -1784,9 +1861,9 @@
     min-height: 44px;
   }
 
-  /* 세션 리스트 아이템 */
-  .session-list-item {
-    padding: 14px 16px;
+  /* 세션 카드 */
+  .session-card-body {
+    padding: 12px 14px 6px;
   }
 
   .session-badge {
@@ -1834,7 +1911,7 @@
 /* 터치 타겟 강화 — 학습분석 인터랙션 */
 @media (max-width: 768px) {
   .weak-question-btn,
-  .session-action-btn,
+  .session-btn,
   .filter-button,
   .mgmt-button,
   .sync-button {
@@ -1848,10 +1925,9 @@
     padding: 10px 14px;
   }
 
-  /* 세션 목록 클릭 영역 확대 */
-  .session-list-item {
-    -webkit-tap-highlight-color: rgba(95, 178, 201, 0.15);
-    tap-highlight-color: rgba(95, 178, 201, 0.15);
+  /* 세션 카드 탭 피드백 */
+  .session-card {
+    -webkit-tap-highlight-color: rgba(95, 178, 201, 0.1);
   }
 
   /* 약점 분석 카드 터치 피드백 */

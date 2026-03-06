@@ -1575,14 +1575,9 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
       }).sort((a, b) => b.startTime - a.startTime);
 
       container.innerHTML = '';
-      container.style.cssText = `
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-        gap: 12px !important;
-        width: 100% !important;
-        align-items: start !important;
-      `;
-      mockSessions.forEach(card => container.appendChild(createCardElement(card)));
+      container.className = 'session-list-container question-sets-container';
+      container.style.cssText = '';
+      mockSessions.forEach(card => container.appendChild(createProSessionCard(card)));
       window.sessionCards = mockSessions;
       attachCardEventListeners(container, typeFilter, subjectFilter, yearFilter);
       return;
@@ -2063,21 +2058,12 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
     // 세션 정렬 (최신순)
     sessionCards.sort((a, b) => b.startTime - a.startTime);
 
-    // 컨테이너 초기화
-    // 컨테이너 초기화
     container.innerHTML = '';
-
-    // 리스트 스타일 적용 (Pro Style - 세로 리스트)
     container.className = 'session-list-container question-sets-container';
     container.style.cssText = '';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.gap = '12px';
 
-    // 세션 카드 생성 (새로운 Pro 스타일 리스트 아이템)
     sessionCards.forEach(card => {
-      const cardElement = createProSessionCard(card);
-      container.appendChild(cardElement);
+      container.appendChild(createProSessionCard(card));
     });
 
     // 전역 변수에 세션 카드 데이터 저장
@@ -3589,80 +3575,86 @@ function renderWeakAreasTab() {
  */
 function createProSessionCard(session) {
   const el = document.createElement('div');
-  el.className = 'session-list-item';
+  el.className = 'session-card';
 
-  // 날짜 파싱
-  let dateStr = session.displayDate || '날짜 없음';
-
-  // 표시 전 타입/제목 정규화(오염 데이터 방어)
   const normalized = normalizeSessionPresentation(session);
-  const isMockExam = normalized.type === 'mockexam';
-  const badgeClass = isMockExam ? 'mockexam' : 'regular';
-  const badgeText = isMockExam ? '모의고사' : '일반문제';
+  const isMockExam  = normalized.type === 'mockexam';
+  const badgeClass  = isMockExam ? 'mockexam' : 'regular';
+  const badgeText   = isMockExam ? '모의고사' : '기출문제';
+
+  // 점수 등급 → 색상 클래스
+  const score = session.score || 0;
+  const scoreClass = score >= 80 ? 'score-high'
+                   : score >= 60 ? 'score-good'
+                   : score >= 40 ? 'score-mid'
+                   : 'score-low';
+
+  // 진행률 퍼센트
+  const pct = session.total > 0 ? Math.round((session.completed / session.total) * 100) : 0;
+
+  // 상대 날짜
+  let dateStr = session.displayDate || '';
+  try { dateStr = formatRelativeDate(session.startTime) || dateStr; } catch (_) {}
 
   el.innerHTML = `
-    <div class="session-info">
-      <div class="session-badge ${badgeClass}">${badgeText}</div>
-      <div class="session-title-wrapper">
-        <div class="session-title">${normalized.title}</div>
-        <div class="session-date">${dateStr}</div>
+    <div class="session-card-accent ${scoreClass}"></div>
+
+    <div class="session-card-body">
+      <div class="session-card-header">
+        <span class="session-badge ${badgeClass}">${badgeText}</span>
+        ${session.canResume ? '<span class="session-badge-resume">이어풀기 가능</span>' : ''}
+        <span class="session-card-date">${dateStr}</span>
+      </div>
+      <div class="session-card-title">${normalized.title}</div>
+      <div class="session-progress-wrap">
+        <div class="session-progress-bar">
+          <div class="session-progress-fill ${scoreClass}" style="width:${pct}%"></div>
+        </div>
+        <span class="session-progress-text">
+          ${session.completed}/${session.total}문제 &middot; <strong>${score}점</strong>
+        </span>
       </div>
     </div>
-    
-    <div class="session-stats">
-      <div class="session-stat">
-        <div class="session-stat-value">${session.completed}/${session.total}</div>
-        <div class="session-stat-label">진행도</div>
-      </div>
-      <div class="session-stat">
-        <div class="session-stat-value" style="color: ${session.score >= 60 ? 'var(--success-color)' : 'var(--danger-color)'}">${session.score}점</div>
-        <div class="session-stat-label">점수</div>
-      </div>
+
+    <div class="session-card-score">
+      <div class="session-score-value ${scoreClass}">${score}</div>
+      <div class="session-score-label">점</div>
     </div>
-    
-    <div class="session-actions">
-      ${session.canResume ? `
-        <button class="session-action-btn primary" onclick="location.href='exam/quiz.html?year=${session.year}&subject=${encodeURIComponent(session.subject)}&number=${session.lastQuestionNumber + 1}'">
-          이어풀기
-        </button>
-      ` : ''}
-      <button class="session-action-btn secondary scorecard-btn">
-        기록보기
-      </button>
-      <button class="session-action-btn danger delete-btn" title="기록 삭제">
-        🗑️
-      </button>
+
+    <div class="session-card-actions">
+      ${session.canResume ? '<button class="session-btn session-btn-resume">이어풀기 →</button>' : ''}
+      <button class="session-btn session-btn-record">기록보기</button>
+      <button class="session-btn session-btn-delete" title="기록 삭제">🗑</button>
     </div>
   `;
 
-  // 이벤트 리스너: 기록보기
-  const scorecardBtn = el.querySelector('.scorecard-btn');
-  if (scorecardBtn) {
-    scorecardBtn.addEventListener('click', (e) => {
+  // 이어풀기
+  const resumeBtn = el.querySelector('.session-btn-resume');
+  if (resumeBtn) {
+    resumeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      showSessionScorecard(session);
+      location.href = `exam/quiz.html?year=${session.year}&subject=${encodeURIComponent(session.subject)}&number=${session.lastQuestionNumber + 1}`;
     });
   }
 
-  // 이벤트 리스너: 삭제
-  const deleteBtn = el.querySelector('.delete-btn');
-  if (deleteBtn) {
-    deleteBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (confirm('정말로 이 학습 기록을 삭제하시겠습니까?')) {
-        const success = await deleteSession(
-          session.id,
-          // 현재 필터 상태를 알 수 없으나, 기본값 또는 전역 상태 사용 가능
-          'all', 'all', 'all'
-        );
-        if (success) {
-          // 리스트에서 제거 UI 업데이트
-          el.style.opacity = '0';
-          setTimeout(() => el.remove(), 300);
-        }
+  // 기록보기
+  el.querySelector('.session-btn-record').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showSessionScorecard(session);
+  });
+
+  // 삭제
+  el.querySelector('.session-btn-delete').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (confirm('정말로 이 학습 기록을 삭제하시겠습니까?')) {
+      const success = await deleteSession(session.id, 'all', 'all', 'all');
+      if (success) {
+        el.style.transition = 'opacity 0.3s';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
       }
-    });
-  }
+    }
+  });
 
   return el;
 }
