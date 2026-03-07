@@ -206,9 +206,12 @@ export async function initializeQuiz() {
 
     window.Logger?.info(`로드할 데이터: ${year}년 ${subject}`);
 
-    // 데이터 로드 시도
+    // 데이터 로드 시도 (스포츠: window.QUIZ_DATA_FOLDER 또는 URL 경로로 감지)
     let data;
-    const dataFolder = window.QUIZ_DATA_FOLDER ? `${window.QUIZ_DATA_FOLDER}/` : '';
+    let dataFolder = window.QUIZ_DATA_FOLDER ? `${window.QUIZ_DATA_FOLDER}/` : '';
+    if (!dataFolder && (window.location.pathname.includes('exam-sports') || window.location.pathname.includes('subjects-sports'))) {
+      dataFolder = 'sports/';
+    }
     const dataUrl = `../data/${dataFolder}${year}_${subject}.json`;
     window.Logger?.debug('데이터 URL:', dataUrl);
 
@@ -1923,7 +1926,10 @@ function getScoreComment(scorePercentage) {
  * @returns {Promise<string|null>} 최근 연도
  */
 async function findLatestYear(subject) {
-  const dataFolder = window.QUIZ_DATA_FOLDER ? `${window.QUIZ_DATA_FOLDER}/` : '';
+  let dataFolder = window.QUIZ_DATA_FOLDER ? `${window.QUIZ_DATA_FOLDER}/` : '';
+  if (!dataFolder && (window.location.pathname.includes('exam-sports') || window.location.pathname.includes('subjects-sports'))) {
+    dataFolder = 'sports/';
+  }
   // 확인할 년도 범위 (현재부터 과거)
   const currentYear = new Date().getFullYear();
   const years = [];
