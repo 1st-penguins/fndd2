@@ -95,6 +95,20 @@
   min-width: 0;
 }
 
+.linear-footer__kspo-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 260px;
+}
+
+.linear-footer__kspo-text {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.7;
+}
+
 .linear-footer__section {
   display: flex;
   flex-direction: column;
