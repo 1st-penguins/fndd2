@@ -221,7 +221,7 @@ export async function initializeQuiz() {
         const fallbackYear = await findLatestYear(subject);
         if (fallbackYear) {
           window.Logger?.warn(`${year}년 데이터가 없어 ${fallbackYear}년 데이터를 사용합니다.`);
-          const fallbackResponse = await fetch(`../data/${fallbackYear}_${subject}.json`);
+          const fallbackResponse = await fetch(`../data/${dataFolder}${fallbackYear}_${subject}.json`);
           if (fallbackResponse.ok) {
             data = await fallbackResponse.json();
           } else {
@@ -1923,6 +1923,7 @@ function getScoreComment(scorePercentage) {
  * @returns {Promise<string|null>} 최근 연도
  */
 async function findLatestYear(subject) {
+  const dataFolder = window.QUIZ_DATA_FOLDER ? `${window.QUIZ_DATA_FOLDER}/` : '';
   // 확인할 년도 범위 (현재부터 과거)
   const currentYear = new Date().getFullYear();
   const years = [];
@@ -1933,7 +1934,7 @@ async function findLatestYear(subject) {
   // 년도를 하나씩 확인하며 데이터 존재 여부 확인
   for (const year of years) {
     try {
-      const response = await fetch(`../data/${year}_${subject}.json`);
+      const response = await fetch(`../data/${dataFolder}${year}_${subject}.json`);
       if (response.ok) {
         return year.toString();
       }

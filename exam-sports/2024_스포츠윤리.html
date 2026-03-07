@@ -250,20 +250,25 @@
       });
     </script>
 
-    <!-- Firebase 인증 -->
+    <!-- Firebase 인증 (초기화 완료 후 auth 사용) -->
     <script type="module">
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-      import { auth } from "../js/core/firebase-core.js";
-      document.addEventListener("DOMContentLoaded", () => {
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            localStorage.setItem("userLoggedIn", "true");
-            localStorage.setItem("userName", user.displayName || user.email || "사용자");
-          } else {
-            localStorage.removeItem("userLoggedIn");
-            localStorage.removeItem("userName");
-          }
-        });
+      import { ensureFirebase } from "../js/core/firebase-core.js";
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const { auth } = await ensureFirebase();
+          if (auth) onAuthStateChanged(auth, (user) => {
+            if (user) {
+              localStorage.setItem("userLoggedIn", "true");
+              localStorage.setItem("userName", user.displayName || user.email || "사용자");
+            } else {
+              localStorage.removeItem("userLoggedIn");
+              localStorage.removeItem("userName");
+            }
+          });
+        } catch (e) {
+          console.warn("Firebase 인증 초기화 실패:", e);
+        }
       });
     </script>
     <script src="../js/linear-header.js"></script>
