@@ -126,7 +126,7 @@ export function createLoginModal() {
       <div class="login-modal-close">&times;</div>
       
       <div class="login-modal-icon">
-        <img src="images/firstpenguin-logo3.png" alt="퍼스트펭귄" style="width: 50px;">
+        <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" style="width: 50px;">
       </div>
       
       <h3>반가워요! 👋</h3>
@@ -143,7 +143,7 @@ export function createLoginModal() {
         <div class="login-separator">또는</div>
         
         <button class="btn-auth-google modern-google-button">
-          <img src="images/google_logo.png" alt="G"> Google로 계속하기
+          <img src="/images/google_logo.png" alt="G"> Google로 계속하기
         </button>
         
         <div class="login-footer">
@@ -487,7 +487,7 @@ export async function handleGoogleSignup() {
     // 버튼 상태 복원
     const googleButton = document.querySelector('.auth-social-button');
     if (googleButton) {
-      googleButton.innerHTML = '<img src="../../images/google_logo.png" alt="G" class="google-logo"> Google로 회원가입';
+      googleButton.innerHTML = '<img src="/images/google_logo.png" alt="G" class="google-logo"> Google로 회원가입';
       googleButton.disabled = false;
     }
   }
@@ -525,7 +525,7 @@ export function showSignupForm() {
         <span class="login-modal-close">&times;</span>
       </div>
       <div class="login-modal-icon">
-        <img src="images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="modal-logo">
+        <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="modal-logo">
       </div>
       <h3>회원가입</h3>
       <div class="login-form">
@@ -539,7 +539,7 @@ export function showSignupForm() {
           <span>또는</span>
         </div>
         <button class="auth-social-button">
-          <img src="../../images/google_logo.png" alt="G" class="google-logo"> Google로 회원가입
+          <img src="/images/google_logo.png" alt="G" class="google-logo"> Google로 회원가입
         </button>
         <p class="login-option-text">이미 계정이 있으신가요? <a href="#" id="show-login-link">로그인</a></p>
       </div>
@@ -787,7 +787,7 @@ export function showPasswordResetForm() {
         <span class="login-modal-close">&times;</span>
       </div>
       <div class="login-modal-icon">
-        <img src="images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="modal-logo">
+        <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="modal-logo">
       </div>
       <h3>비밀번호 재설정</h3>
       <p>가입하신 이메일 주소를 입력하시면 비밀번호 재설정 안내를 보내드립니다.</p>

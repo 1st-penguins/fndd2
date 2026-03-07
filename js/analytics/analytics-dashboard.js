@@ -1341,15 +1341,17 @@ function renderSubjectProgress() {
 
   // 과목별 통계 계산
   const subjectStats = {};
-  const allSubjects = [
-    '운동생리학', '건강체력평가', '운동처방론', '운동부하검사',
-    '운동상해', '기능해부학', '병태생리학', '스포츠심리학'
-  ];
+  const _certTypeForSubjects = getCurrentCertificateType();
+  const allSubjects = _certTypeForSubjects === 'sports-instructor'
+    ? ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론']
+    : ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사', '운동상해', '기능해부학', '병태생리학', '스포츠심리학'];
 
   // 이모지 매핑
   const subjectEmojis = {
     '운동생리학': '🧬', '건강체력평가': '💪', '운동처방론': '📝', '운동부하검사': '🏃',
-    '운동상해': '🩹', '기능해부학': '💀', '병태생리학': '🦠', '스포츠심리학': '🧠'
+    '운동상해': '🩹', '기능해부학': '💀', '병태생리학': '🦠', '스포츠심리학': '🧠',
+    '스포츠사회학': '🌐', '스포츠교육학': '📚', '한국체육사': '🏛️', '운동역학': '⚙️',
+    '스포츠윤리': '⚖️', '특수체육론': '♿', '유아체육론': '🧸', '노인체육론': '👴'
   };
 
   // 통계 초기화
@@ -2805,7 +2807,9 @@ function createScoreModal(sessionData, attempts) {
       const number = a.questionData?.number || a.number || 0;
       const subjectStarts = {
         '운동생리학': 1, '건강체력평가': 21, '운동처방론': 41, '운동부하검사': 61,
-        '운동상해': 1, '기능해부학': 21, '병태생리학': 41, '스포츠심리학': 61
+        '운동상해': 1, '기능해부학': 21, '병태생리학': 41, '스포츠심리학': 61,
+        '스포츠사회학': 1, '스포츠교육학': 21, '스포츠심리학_s': 41, '한국체육사': 61,
+        '운동역학': 81, '스포츠윤리': 101, '특수체육론': 121, '유아체육론': 141, '노인체육론': 161
       };
       const startNum = subjectStarts[subject] || 0;
       aNum = startNum > 0 ? startNum + number - 1 : 999;
@@ -2816,7 +2820,9 @@ function createScoreModal(sessionData, attempts) {
       const number = b.questionData?.number || b.number || 0;
       const subjectStarts = {
         '운동생리학': 1, '건강체력평가': 21, '운동처방론': 41, '운동부하검사': 61,
-        '운동상해': 1, '기능해부학': 21, '병태생리학': 41, '스포츠심리학': 61
+        '운동상해': 1, '기능해부학': 21, '병태생리학': 41, '스포츠심리학': 61,
+        '스포츠사회학': 1, '스포츠교육학': 21, '스포츠심리학_s': 41, '한국체육사': 61,
+        '운동역학': 81, '스포츠윤리': 101, '특수체육론': 121, '유아체육론': 141, '노인체육론': 161
       };
       const startNum = subjectStarts[subject] || 0;
       bNum = startNum > 0 ? startNum + number - 1 : 999;
@@ -6290,12 +6296,10 @@ function createCompactSubjectGrid(subjectStats, pointsPerQuestion = 5) {
   };
 
   // 과목 순서 정의 (지정된 순서대로 표시)
-  const subjectOrder = [
-    '기능해부학', '운동상해',
-    '스포츠심리학', '병태생리학',
-    '운동생리학', '건강체력평가',
-    '운동처방론', '운동부하검사'
-  ];
+  const _certForGrid = getCurrentCertificateType();
+  const subjectOrder = _certForGrid === 'sports-instructor'
+    ? ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론']
+    : ['기능해부학', '운동상해', '스포츠심리학', '병태생리학', '운동생리학', '건강체력평가', '운동처방론', '운동부하검사'];
 
   // 필터링된 과목 목록 (실제 데이터에 있는 과목만)
   const availableSubjects = subjectOrder.filter(subject => subjectStats[subject]);

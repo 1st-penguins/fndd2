@@ -147,8 +147,10 @@ export async function initializeQuiz() {
     const filename = pathSegments[pathSegments.length - 1];
     const filenameMatch = filename.match(/(\d{4})_([^.]+)/);
 
-    let year = '2025';
-    let subject = '운동생리학';
+    // URL 파라미터 (quiz.html?year=...&subject=... 형태로 진입 시 사용)
+    const _urlParamsInit = new URLSearchParams(window.location.search);
+    let year = _urlParamsInit.get('year') || '2025';
+    let subject = _urlParamsInit.get('subject') || '운동생리학';
 
     if (filenameMatch) {
       year = filenameMatch[1];  // 추출된 년도 (예: 2024)
@@ -170,6 +172,17 @@ export async function initializeQuiz() {
         window.Logger?.error('과목명 디코딩 오류:', error);
         // 디코딩 실패 시 원본 사용
       }
+    } else {
+      // quiz.html처럼 파일명 매칭 안 될 때 URL 파라미터 subject 디코딩
+      try {
+        let decoded = subject;
+        for (let i = 0; i < 3; i++) {
+          const temp = decodeURIComponent(decoded);
+          if (temp === decoded) break;
+          decoded = temp;
+        }
+        subject = decoded;
+      } catch (e) { /* 원본 유지 */ }
     }
     currentYear = year;
     currentSubject = subject;
@@ -1246,8 +1259,9 @@ export async function submitQuiz() {
       const filename = pathSegments[pathSegments.length - 1];
       const filenameMatch = filename.match(/(\d{4})_([^.]+)/);
 
-      let year = '2025';
-      let subject = '운동생리학';
+      const _urlParamsSave = new URLSearchParams(window.location.search);
+      let year = _urlParamsSave.get('year') || '2025';
+      let subject = _urlParamsSave.get('subject') || '운동생리학';
 
       if (filenameMatch) {
         year = filenameMatch[1];
@@ -1257,6 +1271,16 @@ export async function submitQuiz() {
         } catch (error) {
           console.error('과목명 디코딩 오류:', error);
         }
+      } else {
+        try {
+          let decoded = subject;
+          for (let i = 0; i < 3; i++) {
+            const temp = decodeURIComponent(decoded);
+            if (temp === decoded) break;
+            decoded = temp;
+          }
+          subject = decoded;
+        } catch (e) { /* 원본 유지 */ }
       }
 
       // 세션 ID 가져오기
@@ -1822,8 +1846,9 @@ export function showResults() {
   const filename = pathSegments[pathSegments.length - 1];
   const filenameMatch = filename.match(/(\d{4})_([^.]+)/);
 
-  let year = '2025';
-  let subject = '운동생리학';
+  const _urlParamsResult = new URLSearchParams(window.location.search);
+  let year = _urlParamsResult.get('year') || '2025';
+  let subject = _urlParamsResult.get('subject') || '운동생리학';
 
   if (filenameMatch) {
     year = filenameMatch[1];  // 추출된 년도 (예: 2024)
@@ -1834,6 +1859,16 @@ export function showResults() {
     } catch (error) {
       console.error('과목명 디코딩 오류:', error);
     }
+  } else {
+    try {
+      let decoded = subject;
+      for (let i = 0; i < 3; i++) {
+        const temp = decodeURIComponent(decoded);
+        if (temp === decoded) break;
+        decoded = temp;
+      }
+      subject = decoded;
+    } catch (e) { /* 원본 유지 */ }
   }
 
   // 현재 날짜 

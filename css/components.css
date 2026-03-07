@@ -84,6 +84,31 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
+/* 합격기준 안내 박스 */
+.exam-notice {
+  margin: 0 28px 24px;
+  padding: 14px 18px;
+  background: #F0F7FF;
+  border-left: 4px solid #5FB2C9;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.875rem;
+  color: #1D2F4E;
+  line-height: 1.7;
+}
+
+.exam-notice strong {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 700;
+  color: #1D2F4E;
+}
+
+.exam-notice .exam-notice-sub {
+  color: #5c7195;
+  margin-top: 4px;
+  font-size: 0.82rem;
+}
+
 /* ============================================
    과목 리스트 (Grid Layout)
    ============================================ */
