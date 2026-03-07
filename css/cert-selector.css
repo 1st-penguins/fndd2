@@ -1,126 +1,59 @@
-/* cert-selector.css - 자격증 선택 버튼 스타일 */
+/* cert-selector.css - 자격증 선택 pill 토글 */
 
+/* 자격증 pill 토글 — access-tabs(회색 fill)와 구분하기 위해 outline 스타일 사용 */
 .cert-selector {
   display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin: 0 auto 30px;
-  /* Explicitly centered with margin auto */
-  flex-wrap: wrap;
-  max-width: 1000px;
-  /* Increased to align with header/container */
-  padding: 0 20px;
+  width: fit-content;
+  margin: 0 auto 16px;
+  background: #fff;
+  border: 1.5px solid #e4e7ec;
+  border-radius: 100px;
+  padding: 3px;
+  gap: 2px;
 }
 
 .cert-button {
-  flex: 1;
-  min-width: 200px;
-  max-width: 350px;
-  padding: 18px 24px;
-  border: 1px solid rgba(29, 47, 78, 0.12);
-  background: var(--frost-white, #FFFFFF);
-  color: var(--penguin-navy);
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 17px;
+  padding: 7px 22px;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: 0 1px 2px rgba(29, 47, 78, 0.04);
-  position: relative;
-  overflow: hidden;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.cert-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-}
-
-.cert-button:hover::before {
-  left: 100%;
-}
-
-/* 🎯 활성화 상태 */
 .cert-button.active {
-  border: 1px solid var(--cert-primary, var(--penguin-navy));
-  background: linear-gradient(135deg, var(--cert-gradient-start) 0%, var(--cert-gradient-end) 100%);
-  color: var(--frost-white, #FFFFFF);
-  box-shadow: 0 2px 8px rgba(29, 47, 78, 0.12);
-  transform: translateY(0);
-}
-
-.cert-button.active::before {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  background: var(--cert-primary, #1D2F4E);
+  color: #fff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.14);
 }
 
 .cert-button:hover:not(.active) {
-  border-color: rgba(95, 178, 201, 0.3);
-  color: var(--cert-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(29, 47, 78, 0.08);
-  background: rgba(95, 178, 201, 0.03);
+  color: var(--cert-primary, #1D2F4E);
+  background: #f5f7fa;
 }
 
 .cert-button:active {
-  transform: translateY(0);
+  opacity: 0.85;
 }
 
-/* 모바일 (768px 이하) */
-@media (max-width: 768px) {
-  .cert-selector {
-    gap: 12px;
-    padding: 0 16px;
-    max-width: 100%;
-  }
-
-  .cert-button {
-    font-size: 16px;
-    padding: 14px 16px;
-    min-width: 160px;
-    min-height: 44px;
-    /* 터치 타겟 보장 */
-    flex: 1 1 45%;
-    /* 터치 피드백 */
-    -webkit-tap-highlight-color: rgba(95, 178, 201, 0.2);
-  }
-
-  .cert-button:active {
-    transform: scale(0.98);
-  }
-}
-
-/* 작은 모바일 (480px 이하) */
+/* 모바일 (480px 이하): 전체 너비 */
 @media (max-width: 480px) {
   .cert-selector {
-    flex-direction: column;
-    gap: 10px;
-    padding: 0 12px;
+    width: calc(100% - 32px);
+    border-radius: 12px;
   }
 
   .cert-button {
-    width: 100%;
-    max-width: 100%;
-    min-width: auto;
-    min-height: 44px;
-    /* 터치 타겟 보장 */
-    font-size: 15px;
-    padding: 14px 12px;
-  }
-}
-
-/* 매우 작은 화면 (360px 이하) */
-@media (max-width: 360px) {
-  .cert-button {
-    font-size: 14px;
-    padding: 12px 10px;
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    padding: 9px 10px;
+    min-height: 42px;
   }
 }

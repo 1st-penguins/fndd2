@@ -19,7 +19,8 @@ function initYearPage() {
 
   if (yearMatch) {
     const year = yearMatch[1];
-    document.title = `${year}년 기출문제 - 퍼스트펭귄 건강운동관리사`;
+    const isSports = window.location.pathname.includes('years-sports');
+    document.title = `${year}년 기출문제 - 퍼스트펭귄 ${isSports ? '2급 생활체육지도사' : '건강운동관리사'}`;
   }
 
   // 로그인 상태에 따른 제한된 콘텐츠 처리

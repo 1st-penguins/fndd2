@@ -208,7 +208,8 @@ export async function initializeQuiz() {
 
     // 데이터 로드 시도
     let data;
-    const dataUrl = `../data/${year}_${subject}.json`;
+    const dataFolder = window.QUIZ_DATA_FOLDER ? `${window.QUIZ_DATA_FOLDER}/` : '';
+    const dataUrl = `../data/${dataFolder}${year}_${subject}.json`;
     window.Logger?.debug('데이터 URL:', dataUrl);
 
     try {

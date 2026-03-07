@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2025년 기출문제 - 퍼스트펭귄 2급 생활체육지도사</title>
+
+  <!-- 외부 CSS 파일 연결 -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/linear-header.css">
+  <link rel="stylesheet" href="../css/linear-footer.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages/subject.css">
+  <link rel="stylesheet" href="../css/pages/page-header.css">
+  <link rel="stylesheet" href="../css/login.css">
+
+  <!-- PWA 및 테마 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1D2F4E">
+
+  <!-- 구글 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase 리소스 힌트 -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+
+  <script src="../js/logger.js"></script>
+
+  <!-- Firebase 및 로그인 관리 스크립트 -->
+  <script type="module" src="../js/config/dev-config.js"></script>
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+  <script type="module" src="../js/auth/auth-ui.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  <script type="module" src="../js/utils/ui-utils.js"></script>
+
+  <!-- 브라우저 리다이렉트 스크립트 -->
+  <script type="module">
+    import { initBrowserRedirect } from "/js/utils/browser-redirect.js";
+    initBrowserRedirect();
+  </script>
+
+  <!-- 페이지 전용 스크립트 -->
+  <script type="module" src="../js/years/year-page.js"></script>
+
+  <!-- Linear Header -->
+  <script src="../js/linear-header.js"></script>
+  <script type="module" src="../js/dev-mode-toggle.js"></script>
+</head>
+
+<body>
+  <!-- 펭귄 장식 -->
+  <div class="penguin-ocean">
+    <div class="penguin-decoration penguin-top-right penguin-float">
+      <img src="../images/firstpenguin-logo.png" alt="펭귄 장식" />
+    </div>
+    <div class="penguin-decoration penguin-bottom-left penguin-float">
+      <img src="../images/firstpenguin-logo.png" alt="펭귄 장식" />
+    </div>
+  </div>
+
+  <!-- Linear Header -->
+  <header class="linear-header">
+    <div class="linear-header__container">
+      <a href="../index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="../images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" />
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+      </a>
+
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="../index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../lectures.html" class="linear-header__nav-link">강의</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../contact.html" class="linear-header__nav-link">문의</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="linear-header__auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login">로그인</a>
+        <div id="user-profile-container" class="linear-header__user-profile" style="display: none;">
+          <span id="user-name" class="linear-header__user-name"></span>
+          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
+        </div>
+      </div>
+
+      <div class="linear-header__actions">
+        <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
+          <button id="dev-mode-btn" class="dev-mode-btn">
+            <span class="dev-mode-indicator"></span>
+            DEV
+          </button>
+        </div>
+        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <a href="../index.html" class="linear-header__nav-link">홈</a>
+      <a href="../lectures.html" class="linear-header__nav-link">강의</a>
+      <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="../contact.html" class="linear-header__nav-link">문의</a>
+    </div>
+  </header>
+
+  <!-- 페이지 제목 섹션 -->
+  <section class="page-header">
+    <div class="container">
+      <a href="../index.html" class="back-link">
+        <span class="back-arrow">←</span>
+        <span>목록으로</span>
+      </a>
+      <div class="page-title">
+        <h1>2025년 기출문제</h1>
+        <div class="page-subtitle-fixed">과목별 문제 모음</div>
+      </div>
+    </div>
+  </section>
+
+  <main class="main-content restricted-content">
+    <div class="container">
+      <div class="subject-intro">
+        <h2>2025년 2급 생활체육지도사 기출문제</h2>
+        <p class="subject-description">
+          2025년도 2급 생활체육지도사 자격시험<br>
+          과목별 기출문제를 직접 풀어볼 수 있습니다.<br>
+          모든 문제는 국민체육진흥공단 공식 기출문제입니다.
+        </p>
+        <small class="source-note">출처: 국민체육진흥공단</small>
+      </div>
+
+      <!-- 1교시 과목 -->
+      <div class="subject-section">
+        <h3 class="section-title">1교시 과목</h3>
+        <ul class="years-list">
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_스포츠사회학.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_스포츠사회학.html?prev=year&year=2025'">
+            <div class="year-header">스포츠사회학</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_스포츠사회학.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_스포츠교육학.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_스포츠교육학.html?prev=year&year=2025'">
+            <div class="year-header">스포츠교육학</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_스포츠교육학.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_스포츠심리학.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_스포츠심리학.html?prev=year&year=2025'">
+            <div class="year-header">스포츠심리학</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_스포츠심리학.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_한국체육사.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_한국체육사.html?prev=year&year=2025'">
+            <div class="year-header">한국체육사</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_한국체육사.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 2교시 과목 -->
+      <div class="subject-section">
+        <h3 class="section-title">2교시 과목</h3>
+        <ul class="years-list">
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_운동생리학.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_운동생리학.html?prev=year&year=2025'">
+            <div class="year-header">운동생리학</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_운동생리학.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_운동역학.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_운동역학.html?prev=year&year=2025'">
+            <div class="year-header">운동역학</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_운동역학.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_스포츠윤리.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_스포츠윤리.html?prev=year&year=2025'">
+            <div class="year-header">스포츠윤리</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_스포츠윤리.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_특수체육론.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_특수체육론.html?prev=year&year=2025'">
+            <div class="year-header">특수체육론</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_특수체육론.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_유아체육론.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_유아체육론.html?prev=year&year=2025'">
+            <div class="year-header">유아체육론</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_유아체육론.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+          <li class="year-item restricted-link" data-href="../exam-sports/2025_노인체육론.html?prev=year&year=2025"
+            onclick="window.location.href='../exam-sports/2025_노인체육론.html?prev=year&year=2025'">
+            <div class="year-header">노인체육론</div>
+            <div class="year-content">
+              <div class="question-count">문제 수: 20문항</div>
+              <a href="javascript:void(0)" class="start-button"
+                onclick="window.location.href='../exam-sports/2025_노인체육론.html?prev=year&year=2025'; return false;">풀어보기</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Linear Footer -->
+  <footer class="linear-footer">
+    <div class="linear-footer__container">
+      <div class="linear-footer__content">
+        <div class="linear-footer__brand">
+          <a href="../index.html" class="linear-footer__brand-logo">
+            <div class="linear-footer__brand-icon">
+              <img src="../images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" />
+            </div>
+            <span class="linear-footer__brand-text">퍼스트펭귄</span>
+          </a>
+          <p class="linear-footer__brand-description">
+            KSPO 기출문제 풀이 및 학습 분석 플랫폼
+          </p>
+        </div>
+
+        <div class="linear-footer__sections">
+          <div class="linear-footer__section">
+            <h3 class="linear-footer__section-title">서비스</h3>
+            <ul class="linear-footer__nav-list">
+              <li><a href="../index.html" class="linear-footer__nav-link">문제풀기</a></li>
+              <li><a href="../notices.html" class="linear-footer__nav-link">공지사항</a></li>
+            </ul>
+          </div>
+          <div class="linear-footer__section">
+            <h3 class="linear-footer__section-title">지원</h3>
+            <ul class="linear-footer__nav-list">
+              <li><a href="../contact.html" class="linear-footer__nav-link">문의하기</a></li>
+              <li><a href="../company-info.html" class="linear-footer__nav-link">사업자정보</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="linear-footer__social">
+          <a href="https://instagram.com/1st_penguins" target="_blank" class="linear-footer__social-link" aria-label="인스타그램">
+            <img src="../images/instagram_logo.svg" alt="인스타그램"
+              style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+          </a>
+        </div>
+      </div>
+
+      <div class="linear-footer__divider"></div>
+
+      <div class="linear-footer__bottom">
+        <p class="linear-footer__copyright">© 2025 퍼스트펭귄. All rights reserved.</p>
+        <div class="linear-footer__legal">
+          <a href="../refund-policy.html" class="linear-footer__legal-link">환불정책</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>
