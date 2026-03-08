@@ -658,6 +658,14 @@ function injectFooter() {
                 <span>건강운동관리사</span>
               </a>
             </li>
+            <li>
+              <a href="https://open.kakao.com/o/ptzXWpki" target="_blank" rel="noopener" class="linear-footer__sns-link">
+                <span class="linear-footer__sns-icon-wrap linear-footer__sns-icon-wrap--kakao">
+                  <img src="/images/kakaotalk_logo.svg" alt="카카오톡" class="linear-footer__sns-icon">
+                </span>
+                <span>생활스포츠지도사</span>
+              </a>
+            </li>
           </ul>
         </div>
 
