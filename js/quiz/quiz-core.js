@@ -880,6 +880,11 @@ export function checkAnswer() {
   explanation = explanation.replace(/^\s*이\s*문제의\s*정답은\s*\d+번입니다\.\s*/i, '');
 
   // 정답 확인 결과 반환
+  // 정답 확인 상태 기록 → updateQuestionIndicators가 checked-correct/checked-incorrect 클래스를 붙임
+  perQuestionChecked[currentQuestionIndex] = true;
+  window.perQuestionChecked = perQuestionChecked;
+  updateQuestionIndicators();
+
   const result = {
     status: 'answered',
     isCorrect,
