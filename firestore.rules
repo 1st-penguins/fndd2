@@ -29,9 +29,13 @@ service cloud.firestore {
 
     // 공지 조회수 증가 전용 업데이트 허용 (비관리자)
     function canIncrementNoticeView() {
-      let oldCount = resource.data.viewCount is int ? resource.data.viewCount : 0;
-      return request.resource.data.diff(resource.data).changedKeys().hasOnly(['viewCount', 'lastViewedAt']) &&
-             request.resource.data.viewCount == oldCount + 1;
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(['viewCount', 'lastViewedAt']);
+    }
+
+    // 공지 좋아요 업데이트 허용 (로그인 사용자)
+    function canUpdateNoticeLikes() {
+      return isLoggedIn() &&
+             request.resource.data.diff(resource.data).changedKeys().hasOnly(['likes']);
     }
 
     // visits 문서 유효성 검사 (공지 방문 집계용)
@@ -141,7 +145,7 @@ service cloud.firestore {
     match /notices/{noticeId} {
       allow read: if true; // 공개
       allow create, delete: if isAdmin();
-      allow update: if isAdmin() || canIncrementNoticeView();
+      allow update: if isAdmin() || canIncrementNoticeView() || canUpdateNoticeLikes();
     }
 
     match /visits/{visitId} {
