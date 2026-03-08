@@ -643,36 +643,23 @@ function injectFooter() {
             <li>
               <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="linear-footer__sns-link">
                 <span class="linear-footer__sns-icon-wrap">
-                  <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                    <defs><radialGradient id="ftIg" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs>
-                    <rect x="1" y="1" width="22" height="22" rx="6" fill="url(#ftIg)"/>
-                    <rect x="5.5" y="5.5" width="13" height="13" rx="4" fill="none" stroke="white" stroke-width="1.5"/>
-                    <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
-                    <circle cx="17" cy="7" r="1.2" fill="white"/>
-                  </svg>
+                  <img src="/images/instagram_logo.svg" alt="인스타그램" class="linear-footer__sns-icon">
                 </span>
                 <span>1st_penguins</span>
               </a>
             </li>
             <li>
               <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap">
-                  <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="4" width="22" height="16" rx="5" fill="#FF0000"/>
-                    <polygon points="10,8.5 10,15.5 17,12" fill="white"/>
-                  </svg>
+                <span class="linear-footer__sns-icon-wrap linear-footer__sns-icon-wrap--yt">
+                  <img src="/images/youtube_logo.svg" alt="유튜브" class="linear-footer__sns-icon">
                 </span>
                 <span>@the1stpeng</span>
               </a>
             </li>
             <li>
               <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap">
-                  <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="24" height="24" rx="6" fill="#FFE812"/>
-                    <ellipse cx="12" cy="11" rx="7.5" ry="6" fill="#3B1B1B"/>
-                    <path d="M9 9.5 L9 13.5 M9 9.5 L12 12 L15 9.5 M15 9.5 L15 13.5" stroke="#FFE812" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                  </svg>
+                <span class="linear-footer__sns-icon-wrap linear-footer__sns-icon-wrap--kakao">
+                  <img src="/images/kakaotalk_logo.svg" alt="카카오톡" class="linear-footer__sns-icon">
                 </span>
                 <span>건강운동관리사</span>
               </a>
