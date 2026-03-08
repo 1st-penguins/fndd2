@@ -228,35 +228,37 @@
   transform: translateX(3px);
 }
 
+/* 투명 가이드 박스 — 모든 아이콘의 왼쪽 시작점 통일 */
 .linear-footer__sns-icon-wrap {
   width: 28px;
   height: 28px;
-  border-radius: 7px;
   flex-shrink: 0;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 기준: 인스타그램 — 28px 꽉 채움 */
+/* 기준: 인스타그램 */
 .linear-footer__sns-icon-wrap .linear-footer__sns-icon {
   display: block;
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-}
-
-/* 유튜브: 가로로 넓어 보이므로 살짝 축소 */
-.linear-footer__sns-icon-wrap--youtube .linear-footer__sns-icon {
   width: 26px;
   height: 26px;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
-/* 카카오: 부피감 커서 더 축소 */
-.linear-footer__sns-icon-wrap--kakao .linear-footer__sns-icon {
+/* 유튜브: 가로로 넓어 보여 높이 기준으로 축소 */
+.linear-footer__sns-icon-wrap--youtube .linear-footer__sns-icon {
   width: 24px;
   height: 24px;
+  border-radius: 4px;
+}
+
+/* 카카오: 부피감 크므로 가장 작게 */
+.linear-footer__sns-icon-wrap--kakao .linear-footer__sns-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
 }
 
 .linear-footer__divider {
