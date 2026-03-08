@@ -2313,7 +2313,6 @@ async function deleteAllQuestionSets(certType = null) {
     }
 
     // 성공 메시지 표시
-    const label = certType === 'sports' ? '생활스포츠지도사' : certType === 'health' ? '건강운동관리사' : '전체';
     hideLoading();
     showToast(`${label} 문제풀이기록이 삭제되었습니다. (총 ${totalDeleted}개 항목)`, 'success');
 
