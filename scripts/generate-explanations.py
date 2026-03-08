@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data", "sports")
 IMAGE_BASE = BASE_DIR  # 이미지 경로는 프로젝트 루트 기준
 
-PLACEHOLDER = ["이 문제의 정답은"]  # 해설이 없는 것으로 판단하는 패턴
+PLACEHOLDER = ["이 문제의 정답은", "##", "**"]  # 해설이 없거나 재생성 필요한 패턴
 
 
 def is_placeholder(explanation):
@@ -47,13 +47,24 @@ def generate_explanation(image_path, correct_answer_index, subject, year):
 정답: {correct_num}번
 
 해설 작성 규칙:
-1. 정답이 {correct_num}번인 이유를 명확히 설명
-2. 핵심 개념/이론 중심으로 간결하게 (3~5문장)
-3. 오답 선택지가 왜 틀렸는지 간략히 언급 (가능하면)
-4. 수험생이 이해하기 쉬운 언어로 작성
-5. "정답은 {correct_num}번입니다."로 시작하지 말고 바로 내용부터 시작
+1. 마크다운 문법 절대 금지 (##, **, >, |, - 기호 사용 금지)
+2. 영어 용어 괄호 표기 금지 (강화(Reinforcement) X → 강화 O)
+3. 이모지 사용 금지
+4. 아래 형식을 정확히 따를 것:
 
-해설만 출력하세요. 다른 말은 하지 마세요."""
+[형식]
+정답 {correct_num}번: (정답 선택지 내용 한 줄 요약)
+
+(정답인 이유를 2~3문장으로 설명. 핵심 개념 중심으로 간결하게.)
+
+오답 정리
+(오답 번호): (오답인 이유 한 줄)
+(오답 번호): (오답인 이유 한 줄)
+(오답 번호): (오답인 이유 한 줄)
+
+시험 포인트: (핵심 키워드나 암기 포인트 한 줄)
+
+위 형식 그대로만 출력하세요. 다른 말은 하지 마세요."""
 
     response = client.messages.create(
         model="claude-sonnet-4-6",
