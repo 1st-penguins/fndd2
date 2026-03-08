@@ -239,11 +239,24 @@
   justify-content: center;
 }
 
+/* 기준: 인스타그램 — 28px 꽉 채움 */
 .linear-footer__sns-icon-wrap .linear-footer__sns-icon {
   display: block;
   width: 28px;
   height: 28px;
   object-fit: contain;
+}
+
+/* 유튜브: 가로로 넓어 보이므로 살짝 축소 */
+.linear-footer__sns-icon-wrap--youtube .linear-footer__sns-icon {
+  width: 26px;
+  height: 26px;
+}
+
+/* 카카오: 부피감 커서 더 축소 */
+.linear-footer__sns-icon-wrap--kakao .linear-footer__sns-icon {
+  width: 24px;
+  height: 24px;
 }
 
 .linear-footer__divider {

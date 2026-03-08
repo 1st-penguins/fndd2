@@ -644,7 +644,7 @@ function injectFooter() {
             </li>
             <li>
               <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap">
+                <span class="linear-footer__sns-icon-wrap linear-footer__sns-icon-wrap--youtube">
                   <img src="/images/icons8-youtube.svg" alt="유튜브" class="linear-footer__sns-icon">
                 </span>
                 <span>@the1stpeng</span>
@@ -652,7 +652,7 @@ function injectFooter() {
             </li>
             <li>
               <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap">
+                <span class="linear-footer__sns-icon-wrap linear-footer__sns-icon-wrap--kakao">
                   <img src="/images/kakaotalk_logo.svg" alt="카카오톡" class="linear-footer__sns-icon">
                 </span>
                 <span>건강운동관리사</span>
