@@ -415,6 +415,10 @@ if (typeof window.LinearHeader === 'undefined') {
       };
 
       const certName = certNames[certType] || '건강운동관리사';
+      const certColor = certType === 'sports-instructor' ? '#059669' : '#1D2F4E';
+
+      // CSS 변수 업데이트 (배지 색상)
+      document.documentElement.style.setProperty('--cert-primary', certColor);
 
       // 데스크톱 배지 업데이트
       if (this.headerBadge) {
@@ -460,6 +464,10 @@ window.updateHeaderCertificateBadge = function () {
   };
 
   const certName = certNames[certType] || '건강운동관리사';
+  const certColor = certType === 'sports-instructor' ? '#059669' : '#1D2F4E';
+
+  // CSS 변수 업데이트 (배지 색상)
+  document.documentElement.style.setProperty('--cert-primary', certColor);
 
   // 데스크톱 배지 업데이트
   const headerBadge = document.getElementById('header-cert-badge');
