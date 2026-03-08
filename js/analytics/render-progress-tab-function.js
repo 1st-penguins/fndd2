@@ -1,8 +1,99 @@
 // render-progress-tab-function.js - 학습 진행률 탭 렌더링
 
+const SPORTS_SUBJECTS = ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론'];
+const SPORTS_YEARS = ['2025', '2024', '2023', '2022'];
+
+const SUBJECT_EMOJIS = {
+  '스포츠사회학': '🌐', '스포츠교육학': '📚', '스포츠심리학': '🧠', '한국체육사': '🏛️',
+  '운동생리학': '🧬', '운동역학': '⚙️', '스포츠윤리': '⚖️', '특수체육론': '♿',
+  '유아체육론': '🧸', '노인체육론': '👴'
+};
+
+function renderSportsInstructorProgress(container, attempts) {
+  const normalizeYear = (v) => { const m = String(v ?? '').match(/(20\d{2})/); return m ? m[1] : null; };
+
+  // 연도×과목별 풀이 여부 집계
+  const done = {}; // done[year][subject] = { count, correct }
+  attempts.forEach(a => {
+    const q = a?.questionData || {};
+    const year = normalizeYear(q.year || a.year);
+    const subject = q.subject || a.subject;
+    if (!year || !subject || !SPORTS_YEARS.includes(year)) return;
+    if (!done[year]) done[year] = {};
+    if (!done[year][subject]) done[year][subject] = { count: 0, correct: 0 };
+    done[year][subject].count++;
+    if (a.isCorrect) done[year][subject].correct++;
+  });
+
+  let html = `
+    <div class="progress-container">
+      <div class="progress-header-section">
+        <h3>연도별 기출 학습 진행률</h3>
+        <p>각 연도별 과목 풀이 현황을 확인할 수 있습니다. (10과목)</p>
+      </div>`;
+
+  SPORTS_YEARS.forEach(year => {
+    const yearData = done[year] || {};
+    const completedSubjects = SPORTS_SUBJECTS.filter(s => (yearData[s]?.count ?? 0) > 0);
+    const completedCount = completedSubjects.length;
+    const totalCount = SPORTS_SUBJECTS.length;
+    const pct = Math.round((completedCount / totalCount) * 100);
+    const color = pct === 100 ? '#059669' : pct >= 50 ? '#5FB2C9' : '#1D2F4E';
+
+    const subjectsHtml = SPORTS_SUBJECTS.map(subject => {
+      const s = yearData[subject];
+      const isDone = (s?.count ?? 0) > 0;
+      const acc = isDone ? Math.round((s.correct / s.count) * 100) : null;
+      const url = `exam-sports/${year}_${subject}.html`;
+      return `
+        <div class="sports-subject-item ${isDone ? 'done' : 'not-done'}">
+          <span class="subject-emoji">${SUBJECT_EMOJIS[subject] || '📖'}</span>
+          <span class="subject-name">${subject}</span>
+          ${isDone
+            ? `<span class="subject-acc">${acc}%</span>`
+            : `<a href="${url}" class="subject-start-btn">풀기</a>`}
+        </div>`;
+    }).join('');
+
+    html += `
+      <div class="sports-year-card">
+        <div class="sports-year-header">
+          <span class="sports-year-title">${year}년</span>
+          <span class="sports-year-badge" style="background:${color}">${completedCount}/${totalCount} 과목</span>
+        </div>
+        <div class="sports-year-progress-bar">
+          <div class="sports-year-progress-fill" style="width:${pct}%; background:${color}"></div>
+        </div>
+        <div class="sports-subjects-grid">${subjectsHtml}</div>
+      </div>`;
+  });
+
+  html += `</div>`;
+
+  html += `<style>
+    .sports-year-card { background: var(--color-bg-level-0, #fff); border: 1px solid var(--color-border-primary, #e2e8f0); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+    .sports-year-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .sports-year-title { font-size: 1.2rem; font-weight: 700; color: var(--color-text-primary); }
+    .sports-year-badge { color: #fff; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+    .sports-year-progress-bar { height: 8px; background: rgba(0,0,0,0.06); border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
+    .sports-year-progress-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+    .sports-subjects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .sports-subject-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; font-size: 0.875rem; }
+    .sports-subject-item.done { background: rgba(5,150,105,0.08); color: #059669; font-weight: 600; }
+    .sports-subject-item.not-done { background: var(--color-bg-level-1, #f8fafc); color: var(--color-text-secondary); }
+    .subject-emoji { font-size: 1rem; }
+    .subject-name { flex: 1; }
+    .subject-acc { font-size: 0.8rem; font-weight: 700; color: #059669; }
+    .subject-start-btn { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; background: #1D2F4E; color: #fff; text-decoration: none; white-space: nowrap; }
+    .subject-start-btn:hover { background: #2a4570; }
+  </style>`;
+
+  container.innerHTML = html;
+}
+
 /**
  * 학습 진행률 탭 렌더링
- * @param {Object} [data] - { userProgress, mockExamResults, attempts }
+ * @param {Object} [data] - { userProgress, mockExamResults, attempts, certType }
  *   생략 시 window.state / window.userAttempts에서 읽음 (하위 호환)
  */
 export function renderProgressTabStandalone(data) {
@@ -13,6 +104,12 @@ export function renderProgressTabStandalone(data) {
   const userProgress    = data?.userProgress    ?? window.state?.userProgress    ?? {};
   const mockExamResults = data?.mockExamResults ?? window.state?.mockExamResults ?? [];
   const attempts        = data?.attempts        ?? window.userAttempts           ?? window.state?.attempts ?? [];
+  const certType        = data?.certType        ?? localStorage.getItem('currentCertificateType') ?? 'health-manager';
+
+  // 생활스포츠지도사: 연도별 과목 완료율 뷰
+  if (certType === 'sports-instructor') {
+    return renderSportsInstructorProgress(container, attempts);
+  }
 
   // ── 레거시 포맷 정규화 헬퍼 ──────────────────────────────────────
   const normalizeYear = (v) => {

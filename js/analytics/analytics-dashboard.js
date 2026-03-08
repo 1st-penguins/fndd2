@@ -3455,6 +3455,7 @@ function renderProgressTab() {
     userProgress:    state.userProgress,
     mockExamResults: state.mockExamResults,
     attempts:        state.attempts,
+    certType:        getCurrentCertificateType(),
   });
 }
 
