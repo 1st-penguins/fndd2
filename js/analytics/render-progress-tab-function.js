@@ -1,19 +1,17 @@
 // render-progress-tab-function.js - 학습 진행률 탭 렌더링
 
-const SPORTS_SUBJECTS = ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론'];
 const SPORTS_YEARS = ['2025', '2024', '2023', '2022'];
-
-const SUBJECT_EMOJIS = {
-  '스포츠사회학': '🌐', '스포츠교육학': '📚', '스포츠심리학': '🧠', '한국체육사': '🏛️',
-  '운동생리학': '🧬', '운동역학': '⚙️', '스포츠윤리': '⚖️', '특수체육론': '♿',
-  '유아체육론': '🧸', '노인체육론': '👴'
+const SPORTS_CATEGORIES = {
+  '기본': ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리'],
+  '전문': ['특수체육론', '유아체육론', '노인체육론'],
 };
+const SPORTS_SUBJECTS_ALL = [...SPORTS_CATEGORIES['기초'], ...SPORTS_CATEGORIES['특화']];
 
 function renderSportsInstructorProgress(container, attempts) {
   const normalizeYear = (v) => { const m = String(v ?? '').match(/(20\d{2})/); return m ? m[1] : null; };
 
-  // 연도×과목별 풀이 여부 집계
-  const done = {}; // done[year][subject] = { count, correct }
+  // 연도×과목별 풀이 집계
+  const done = {};
   attempts.forEach(a => {
     const q = a?.questionData || {};
     const year = normalizeYear(q.year || a.year);
@@ -29,31 +27,39 @@ function renderSportsInstructorProgress(container, attempts) {
     <div class="progress-container">
       <div class="progress-header-section">
         <h3>연도별 기출 학습 진행률</h3>
-        <p>각 연도별 과목 풀이 현황을 확인할 수 있습니다. (10과목)</p>
+        <p>각 연도별 기초·특화 과목 풀이 현황을 확인할 수 있습니다.</p>
       </div>`;
 
   SPORTS_YEARS.forEach(year => {
     const yearData = done[year] || {};
-    const completedSubjects = SPORTS_SUBJECTS.filter(s => (yearData[s]?.count ?? 0) > 0);
-    const completedCount = completedSubjects.length;
-    const totalCount = SPORTS_SUBJECTS.length;
+    const completedCount = SPORTS_SUBJECTS_ALL.filter(s => (yearData[s]?.count ?? 0) > 0).length;
+    const totalCount = SPORTS_SUBJECTS_ALL.length;
     const pct = Math.round((completedCount / totalCount) * 100);
     const color = pct === 100 ? '#059669' : pct >= 50 ? '#5FB2C9' : '#1D2F4E';
 
-    const subjectsHtml = SPORTS_SUBJECTS.map(subject => {
-      const s = yearData[subject];
-      const isDone = (s?.count ?? 0) > 0;
-      const acc = isDone ? Math.round((s.correct / s.count) * 100) : null;
-      const url = `exam-sports/${year}_${subject}.html`;
-      return `
-        <div class="sports-subject-item ${isDone ? 'done' : 'not-done'}">
-          <span class="subject-emoji">${SUBJECT_EMOJIS[subject] || '📖'}</span>
-          <span class="subject-name">${subject}</span>
-          ${isDone
-            ? `<span class="subject-acc">${acc}%</span>`
-            : `<a href="${url}" class="subject-start-btn">풀기</a>`}
+    let categoriesHtml = '';
+    Object.entries(SPORTS_CATEGORIES).forEach(([categoryName, subjects]) => {
+      const catDone = subjects.filter(s => (yearData[s]?.count ?? 0) > 0).length;
+      const subjectsHtml = subjects.map(subject => {
+        const s = yearData[subject];
+        const isDone = (s?.count ?? 0) > 0;
+        const acc = isDone ? Math.round((s.correct / s.count) * 100) : null;
+        const url = `exam-sports/${year}_${subject}.html`;
+        return `
+          <div class="sports-subject-item ${isDone ? 'done' : 'not-done'}">
+            <span class="subject-name">${subject}</span>
+            ${isDone
+              ? `<span class="subject-acc">${acc}%</span>`
+              : `<a href="${url}" class="subject-start-btn">풀기</a>`}
+          </div>`;
+      }).join('');
+
+      categoriesHtml += `
+        <div class="sports-category-section">
+          <div class="sports-category-label">${categoryName} <span class="cat-count">${catDone}/${subjects.length}</span></div>
+          <div class="sports-subjects-grid">${subjectsHtml}</div>
         </div>`;
-    }).join('');
+    });
 
     html += `
       <div class="sports-year-card">
@@ -64,7 +70,7 @@ function renderSportsInstructorProgress(container, attempts) {
         <div class="sports-year-progress-bar">
           <div class="sports-year-progress-fill" style="width:${pct}%; background:${color}"></div>
         </div>
-        <div class="sports-subjects-grid">${subjectsHtml}</div>
+        ${categoriesHtml}
       </div>`;
   });
 
@@ -77,11 +83,13 @@ function renderSportsInstructorProgress(container, attempts) {
     .sports-year-badge { color: #fff; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
     .sports-year-progress-bar { height: 8px; background: rgba(0,0,0,0.06); border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
     .sports-year-progress-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
-    .sports-subjects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-    .sports-subject-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; font-size: 0.875rem; }
+    .sports-category-section { margin-bottom: 16px; }
+    .sports-category-label { font-size: 0.8rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .cat-count { font-weight: 600; color: var(--color-text-tertiary, #94a3b8); }
+    .sports-subjects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .sports-subject-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-radius: 10px; font-size: 0.875rem; }
     .sports-subject-item.done { background: rgba(5,150,105,0.08); color: #059669; font-weight: 600; }
     .sports-subject-item.not-done { background: var(--color-bg-level-1, #f8fafc); color: var(--color-text-secondary); }
-    .subject-emoji { font-size: 1rem; }
     .subject-name { flex: 1; }
     .subject-acc { font-size: 0.8rem; font-weight: 700; color: #059669; }
     .subject-start-btn { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; background: #1D2F4E; color: #fff; text-decoration: none; white-space: nowrap; }
