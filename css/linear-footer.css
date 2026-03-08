@@ -28,7 +28,7 @@
 
 .linear-footer__content {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 0.9fr;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
   gap: 32px;
   margin-bottom: 32px;
 }
@@ -229,41 +229,18 @@
 }
 
 .linear-footer__sns-icon-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 34px;
   height: 34px;
   border-radius: 9px;
   flex-shrink: 0;
   overflow: hidden;
-  /* 인스타그램: 그라디언트 */
-  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-}
-
-.linear-footer__sns-icon-wrap--yt {
-  background: #FF0000;
-}
-
-.linear-footer__sns-icon-wrap--kakao {
-  background: #FFE812;
 }
 
 .linear-footer__sns-icon-wrap .linear-footer__sns-icon {
   display: block;
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-/* 인스타그램: 그라디언트 배경 위에 흰색 아이콘 */
-.linear-footer__sns-icon-wrap:not(.linear-footer__sns-icon-wrap--yt):not(.linear-footer__sns-icon-wrap--kakao) .linear-footer__sns-icon {
-  filter: brightness(0) invert(1);
-}
-
-/* 유튜브: 빨간 배경 위에 흰색 아이콘 */
-.linear-footer__sns-icon-wrap--yt .linear-footer__sns-icon {
-  filter: brightness(0) invert(1);
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
 }
 
 .linear-footer__divider {

@@ -614,22 +614,21 @@ function injectFooter() {
           <p class="linear-footer__brand-description">본 사이트의 기출문제는 국민체육진흥공단(KSPO)에서 출제한 문제로, 저작권은 KSPO에 있습니다. 퍼스트펭귄은 해당 문제를 비영리 학습 목적으로 제공합니다.</p>
         </div>
 
-        <div class="linear-footer__nav-group">
-          <div class="linear-footer__section">
-            <h3 class="linear-footer__section-title">서비스</h3>
-            <ul class="linear-footer__nav-list">
-              <li class="linear-footer__nav-item"><a href="/" class="linear-footer__nav-link">기출문제</a></li>
-              <li class="linear-footer__nav-item"><a href="/lectures" class="linear-footer__nav-link">인터넷 강의</a></li>
-              <li class="linear-footer__nav-item"><a href="/notices" class="linear-footer__nav-link">공지사항</a></li>
-            </ul>
-          </div>
-          <div class="linear-footer__section">
-            <h3 class="linear-footer__section-title">지원</h3>
-            <ul class="linear-footer__nav-list">
-              <li class="linear-footer__nav-item"><a href="/refund-policy" class="linear-footer__nav-link">환불정책</a></li>
-              <li class="linear-footer__nav-item"><a href="/company-info" class="linear-footer__nav-link">사업자정보</a></li>
-            </ul>
-          </div>
+        <div class="linear-footer__section">
+          <h3 class="linear-footer__section-title">서비스</h3>
+          <ul class="linear-footer__nav-list">
+            <li class="linear-footer__nav-item"><a href="/" class="linear-footer__nav-link">기출문제</a></li>
+            <li class="linear-footer__nav-item"><a href="/lectures" class="linear-footer__nav-link">인터넷 강의</a></li>
+            <li class="linear-footer__nav-item"><a href="/notices" class="linear-footer__nav-link">공지사항</a></li>
+          </ul>
+        </div>
+
+        <div class="linear-footer__section">
+          <h3 class="linear-footer__section-title">지원</h3>
+          <ul class="linear-footer__nav-list">
+            <li class="linear-footer__nav-item"><a href="/refund-policy" class="linear-footer__nav-link">환불정책</a></li>
+            <li class="linear-footer__nav-item"><a href="/company-info" class="linear-footer__nav-link">사업자정보</a></li>
+          </ul>
         </div>
 
         <div class="linear-footer__section">
@@ -645,7 +644,7 @@ function injectFooter() {
             </li>
             <li>
               <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap linear-footer__sns-icon-wrap--yt">
+                <span class="linear-footer__sns-icon-wrap">
                   <img src="/images/youtube_logo.svg" alt="유튜브" class="linear-footer__sns-icon">
                 </span>
                 <span>@the1stpeng</span>
@@ -653,7 +652,7 @@ function injectFooter() {
             </li>
             <li>
               <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap linear-footer__sns-icon-wrap--kakao">
+                <span class="linear-footer__sns-icon-wrap">
                   <img src="/images/kakaotalk_logo.svg" alt="카카오톡" class="linear-footer__sns-icon">
                 </span>
                 <span>건강운동관리사</span>
