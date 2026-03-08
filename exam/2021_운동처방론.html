@@ -319,7 +319,7 @@
       const yearParam = getParameterByName('year');   // '2021'?
       
       // 두 번째 nav-link가 '목록으로' 링크입니다
-      const backLink = document.querySelectorAll('.nav-link')[1]; 
+      const backLink = document.querySelector('.back-link'); 
       
       if (backLink) {
         // 만약 prev=year & year=2021 처럼 들어왔다면 → 연도별 페이지로 돌아가기
