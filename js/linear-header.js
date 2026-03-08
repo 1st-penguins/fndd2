@@ -645,7 +645,7 @@ function injectFooter() {
             <li>
               <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="linear-footer__sns-link">
                 <span class="linear-footer__sns-icon-wrap">
-                  <img src="/images/youtube_logo.svg" alt="유튜브" class="linear-footer__sns-icon">
+                  <img src="/images/icons8-youtube.svg" alt="유튜브" class="linear-footer__sns-icon">
                 </span>
                 <span>@the1stpeng</span>
               </a>
