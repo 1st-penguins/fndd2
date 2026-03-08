@@ -20,7 +20,9 @@
       "Bash(git:*)",
       "WebFetch(domain:fndd.netlify.app)",
       "Bash(python:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(pip install:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python:*)"
     ]
   }
 }
