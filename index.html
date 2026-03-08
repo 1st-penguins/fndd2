@@ -1343,7 +1343,8 @@
           }
 
           const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          const { db } = await import('./js/core/firebase-core.js');
+          const { ensureFirebase } = await import('./js/core/firebase-core.js');
+          const { db } = await ensureFirebase();
 
           // Firestore에 사용자 선호도 저장
           const userRef = doc(db, 'users', user.uid);
@@ -1368,7 +1369,8 @@
           }
 
           const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          const { db } = await import('./js/core/firebase-core.js');
+          const { ensureFirebase } = await import('./js/core/firebase-core.js');
+          const { db } = await ensureFirebase();
 
           const userRef = doc(db, 'users', user.uid);
           const userDoc = await getDoc(userRef);
