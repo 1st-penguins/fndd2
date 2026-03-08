@@ -611,7 +611,7 @@ function injectFooter() {
             </div>
             <span class="linear-footer__brand-text">퍼스트펭귄</span>
           </a>
-          <p class="linear-footer__brand-description">체육지도자 자격증을 위한 KSPO 기출문제 학습 플랫폼</p>
+          <p class="linear-footer__brand-description">본 사이트의 기출문제는 국민체육진흥공단(KSPO)에서 출제한 문제로, 저작권은 KSPO에 있습니다. 퍼스트펭귄은 해당 문제를 비영리 학습 목적으로 제공합니다.</p>
         </div>
 
         <div class="linear-footer__nav-group">
@@ -630,11 +630,6 @@ function injectFooter() {
               <li class="linear-footer__nav-item"><a href="/company-info" class="linear-footer__nav-link">사업자정보</a></li>
             </ul>
           </div>
-        </div>
-
-        <div class="linear-footer__kspo-notice">
-          <h3 class="linear-footer__section-title">저작권 안내</h3>
-          <p class="linear-footer__kspo-text">본 사이트의 기출문제는 국민체육진흥공단(KSPO)에서 출제한 문제로, 저작권은 KSPO에 있습니다. 퍼스트펭귄은 해당 문제를 비영리 학습 목적으로 제공합니다.</p>
         </div>
 
         <div class="linear-footer__section">
@@ -673,6 +668,7 @@ function injectFooter() {
 
       <div class="linear-footer__bottom">
         <p class="linear-footer__copyright">© 2025 퍼스트펭귄. All rights reserved.</p>
+        <p class="linear-footer__legal-desc">체육지도자 자격증을 위한 KSPO 기출문제 학습 플랫폼</p>
         <ul class="linear-footer__legal">
           <li class="linear-footer__legal-item"><a href="/refund-policy" class="linear-footer__legal-link">환불정책</a></li>
           <li class="linear-footer__legal-item"><a href="/company-info" class="linear-footer__legal-link">사업자정보</a></li>
