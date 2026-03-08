@@ -23,6 +23,7 @@ import {
   isRestrictedPage,
   isUserLoggedIn
 } from "./auth-utils.js";
+import { recordDailyVisit } from "../analytics/daily-visitor.js";
 
 /**
  * 현재 로그인한 사용자 정보 반환
@@ -86,7 +87,10 @@ export async function initAuth() {
       if (user) {
         // 로그인 상태 저장
         setLoggedIn(user);
-        
+
+        // 오늘 방문 기록 (비동기, 실패해도 무관)
+        recordDailyVisit(user.uid);
+
         // 팝업/외부 탭 로그인 복귀 시 남아있는 로그인 모달 정리
         if (typeof window.closeLoginModal === 'function') {
           window.closeLoginModal();

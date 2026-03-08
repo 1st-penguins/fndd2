@@ -27,6 +27,7 @@ import { sessionManager } from '../data/session-manager.js';
 import { showLoading, hideLoading, showError, showToast } from "../utils/ui-utils.js";
 import { getScoreColor, getWeaknessColor } from './chart-utils.js';
 import { isDevMode } from "../config/dev-config.js";
+import { getTodayVisitorCount, getRecentVisitorStats } from "./daily-visitor.js";
 import {
   renderExpectedScore,
   renderLearningTrend,
@@ -3464,6 +3465,59 @@ function renderAdminTab() {
 
   // admin-tab 내용 초기화
   adminTab.innerHTML = '';
+
+  // 오늘 방문자 카드
+  const visitorCard = document.createElement('div');
+  visitorCard.className = 'stats-card';
+  visitorCard.innerHTML = `
+    <div class="stats-header">오늘의 방문자</div>
+    <div id="today-visitor-section" style="padding: 16px 0;">
+      <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+        <div style="text-align: center;">
+          <div id="today-visitor-count" style="font-size: 3rem; font-weight: 700; color: var(--penguin-navy, #1D2F4E); line-height: 1;">—</div>
+          <div style="font-size: 0.85rem; color: #888; margin-top: 4px;">오늘 접속 (고유 아이디)</div>
+        </div>
+        <div id="visitor-week-chart" style="flex: 1; min-width: 200px;"></div>
+      </div>
+    </div>
+  `;
+  adminTab.appendChild(visitorCard);
+
+  // 오늘 방문자 수 비동기 로드
+  (async () => {
+    const countEl = document.getElementById('today-visitor-count');
+    const weekEl = document.getElementById('visitor-week-chart');
+    try {
+      const [todayCount, weekStats] = await Promise.all([
+        getTodayVisitorCount(),
+        getRecentVisitorStats(7)
+      ]);
+      if (countEl) countEl.textContent = todayCount ?? '—';
+
+      // 최근 7일 간단 바 차트
+      if (weekEl && weekStats) {
+        const maxCount = Math.max(...weekStats.map(s => s.count), 1);
+        weekEl.innerHTML = `
+          <div style="display: flex; align-items: flex-end; gap: 6px; height: 60px;">
+            ${weekStats.slice().reverse().map(s => {
+              const pct = Math.round((s.count / maxCount) * 100);
+              const isToday = s.date === weekStats[0].date;
+              const label = s.date.slice(5); // MM-DD
+              return `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1;">
+                  <span style="font-size: 0.7rem; color: #888;">${s.count}</span>
+                  <div style="width: 100%; background: ${isToday ? 'var(--penguin-skyblue, #5FB2C9)' : '#dde'}; height: ${Math.max(pct * 0.48, 2)}px; border-radius: 3px 3px 0 0; transition: height 0.3s;"></div>
+                  <span style="font-size: 0.65rem; color: #aaa;">${label}</span>
+                </div>`;
+            }).join('')}
+          </div>
+          <div style="font-size: 0.75rem; color: #aaa; margin-top: 4px; text-align: right;">최근 7일</div>
+        `;
+      }
+    } catch (e) {
+      if (countEl) countEl.textContent = '오류';
+    }
+  })();
 
   // 관리자 통계 카드 추가
   const statsCard = document.createElement('div');
