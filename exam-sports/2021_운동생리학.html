@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2021 운동생리학 - 퍼스트펭귄 2급 생활체육지도사</title>
+
+  <!-- PWA 및 테마 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1D2F4E">
+
+  <!-- Firebase 리소스 힌트 -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+
+  <!-- 외부 CSS 파일 연결 -->
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/linear-header.css">
+  <link rel="stylesheet" href="../css/linear-footer.css">
+  <link rel="stylesheet" href="../css/pages/page-header.css">
+  <link rel="stylesheet" href="../css/layout.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/pages/quiz.css" />
+  <link rel="stylesheet" href="../css/indicators.css" />
+  <link rel="stylesheet" href="../css/login.css" />
+  <link rel="stylesheet" href="../css/mobile-ux-improvements.css" />
+
+  <!-- 스포츠 데이터 폴더 설정 (quiz-core.js보다 먼저 실행됨) -->
+  <script>window.QUIZ_DATA_FOLDER = 'sports';</script>
+
+  <!-- 개발 모드 설정 -->
+  <script type="module" src="../js/config/dev-config.js"></script>
+
+  <!-- Firebase 관련 스크립트 -->
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  <script type="module" src="../js/auth/auth-ui.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+
+  <script src="../js/mobile-viewport-fix.js"></script>
+</head>
+
+<body>
+  <!-- Linear Header -->
+  <header class="linear-header">
+    <div class="linear-header__container">
+      <a href="../index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" />
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+      </a>
+
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="../index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../lectures.html" class="linear-header__nav-link">강의</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="linear-header__auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">
+          로그인
+        </a>
+        <div id="user-profile-container" class="linear-header__user-profile" style="display: none;">
+          <span id="user-name" class="linear-header__user-name"></span>
+          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
+        </div>
+      </div>
+
+      <div class="linear-header__actions">
+        <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
+          <button id="dev-mode-btn" class="dev-mode-btn">
+            <span class="dev-mode-indicator"></span>
+            DEV
+          </button>
+        </div>
+
+        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <a href="../index.html" class="linear-header__nav-link">홈</a>
+      <a href="../lectures.html" class="linear-header__nav-link">강의</a>
+      <a href="../notices.html" class="linear-header__nav-link">공지사항</a>    </div>
+  </header>
+
+  <!-- 페이지 헤더 -->
+  <section class="page-header">
+    <div class="container">
+      <a href="../years-sports/year_2021.html" class="back-link">
+        <span class="back-arrow">←</span>
+        <span>목록으로</span>
+      </a>
+      <div class="page-title">
+        <h1>2021년 운동생리학 기출문제</h1>
+        <p class="page-subtitle">총 20문항 | 제한시간 20분</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 메인 콘텐츠 -->
+  <main style="padding-top: 20px;">
+
+    <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+      <div class="progress-container">
+        <div class="progress-header">
+          <div class="progress-info">
+            <div>진행 상황</div>
+            <div class="progress-count" id="progress-count">1 / 20</div>
+          </div>
+          <div class="timer-container">
+            <div class="timer">
+              <span class="timer-icon">⏱️</span>
+              <span id="timer">20:00</span>
+            </div>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress" id="progress-bar"></div>
+        </div>
+        <div class="question-indicators-container">
+          <div class="question-indicators" id="question-indicators">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content restricted-content" style="padding-top: 44px;">
+      <div class="container">
+        <div id="quiz-container">
+          <div class="quiz-container">
+            <div class="question-number">문제 1</div>
+            <div id="question-container" class="question-image-container">
+            </div>
+            <div class="option-buttons" id="option-buttons">
+              <button class="option-button" onclick="selectOption(0)">1</button>
+              <button class="option-button" onclick="selectOption(1)">2</button>
+              <button class="option-button" onclick="selectOption(2)">3</button>
+              <button class="option-button" onclick="selectOption(3)">4</button>
+            </div>
+            <div id="feedback" class="answer-feedback"></div>
+          </div>
+        </div>
+
+        <div class="navigation-buttons">
+          <button id="prev-button" class="nav-button prev-button disabled">
+            <span>이전</span>
+          </button>
+          <button id="check-button" class="nav-button check-button" onclick="showCurrentAnswer()">
+            <span>정답 보기</span>
+          </button>
+          <button id="next-button" class="nav-button next-button">
+            <span>다음</span>
+          </button>
+          <button id="submit-button" class="nav-button check-button" style="display: none;">
+            <span>결과 확인</span>
+          </button>
+        </div>
+
+        <div id="results-summary" class="results-summary">
+        </div>
+      </div>
+    </div>
+
+    <!-- 문제 불러오기 및 퀴즈 로직 -->
+    <script type="module">
+      import {
+        initializeQuiz, selectOption, checkAnswer,
+        goToNextQuestion, goToPreviousQuestion, submitQuiz
+      } from '../js/quiz/quiz-core.js';
+      import { recordQuizData, initAutoSave } from '../js/quiz/quiz-data-recorder.js';
+
+      window.selectOption = (optionIndex) => {
+        selectOption(optionIndex);
+      };
+
+      window.checkAnswer = () => {
+        const result = checkAnswer();
+        if (result.status === 'no-answer') {
+          alert('답을 선택해주세요.');
+          return;
+        }
+        const feedback = document.getElementById('feedback');
+        feedback.className = `answer-feedback ${result.isCorrect ? 'correct-feedback' : 'incorrect-feedback'}`;
+        feedback.innerHTML = `
+          <div class="feedback-title">
+            <span class="feedback-icon">${result.isCorrect ? '✔' : '✗'}</span>
+            <span>${result.isCorrect ? '정답입니다!' : '오답입니다!'}</span>
+          </div>
+          ${!result.isCorrect ? `<div class="correct-answer">정답: ${result.correctAnswer + 1}번</div>` : ''}
+          <div class="explanation">${result.explanation}</div>
+        `;
+        feedback.style.display = 'block';
+        const indicators = document.querySelectorAll('.indicator');
+        if (indicators && window.currentQuestionIndex !== undefined && indicators[window.currentQuestionIndex]) {
+          indicators[window.currentQuestionIndex].classList.remove('correct', 'incorrect');
+          indicators[window.currentQuestionIndex].classList.add(result.isCorrect ? 'correct' : 'incorrect');
+        }
+        recordQuizData(result);
+        return result;
+      };
+
+      window.goToNextQuestion = goToNextQuestion;
+      window.goToPreviousQuestion = goToPreviousQuestion;
+      window.submitQuiz = submitQuiz;
+      window.showCurrentAnswer = () => {
+        const result = checkAnswer();
+        if (result.status === 'no-answer') {
+          alert('답을 선택해주세요.');
+          return;
+        }
+        const feedback = document.getElementById('feedback');
+        feedback.className = `answer-feedback ${result.isCorrect ? 'correct-feedback' : 'incorrect-feedback'}`;
+        feedback.innerHTML = `
+          <div class="feedback-title">
+            <span class="feedback-icon">${result.isCorrect ? '✔' : '✗'}</span>
+            <span>${result.isCorrect ? '정답입니다!' : '오답입니다!'}</span>
+          </div>
+          ${!result.isCorrect ? `<div class="correct-answer">정답: ${result.correctAnswer + 1}번</div>` : ''}
+          <div class="explanation">${result.explanation}</div>
+        `;
+        feedback.style.display = 'block';
+        recordQuizData(result);
+      };
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          await initializeQuiz();
+          initAutoSave();
+        } catch (error) {
+          console.error('퀴즈 초기화 실패:', error);
+          alert('퀴즈를 로드하는 중 오류가 발생했습니다. 페이지를 새로고침해 주세요.');
+        }
+      });
+    </script>
+
+    <!-- Firebase 인증 (초기화 완료 후 auth 사용) -->
+    <script type="module">
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+      import { ensureFirebase } from "../js/core/firebase-core.js";
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const { auth } = await ensureFirebase();
+          if (auth) onAuthStateChanged(auth, (user) => {
+            if (user) {
+              localStorage.setItem("userLoggedIn", "true");
+              localStorage.setItem("userName", user.displayName || user.email || "사용자");
+            } else {
+              localStorage.removeItem("userLoggedIn");
+              localStorage.removeItem("userName");
+            }
+          });
+        } catch (e) {
+          console.warn("Firebase 인증 초기화 실패:", e);
+        }
+      });
+    </script>
+    <script src="../js/linear-header.js"></script>
+    <script type="module" src="../js/dev-mode-toggle.js"></script>
+
+  </main>
+
+  <!-- 슬림 푸터 -->
+  <footer class="linear-footer"></footer>
+</body>
+
+</html>

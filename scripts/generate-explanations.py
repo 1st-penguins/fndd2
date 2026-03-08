@@ -170,8 +170,12 @@ def process_file(json_path):
     return updated
 
 
-def main():
-    json_files = sorted(glob.glob(os.path.join(DATA_DIR, "*.json")))
+def main(years=None):
+    all_files = sorted(glob.glob(os.path.join(DATA_DIR, "*.json")))
+    if years:
+        json_files = [f for f in all_files if os.path.basename(f)[:4] in years]
+    else:
+        json_files = all_files
     print(f"총 {len(json_files)}개 파일 처리 시작\n")
 
     total = 0
@@ -194,4 +198,4 @@ if __name__ == "__main__":
         print(f"[{target}.json] 단일 처리 모드\n")
         process_file(path)
     else:
-        main()
+        main(years={'2022', '2023', '2024', '2025'})
