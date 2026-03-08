@@ -614,21 +614,22 @@ function injectFooter() {
           <p class="linear-footer__brand-description">체육지도자 자격증을 위한 KSPO 기출문제 학습 플랫폼</p>
         </div>
 
-        <div class="linear-footer__section">
-          <h3 class="linear-footer__section-title">서비스</h3>
-          <ul class="linear-footer__nav-list">
-            <li class="linear-footer__nav-item"><a href="/" class="linear-footer__nav-link">기출문제</a></li>
-            <li class="linear-footer__nav-item"><a href="/lectures" class="linear-footer__nav-link">인터넷 강의</a></li>
-            <li class="linear-footer__nav-item"><a href="/notices" class="linear-footer__nav-link">공지사항</a></li>
-          </ul>
-        </div>
-
-        <div class="linear-footer__section">
-          <h3 class="linear-footer__section-title">지원</h3>
-          <ul class="linear-footer__nav-list">
-            <li class="linear-footer__nav-item"><a href="/refund-policy" class="linear-footer__nav-link">환불정책</a></li>
-            <li class="linear-footer__nav-item"><a href="/company-info" class="linear-footer__nav-link">사업자정보</a></li>
-          </ul>
+        <div class="linear-footer__nav-group">
+          <div class="linear-footer__section">
+            <h3 class="linear-footer__section-title">서비스</h3>
+            <ul class="linear-footer__nav-list">
+              <li class="linear-footer__nav-item"><a href="/" class="linear-footer__nav-link">기출문제</a></li>
+              <li class="linear-footer__nav-item"><a href="/lectures" class="linear-footer__nav-link">인터넷 강의</a></li>
+              <li class="linear-footer__nav-item"><a href="/notices" class="linear-footer__nav-link">공지사항</a></li>
+            </ul>
+          </div>
+          <div class="linear-footer__section">
+            <h3 class="linear-footer__section-title">지원</h3>
+            <ul class="linear-footer__nav-list">
+              <li class="linear-footer__nav-item"><a href="/refund-policy" class="linear-footer__nav-link">환불정책</a></li>
+              <li class="linear-footer__nav-item"><a href="/company-info" class="linear-footer__nav-link">사업자정보</a></li>
+            </ul>
+          </div>
         </div>
 
         <div class="linear-footer__kspo-notice">
@@ -641,19 +642,38 @@ function injectFooter() {
           <ul class="linear-footer__sns-list">
             <li>
               <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap"><img src="/images/instagram_logo.svg" alt="인스타그램" class="linear-footer__sns-icon"></span>
+                <span class="linear-footer__sns-icon-wrap">
+                  <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                    <defs><radialGradient id="ftIg" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs>
+                    <rect x="1" y="1" width="22" height="22" rx="6" fill="url(#ftIg)"/>
+                    <rect x="5.5" y="5.5" width="13" height="13" rx="4" fill="none" stroke="white" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                    <circle cx="17" cy="7" r="1.2" fill="white"/>
+                  </svg>
+                </span>
                 <span>1st_penguins</span>
               </a>
             </li>
             <li>
               <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap"><img src="/images/youtube_logo.svg" alt="유튜브" class="linear-footer__sns-icon"></span>
+                <span class="linear-footer__sns-icon-wrap">
+                  <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="4" width="22" height="16" rx="5" fill="#FF0000"/>
+                    <polygon points="10,8.5 10,15.5 17,12" fill="white"/>
+                  </svg>
+                </span>
                 <span>@the1stpeng</span>
               </a>
             </li>
             <li>
               <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <span class="linear-footer__sns-icon-wrap"><img src="/images/kakaotalk_logo.svg" alt="카카오톡" class="linear-footer__sns-icon"></span>
+                <span class="linear-footer__sns-icon-wrap">
+                  <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="24" height="24" rx="6" fill="#FFE812"/>
+                    <ellipse cx="12" cy="11" rx="7.5" ry="6" fill="#3B1B1B"/>
+                    <path d="M9 9.5 L9 13.5 M9 9.5 L12 12 L15 9.5 M15 9.5 L15 13.5" stroke="#FFE812" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                  </svg>
+                </span>
                 <span>건강운동관리사</span>
               </a>
             </li>

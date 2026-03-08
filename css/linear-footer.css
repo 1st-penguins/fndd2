@@ -28,10 +28,14 @@
 
 .linear-footer__content {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr;
-  /* 브랜드 영역 살짝 넓힘 */
-  gap: 40px;
+  grid-template-columns: 1.4fr 1fr 1.3fr 0.9fr;
+  gap: 32px;
   margin-bottom: 32px;
+}
+
+.linear-footer__nav-group {
+  display: flex;
+  gap: 28px;
 }
 
 .linear-footer__brand {
@@ -228,19 +232,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.1);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   flex-shrink: 0;
   overflow: hidden;
 }
 
-.linear-footer__sns-icon {
-  width: 18px;
-  height: 18px;
+.linear-footer__sns-icon-wrap svg {
   display: block;
-  object-fit: contain;
+  width: 20px;
+  height: 20px;
 }
 
 .linear-footer__divider {
