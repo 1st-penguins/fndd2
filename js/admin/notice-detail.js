@@ -192,15 +192,17 @@ function updateNoticeContent(notice) {
  */
 function formatContent(content) {
   if (!content) return '<p>내용이 없습니다.</p>';
-  
-  // 단순 텍스트인 경우 줄바꿈 처리
+
   if (!content.includes('<')) {
+    // 줄바꿈 처리 후 URL 링크화
     content = content
       .replace(/\n/g, '<br>')
-      // URL을 링크로 변환
-      .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+  } else {
+    // HTML 포함 콘텐츠: href 속성 밖의 URL만 링크화
+    content = content.replace(/(?<!href=["'])((https?:\/\/)[^\s<"']+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
   }
-  
+
   // 전체 내용을 컨테이너 div로 감싸기
   return `<div class="notice-content-wrapper">${content}</div>`;
 }
