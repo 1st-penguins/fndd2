@@ -1,7 +1,7 @@
 // subject-page.js - 과목별 기출문제 페이지 컨트롤러
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { auth } from "../core/firebase-core.js";
+import { ensureFirebase } from "../core/firebase-core.js";
 import { isUserLoggedIn } from "../auth/auth-utils.js";
 import { showLoginModal, closeLoginModal, updateLoginUI, updateRestrictedContent } from "../auth/auth-ui.js";
 import { navigateWithAccessGuard, setupRestrictedLinkDelegation } from "../auth/access-guard.js";
@@ -105,7 +105,8 @@ function setupLoginModalEvents() {
 /**
  * 인증 상태 변경 감지 및 처리
  */
-function setupAuthStateListener() {
+async function setupAuthStateListener() {
+  const { auth } = await ensureFirebase();
   onAuthStateChanged(auth, user => {
     updateLoginUI();
     updateRestrictedContent(!!user);
