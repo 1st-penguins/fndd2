@@ -38,7 +38,8 @@ export async function recordQuizData(result) {
       subject: subject,
       number: window.currentQuestionIndex + 1,
       isFromMockExam: subject.includes('모의고사'),
-      mockExamPart: subject.includes('1교시') ? 1 : (subject.includes('2교시') ? 2 : null)
+      mockExamPart: subject.includes('1교시') ? 1 : (subject.includes('2교시') ? 2 : null),
+      certType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports' : 'health'
     };
     
     // 데이터 기록

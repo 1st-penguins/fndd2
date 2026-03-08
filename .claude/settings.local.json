@@ -25,7 +25,13 @@
       "Bash(PYTHONIOENCODING=utf-8 python:*)",
       "Bash(PYTHONIOENCODING=utf-8 grep:*)",
       "Bash(PYTHONIOENCODING=utf-8 sed:*)",
-      "Bash(PYTHONIOENCODING=utf-8 wc:*)"
+      "Bash(PYTHONIOENCODING=utf-8 wc:*)",
+      "Bash(kill 1916:*)",
+      "Bash(tasklist:*)",
+      "Bash(kill 1901:*)",
+      "Bash(kill 1912:*)",
+      "Bash(taskkill:*)",
+      "Bash(export:*)"
     ]
   }
 }

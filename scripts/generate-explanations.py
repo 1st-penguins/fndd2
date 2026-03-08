@@ -198,4 +198,4 @@ if __name__ == "__main__":
         print(f"[{target}.json] 단일 처리 모드\n")
         process_file(path)
     else:
-        main(years={'2022', '2023', '2024', '2025'})
+        main(years={'2021'})

@@ -296,6 +296,7 @@ class SessionManager {
           return `문제풀이 ${new Date().toLocaleDateString()}`;
         })(),
         type: finalType,
+        certType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports' : 'health',
         ...cleanedMetadata
       };
 

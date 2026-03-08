@@ -733,12 +733,8 @@ async function refreshDataIfNeeded(force = false) {
  * @param {CustomEvent} e - 이벤트 객체
  */
 function handleSetFiltersChange(e) {
-  // console.log('필터 변경:', e.target.value);
-  const { type, subject, year } = e.detail;
-  // console.log('세트 필터 변경:', { type, subject, year });
-
-  // 필터 적용하여 문제풀이기록 다시 렌더링
-  renderFilteredQuestionSets(type, subject, year);
+  const { type, subject, year, cert } = e.detail;
+  renderFilteredQuestionSets(type, subject, year, cert || 'all');
 }
 
 /**
@@ -1448,41 +1444,43 @@ function renderQuestionSetsTab() {
   const applyFilterButton = document.getElementById('apply-set-filters');
   if (applyFilterButton && applyFilterButton.dataset.listenerAttached !== 'true') {
     applyFilterButton.addEventListener('click', function () {
+      const certFilter = document.getElementById('set-cert-filter')?.value || 'all';
       const typeFilter = document.getElementById('set-type-filter').value;
       const subjectFilter = document.getElementById('set-subject-filter').value;
       const yearFilter = document.getElementById('set-year-filter').value;
 
-      // 필터 변경 이벤트 발생
       document.dispatchEvent(new CustomEvent('setFiltersChanged', {
-        detail: { type: typeFilter, subject: subjectFilter, year: yearFilter }
+        detail: { cert: certFilter, type: typeFilter, subject: subjectFilter, year: yearFilter }
       }));
     });
     applyFilterButton.dataset.listenerAttached = 'true';
   }
 
-  // 모든 문제풀이기록 삭제 버튼 이벤트 리스너 등록 (중복 방지)
-  const deleteAllButton = document.getElementById('delete-all-question-sets');
-  if (deleteAllButton && deleteAllButton.dataset.listenerAttached !== 'true') {
-    deleteAllButton.addEventListener('click', async function () {
-      const success = await deleteAllQuestionSets();
-      if (success) {
-        // 데이터 새로고침
-        if (window.loadAnalyticsData && window.auth?.currentUser) {
+  // 자격증별 삭제 버튼
+  ['health', 'sports'].forEach(certType => {
+    const btn = document.getElementById(`delete-${certType}-question-sets`);
+    if (btn && btn.dataset.listenerAttached !== 'true') {
+      btn.addEventListener('click', async function () {
+        const label = certType === 'health' ? '건강운동관리사' : '생활스포츠지도사';
+        const confirmed = confirm(`⚠️ ${label} 문제풀이기록을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`);
+        if (!confirmed) return;
+        const success = await deleteAllQuestionSets(certType);
+        if (success && window.loadAnalyticsData && window.auth?.currentUser) {
           await window.loadAnalyticsData(window.auth.currentUser);
         }
-      }
-    });
-    deleteAllButton.dataset.listenerAttached = 'true';
-  }
+      });
+      btn.dataset.listenerAttached = 'true';
+    }
+  });
 
-  // 모든 필터에 대해 초기 렌더링
-  renderFilteredQuestionSets('all', 'all', 'all');
+  // 초기 렌더링
+  renderFilteredQuestionSets('all', 'all', 'all', 'all');
 }
 
 /**
  * 세션 기반 문제풀이기록 렌더링 함수 (Firebase 인덱스 오류 해결)
  */
-async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter) {
+async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter, certFilter = 'all') {
   const container = document.getElementById('question-sets-container');
   if (!container) {
     console.error('컨테이너를 찾을 수 없습니다.');
@@ -2016,9 +2014,12 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter)
           sessionData.subject === subjectFilter;
         const yearMatches = yearFilter === 'all' ||
           sessionData.year === yearFilter;
+        const certMatches = certFilter === 'all' ||
+          (sessionData.certType ? sessionData.certType === certFilter :
+            (certFilter === 'health')); // certType 없는 기존 데이터는 건강운동관리사로 간주
 
         // 세션 카드 표시 여부 결정 (필터 + 시도 기록 유무)
-        const shouldShowCard = (typeMatches && subjectMatches && yearMatches);
+        const shouldShowCard = (typeMatches && subjectMatches && yearMatches && certMatches);
 
         if (shouldShowCard) {
           // 세션 타입도 제목과 동일한 정규화 결과 사용
@@ -2216,82 +2217,79 @@ async function loadAttemptsForSession(sessionId) {
 /**
  * 모든 문제풀이기록 삭제 함수
  */
-async function deleteAllQuestionSets() {
+async function deleteAllQuestionSets(certType = null) {
   try {
-    // 현재 사용자 확인
     const user = auth.currentUser;
     if (!user) {
       showToast('로그인이 필요합니다.');
       return false;
     }
 
-    // 확인 메시지
-    const confirmed = confirm(
-      '⚠️ 모든 문제풀이기록을 삭제하시겠습니까?\n\n' +
-      '이 작업은 되돌릴 수 없으며, 다음 항목들이 삭제됩니다:\n' +
-      '• 모든 세션 기록\n' +
-      '• 모든 문제 시도 기록\n' +
-      '• 모든 모의고사 결과\n\n' +
-      '정말로 계속하시겠습니까?'
-    );
-
-    if (!confirmed) {
-      return false;
-    }
-
-    // 최종 확인
-    const finalConfirm = confirm(
-      '최종 확인: 모든 문제풀이기록이 완전히 삭제됩니다.\n\n' +
-      '이 작업은 취소할 수 없습니다. 계속하시겠습니까?'
-    );
-
-    if (!finalConfirm) {
-      return false;
-    }
-
-    showLoading('모든 문제풀이기록 삭제 중...');
+    const label = certType === 'sports' ? '생활스포츠지도사' : certType === 'health' ? '건강운동관리사' : '전체';
+    showLoading(`${label} 문제풀이기록 삭제 중...`);
 
     let totalDeleted = 0;
-    const BATCH_SIZE = 500; // Firebase 배치 최대 크기
+    const BATCH_SIZE = 500;
 
-    // 1. 모든 세션의 시도 기록 삭제 (배치 처리로 여러 번 나누어 삭제)
-    const attemptsRef = collection(db, "attempts");
-    const attemptsQuery = query(
-      attemptsRef,
-      where("userId", "==", user.uid)
-    );
+    // certType이 있으면 해당 세션 ID 목록을 먼저 수집
+    let targetSessionIds = null;
+    if (certType) {
+      // certType 필드가 있는 세션 쿼리
+      const sessionsSnap = await getDocs(query(
+        collection(db, 'sessions'),
+        where('userId', '==', user.uid),
+        where('certType', '==', certType)
+      ));
+      // certType 없는 기존 데이터: health로 처리 (sports 제외 전부)
+      let legacySnap = { docs: [] };
+      if (certType === 'health') {
+        // certType 필드 자체가 없는 세션도 포함 (기존 건강운동관리사 데이터)
+        // Firestore는 필드 없음 쿼리 미지원 → 전체 로드 후 클라이언트 필터
+        const allSnap = await getDocs(query(
+          collection(db, 'sessions'),
+          where('userId', '==', user.uid)
+        ));
+        legacySnap = { docs: allSnap.docs.filter(d => !d.data().certType) };
+      }
+      targetSessionIds = new Set([
+        ...sessionsSnap.docs.map(d => d.id),
+        ...legacySnap.docs.map(d => d.id)
+      ]);
+    }
 
-    const attemptsDeleted = await deleteQueryBatch(db, attemptsQuery, BATCH_SIZE, (deleted) => {
-      console.log(`시도 기록 ${deleted}개 삭제 중...`);
-    });
-    totalDeleted += attemptsDeleted;
-    console.log(`총 ${attemptsDeleted}개 시도 기록 삭제 완료`);
+    // 1. attempts 삭제
+    let attemptsQuery;
+    if (targetSessionIds) {
+      // sessionId 기준으로 필터 (IN 쿼리는 최대 10개 → 배치 처리)
+      const ids = [...targetSessionIds];
+      for (let i = 0; i < ids.length; i += 10) {
+        const chunk = ids.slice(i, i + 10);
+        const q = query(collection(db, 'attempts'), where('userId', '==', user.uid), where('sessionId', 'in', chunk));
+        totalDeleted += await deleteQueryBatch(db, q, BATCH_SIZE);
+      }
+    } else {
+      attemptsQuery = query(collection(db, 'attempts'), where('userId', '==', user.uid));
+      totalDeleted += await deleteQueryBatch(db, attemptsQuery, BATCH_SIZE);
+    }
 
-    // 2. 모든 모의고사 결과 삭제 (배치 처리로 여러 번 나누어 삭제)
-    const mockResultsRef = collection(db, "mockExamResults");
-    const mockResultsQuery = query(
-      mockResultsRef,
-      where("userId", "==", user.uid)
-    );
+    // 2. mockExamResults 삭제 (certType 없으면 전체, 있으면 해당 세션 기반)
+    if (!certType) {
+      const mockQ = query(collection(db, 'mockExamResults'), where('userId', '==', user.uid));
+      totalDeleted += await deleteQueryBatch(db, mockQ, BATCH_SIZE);
+    }
 
-    const mockResultsDeleted = await deleteQueryBatch(db, mockResultsQuery, BATCH_SIZE, (deleted) => {
-      console.log(`모의고사 결과 ${deleted}개 삭제 중...`);
-    });
-    totalDeleted += mockResultsDeleted;
-    console.log(`총 ${mockResultsDeleted}개 모의고사 결과 삭제 완료`);
-
-    // 3. 모든 세션 문서 삭제 (배치 처리로 여러 번 나누어 삭제)
-    const sessionsRef = collection(db, "sessions");
-    const sessionsQuery = query(
-      sessionsRef,
-      where("userId", "==", user.uid)
-    );
-
-    const sessionsDeleted = await deleteQueryBatch(db, sessionsQuery, BATCH_SIZE, (deleted) => {
-      console.log(`세션 문서 ${deleted}개 삭제 중...`);
-    });
-    totalDeleted += sessionsDeleted;
-    console.log(`총 ${sessionsDeleted}개 세션 문서 삭제 완료`);
+    // 3. sessions 삭제
+    if (targetSessionIds) {
+      const ids = [...targetSessionIds];
+      for (let i = 0; i < ids.length; i += 10) {
+        const chunk = ids.slice(i, i + 10);
+        const q = query(collection(db, 'sessions'), where('userId', '==', user.uid), where('__name__', 'in', chunk));
+        totalDeleted += await deleteQueryBatch(db, q, BATCH_SIZE);
+      }
+    } else {
+      const sessQ = query(collection(db, 'sessions'), where('userId', '==', user.uid));
+      totalDeleted += await deleteQueryBatch(db, sessQ, BATCH_SIZE);
+    }
 
     // 삭제 확인: 세션이 정말 모두 삭제되었는지 확인
     const verifyQuery = query(
@@ -2314,22 +2312,14 @@ async function deleteAllQuestionSets() {
     }
 
     // 성공 메시지 표시
+    const label = certType === 'sports' ? '생활스포츠지도사' : certType === 'health' ? '건강운동관리사' : '전체';
     hideLoading();
-    showToast(`모든 문제풀이기록이 삭제되었습니다. (총 ${totalDeleted}개 항목)`, 'success');
+    showToast(`${label} 문제풀이기록이 삭제되었습니다. (총 ${totalDeleted}개 항목)`, 'success');
 
-    // 컨테이너 강제 초기화 및 빈 상태 표시
-    const container = document.getElementById('question-sets-container');
-    if (container) {
-      container.innerHTML = '';
-      // 삭제 후 빈 상태 메시지 즉시 표시
-      renderEmptyStateMessage(container, 'all', 'all', 'all');
-    }
-
-    // 문제풀이기록 탭 다시 렌더링 (세션 확인을 위해)
+    // 문제풀이기록 탭 다시 렌더링
     if (typeof renderFilteredQuestionSets === 'function') {
-      // 약간의 지연 후 렌더링 (Firestore 동기화 시간 확보)
       setTimeout(async () => {
-        await renderFilteredQuestionSets('all', 'all', 'all');
+        await renderFilteredQuestionSets('all', 'all', 'all', 'all');
       }, 500);
     }
 

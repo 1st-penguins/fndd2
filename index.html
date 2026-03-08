@@ -529,6 +529,14 @@
               <div class="stats-section">
                 <div class="filter-controls">
                   <div class="filter-group">
+                    <label for="set-cert-filter">자격증:</label>
+                    <select id="set-cert-filter" class="filter-select">
+                      <option value="all">전체</option>
+                      <option value="health">건강운동관리사</option>
+                      <option value="sports">생활스포츠지도사</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
                     <label for="set-type-filter">유형:</label>
                     <select id="set-type-filter" class="filter-select">
                       <option value="all">전체</option>
@@ -540,20 +548,34 @@
                     <label for="set-subject-filter">과목:</label>
                     <select id="set-subject-filter" class="filter-select">
                       <option value="all">전체 과목</option>
-                      <option value="운동생리학">운동생리학</option>
-                      <option value="건강체력평가">건강체력평가</option>
-                      <option value="운동처방론">운동처방론</option>
-                      <option value="운동부하검사">운동부하검사</option>
-                      <option value="운동상해">운동상해</option>
-                      <option value="기능해부학">기능해부학</option>
-                      <option value="병태생리학">병태생리학</option>
-                      <option value="스포츠심리학">스포츠심리학</option>
+                      <optgroup label="건강운동관리사">
+                        <option value="운동생리학">운동생리학</option>
+                        <option value="건강체력평가">건강체력평가</option>
+                        <option value="운동처방론">운동처방론</option>
+                        <option value="운동부하검사">운동부하검사</option>
+                        <option value="운동상해">운동상해</option>
+                        <option value="기능해부학">기능해부학</option>
+                        <option value="병태생리학">병태생리학</option>
+                        <option value="스포츠심리학">스포츠심리학</option>
+                      </optgroup>
+                      <optgroup label="생활스포츠지도사">
+                        <option value="스포츠사회학">스포츠사회학</option>
+                        <option value="스포츠교육학">스포츠교육학</option>
+                        <option value="스포츠심리학_s">스포츠심리학</option>
+                        <option value="한국체육사">한국체육사</option>
+                        <option value="운동역학">운동역학</option>
+                        <option value="스포츠윤리">스포츠윤리</option>
+                        <option value="특수체육론">특수체육론</option>
+                        <option value="유아체육론">유아체육론</option>
+                        <option value="노인체육론">노인체육론</option>
+                      </optgroup>
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="set-year-filter">연도:</label>
                     <select id="set-year-filter" class="filter-select">
                       <option value="all">전체</option>
+                      <option value="2025">2025</option>
                       <option value="2024">2024</option>
                       <option value="2023">2023</option>
                       <option value="2022">2022</option>
@@ -564,7 +586,8 @@
                   </div>
                   <div class="filter-buttons-group">
                     <button id="apply-set-filters" class="filter-button">적용</button>
-                    <button id="delete-all-question-sets" class="filter-button delete-all">모든 문제풀이기록 삭제</button>
+                    <button id="delete-health-question-sets" class="filter-button delete-all">건강운동관리사 삭제</button>
+                    <button id="delete-sports-question-sets" class="filter-button delete-all">생활스포츠 삭제</button>
                   </div>
                 </div>
 
