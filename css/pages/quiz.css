@@ -592,6 +592,7 @@ header::before {
     margin-top: 15px;
     font-size: 0.95rem;
     line-height: 1.6;
+    white-space: pre-line;
 }
 
 .correct-answer {

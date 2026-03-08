@@ -33,42 +33,74 @@ def image_to_base64(image_path):
         return base64.standard_b64encode(f.read()).decode("utf-8")
 
 
-def generate_explanation(image_path, correct_answer_index, subject, year):
-    """Claude Vision API로 해설 생성"""
-    correct_num = correct_answer_index + 1  # 0-indexed → 1-indexed
+def build_prompt(correct_answer, subject, year):
+    """정답 유형에 따라 프롬프트 생성"""
+    is_list = isinstance(correct_answer, list)
+    all_correct = is_list and sorted(correct_answer) == [0, 1, 2, 3]
+    is_multiple = is_list and not all_correct
 
-    img_b64 = image_to_base64(image_path)
+    if all_correct:
+        answer_info = "정답: 모두 정답 (문제 오류로 전항 정답 처리)"
+        format_block = """[출력 형식 - 아래 구조 그대로, 줄바꿈 포함]
+문제 오류: 모두 정답 처리된 문항입니다.
 
-    prompt = f"""당신은 2급 생활스포츠지도사 시험 전문 강사입니다.
-아래 기출문제 이미지를 보고 해설을 작성해주세요.
+(문제 오류 또는 출제 기준 변경으로 인해 전항이 정답으로 처리된 이유를 2~3문장으로 설명.)
 
-과목: {subject}
-연도: {year}년
-정답: {correct_num}번
+시험 포인트: (이 문제에서 다루는 핵심 개념 한 줄)"""
+    elif is_multiple:
+        nums = ", ".join(str(i + 1) for i in sorted(correct_answer))
+        answer_info = f"정답: {nums}번 (복수정답)"
+        wrong = [i for i in range(4) if i not in correct_answer]
+        wrong_lines = "\n".join(f"{i+1}번: (오답인 이유 한 줄)" for i in wrong)
+        format_block = f"""[출력 형식 - 아래 구조 그대로, 줄바꿈 포함]
+복수정답 {nums}번: (각 정답 선택지의 공통 핵심을 한 줄로 요약)
 
-해설 작성 규칙:
-1. 마크다운 문법 절대 금지 (##, **, >, |, - 기호 사용 금지)
-2. 영어 용어 괄호 표기 금지 (강화(Reinforcement) X → 강화 O)
-3. 이모지 사용 금지
-4. 아래 형식을 정확히 따를 것:
+(각 정답 선택지가 옳은 이유를 2~3문장으로 설명.)
 
-[형식]
+오답 정리
+{wrong_lines}
+
+시험 포인트: (핵심 키워드나 암기 포인트 한 줄)"""
+    else:
+        correct_num = correct_answer + 1
+        answer_info = f"정답: {correct_num}번"
+        wrong_nums = [i + 1 for i in range(4) if i != correct_answer]
+        wrong_lines = "\n".join(f"{n}번: (오답인 이유 한 줄)" for n in wrong_nums)
+        format_block = f"""[출력 형식 - 아래 구조 그대로, 줄바꿈 포함]
 정답 {correct_num}번: (정답 선택지 내용 한 줄 요약)
 
 (정답인 이유를 2~3문장으로 설명. 핵심 개념 중심으로 간결하게.)
 
 오답 정리
-(오답 번호): (오답인 이유 한 줄)
-(오답 번호): (오답인 이유 한 줄)
-(오답 번호): (오답인 이유 한 줄)
+{wrong_lines}
 
-시험 포인트: (핵심 키워드나 암기 포인트 한 줄)
+시험 포인트: (핵심 키워드나 암기 포인트 한 줄)"""
+
+    return f"""당신은 2급 생활스포츠지도사 시험 전문 강사입니다.
+아래 기출문제 이미지를 보고 해설을 작성해주세요.
+
+과목: {subject}
+연도: {year}년
+{answer_info}
+
+해설 작성 규칙:
+1. 마크다운 문법 절대 금지 (##, **, >, |, - 기호 사용 금지)
+2. 영어 용어 괄호 표기 금지 (강화(Reinforcement) X → 강화 O)
+3. 이모지 사용 금지
+
+{format_block}
 
 위 형식 그대로만 출력하세요. 다른 말은 하지 마세요."""
 
+
+def generate_explanation(image_path, correct_answer, subject, year):
+    """Claude Vision API로 해설 생성"""
+    img_b64 = image_to_base64(image_path)
+    prompt = build_prompt(correct_answer, subject, year)
+
     response = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=500,
+        max_tokens=700,
         messages=[
             {
                 "role": "user",
@@ -111,7 +143,12 @@ def process_file(json_path):
             continue
 
         try:
-            print(f"  문제 {q['id']} 해설 생성 중...", end=" ", flush=True)
+            ca = q["correctAnswer"]
+            if isinstance(ca, list):
+                tag = " [모두정답]" if sorted(ca) == [0, 1, 2, 3] else f" [복수정답:{[i+1 for i in sorted(ca)]}]"
+            else:
+                tag = ""
+            print(f"  문제 {q['id']}{tag} 해설 생성 중...", end=" ", flush=True)
             explanation = generate_explanation(
                 image_path, q["correctAnswer"], subject, year
             )

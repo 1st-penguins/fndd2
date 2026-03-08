@@ -22,7 +22,10 @@
       "Bash(python:*)",
       "Bash(xxd:*)",
       "Bash(pip install:*)",
-      "Bash(PYTHONIOENCODING=utf-8 python:*)"
+      "Bash(PYTHONIOENCODING=utf-8 python:*)",
+      "Bash(PYTHONIOENCODING=utf-8 grep:*)",
+      "Bash(PYTHONIOENCODING=utf-8 sed:*)",
+      "Bash(PYTHONIOENCODING=utf-8 wc:*)"
     ]
   }
 }
