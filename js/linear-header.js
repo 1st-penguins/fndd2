@@ -669,10 +669,6 @@ function injectFooter() {
       <div class="linear-footer__bottom">
         <p class="linear-footer__copyright">© 2025 퍼스트펭귄. All rights reserved.</p>
         <p class="linear-footer__legal-desc">체육지도자 자격증을 위한 KSPO 기출문제 학습 플랫폼</p>
-        <ul class="linear-footer__legal">
-          <li class="linear-footer__legal-item"><a href="/refund-policy" class="linear-footer__legal-link">환불정책</a></li>
-          <li class="linear-footer__legal-item"><a href="/company-info" class="linear-footer__legal-link">사업자정보</a></li>
-        </ul>
       </div>
     </div>
   `;
