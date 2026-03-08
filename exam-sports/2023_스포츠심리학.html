@@ -238,6 +238,11 @@
           <div class="explanation">${result.explanation}</div>
         `;
         feedback.style.display = 'block';
+        const indicators = document.querySelectorAll('.indicator');
+        if (indicators && window.currentQuestionIndex !== undefined && indicators[window.currentQuestionIndex]) {
+          indicators[window.currentQuestionIndex].classList.remove('correct', 'incorrect');
+          indicators[window.currentQuestionIndex].classList.add(result.isCorrect ? 'correct' : 'incorrect');
+        }
         recordQuizData(result);
       };
 

@@ -272,7 +272,11 @@
         <div class="explanation">${result.explanation}</div>
       `;
       feedback.style.display = 'block';
-      
+      const indicators = document.querySelectorAll('.indicator');
+      if (indicators && window.currentQuestionIndex !== undefined && indicators[window.currentQuestionIndex]) {
+        indicators[window.currentQuestionIndex].classList.remove('correct', 'incorrect');
+        indicators[window.currentQuestionIndex].classList.add(result.isCorrect ? 'correct' : 'incorrect');
+      }
       // 학습 분석 데이터 저장
       recordQuizData(result);
     };
