@@ -24,8 +24,7 @@
   <script type="module" src="../js/core/firebase-core.js"></script>
   <script type="module" src="../js/data/notice-repository.js"></script>
   <script type="module" src="../js/utils/date-utils.js"></script>
-  <script type="module" src="../js/data/comment-repository.js"></script>
-  <script type="module" src="../js/data/comment-ui.js"></script>
+
 
   <!-- 페이지 전용 스크립트 -->
   <script type="module" src="../js/admin/notice-detail.js"></script>
@@ -131,11 +130,6 @@
       color: #1D2F4E;
     }
 
-    .comments-container {
-      margin-top: 60px;
-      padding-top: 40px;
-      border-top: 1px solid #e2e8f0;
-    }
 
     /* 좋아요 버튼 스타일 */
     .notice-actions {
@@ -262,14 +256,6 @@
             </button>
           </div>
 
-          <!-- 댓글 컨테이너 -->
-          <div id="comments-container" class="comments-container">
-            <ul class="comment-list"></ul>
-            <form class="comment-form">
-              <textarea class="comment-input" placeholder="댓글을 입력하세요..."></textarea>
-              <button type="button" class="comment-submit">등록</button>
-            </form>
-          </div>
         </div>
       </div>
     </div>
