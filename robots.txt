@@ -6,4 +6,4 @@ Allow: /
 # Disallow: /admin-notices.html
 # Disallow: /파이어베이스 임포트.html
 
-Sitemap: https://fndd.netlify.app/sitemap.xml
+Sitemap: https://fndd.co.kr/sitemap.xml
