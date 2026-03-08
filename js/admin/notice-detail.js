@@ -2,7 +2,6 @@
 
 import { getNoticeById, incrementNoticeViewCount, trackNoticeBoardVisit } from "../data/notice-repository.js";
 import { formatSimpleDate } from "../utils/date-utils.js";
-import { initComments } from "../data/comment-ui.js";
 import { isAdmin } from "../auth/auth-utils.js";
 import { auth } from "../core/firebase-core.js";
 
@@ -148,41 +147,6 @@ function updateNoticeContent(notice) {
   // 페이지 제목 설정
   document.title = `${notice.title || '공지사항'} - 퍼스트펭귄`;
 
-  // 댓글 기능 초기화
-  console.log("공지사항 내용 업데이트 완료, 댓글 초기화 호출:", notice.id);
-  try {
-    // 댓글 컨테이너 확인 및 생성
-    let commentsContainer = document.getElementById('comments-container');
-    if (!commentsContainer) {
-      console.log("댓글 컨테이너가 없어서 새로 생성합니다");
-      
-      const contentWrapper = document.querySelector('.notice-content-wrapper');
-      if (contentWrapper) {
-        commentsContainer = document.createElement('div');
-        commentsContainer.id = 'comments-container';
-        commentsContainer.className = 'comments-container';
-        commentsContainer.innerHTML = `
-          <div class="comments-header">
-            <h3>댓글</h3>
-          </div>
-          <div class="comment-form">
-            <textarea class="comment-input" placeholder="댓글을 입력하세요..."></textarea>
-            <button class="comment-submit">댓글 작성</button>
-          </div>
-          <div class="comment-list">
-            <p class="no-comments">아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
-          </div>
-        `;
-        contentWrapper.appendChild(commentsContainer);
-        console.log("댓글 컨테이너를 생성했습니다");
-      }
-    }
-    
-    // 댓글 초기화 호출
-    initComments(notice.id);
-  } catch (error) {
-    console.error("댓글 초기화 오류:", error);
-  }
 }
 
 /**
