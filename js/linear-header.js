@@ -340,6 +340,15 @@ if (typeof window.LinearHeader === 'undefined') {
           // 로그인된 상태: 로그인 링크 숨기고 사용자 프로필 표시
           this.loginLink.style.display = 'none';
           this.userProfileContainer.style.display = 'flex';
+
+          // 데스크톱 사용자 이름 업데이트
+          if (typeof window.getCurrentUserName === 'function') {
+            const userName = window.getCurrentUserName();
+            const userNameEl = document.getElementById('user-name');
+            if (userNameEl && userName && userName !== '사용자') {
+              userNameEl.textContent = userName;
+            }
+          }
         } else {
           // 로그아웃된 상태: 사용자 프로필 숨기고 로그인 링크 표시
           this.loginLink.style.display = 'block';
