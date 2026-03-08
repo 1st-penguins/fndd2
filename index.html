@@ -1129,9 +1129,6 @@
           <button class="sub-tab-button" data-subtab="sports-year-view">
             연도별
           </button>
-          <button class="sub-tab-button" data-subtab="sports-mockexam-view">
-            모의고사
-          </button>
         </div>
 
         <!-- 과목별 보기 -->
@@ -1282,56 +1279,6 @@
           </section>
         </div>
 
-        <!-- 모의고사 보기 -->
-        <div id="sports-mockexam-view" class="sub-tab-content">
-          <!-- 로그인 필요 안내 오버레이 -->
-          <div class="login-required-overlay" id="sports-mockexam-login-overlay">
-            <div class="login-required-content">
-              <div class="login-required-icon">📝</div>
-              <h3>로그인이 필요한 서비스입니다</h3>
-              <p>실전과 동일한 모의고사로<br>최종 점검을 하세요.</p>
-              <div class="login-required-features">
-                <div class="feature-item">✓ 연도별 실전 모의고사</div>
-                <div class="feature-item">✓ 1교시 + 2교시 (각 80문제)</div>
-                <div class="feature-item">✓ 실제 시험 시간 측정</div>
-                <div class="feature-item">✓ 즉시 채점 및 성적 분석</div>
-              </div>
-              <div class="login-required-actions">
-                <button class="btn btn-primary"
-                  onclick="window.lazyAuthAndShowLoginModal && window.lazyAuthAndShowLoginModal()">
-                  로그인 / 회원가입
-                </button>
-                <button class="btn btn-outline" onclick="showPreviewContent()">
-                  미리보기
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <section class="exam-section">
-            <div class="section-header">모의고사</div>
-            <div class="section-description">
-              연도별 모의고사로 실전 감각을 익히세요. 각 교시는 80문제로 구성되어 있습니다.
-            </div>
-            <ul class="subjects-list">
-              <li class="subject-item restricted-link" data-href="years-sports/year_2025.html">
-                <span class="subject-name">2025년 모의고사</span>
-                <span class="subject-code">1교시 (80문제) + 2교시 (80문제)</span>
-                <span class="pass-rate">합격률: -</span>
-              </li>
-              <li class="subject-item restricted-link" data-href="years-sports/year_2024.html">
-                <span class="subject-name">2024년 모의고사</span>
-                <span class="subject-code">1교시 (80문제) + 2교시 (80문제)</span>
-                <span class="pass-rate">합격률: -</span>
-              </li>
-              <li class="subject-item restricted-link" data-href="years-sports/year_2023.html">
-                <span class="subject-name">2023년 모의고사</span>
-                <span class="subject-code">1교시 (80문제) + 2교시 (80문제)</span>
-                <span class="pass-rate">합격률: -</span>
-              </li>
-            </ul>
-          </section>
-        </div>
       </div>
       <!-- /2급 생활스포츠지도사 콘텐츠 끝 -->
     </div>
