@@ -501,6 +501,17 @@
     margin-bottom: 24px;
   }
 
+  .linear-footer__section {
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+
+  .linear-footer__sns-list,
+  .linear-footer__nav-list {
+    align-items: flex-start;
+  }
+
   .linear-footer__brand {
     align-items: center;
   }
