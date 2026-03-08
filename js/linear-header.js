@@ -641,26 +641,20 @@ function injectFooter() {
           <ul class="linear-footer__sns-list">
             <li>
               <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <img src="/images/instagram_logo.svg" alt="인스타그램" class="linear-footer__sns-icon">
+                <span class="linear-footer__sns-icon-wrap"><img src="/images/instagram_logo.svg" alt="인스타그램" class="linear-footer__sns-icon"></span>
                 <span>1st_penguins</span>
               </a>
             </li>
             <li>
               <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <img src="/images/youtube_logo.svg" alt="유튜브" class="linear-footer__sns-icon">
+                <span class="linear-footer__sns-icon-wrap"><img src="/images/youtube_logo.svg" alt="유튜브" class="linear-footer__sns-icon"></span>
                 <span>@the1stpeng</span>
               </a>
             </li>
             <li>
               <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="linear-footer__sns-link">
-                <img src="/images/kakaotalk_logo.svg" alt="카카오톡" class="linear-footer__sns-icon">
+                <span class="linear-footer__sns-icon-wrap"><img src="/images/kakaotalk_logo.svg" alt="카카오톡" class="linear-footer__sns-icon"></span>
                 <span>건강운동관리사</span>
-              </a>
-            </li>
-            <li>
-              <a href="#" class="linear-footer__sns-link" data-kakao="sports">
-                <img src="/images/kakaotalk_logo.svg" alt="카카오톡" class="linear-footer__sns-icon">
-                <span>생활체육지도자</span>
               </a>
             </li>
           </ul>
