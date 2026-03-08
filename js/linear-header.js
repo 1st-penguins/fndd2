@@ -596,7 +596,7 @@ window.addEventListener('load', () => {
 });
 
 // ── 푸터 자동 주입 ────────────────────────────────────────────────
-(function injectFooter() {
+function injectFooter() {
   const footer = document.querySelector('footer.linear-footer');
   if (!footer) return;
 
@@ -679,4 +679,6 @@ window.addEventListener('load', () => {
       </div>
     </div>
   `;
-})();
+}
+
+document.addEventListener('DOMContentLoaded', injectFooter);
