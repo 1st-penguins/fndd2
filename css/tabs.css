@@ -187,17 +187,12 @@
   .access-tabs {
     flex-wrap: nowrap;
     justify-content: center;
-    /* Center tabs on mobile */
-    overflow-x: visible;
-    padding: 6px;
-    margin: 0 auto 24px;
-    /* Center margin */
-    width: 100%;
-    /* Full width on mobile */
-    max-width: 100%;
-    /* Full width to fit all tabs in one line */
+    overflow-x: auto;
+    padding: 5px;
+    margin: 0 16px 24px;
+    width: auto;
+    max-width: calc(100% - 32px);
     background: #F1F3F5;
-    /* Keep background on mobile */
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
     border-radius: 20px;
     gap: 4px;
@@ -211,18 +206,14 @@
   .tab-button {
     background: #FFFFFF;
     border: 1px solid #E9ECEF;
-    padding: 8px 10px;
+    padding: 8px 16px;
     font-size: 13px;
     color: #495057;
-    flex: 1 1 0;
-    /* 균등하게 공간 배분 */
-    min-width: 0;
-    /* 최소 너비 제한 해제 */
+    flex: 0 0 auto;
     min-height: 36px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
   }
 
   .tab-button.active {
@@ -265,14 +256,15 @@
 
 @media (max-width: 480px) {
   .tab-button {
-    padding: 7px 8px;
+    padding: 7px 12px;
     font-size: 12px;
     min-height: 34px;
   }
 
   .access-tabs {
-    margin: 0 auto 20px;
-    padding: 5px;
+    margin: 0 12px 20px;
+    max-width: calc(100% - 24px);
+    padding: 4px;
     gap: 3px;
   }
 }
