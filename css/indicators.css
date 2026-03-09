@@ -151,6 +151,20 @@ body:not([data-current-subject]) .indicator {
   color: var(--ind-incorrect-text);
 }
 
+/* 5. Checked Correct (정답 보기로 확인된 정답) */
+.indicator.checked-correct {
+  background-color: var(--ind-correct-bg);
+  border-color: var(--ind-correct-border);
+  color: var(--ind-correct-text);
+}
+
+/* 6. Checked Incorrect (정답 보기로 확인된 오답) */
+.indicator.checked-incorrect {
+  background-color: var(--ind-incorrect-bg);
+  border-color: var(--ind-incorrect-border);
+  color: var(--ind-incorrect-text);
+}
+
 
 /* ============================================
    Responsive Design
