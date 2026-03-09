@@ -25,7 +25,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   padding: 60px 0 20px;
   /* GPU 가속 활성화 (iOS Safari 성능 향상) */
   transform: translateZ(0);

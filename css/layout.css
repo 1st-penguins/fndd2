@@ -117,7 +117,6 @@
     background: linear-gradient(180deg, #f8fafc 0%, #f0f7fa 100%);
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
     box-sizing: border-box;
 }
 
@@ -127,7 +126,6 @@
     padding: 0 20px;
     width: 100%;
     box-sizing: border-box;
-    overflow-x: hidden;
 }
 
 /* 푸터 스타일 (Linear Footer가 아닌 경우에만 적용) */
