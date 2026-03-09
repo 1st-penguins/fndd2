@@ -372,18 +372,13 @@ function handleDashboardReady(e) {
  */
 function checkIfAdmin(user) {
   if (!user) return false;
-  
-  // 1. isAdmin 함수가 전역에 존재하는 경우 사용
+
+  // 전역 isAdmin 함수 우선 사용 (auth-utils.js에서 노출)
   if (typeof window.isAdmin === 'function') {
     return window.isAdmin(user);
   }
-  
-  // 2. 로컬 스토리지의 값 확인
-  if (localStorage.getItem('isAdmin') === 'true') {
-    return true;
-  }
-  
-  // 3. 사용자 이메일 확인 (백업 방법)
+
+  // 백업: 이메일 직접 확인
   const adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
   return user.email && adminEmails.includes(user.email);
 }

@@ -28,6 +28,7 @@ export function clearLoginState() {
   localStorage.removeItem('userEmail');
   localStorage.removeItem('userId');
   localStorage.removeItem('isAdmin');
+  localStorage.removeItem('emailVerified');
 }
 
 /**

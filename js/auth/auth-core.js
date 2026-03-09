@@ -70,7 +70,10 @@ export async function initAuth() {
       console.error('❌ Redirect 로그인 복귀 오류:', redirectError);
     }
 
-    // 인증 상태 변경 감지 (모바일 환경 강화)
+    // 이전 auth 상태 추적 (중복 호출 방지)
+    let prevAuthState = undefined;
+
+    // 인증 상태 변경 감지
     onAuthStateChanged(authInstance, (user) => {
       // auth 상태가 최소 1회 확정되었음을 전역 플래그로 기록
       if (typeof window !== 'undefined') {
@@ -78,11 +81,9 @@ export async function initAuth() {
         window.__lastAuthState = !!user;
       }
 
-      if (window.Logger && window.Logger.isDev()) {
-        console.log('🔄 Firebase 인증 상태 변경:', user ? '로그인 됨' : '로그아웃 상태');
-        console.log('User:', user ? user.email : 'null');
-        console.log('Timestamp:', new Date().toISOString());
-      }
+      const isLoggedIn = !!user;
+      const stateChanged = prevAuthState !== isLoggedIn;
+      prevAuthState = isLoggedIn;
 
       if (user) {
         // 로그인 상태 저장
@@ -96,12 +97,6 @@ export async function initAuth() {
           window.closeLoginModal();
         }
 
-        // 관리자 상태 확인 및 저장
-        localStorage.setItem('isAdmin', isAdmin(user) ? 'true' : 'false');
-
-        // 이메일 인증 상태 저장 및 확인
-        localStorage.setItem('emailVerified', user.emailVerified ? 'true' : 'false');
-
         // 이메일 인증되지 않았을 경우 배너 표시
         if (!user.emailVerified) {
           showEmailVerificationBanner(user.email);
@@ -111,7 +106,7 @@ export async function initAuth() {
         if (typeof window.updateLectureTabVisibility === 'function') {
           window.updateLectureTabVisibility();
         }
-        
+
         // 태그 검색 링크 표시 업데이트
         if (typeof window.updateTagSearchLinkVisibility === 'function') {
           window.updateTagSearchLinkVisibility(isAdmin(user));
@@ -124,43 +119,20 @@ export async function initAuth() {
         if (typeof window.updateLectureTabVisibility === 'function') {
           window.updateLectureTabVisibility();
         }
-        
+
         // 태그 검색 링크 숨기기 (로그아웃 시)
         if (typeof window.updateTagSearchLinkVisibility === 'function') {
           window.updateTagSearchLinkVisibility(false);
         }
       }
 
-      // UI 업데이트 (전역 함수 호출 - 마이그레이션 호환성)
+      // UI 업데이트 (updateLoginUI가 내부적으로 restrictedContent + overlays 모두 처리)
       if (typeof window.updateLoginUI === 'function') {
         window.updateLoginUI();
       }
 
-      // 제한된 콘텐츠 업데이트 - 명시적으로 로그인 상태 전달
-      if (typeof window.updateRestrictedContent === 'function') {
-        window.updateRestrictedContent(!!user);
-      }
-
-      // 로그인 오버레이 업데이트 (모바일 환경 강화)
-      if (typeof window.updateLoginOverlays === 'function') {
-        console.log('🎯 Firebase 상태 변경으로 인한 오버레이 업데이트');
-        window.updateLoginOverlays();
-
-        // 모바일에서 추가 지연 후 재시도
-        setTimeout(() => {
-          console.log('🎯 Firebase 상태 변경 후 지연 업데이트');
-          window.updateLoginOverlays();
-        }, 500);
-
-        // 추가 지연으로 모바일 상태 반영 확실히
-        setTimeout(() => {
-          window.updateLoginOverlays();
-        }, 1500);
-      }
-
-      // 공지사항 재로드 (로그인 상태 변경 시)
-      if (typeof window.reloadNotices === 'function') {
-        console.log('🔄 로그인 상태 변경으로 공지사항 재로드');
+      // 공지사항 재로드 (로그인 상태가 실제로 변경된 경우만)
+      if (stateChanged && typeof window.reloadNotices === 'function') {
         window.reloadNotices();
       }
 
