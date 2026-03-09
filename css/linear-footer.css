@@ -21,7 +21,7 @@
 }
 
 .linear-footer__container {
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 var(--page-padding-inline, 24px);
 }
@@ -29,7 +29,7 @@
 .linear-footer__content {
   display: grid;
   grid-template-columns: 1.8fr 1fr 1fr 1fr;
-  gap: 32px;
+  gap: 28px;
   margin-bottom: 32px;
 }
 
@@ -472,21 +472,11 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* 반응형 디자인 */
+/* 반응형 — 중간 폭에서도 4열 유지, 간격만 조정 */
 @media (max-width: 1024px) {
   .linear-footer__content {
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-  }
-
-  .linear-footer__brand {
-    grid-column: 1 / -1;
-    text-align: center;
-    margin-bottom: 16px;
-  }
-
-  .linear-footer__brand-description {
-    max-width: 100%;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 20px;
   }
 }
 
