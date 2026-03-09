@@ -2,235 +2,397 @@
 <html lang="ko">
 <head>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>공지사항 관리</title>
-  
-  <!-- 기본 스타일 -->
+  <title>공지사항 관리 | 퍼스트펭귄</title>
   <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
-  
-  <!-- Firebase 및 로그인 관리 스크립트 (모듈 방식) -->
   <script type="module" src="../js/core/firebase-core.js"></script>
   <script type="module" src="../js/auth/auth-core.js"></script>
   <script type="module" src="../js/auth/auth-utils.js"></script>
-  
-  <!-- 공지사항 모듈 -->
   <script type="module" src="../js/data/notice-repository.js"></script>
-  
-  <!-- 관리자 페이지 스크립트 -->
   <script type="module" src="../js/admin/notices-admin.js"></script>
-  
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.6; }
-    h1, h2 { color: #1D2F4E; }
-    .container { max-width: 1000px; margin: 0 auto; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input[type="text"], textarea, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-    textarea { min-height: 200px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
-    .btn-primary { background-color: #5FB2C9; color: white; }
-    .btn-success { background-color: #37b24d; color: white; }
-    .btn-danger { background-color: #ff6b6b; color: white; }
-    .btn-warning { background-color: #fcc419; color: white; }
-    .btn-sm { padding: 5px 10px; font-size: 12px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
-    table th { background-color: #f5f5f5; }
-    .notice-status { padding: 3px 8px; border-radius: 3px; font-size: 12px; display: inline-block; }
-    .status-published { background-color: #d3f9d8; color: #2b8a3e; }
-    .status-draft { background-color: #e9ecef; color: #495057; }
-    .loading { text-align: center; padding: 20px; }
-    .back-link { text-decoration: none; color: #1D2F4E; display: inline-block; margin-bottom: 20px; }
-    .form-actions { margin-top: 20px; }
-    .action-buttons { display: flex; gap: 5px; }
-    .badge { display: inline-block; padding: 3px 6px; border-radius: 3px; font-size: 12px; }
-    
-    /* 동적 배지 클래스 대응 */
-    .notice-badge-new { background-color: #f44336; color: white; }
-    .notice-badge-important { background-color: #ff9800; color: white; }
-    .notice-badge-lecture-upcoming { background-color: #4caf50; color: white; }
-    .notice-badge-lecture-ended { background-color: #9e9e9e; color: white; }
-    .notice-badge-event { background-color: #8b5cf6; color: white; }
-    .notice-badge-notice { background-color: #2196f3; color: white; }
-    .notice-badge-update { background-color: #4caf50; color: white; }
-    .notice-badge-faq { background-color: #607d8b; color: white; }
-    .notice-badge-guide { background-color: #009688; color: white; }
-    .notice-badge-default { background-color: #5FB2C9; color: white; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: #f4f6f9;
+      color: #212529;
+      min-height: 100vh;
+    }
 
-    /* 배지 색상 */
-    .badge-신규 { background-color: #f44336; color: white; }
-    .badge-중요 { background-color: #ff9800; color: white; }
-    .badge-강의예정 { background-color: #4caf50; color: white; }
-    .badge-강의종료 { background-color: #9e9e9e; color: white; }
-    .badge-행사 { background-color: #8b5cf6; color: white; }
-    .badge-안내 { background-color: #2196f3; color: white; }
-    .badge-업데이트 { background-color: #4caf50; color: white; }
-    .badge-FAQ { background-color: #607d8b; color: white; }
-    .badge-가이드 { background-color: #009688; color: white; }
-    
-    .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-    .filter-select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-    
-    /* 편집기 도구모음 */
+    /* 상단 바 */
+    .topbar {
+      background: var(--penguin-navy, #1D2F4E);
+      color: white;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-title { font-size: 17px; font-weight: 700; }
+    .topbar a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; }
+    .topbar a:hover { color: white; }
+
+    /* 토스트 알림 */
+    #toast {
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      background: #212529; color: white;
+      padding: 12px 20px; border-radius: 8px;
+      font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
+    #toast.success { background: #2b8a3e; }
+    #toast.error { background: #c92a2a; }
+
+    /* 레이아웃 */
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 50px);
+    }
+
+    /* 좌측 패널 - 작성/수정 폼 */
+    .panel-form {
+      background: white;
+      border-right: 1px solid #e9ecef;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      height: calc(100vh - 50px);
+      overflow-y: auto;
+    }
+    .panel-form h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--penguin-navy, #1D2F4E);
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f3f5;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #495057; }
+    .form-group input[type="text"],
+    .form-group select,
+    .form-group textarea {
+      padding: 9px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--penguin-skyblue, #5FB2C9);
+    }
+    .form-group textarea { min-height: 180px; resize: vertical; }
+
+    /* 고정 토글 */
+    .pin-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .pin-toggle-wrap:hover { background: #f8f9fa; }
+    .toggle-switch {
+      width: 40px; height: 22px;
+      background: #dee2e6;
+      border-radius: 999px;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 16px; height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    #notice-pinned:checked + .pin-toggle-wrap .toggle-switch { background: var(--penguin-navy, #1D2F4E); }
+    #notice-pinned:checked + .pin-toggle-wrap .toggle-switch::after { transform: translateX(18px); }
+    #notice-pinned { display: none; }
+
+    /* 에디터 툴바 */
     .editor-toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 4px;
       padding: 8px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
-      margin-bottom: 10px;
+      background: #f8f9fa;
+      border-radius: 8px 8px 0 0;
+      border: 1px solid #dee2e6;
+      border-bottom: none;
     }
-    
     .editor-btn {
-      padding: 6px 10px;
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 3px;
+      padding: 4px 9px;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    .editor-btn:hover { background: #e9ecef; }
+    #notice-content { border-radius: 0 0 8px 8px; }
+
+    /* 미리보기 */
+    .preview-box {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 80px;
+      font-size: 14px;
+      line-height: 1.7;
+      background: #fafafa;
+      color: #495057;
+    }
+
+    /* 폼 버튼 */
+    .form-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.15s;
     }
-    
-    .editor-btn:hover {
-      background-color: #e9ecef;
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-publish { background: var(--penguin-navy, #1D2F4E); color: white; flex: 1; }
+    .btn-publish:hover:not(:disabled) { background: #162340; }
+    .btn-draft { background: #e9ecef; color: #495057; }
+    .btn-draft:hover:not(:disabled) { background: #dee2e6; }
+    .btn-reset { background: transparent; color: #868e96; padding: 10px 12px; }
+    .btn-reset:hover { color: #495057; }
+
+    /* 우측 패널 - 목록 */
+    .panel-list { padding: 24px; overflow-y: auto; }
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
     }
-    
-    .editor-btn.active {
-      background-color: #e9ecef;
-      border-color: #adb5bd;
+    .list-header h2 { font-size: 16px; font-weight: 700; color: var(--penguin-navy, #1D2F4E); }
+    .list-actions { display: flex; gap: 8px; align-items: center; }
+    .filter-select {
+      padding: 7px 10px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
     }
-    
-    /* 미리보기 영역 */
-    .preview-box {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 15px;
-      margin-top: 15px;
-      background-color: white;
-      min-height: 100px;
+    .btn-refresh {
+      padding: 7px 14px;
+      background: #f1f3f5;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
     }
-    
-    .notice-content img {
-      max-width: 100%;
-      height: auto;
+    .btn-refresh:hover { background: #e9ecef; }
+
+    /* 공지 카드 목록 */
+    .notice-cards { display: flex; flex-direction: column; gap: 8px; }
+    .notice-card {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .notice-card.is-pinned { border-left: 3px solid var(--penguin-navy, #1D2F4E); }
+    .notice-card.is-draft { background: #f8f9fa; opacity: 0.8; }
+
+    .card-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #212529;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .card-date { font-size: 12px; color: #868e96; }
+
+    /* 상태/배지 뱃지 */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-draft { background: #e9ecef; color: #495057; }
+    .badge-published { background: #d3f9d8; color: #2b8a3e; }
+    .badge-신규 { background: #ffe3e3; color: #c92a2a; }
+    .badge-중요 { background: #fff3bf; color: #e67700; }
+    .badge-강의예정 { background: #d3f9d8; color: #2b8a3e; }
+    .badge-강의종료 { background: #e9ecef; color: #495057; }
+    .badge-행사 { background: #f3d9fa; color: #7950f2; }
+    .badge-안내 { background: #d0ebff; color: #1971c2; }
+    .badge-업데이트 { background: #d3f9d8; color: #2b8a3e; }
+    .badge-FAQ { background: #e8f4fd; color: #1864ab; }
+    .badge-가이드 { background: #e6fcf5; color: #087f5b; }
+    .badge-공지 { background: #d0ebff; color: #1971c2; }
+
+    /* 카드 오른쪽 컨트롤 */
+    .card-controls { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    /* 인라인 고정 토글 */
+    .pin-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      opacity: 0.3;
+      transition: opacity 0.15s, transform 0.15s;
+      padding: 4px;
+      line-height: 1;
+    }
+    .pin-btn:hover { opacity: 0.7; transform: scale(1.1); }
+    .pin-btn.pinned { opacity: 1; }
+
+    /* 카드 액션 버튼 */
+    .card-btn {
+      padding: 5px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .card-btn:hover { background: #f1f3f5; }
+    .card-btn.edit { color: var(--penguin-navy, #1D2F4E); }
+    .card-btn.publish { color: #2b8a3e; border-color: #8ce99a; }
+    .card-btn.publish:hover { background: #d3f9d8; }
+    .card-btn.delete { color: #c92a2a; border-color: #ffc9c9; }
+    .card-btn.delete:hover { background: #fff5f5; }
+
+    .loading-text { text-align: center; padding: 40px; color: #868e96; }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel-form { position: static; height: auto; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <a href="../index.html" class="back-link">← 홈으로 돌아가기</a>
-    <h1>공지사항 관리</h1>
-    
-    <!-- 공지사항 작성 폼 -->
-    <div>
+  <div class="topbar">
+    <span class="topbar-title">공지사항 관리</span>
+    <a href="../index.html">← 홈으로</a>
+  </div>
+
+  <div id="toast"></div>
+
+  <div class="layout">
+    <!-- 좌측: 작성/수정 폼 -->
+    <aside class="panel-form">
       <h2 id="form-title">새 공지사항 작성</h2>
       <input type="hidden" id="notice-id">
+
       <div class="form-group">
         <label for="notice-title">제목</label>
-        <input type="text" id="notice-title" placeholder="공지사항 제목">
+        <input type="text" id="notice-title" placeholder="공지 제목을 입력하세요">
       </div>
+
       <div class="form-group">
-        <label for="notice-badge">배지</label>
+        <label for="notice-badge">카테고리</label>
         <select id="notice-badge">
           <option value="">없음</option>
+          <option value="공지">공지</option>
+          <option value="업데이트">업데이트</option>
           <option value="신규">신규</option>
           <option value="중요">중요</option>
           <option value="강의예정">강의예정</option>
           <option value="강의종료">강의종료</option>
           <option value="행사">행사</option>
           <option value="안내">안내</option>
-          <option value="업데이트">업데이트</option>
           <option value="FAQ">FAQ</option>
           <option value="가이드">가이드</option>
         </select>
       </div>
+
       <div class="form-group">
-        <label>
-          <input type="checkbox" id="notice-pinned"> 상단에 고정
+        <label>상단 고정</label>
+        <input type="checkbox" id="notice-pinned">
+        <label for="notice-pinned" class="pin-toggle-wrap">
+          <div class="toggle-switch"></div>
+          <span style="font-size:14px;color:#495057;">상단에 고정</span>
         </label>
       </div>
+
       <div class="form-group">
-        <label for="notice-content">내용</label>
+        <label>내용</label>
         <div class="editor-toolbar">
-          <button type="button" class="editor-btn" data-format="h1">제목 1</button>
-          <button type="button" class="editor-btn" data-format="h2">제목 2</button>
-          <button type="button" class="editor-btn" data-format="h3">제목 3</button>
-          <button type="button" class="editor-btn" data-format="b">굵게</button>
-          <button type="button" class="editor-btn" data-format="i">기울임</button>
-          <button type="button" class="editor-btn" data-format="u">밑줄</button>
-          <select class="editor-btn" id="font-color">
-            <option value="">글자 색상</option>
-            <option value="red">빨간색</option>
-            <option value="blue">파란색</option>
-            <option value="green">녹색</option>
-            <option value="purple">보라색</option>
-            <option value="orange">주황색</option>
-          </select>
-          <button type="button" class="editor-btn" data-format="ul">목록</button>
-          <button type="button" class="editor-btn" data-format="ol">번호 목록</button>
-          <button type="button" class="editor-btn" data-format="img">이미지 URL</button>
+          <button type="button" class="editor-btn" data-format="b"><b>B</b></button>
+          <button type="button" class="editor-btn" data-format="i"><i>I</i></button>
+          <button type="button" class="editor-btn" data-format="h2">H2</button>
+          <button type="button" class="editor-btn" data-format="h3">H3</button>
+          <button type="button" class="editor-btn" data-format="ul">• 목록</button>
+          <button type="button" class="editor-btn" data-format="ol">1. 목록</button>
+          <button type="button" class="editor-btn" data-format="hr">─ 구분선</button>
           <button type="button" class="editor-btn" data-format="a">링크</button>
-          <button type="button" class="editor-btn" data-format="center">가운데 정렬</button>
-          <button type="button" class="editor-btn" data-format="quote">인용구</button>
         </div>
-        <textarea id="notice-content" placeholder="공지사항 내용"></textarea>
+        <textarea id="notice-content" placeholder="공지 내용을 입력하세요&#10;&#10;HTML 태그 사용 가능합니다."></textarea>
       </div>
+
       <div class="form-group">
         <label>미리보기</label>
-        <div class="preview-box" id="content-preview"></div>
+        <div class="preview-box" id="content-preview"><em style="color:#adb5bd">내용을 입력하면 여기에 미리보기가 표시됩니다.</em></div>
       </div>
+
       <div class="form-actions">
-        <button id="reset-btn" class="btn">새로 작성</button>
-        <button id="publish-btn" class="btn btn-success">발행하기</button>
-        <button id="draft-btn" class="btn btn-primary">초안 저장</button>
+        <button id="reset-btn" class="btn btn-reset">취소</button>
+        <button id="draft-btn" class="btn btn-draft">초안 저장</button>
+        <button id="publish-btn" class="btn btn-publish">발행하기</button>
       </div>
-    </div>
-    
-    <!-- 공지사항 목록 -->
-    <div style="margin-top: 40px;">
-      <h2>공지사항 목록</h2>
-      
-      <div class="filter-bar">
-        <select id="status-filter" class="filter-select">
-          <option value="all">모든 상태</option>
-          <option value="published">발행됨</option>
-          <option value="draft">초안</option>
-        </select>
-        <select id="badge-filter" class="filter-select">
-          <option value="all">모든 배지</option>
-          <option value="">없음</option>
-          <option value="신규">신규</option>
-          <option value="중요">중요</option>
-          <option value="강의예정">강의예정</option>
-          <option value="강의종료">강의종료</option>
-          <option value="행사">행사</option>
-          <option value="안내">안내</option>
-          <option value="업데이트">업데이트</option>
-          <option value="FAQ">FAQ</option>
-          <option value="가이드">가이드</option>
-        </select>
-        <button id="refresh-btn" class="btn btn-primary">새로고침</button>
+    </aside>
+
+    <!-- 우측: 공지 목록 -->
+    <main class="panel-list">
+      <div class="list-header">
+        <h2>공지 목록 <span id="notice-count" style="font-weight:400;color:#868e96;font-size:14px;"></span></h2>
+        <div class="list-actions">
+          <select id="status-filter" class="filter-select">
+            <option value="all">전체</option>
+            <option value="published">발행됨</option>
+            <option value="draft">초안</option>
+          </select>
+          <button id="refresh-btn" class="btn-refresh">↻ 새로고침</button>
+        </div>
       </div>
-      
-      <div id="notices-loading" class="loading">공지사항을 불러오는 중...</div>
-      <table id="notices-table" style="display: none;">
-        <thead>
-          <tr>
-            <th>상태</th>
-            <th>제목</th>
-            <th>배지</th>
-            <th>고정 여부</th>
-            <th>날짜</th>
-            <th>관리</th>
-          </tr>
-        </thead>
-        <tbody id="notices-list"></tbody>
-      </table>
-    </div>
+
+      <div id="notices-loading" class="loading-text">공지사항을 불러오는 중...</div>
+      <div id="notice-cards" class="notice-cards" style="display:none;"></div>
+    </main>
   </div>
 </body>
 </html>
