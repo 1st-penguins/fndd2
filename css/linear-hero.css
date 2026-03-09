@@ -323,7 +323,7 @@
 
   /* 공지사항 버튼과 더 알아보기 겹침 방지: 액션 아래 여백 확보 */
   .linear-hero__actions {
-    margin-bottom: 64px;
+    margin-bottom: 80px;
   }
 }
 

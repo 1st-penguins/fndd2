@@ -242,7 +242,6 @@ footer:not(.linear-footer) {
         padding: 30px 0 40px;
         width: 100%;
         max-width: 100%;
-        overflow-x: hidden;
     }
 
     .container {
@@ -277,7 +276,6 @@ footer:not(.linear-footer) {
         padding: 24px 0 32px;
         width: 100%;
         max-width: 100%;
-        overflow-x: hidden;
     }
 
     /* header 스타일은 linear-header.css에서 처리됨 */

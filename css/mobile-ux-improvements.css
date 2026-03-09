@@ -29,10 +29,14 @@ input[type="submit"],
 @media (max-width: 768px) {
   /* 버튼 내부 패딩으로 터치 영역 확보 */
   button,
-  .btn,
+  .btn {
+    padding: 12px 20px;
+    min-height: 44px;
+  }
+
+  /* 탭 버튼은 tabs.css에서 별도 관리 */
   .tab-button,
   .sub-tab-button {
-    padding: 12px 20px;
     min-height: 44px;
   }
   
