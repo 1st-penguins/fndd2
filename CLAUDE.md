@@ -8,7 +8,7 @@
 
 ```js
 // sw.js 맨 위
-const CACHE_VERSION = '2026030902'; // ← 배포마다 숫자 올리기 (예: ...02 → ...03)
+const CACHE_VERSION = '2026030903'; // ← 배포마다 숫자 올리기 (예: ...03 → ...04)
 ```
 
 이 값을 올리지 않으면:
@@ -70,4 +70,5 @@ const CACHE_VERSION = '2026030902'; // ← 배포마다 숫자 올리기 (예: .
 - `sw.js` — 서비스 워커 (캐시 관리)
 
 ### 캐시 설정
-- `_headers` — Cloudflare Pages 헤더 (HTML: no-cache, JS/CSS: no-cache, images: 30일)
+- `_headers` — Cloudflare Pages 헤더 (HTML: no-cache, **sw.js: no-store**, JS/CSS: no-cache, images: 30일)
+- `/sw.js`에는 반드시 `no-store` 설정 — 없으면 Cloudflare CDN이 sw.js 자체를 캐시해서 CACHE_VERSION 변경이 사용자에게 반영 안 됨
