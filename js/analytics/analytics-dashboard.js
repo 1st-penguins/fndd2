@@ -961,11 +961,12 @@ function removeDuplicateAttempts(attempts) {
  * @param {Object} user - 현재 사용자 정보
  */
 export async function renderHomeDashboard(user) {
-  // console.log('홈 대시보드 초기화 시작');
+  if (!user) return;
 
-  if (!user) {
-    // console.log('로그인 필요');
-    return;
+  // 관리자 탭 버튼 표시 제어 (어드민만 보여야 함)
+  const adminTabBtn = document.querySelector('.sub-tab-button.admin-only[data-tab="admin-tab"]');
+  if (adminTabBtn) {
+    adminTabBtn.style.display = isAdmin(user) ? '' : 'none';
   }
 
   // 데이터 로드 (기존 loadAnalyticsData 활용하되 에러 처리 강화)
