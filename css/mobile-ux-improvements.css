@@ -6,12 +6,12 @@
    ============================================ */
 
 /* 모든 클릭 가능한 요소에 최소 터치 타겟 크기 보장 */
-button,
-a,
+button:not(.admin-only),
+a:not(.admin-only),
 input[type="button"],
 input[type="submit"],
-.tab-button,
-.sub-tab-button,
+.tab-button:not(.admin-only),
+.sub-tab-button:not(.admin-only),
 .cert-button,
 .subject-item,
 .notice-link,
