@@ -10,11 +10,18 @@
 /sw.js
   Cache-Control: no-store, no-cache, must-revalidate
 
+# JS/CSS: 1단계 하위까지 커버
 /js/*
-  Cache-Control: no-cache
+  Cache-Control: no-cache, must-revalidate
+/js/**/*
+  Cache-Control: no-cache, must-revalidate
 
 /css/*
-  Cache-Control: no-cache
+  Cache-Control: no-cache, must-revalidate
+/css/**/*
+  Cache-Control: no-cache, must-revalidate
 
 /images/*
+  Cache-Control: public, max-age=2592000
+/images/**/*
   Cache-Control: public, max-age=2592000
