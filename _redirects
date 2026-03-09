@@ -1,0 +1,5 @@
+# fndd.co.kr → the1stpeng.com 301 리다이렉트
+https://fndd.co.kr/* https://the1stpeng.com/:splat 301!
+https://www.fndd.co.kr/* https://the1stpeng.com/:splat 301!
+http://fndd.co.kr/* https://the1stpeng.com/:splat 301!
+http://www.fndd.co.kr/* https://the1stpeng.com/:splat 301!

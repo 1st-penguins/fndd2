@@ -31,7 +31,18 @@
       "Bash(kill 1901:*)",
       "Bash(kill 1912:*)",
       "Bash(taskkill:*)",
-      "Bash(export:*)"
+      "Bash(export:*)",
+      "Bash(sed -n '135,160p' /c/Users/Pc/Desktop/fndd2/css/components.css\nsed -n '245,310p' /c/Users/Pc/Desktop/fndd2/css/components.css\nsed -n '340,380p' /c/Users/Pc/Desktop/fndd2/css/components.css)",
+      "Bash(npx firebase:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(cmd:*)",
+      "Bash(powershell:*)",
+      "Bash(npm list:*)",
+      "Bash(node:*)",
+      "Bash(npx playwright:*)",
+      "Bash(npm install:*)",
+      "Bash(do:*)",
+      "Bash(curl:*)"
     ]
   }
 }
