@@ -179,6 +179,45 @@
 }
 
 /* ============================================
+   공지 본문 내용 (detail 페이지)
+   ============================================ */
+.notice-content-wrapper h2,
+.notice-content-wrapper h3 {
+  margin-top: 24px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1D2F4E;
+}
+
+.notice-content-wrapper h2:first-child,
+.notice-content-wrapper h3:first-child {
+  margin-top: 0;
+}
+
+.notice-content-wrapper p {
+  margin-bottom: 12px;
+  line-height: 1.8;
+}
+
+.notice-content-wrapper ul,
+.notice-content-wrapper ol {
+  margin-bottom: 16px;
+  padding-left: 20px;
+}
+
+.notice-content-wrapper li {
+  margin-bottom: 6px;
+  line-height: 1.7;
+}
+
+.notice-content-wrapper hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #e9ecef;
+}
+
+/* ============================================
    페이지네이션
    ============================================ */
 .notice-pagination {
