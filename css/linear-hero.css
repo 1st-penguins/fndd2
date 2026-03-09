@@ -504,7 +504,7 @@
         rgba(25, 42, 65, 0.4) 60%,
         rgba(30, 50, 75, 0.3) 80%,
         rgba(35, 58, 85, 0.2) 100%),
-      url('../images/background hero3.jpg');
+      url('../images/background-hero3.jpg');
     background-size: auto 100%;
     background-position: center 70%;
     background-repeat: no-repeat;
@@ -592,7 +592,7 @@
         rgba(25, 42, 65, 0.4) 60%,
         rgba(30, 50, 75, 0.3) 80%,
         rgba(35, 58, 85, 0.2) 100%),
-      url('../images/background hero3.jpg');
+      url('../images/background-hero3.jpg');
     /* iOS Safari 확대 방지: 배경 크기 고정 */
     background-size: auto 100%;
     background-position: center 70%;

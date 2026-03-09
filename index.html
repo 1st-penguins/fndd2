@@ -97,8 +97,8 @@
   <!-- Hero 배경 이미지 preload (데스크톱) -->
   <link rel="preload" as="image" href="images/background_hero.webp" media="(min-width: 769px)">
 
-  <!-- Hero 배경 이미지 preload (모바일 - WebP) -->
-  <link rel="preload" as="image" href="images/background_hero.webp" media="(max-width: 768px)">
+  <!-- Hero 배경 이미지 preload (모바일) -->
+  <link rel="preload" as="image" href="images/background-hero3.jpg" media="(max-width: 768px)">
 
   <!-- Hero 로고 preload (LCP 최적화) -->
   <link rel="preload" as="image" href="images/firstpenguin-logo.png" fetchpriority="high">
@@ -184,7 +184,7 @@
 
         // 모바일: 최적화된 JPG (54KB), 데스크톱: WebP (285KB)
         if (isMobile) {
-          bgImage.src = 'images/background hero3.jpg';
+          bgImage.src = 'images/background-hero3.jpg';
           console.log('📱 모바일: 최적화된 배경 이미지 로드 중...');
         } else {
           bgImage.src = 'images/background_hero.webp';
