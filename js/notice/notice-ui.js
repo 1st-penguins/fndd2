@@ -666,8 +666,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // 공지사항 컨테이너가 있을 경우 (notice-list로 수정)
+  // app.js에서 이미 초기화한 경우 중복 실행 방지
   const noticeContainer = document.getElementById('notice-list');
-  if (noticeContainer) {
+  if (noticeContainer && !noticeContainer.dataset.initBy) {
     // 공지 게시판 방문 기록 (하루 1회/방문자 기준)
     trackNoticeBoardVisit();
 

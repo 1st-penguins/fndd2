@@ -2,7 +2,7 @@
 // 인덱스 페이지의 초기화 및 UI 기능 관리
 
 import { updateLoginUI, updateRestrictedContent as updateAuthRestrictedContent } from './auth/auth-ui.js';
-import { loadNotices } from './notice/notice-ui.js';
+import { loadNotices, loadNoticesWithPagination } from './notice/notice-ui.js';
 import { formatSimpleDate } from './utils/date-utils.js';
 import { addScrollUpButton } from './utils/ui-utils.js';
 import {
@@ -563,6 +563,12 @@ function initTabs() {
           }
         }
 
+        // 강의 탭: 외부 링크로 이동
+        if (tabId === 'lecture-tab') {
+          window.open('https://litt.ly/the1stpeng', '_blank', 'noopener,noreferrer');
+          return;
+        }
+
         if (tabId) {  // data-tab 속성이 있는 경우에만 처리
           showTab(tabId);
         }
@@ -590,36 +596,23 @@ function initNotices() {
   const noticeContainer = document.getElementById('notice-list');
   if (!noticeContainer) return;
 
-  // 로딩 표시
-  noticeContainer.innerHTML = `
-    <div class="notice-item loading">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">공지사항을 불러오는 중입니다...</div>
-    </div>
-  `;
-
-  // 공지사항 로드
-  loadNotices('notice-list', {
+  // 공지사항 로드 (페이지네이션 포함, notice-ui.js의 DOMContentLoaded와 중복 방지)
+  noticeContainer.dataset.initBy = 'app';
+  loadNoticesWithPagination('notice-list', {
+    itemsPerPage: 8,
     showBadges: true,
     showDates: true,
-    dateFn: formatSimpleDate
-  })
-    .then(() => {
-      // 페이지네이션 처리가 필요할 경우 여기에 코드 추가
-      const paginationElement = document.getElementById('notice-pagination');
-      if (paginationElement) {
-        // 페이지네이션 설정
-      }
-    })
-    .catch(error => {
-      window.Logger?.error('공지사항 로드 오류:', error);
-      noticeContainer.innerHTML = `
+    dateFn: formatSimpleDate,
+    paginationId: 'notice-pagination'
+  }).catch(error => {
+    window.Logger?.error('공지사항 로드 오류:', error);
+    noticeContainer.innerHTML = `
       <div class="notice-error">
         공지사항을 불러오는 중 오류가 발생했습니다: ${error.message}
         <br>오류가 지속되면 관리자에게 문의해주세요.
       </div>
     `;
-    });
+  });
 }
 
 /**
