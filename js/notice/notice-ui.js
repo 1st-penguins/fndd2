@@ -105,6 +105,9 @@ export async function loadNotices(containerId = 'notice-container', options = {}
  * @param {string} [containerId='notice-container'] - 공지사항 컨테이너 ID
  * @param {Object} [options={}] - 옵션
  */
+// 공지사항 데이터 캐시 (페이지 이동 시 Firestore 재요청 방지)
+let _cachedNotices = null;
+
 export async function loadNoticesWithPagination(containerId = 'notice-container', options = {}) {
   const container = document.getElementById(containerId);
   if (!container) {
@@ -128,16 +131,21 @@ export async function loadNoticesWithPagination(containerId = 'notice-container'
   const opts = { ...defaultOptions, ...options };
 
   try {
-    // 로딩 표시 (notices.html의 로딩 요소 숨기기)
     const loadingEl = document.getElementById('notices-loading');
     const emptyEl = document.getElementById('notices-empty');
-    if (loadingEl) loadingEl.style.display = 'flex';
-    if (emptyEl) emptyEl.style.display = 'none';
 
-    container.innerHTML = '<div class="notice-loading">공지사항을 불러오는 중...</div>';
+    // 캐시가 없을 때만 로딩 표시 + Firestore 요청
+    let allNotices;
+    if (_cachedNotices) {
+      allNotices = _cachedNotices;
+    } else {
+      if (loadingEl) loadingEl.style.display = 'flex';
+      if (emptyEl) emptyEl.style.display = 'none';
+      container.innerHTML = '<div class="notice-loading">공지사항을 불러오는 중...</div>';
 
-    // 모든 공지사항 데이터 가져오기 (페이지네이션을 위해 limit 없이)
-    const allNotices = await getNotices(0); // 0 = 제한 없음
+      allNotices = await getNotices(0);
+      _cachedNotices = allNotices; // 캐시 저장
+    }
 
     if (!allNotices || allNotices.length === 0) {
       container.innerHTML = '';
@@ -302,8 +310,11 @@ function createPagination(paginationId, currentPage, totalPages, containerId, op
       // 공지사항 다시 로드
       loadNoticesWithPagination(containerId, newOptions);
 
-      // 스크롤 위치 조정
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // 스크롤: 공지사항 목록 상단으로만 이동 (맨 위 X)
+      const container = document.getElementById(containerId);
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   });
 }
