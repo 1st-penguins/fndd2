@@ -54,18 +54,8 @@ export function showLoginModal() {
 
   const modal = document.getElementById('login-modal');
   if (modal) {
-    // 모바일에서 모달이 보이도록 페이지를 맨 위로 스크롤
-    // 모바일 환경 감지 (화면 너비 768px 이하)
-    if (window.innerWidth <= 768) {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-
-    // 스타일 초기화 (기존 인라인 스타일 제거)
-    modal.style = '';
-    modal.style.display = 'flex';
+    // 스타일 초기화 후 표시
+    modal.style.cssText = 'display: flex;';
 
     // 애니메이션을 위해 약간의 지연 후 show 클래스 추가
     requestAnimationFrame(() => {

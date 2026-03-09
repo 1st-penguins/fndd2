@@ -369,68 +369,11 @@ function createNoticeItem(notice, options) {
     options.dateFn(notice.timestamp || notice.createdAt) :
     (notice.date || '날짜 없음');
 
-  // 배지 색상 결정 (badge에 따라 다른 색상 적용)
-  let borderColor = 'var(--penguin-navy)'; // 기본 색상
-
-  if (notice.badge) {
-    const badgeClass = getBadgeClass(notice.badge);
-
-    // 배지 유형에 따른 색상 매핑
-    switch (badgeClass) {
-      case 'new':
-        borderColor = '#f44336'; // 빨간색
-        break;
-      case 'important':
-        borderColor = '#ff9800'; // 주황색
-        break;
-      case 'urgent':
-        borderColor = '#d32f2f'; // 진한 빨간색
-        break;
-      case 'lecture-upcoming':
-        borderColor = '#4caf50'; // 녹색
-        break;
-      case 'lecture-ended':
-      case 'closed':
-        borderColor = '#9e9e9e'; // 회색
-        break;
-      case 'event':
-        borderColor = '#8b5cf6'; // 보라색
-        break;
-      case 'notice':
-        borderColor = '#2196f3'; // 파란색
-        break;
-      case 'update':
-        borderColor = '#4caf50'; // 녹색
-        break;
-      case 'faq':
-        borderColor = '#607d8b'; // 짙은 회색
-        break;
-      case 'guide':
-        borderColor = '#009688'; // 청록색
-        break;
-      default:
-        borderColor = 'var(--penguin-navy)'; // 기본 색상
-    }
-  }
-
-  // 배지 HTML 생성
-  let badgeHTML = '';
-  if (options.showBadges && notice.badge) {
-    const badgeClass = getBadgeClass(notice.badge);
-    badgeHTML = `<span class="notice-badge ${badgeClass}">${notice.badge}</span>`;
-  }
-
-  // 30일 이내의 공지인지 확인하여 NEW 배지 추가
+  // 30일 이내의 공지인지 확인
   const oneMonthAgo = new Date();
   oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
-
   const noticeDate = notice.timestamp || notice.createdAt;
   const isNew = noticeDate && noticeDate > oneMonthAgo;
-
-  let newBadgeHTML = '';
-  if (isNew) {
-    newBadgeHTML = '<span class="notice-badge new">NEW</span>';
-  }
 
   // 상대 경로 처리
   const detailPath = window.location.pathname.includes('notices.html')
