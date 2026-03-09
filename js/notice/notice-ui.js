@@ -432,21 +432,27 @@ function createNoticeItem(notice, options) {
     newBadgeHTML = '<span class="notice-badge new">NEW</span>';
   }
 
-  // 수정된 레이아웃으로 공지사항 HTML 생성
-  // 상대 경로 처리: notices.html에서 실행 시 notices/detail.html, 다른 곳에서 실행 시 ../notices/detail.html
+  // 상대 경로 처리
   const detailPath = window.location.pathname.includes('notices.html')
     ? 'notices/detail.html'
     : '../notices/detail.html';
   const newDot = isNew ? '<span class="notice-new-dot"></span>' : '';
+  const pinEmoji = notice.pinned ? '<span class="notice-pin">📌</span>' : '';
+
+  // 배지 HTML (badge 데이터가 있을 때만)
+  let badgeTag = '';
+  if (options.showBadges && notice.badge) {
+    const badgeClass = getBadgeClass(notice.badge);
+    badgeTag = `<span class="notice-badge ${badgeClass}">${notice.badge}</span>`;
+  }
 
   return `
     <div class="${itemClass}">
       <a href="${detailPath}?id=${notice.id}" class="notice-link">
         <div class="notice-content">
-          <h3 class="notice-title">${notice.title}${newDot}</h3>
+          <h3 class="notice-title">${badgeTag}${notice.title}${pinEmoji}${newDot}</h3>
         </div>
         <span class="notice-date">${formattedDate}</span>
-        ${notice.pinned ? '<span class="pin-icon"></span>' : ''}
       </a>
     </div>
   `;
