@@ -1,5 +1,5 @@
 // 배포할 때마다 이 버전을 올려야 이전 캐시가 모두 삭제됩니다
-const CACHE_VERSION = '2026030905';
+const CACHE_VERSION = '2026030906';
 const CACHE_NAME = `fp-cache-v${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
@@ -40,8 +40,12 @@ function isRootNavigation(url) {
 async function handleNavigationRequest(request) {
   const url = new URL(request.url);
   try {
-    // redirect: 'follow'로 강제 — SW 내부에서 리다이렉트 자동 추적
-    const networkResponse = await fetch(request, { redirect: 'follow' });
+    const networkResponse = await fetch(request);
+
+    // 리다이렉트 응답은 그대로 반환 — 브라우저가 알아서 따라감
+    if (networkResponse.type === 'opaqueredirect') {
+      return networkResponse;
+    }
 
     // 성공(200-299)이면 캐시 업데이트
     if (networkResponse.ok) {
@@ -49,7 +53,7 @@ async function handleNavigationRequest(request) {
       cache.put(request, networkResponse.clone());
     }
 
-    // 200이든 404든 서버 응답 그대로 반환 (SW가 임의로 503 생성하지 않음)
+    // 서버 응답 그대로 반환
     return networkResponse;
   } catch (e) {
     // 네트워크 자체 실패 (오프라인 등) — 캐시 폴백
