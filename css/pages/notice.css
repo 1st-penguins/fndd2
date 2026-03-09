@@ -2,11 +2,14 @@
    공지사항 스타일 - Linear Premium Redesign
    ============================================ */
 
-/* 공지사항 목록 컨테이너 */
+/* 공지사항 목록 컨테이너 — 통짜 카드 */
 .notice-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  background: var(--glass-bg, rgba(255,255,255,0.7));
+  backdrop-filter: var(--glass-blur, blur(12px));
+  -webkit-backdrop-filter: var(--glass-blur, blur(12px));
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.3));
+  border-radius: var(--radius-premium, 16px);
+  overflow: hidden;
   margin-bottom: 40px;
 }
 
@@ -28,31 +31,34 @@
   color: var(--deep-sea-gray);
 }
 
-/* 공지사항 아이템 */
+/* 공지사항 아이템 — 구분선으로 분리 */
 .notice-item {
-  background: var(--glass-bg, rgba(255,255,255,0.7));
-  backdrop-filter: var(--glass-blur, blur(12px));
-  -webkit-backdrop-filter: var(--glass-blur, blur(12px));
-  border: 1px solid var(--glass-border, rgba(255,255,255,0.3));
-  border-radius: var(--radius-premium, 16px);
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  overflow: hidden;
   position: relative;
+  transition: background 0.2s ease;
+}
+
+.notice-item + .notice-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* 고정 공지 영역 뒤 구분선 */
+.pinned-notices + .notice-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* pinned-notices 내부 아이템 구분선 */
+.pinned-notices .notice-item + .notice-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 /* 호버 효과 */
 .notice-item:hover {
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.9);
-  border-color: var(--penguin-skyblue);
-  box-shadow: var(--shadow-lg, 0 12px 32px rgba(0,0,0,0.08));
-  z-index: 1;
+  background: rgba(95, 178, 201, 0.06);
 }
 
 /* 고정된 공지사항 (Pinned) */
 .notice-item.pinned {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(95, 178, 201, 0.25);
+  background: rgba(95, 178, 201, 0.04);
 }
 
 /* 공지사항 링크 */
@@ -61,7 +67,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 18px;
+  padding: 13px 20px;
   text-decoration: none;
   color: inherit;
   width: 100%;
@@ -72,9 +78,6 @@
 .notice-content {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 /* 제목 Typography */
@@ -312,20 +315,16 @@
    ============================================ */
 @media (max-width: 768px) {
   .notice-list {
-    gap: 10px;
-  }
-
-  .notice-item {
-    border-radius: 10px;
+    border-radius: 12px;
   }
 
   .notice-link {
-    padding: 12px 14px;
-    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
   }
 
   .notice-title {
-    font-size: 0.95rem;
+    font-size: 0.93rem;
   }
 
   .admin-usage-panel {
