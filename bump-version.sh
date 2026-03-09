@@ -15,4 +15,7 @@ sed -i "s/content=\"[0-9]*\"/content=\"$NEW_VERSION\"/" index.html
 # index.html 내 모든 ?v= 쿼리 갱신
 sed -i "s/?v=[0-9]*/?v=$NEW_VERSION/g" index.html
 
-echo "완료: sw.js + index.html 버전 → $NEW_VERSION"
+# notices.html 내 모든 ?v= 쿼리 갱신
+sed -i "s/?v=[0-9]*/?v=$NEW_VERSION/g" notices.html
+
+echo "완료: sw.js + index.html + notices.html 버전 → $NEW_VERSION"

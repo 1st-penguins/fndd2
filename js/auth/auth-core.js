@@ -60,15 +60,14 @@ export async function initAuth() {
       };
     }
 
-    // redirect 로그인 복귀 결과 처리 (실패 원인 가시화)
-    try {
-      const redirectResult = await getRedirectResult(authInstance);
-      if (redirectResult?.user) {
-        console.log('✅ Redirect 로그인 복귀 성공:', redirectResult.user.email);
+    // redirect 로그인 복귀 결과 처리 (non-blocking — 초기화 지연 방지)
+    getRedirectResult(authInstance).then(result => {
+      if (result?.user) {
+        console.log('✅ Redirect 로그인 복귀 성공:', result.user.email);
       }
-    } catch (redirectError) {
-      console.error('❌ Redirect 로그인 복귀 오류:', redirectError);
-    }
+    }).catch(err => {
+      console.error('❌ Redirect 로그인 복귀 오류:', err);
+    });
 
     // 이전 auth 상태 추적 (중복 호출 방지)
     let prevAuthState = undefined;

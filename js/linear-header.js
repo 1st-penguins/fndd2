@@ -617,9 +617,9 @@ function injectFooter() {
         <div class="linear-footer__section">
           <h3 class="linear-footer__section-title">서비스</h3>
           <ul class="linear-footer__nav-list">
-            <li class="linear-footer__nav-item"><a href="/" class="linear-footer__nav-link">기출문제</a></li>
-            <li class="linear-footer__nav-item"><a href="/lectures" class="linear-footer__nav-link">인터넷 강의</a></li>
             <li class="linear-footer__nav-item"><a href="/notices" class="linear-footer__nav-link">공지사항</a></li>
+            <li class="linear-footer__nav-item"><a href="/" class="linear-footer__nav-link">문제풀기</a></li>
+            <li class="linear-footer__nav-item"><a href="/lectures" class="linear-footer__nav-link">강의</a></li>
           </ul>
         </div>
 

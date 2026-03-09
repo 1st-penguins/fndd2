@@ -200,8 +200,8 @@ export async function loadNoticesWithPagination(containerId = 'notice-container'
     // HTML 삽입
     container.innerHTML = noticesHTML;
 
-    // 관리자 통계 패널 렌더링 (notices.html에서만 표시)
-    await renderAdminUsagePanel();
+    // 관리자 통계 패널 렌더링 (non-blocking, 어드민만)
+    renderAdminUsagePanel();
 
     // 페이지네이션 생성
     createPagination(opts.paginationId, currentPage, totalPages, containerId, opts);
@@ -654,36 +654,27 @@ document.addEventListener('DOMContentLoaded', function () {
     // 공지 게시판 방문 기록 (하루 1회/방문자 기준)
     trackNoticeBoardVisit();
 
-    // Firebase가 초기화될 때까지 약간 지연
-    setTimeout(() => {
-      // 페이지네이션 기능으로 공지사항 로드 (notice-list로 수정)
-      loadNoticesWithPagination('notice-list', {
-        itemsPerPage: 8,
-        showBadges: true,
-        showDates: true,
-        paginationId: 'notice-pagination'
-      });
-
-      // 페이지네이션 생성 후 관리자 버튼 확인 (추가 지연)
-      setTimeout(() => {
-        const paginationContainer = document.getElementById('notice-pagination');
-        if (paginationContainer) {
-          checkAndAddWriteButton(paginationContainer);
-        }
-      }, 1000);
-    }, 500);
+    // 공지사항 로드 (지연 없이 즉시)
+    loadNoticesWithPagination('notice-list', {
+      itemsPerPage: 8,
+      showBadges: true,
+      showDates: true,
+      paginationId: 'notice-pagination'
+    }).then(() => {
+      const paginationContainer = document.getElementById('notice-pagination');
+      if (paginationContainer) {
+        checkAndAddWriteButton(paginationContainer);
+      }
+    });
   }
 
-  // 인증 상태 변경 시 관리자 버튼 업데이트
+  // 인증 상태 변경 시 관리자 버튼만 업데이트 (공지 전체 리로드 제거)
   if (auth) {
     import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js').then(({ onAuthStateChanged }) => {
       onAuthStateChanged(auth, () => {
         const paginationContainer = document.getElementById('notice-pagination');
         if (paginationContainer) {
           checkAndAddWriteButton(paginationContainer);
-        }
-        if (typeof window.reloadNotices === 'function') {
-          window.reloadNotices();
         }
       });
     });
