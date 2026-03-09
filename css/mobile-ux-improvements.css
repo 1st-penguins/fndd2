@@ -201,27 +201,7 @@ input[type="submit"],
    ============================================ */
 
 @media (max-width: 768px) {
-  /* 탭 컨테이너 가로 스크롤 가능 */
-  .access-tabs {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-    padding-bottom: 8px;
-    margin-bottom: 24px;
-  }
-  
-  .access-tabs::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-  }
-  
-  /* 탭 버튼 최소 너비 보장 */
-  .access-tabs .tab-button {
-    flex: 0 0 auto;
-    min-width: 100px;
-    white-space: nowrap;
-  }
+  /* .access-tabs 스타일은 tabs.css에서 관리 */
   
   /* 서브탭도 가로 스크롤 가능 */
   .sub-tabs {
