@@ -25,7 +25,7 @@ const CACHE_VERSION = '2026030903'; // ← 배포마다 숫자 올리기 (예: .
 
 - **사이트**: the1stpeng.com (건강운동관리사 / 2급 생활스포츠지도사 자격증 시험 대비)
 - **브랜드**: 퍼스트펭귄, 슬로건: "Fear Not, Deep Dive"
-- **배포**: Cloudflare Pages (GitHub 연동 자동 배포)
+- **배포**: Netlify (GitHub 연동 자동 배포)
 - **백엔드**: Firebase (Auth + Firestore)
 - **프론트**: Vanilla JS (ES Modules), CSS 커스텀, PWA(SW)
 
@@ -70,5 +70,6 @@ const CACHE_VERSION = '2026030903'; // ← 배포마다 숫자 올리기 (예: .
 - `sw.js` — 서비스 워커 (캐시 관리)
 
 ### 캐시 설정
-- `_headers` — Cloudflare Pages 헤더 (HTML: no-cache, **sw.js: no-store**, JS/CSS: no-cache, images: 30일)
-- `/sw.js`에는 반드시 `no-store` 설정 — 없으면 Cloudflare CDN이 sw.js 자체를 캐시해서 CACHE_VERSION 변경이 사용자에게 반영 안 됨
+- `_headers` — Netlify 헤더 (HTML: no-cache, **sw.js: no-store**, JS/CSS: no-cache, images: 30일)
+- `netlify.toml` — 빌드/리디렉션 설정만. 헤더 설정은 `_headers`로 통일
+- `/sw.js`에는 반드시 `no-store` 설정 — 없으면 Netlify CDN이 sw.js 자체를 캐시해서 CACHE_VERSION 변경이 사용자에게 반영 안 됨
