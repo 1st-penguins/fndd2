@@ -63,11 +63,8 @@
 
 /* 공지사항 링크 */
 .notice-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 13px 20px;
+  display: block;
+  padding: 14px 20px;
   text-decoration: none;
   color: inherit;
   width: 100%;
@@ -76,18 +73,17 @@
 
 /* 콘텐츠 영역 */
 .notice-content {
-  flex: 1;
   min-width: 0;
 }
 
 /* 제목 Typography */
 .notice-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--penguin-navy, #1D2F4E);
-  line-height: 1.6;
+  line-height: 1.55;
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   transition: color 0.2s ease;
 }
 
@@ -95,64 +91,50 @@
   color: var(--penguin-skyblue, #5FB2C9);
 }
 
-/* 배지 (제목 앞 인라인) */
+/* 배지 — 단일 색상, [카테고리] 스타일 */
 .notice-badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-  line-height: 1.4;
-  vertical-align: middle;
-  margin-right: 4px;
+  color: var(--penguin-skyblue, #5FB2C9);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-right: 2px;
+  vertical-align: baseline;
 }
 
-.notice-badge.important { background: #fff7ed; color: #c2410c; }
-.notice-badge.urgent    { background: #fef2f2; color: #dc2626; }
-.notice-badge.new       { background: #fef2f2; color: #ef4444; }
-.notice-badge.notice    { background: #eff6ff; color: #2563eb; }
-.notice-badge.update    { background: #f0fdf4; color: #16a34a; }
-.notice-badge.event     { background: #faf5ff; color: #7c3aed; }
-.notice-badge.guide     { background: #f0fdfa; color: #0d9488; }
-.notice-badge.faq       { background: #f8fafc; color: #475569; }
-.notice-badge.lecture-upcoming { background: #f0fdf4; color: #16a34a; }
-.notice-badge.lecture-ended,
-.notice-badge.closed    { background: #f1f5f9; color: #94a3b8; }
-
-/* 날짜 (오른쪽 고정) */
+/* 날짜 (제목 아래 메타 라인) */
 .notice-date {
-  font-size: 0.8rem;
+  display: block;
+  font-size: 0.78rem;
   color: #94a3b8;
-  font-weight: 500;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-weight: 400;
+  margin-top: 3px;
 }
 
 /* 핀 이모지 (제목 뒤 인라인) */
 .notice-pin {
-  font-size: 0.85em;
-  margin-left: 4px;
+  font-size: 0.8em;
+  margin-left: 3px;
   vertical-align: middle;
 }
 
-/* NEW 도트 — 제목 옆에 작은 빨간 점 + 펄스 애니메이션 */
+/* NEW 마크 — 제목 뒤 작은 N */
 .notice-new-dot {
   display: inline-block;
-  width: 7px;
-  height: 7px;
-  background: #ef4444;
-  border-radius: 50%;
-  margin-left: 5px;
+  font-size: 0;
+  width: auto;
+  height: auto;
+  background: none;
+  border-radius: 0;
+  margin-left: 6px;
   vertical-align: middle;
-  position: relative;
-  top: -1px;
-  animation: notice-dot-pulse 2s ease-in-out infinite;
+  animation: none;
 }
 
-@keyframes notice-dot-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.3); }
+.notice-new-dot::after {
+  content: 'N';
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #ef4444;
+  vertical-align: middle;
 }
 
 /* ============================================
@@ -320,11 +302,10 @@
 
   .notice-link {
     padding: 12px 16px;
-    gap: 12px;
   }
 
   .notice-title {
-    font-size: 0.93rem;
+    font-size: 0.9rem;
   }
 
   .admin-usage-panel {

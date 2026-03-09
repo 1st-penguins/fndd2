@@ -382,11 +382,10 @@ function createNoticeItem(notice, options) {
   const newDot = isNew ? '<span class="notice-new-dot"></span>' : '';
   const pinEmoji = notice.pinned ? '<span class="notice-pin">📌</span>' : '';
 
-  // 배지 HTML (badge 데이터가 있을 때만)
+  // 배지 HTML — [카테고리] 대괄호 스타일
   let badgeTag = '';
   if (options.showBadges && notice.badge) {
-    const badgeClass = getBadgeClass(notice.badge);
-    badgeTag = `<span class="notice-badge ${badgeClass}">${notice.badge}</span>`;
+    badgeTag = `<span class="notice-badge">[${notice.badge}]</span> `;
   }
 
   return `
@@ -394,8 +393,8 @@ function createNoticeItem(notice, options) {
       <a href="${detailPath}?id=${notice.id}" class="notice-link">
         <div class="notice-content">
           <h3 class="notice-title">${badgeTag}${notice.title}${pinEmoji}${newDot}</h3>
+          <span class="notice-date">${formattedDate}</span>
         </div>
-        <span class="notice-date">${formattedDate}</span>
       </a>
     </div>
   `;
