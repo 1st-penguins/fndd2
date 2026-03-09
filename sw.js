@@ -1,5 +1,5 @@
 // 배포할 때마다 이 버전을 올려야 이전 캐시가 모두 삭제됩니다
-const CACHE_VERSION = '2026030904';
+const CACHE_VERSION = '2026030905';
 const CACHE_NAME = `fp-cache-v${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
@@ -36,31 +36,36 @@ function isRootNavigation(url) {
   return url.pathname === '/' || url.pathname === '/index.html';
 }
 
-// 네비게이션 요청: 네트워크 우선, 실패 시 "동일 페이지" 캐시 폴백
+// 네비게이션 요청: 네트워크 우선, 실패 시 캐시 폴백
 async function handleNavigationRequest(request) {
   const url = new URL(request.url);
   try {
-    const networkResponse = await fetch(request);
-    if (!networkResponse.ok) {
-      throw new Error(`navigation fetch failed: ${networkResponse.status}`);
+    // redirect: 'follow'로 강제 — SW 내부에서 리다이렉트 자동 추적
+    const networkResponse = await fetch(request, { redirect: 'follow' });
+
+    // 성공(200-299)이면 캐시 업데이트
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
     }
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, networkResponse.clone());
+
+    // 200이든 404든 서버 응답 그대로 반환 (SW가 임의로 503 생성하지 않음)
     return networkResponse;
   } catch (e) {
+    // 네트워크 자체 실패 (오프라인 등) — 캐시 폴백
     const cache = await caches.open(CACHE_NAME);
-    // 1) 현재 요청한 페이지 자체 캐시 우선
     const cachedSelf = await cache.match(request, { ignoreSearch: true });
     if (cachedSelf) return cachedSelf;
 
-    // 2) 루트 네비게이션인 경우에만 index 폴백
     if (isRootNavigation(url)) {
       const cachedIndex = await cache.match('/index.html');
       if (cachedIndex) return cachedIndex;
     }
 
-    // 3) 하위 HTML 페이지는 index로 대체하지 않고 명시적 오류 반환
-    return new Response('페이지를 불러올 수 없습니다. 새로고침 후 다시 시도해주세요.', { status: 503 });
+    return new Response('오프라인 상태입니다. 네트워크 연결을 확인해주세요.', {
+      status: 503,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
+    });
   }
 }
 
