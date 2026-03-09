@@ -1,5 +1,5 @@
 // 배포할 때마다 이 버전을 올려야 이전 캐시가 모두 삭제됩니다
-const CACHE_VERSION = '2026030906';
+const CACHE_VERSION = '2026030907';
 const CACHE_NAME = `fp-cache-v${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
@@ -104,7 +104,11 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(handleNavigationRequest(request));
+    // 루트 페이지만 SW가 처리 (오프라인 폴백 용도)
+    // 서브페이지(과목, 시험 등)는 브라우저가 직접 처리 — 리다이렉트/인코딩 문제 방지
+    if (isRootNavigation(url)) {
+      event.respondWith(handleNavigationRequest(request));
+    }
     return;
   }
 
