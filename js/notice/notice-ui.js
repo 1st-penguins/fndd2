@@ -393,8 +393,8 @@ function createNoticeItem(notice, options) {
       <a href="${detailPath}?id=${notice.id}" class="notice-link">
         <div class="notice-content">
           <h3 class="notice-title">${badgeTag}${notice.title}${pinEmoji}${newDot}</h3>
-          <span class="notice-date">${formattedDate}</span>
         </div>
+        <span class="notice-date">${formattedDate}</span>
       </a>
     </div>
   `;
