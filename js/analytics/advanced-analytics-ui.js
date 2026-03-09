@@ -135,46 +135,36 @@ export function renderWeakQuestions(attempts) {
     return;
   }
 
-  let html = `
-    <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: rgba(255, 251, 235, 0.8); border: 1px solid #FCD34D; border-radius: 12px; color: #92400E;">
-      <span style="font-size: 1.2rem;">⚠️</span>
-      <span style="font-size: 0.95rem; font-weight: 600;">집중 공략: 정답률 50% 미만 문제들을 모았습니다.</span>
-    </div>
-    <div class="weak-question-grid">
-  `;
+  let html = '<div class="weak-question-grid">';
 
   weakQuestions.forEach((q) => {
-    const accuracy = (q.correct / q.attempts * 100).toFixed(1);
-    const borderColor = accuracy < 30 ? 'var(--danger-color)' : 'var(--warning-color)';
-    const bgColor = accuracy < 30 ? 'rgba(254, 242, 242, 0.5)' : 'rgba(255, 251, 235, 0.5)';
+    const accuracy = (q.correct / q.attempts * 100).toFixed(0);
+    const accuracyColor = accuracy < 30 ? '#DC2626' : '#D97706';
 
     // 1-20번 문제로 변환
     const displayNum = q.number > 20 ? ((q.number - 1) % 20) + 1 : q.number;
 
     html += `
-      <div class="weak-question-card" style="border-left-color: ${borderColor}; background: linear-gradient(135deg, ${bgColor}, rgba(255,255,255,0.8));">
+      <div class="weak-question-card">
         <div class="weak-question-header">
           <div>
-            <div class="weak-question-year">${q.year}년 기출</div>
-            <div class="weak-question-subject">${q.subject}</div>
+            <div class="weak-question-year">${q.year}년</div>
+            <div class="weak-question-subject">${q.subject} ${displayNum}번</div>
           </div>
-          <div class="weak-question-accuracy" style="color: ${borderColor};">${accuracy}%<span class="weak-question-accuracy-label">정답률</span></div>
+          <div class="weak-question-accuracy" style="color: ${accuracyColor};">${accuracy}%<span class="weak-question-accuracy-label">정답률</span></div>
         </div>
 
         <div class="weak-question-meta">
-          <span class="weak-question-num">Q. ${displayNum}번</span>
-          <span class="weak-question-divider"></span>
           <span class="weak-question-stat">
-            <strong>${q.attempts}</strong>번 시도 중 <strong class="weak-question-wrong">${q.attempts - q.correct}</strong>번 오답
+            ${q.attempts}회 시도 · <strong class="weak-question-wrong">${q.attempts - q.correct}회 오답</strong>
+            ${q.consecutiveWrong >= 2 ? ` · ${q.consecutiveWrong}연속` : ''}
           </span>
-          ${q.consecutiveWrong >= 2 ? `<span style="background:#fee2e2; color:#dc2626; padding:2px 7px; border-radius:99px; font-size:0.72rem; font-weight:700; margin-left:4px;">${q.consecutiveWrong}연속 오답</span>` : ''}
         </div>
 
         <button
           class="weak-question-btn"
-          style="background: linear-gradient(90deg, ${borderColor}, ${borderColor}dd);"
           onclick="window.location.href='exam/quiz.html?year=${q.year}&subject=${encodeURIComponent(q.subject)}&question=${q.number}'">
-          ⚡ 다시 풀기
+          다시 풀기
         </button>
       </div>
     `;

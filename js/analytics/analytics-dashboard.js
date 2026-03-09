@@ -29,11 +29,8 @@ import { getScoreColor, getWeaknessColor } from './chart-utils.js';
 import { isDevMode } from "../config/dev-config.js";
 import { getTodayVisitorCount, getRecentVisitorStats } from "./daily-visitor.js";
 import {
-  renderExpectedScore,
-  renderLearningTrend,
   renderWeakQuestions,
-  renderReviewRecommendations,
-  renderLearningPattern
+  renderReviewRecommendations
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
@@ -887,21 +884,12 @@ function renderOverviewTab() {
   // 개요 통계 렌더링
   renderOverviewStats();
 
-  // 예상 점수 렌더링
-  renderExpectedScore(state.attempts);
-
-  // 학습 트렌드 렌더링
-  renderLearningTrend(state.attempts);
-
   // 과목별 학습 현황 렌더링
   renderSubjectProgress();
 
   // 취약 문제 및 복습 추천 렌더링
   renderWeakQuestions(state.attempts);
   renderReviewRecommendations(state.attempts);
-
-  // 학습 패턴 분석 렌더링
-  renderLearningPattern(state.attempts);
 }
 
 /**
@@ -1022,39 +1010,25 @@ function renderHomeStats() {
   const totalCorrect = uniqueAttempts.filter(a => a.isCorrect).length;
   const correctRate = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
-  // 예상 점수 계산 (간소화)
-  // 최근 50 문제 기준 정답률 * 100점 만점 환산 (단순 계산)
-  const recentAttempts = uniqueAttempts.slice(0, 50);
-  const recentCorrect = recentAttempts.filter(a => a.isCorrect).length;
-  const recentRate = recentAttempts.length > 0 ? Math.round((recentCorrect / recentAttempts.length) * 100) : 0;
-  const estimatedScore = Math.round(recentRate); // 100점 만점 기준
-
   container.innerHTML = `
-    <!-- 1. 총 문제 수 -->
     <div class="stats-card stat-item">
       <div class="stats-value">${totalAttempts}</div>
-      <div class="stats-label">푼 문제 (고유)</div>
-      ${totalRecords > totalAttempts ? `<div style="font-size: 0.75rem; color: #868e96; margin-top: 4px;">전체 기록: ${totalRecords}개</div>` : ''}
+      <div class="stats-label">푼 문제</div>
     </div>
-    
-    <!-- 2. 정답률 -->
+
     <div class="stats-card stat-item">
       <div class="stats-value" style="color: ${getScoreColor(correctRate)}">${correctRate}%</div>
       <div class="stats-label">정답률</div>
     </div>
-    
-    <!-- 3. 예상 점수 -->
+
     <div class="stats-card stat-item">
-      <div class="stats-value">${estimatedScore}점</div>
-      <div class="stats-label">예상 점수</div>
+      <div class="stats-value">${totalCorrect}</div>
+      <div class="stats-label">맞은 문제</div>
     </div>
-    
-    <!-- 4. 합격 가능성 -->
+
     <div class="stats-card stat-item">
-      <div class="stats-value" style="font-size: 1.2rem; line-height: 1.5; color: ${estimatedScore >= 60 ? '#12b886' : '#fa5252'}">
-        ${estimatedScore >= 60 ? '안정권' : '노력필요'}
-      </div>
-      <div class="stats-label">합격 예측</div>
+      <div class="stats-value">${totalAttempts - totalCorrect}</div>
+      <div class="stats-label">틀린 문제</div>
     </div>
   `;
 }
@@ -2033,6 +2007,7 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter,
             title: sessionTitle,
             type: sessionType,
             score: accuracy,
+            correctCount: correctCount,  // 실제 맞은 문제 수
             total: totalQuestions,
             completed: completed,  // ✅ 수정된 completed 사용 (모의고사는 최대 80)
             displayDate: displayDate,
@@ -2040,6 +2015,7 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter,
             attempts: uniqueAttempts,  // ✅ 고유 문제만 저장
             subject: sessionData.subject || '',
             year: sessionData.year || '',
+            certType: sessionData.certType || 'health', // 자격증 타입
             hour: sessionData.hour || sessionData.mockExamPart || null, // 모의고사 교시
             startTime: startTime, // 정렬용 시간 추가
             isActive: isActive, // 활성 세션 여부
@@ -3313,11 +3289,14 @@ function createProSessionCard(session) {
   const badgeClass  = isMockExam ? 'mockexam' : 'regular';
   const badgeText   = isMockExam ? '모의고사' : '기출문제';
 
-  // 점수 등급 → 색상 클래스
-  const score = session.score || 0;
-  const scoreClass = score >= 80 ? 'score-high'
-                   : score >= 60 ? 'score-good'
-                   : score >= 40 ? 'score-mid'
+  // 실제 점수 계산 (문제당 5점)
+  const correct = session.correctCount || Math.round((session.score || 0) * session.completed / 100);
+  const points = correct * 5;
+  const totalPoints = (session.total || 20) * 5;
+  const accuracy = session.total > 0 ? Math.round((correct / session.total) * 100) : 0;
+  const scoreClass = accuracy >= 80 ? 'score-high'
+                   : accuracy >= 60 ? 'score-good'
+                   : accuracy >= 40 ? 'score-mid'
                    : 'score-low';
 
   // 진행률 퍼센트
@@ -3340,14 +3319,14 @@ function createProSessionCard(session) {
           <div class="session-progress-fill ${scoreClass}" style="width:${pct}%"></div>
         </div>
         <span class="session-progress-text">
-          ${session.completed}/${session.total}문제 &middot; <strong>${score}점</strong>
+          ${session.completed}/${session.total}문제 &middot; <strong>${points}/${totalPoints}점</strong>
         </span>
       </div>
     </div>
 
     <div class="session-card-score">
-      <div class="session-score-value ${scoreClass}">${score}</div>
-      <div class="session-score-label">점</div>
+      <div class="session-score-value ${scoreClass}">${points}</div>
+      <div class="session-score-label">/${totalPoints}점</div>
     </div>
 
     <div class="session-card-actions">
@@ -5903,7 +5882,11 @@ function resumeSession(sessionId) {
     const subject = sessionData.subject || '';
     const type = sessionData.type || 'regular';
     const hour = sessionData.hour || null;
+    const certType = sessionData.certType || 'health';
     const lastQuestionNumber = sessionData.lastQuestionNumber || 1;
+
+    // 스포츠지도사는 exam-sports/, 건강운동관리사는 exam/
+    const examFolder = certType === 'sports' ? 'exam-sports' : 'exam';
 
     if (!year) {
       console.error('세션에 년도 정보가 없습니다.');
@@ -5920,9 +5903,7 @@ function resumeSession(sessionId) {
         showToast('모의고사 정보가 불완전합니다.', 'error');
         return;
       }
-      // 모의고사는 globalIndex 기준 (0-79)이므로 그대로 사용
-      // lastQuestionNumber는 이미 1-based이므로 그대로 사용
-      url = `exam/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}&question=${lastQuestionNumber}&resume=true`;
+      url = `${examFolder}/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}&question=${lastQuestionNumber}&resume=true`;
     } else {
       // 일반 문제 URL 생성
       if (!subject) {
@@ -5930,7 +5911,7 @@ function resumeSession(sessionId) {
         showToast('세션 정보가 불완전합니다.', 'error');
         return;
       }
-      url = `exam/${year}_${subject}.html?question=${lastQuestionNumber}&resume=true&sessionId=${sessionId}`;
+      url = `${examFolder}/${year}_${subject}.html?question=${lastQuestionNumber}&resume=true&sessionId=${sessionId}`;
     }
 
     console.log('이어서 풀기 - 페이지 이동:', url);

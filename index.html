@@ -40,7 +40,7 @@
   }
   </script>
   <!-- 캐시 버스팅을 위한 버전 메타 태그 -->
-  <meta name="app-version" content="2026030907">
+  <meta name="app-version" content="2026031002">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="//www.gstatic.com">
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
@@ -228,8 +228,7 @@
 
   <style>
     .pinned-notice {
-      border-left: 3px solid var(--penguin-navy);
-      background-color: rgba(95, 178, 201, 0.05);
+      background: rgba(255, 255, 255, 0.85);
     }
 
     .login-required-message {
@@ -481,16 +480,6 @@
             <!-- 1. 통계 요약 (Quick Stats) -->
             <div id="overview-stats" class="stats-summary-grid">
               <!-- JS로 로드됨: 총 문제수, 정답률 등 -->
-            </div>
-
-            <!-- 예상 점수 카드 -->
-            <div class="stats-card">
-              <div class="stats-header">🎯 예상 점수</div>
-              <div class="stats-section">
-                <div id="expected-score-section">
-                  <!-- 예상 점수가 여기에 렌더링됨 -->
-                </div>
-              </div>
             </div>
 
             <!-- 과목별 학습 현황 -->

@@ -437,20 +437,15 @@ function createNoticeItem(notice, options) {
   const detailPath = window.location.pathname.includes('notices.html')
     ? 'notices/detail.html'
     : '../notices/detail.html';
+  const newDot = isNew ? '<span class="notice-new-dot"></span>' : '';
+
   return `
     <div class="${itemClass}">
       <a href="${detailPath}?id=${notice.id}" class="notice-link">
         <div class="notice-content">
-          <div class="notice-header-row">
-            ${badgeHTML}
-            ${newBadgeHTML}
-            <h3 class="notice-title">${notice.title}</h3>
-          </div>
-          <div class="notice-meta">
-            <span class="notice-date">${formattedDate}</span>
-            ${options.showViewCount ? `<span class="notice-views">조회 ${notice.viewCount || 0}</span>` : ''}
-          </div>
+          <h3 class="notice-title">${notice.title}${newDot}</h3>
         </div>
+        <span class="notice-date">${formattedDate}</span>
         ${notice.pinned ? '<span class="pin-icon"></span>' : ''}
       </a>
     </div>

@@ -6,7 +6,7 @@
 .notice-list {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 10px;
   margin-bottom: 40px;
 }
 
@@ -28,29 +28,31 @@
   color: var(--deep-sea-gray);
 }
 
-/* 공지사항 아이템 - 프리미엄 카드 스타일 */
+/* 공지사항 아이템 */
 .notice-item {
-  background: #ffffff;
-  border: 1px solid rgba(229, 231, 235, 0.6);
-  border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  background: var(--glass-bg, rgba(255,255,255,0.7));
+  backdrop-filter: var(--glass-blur, blur(12px));
+  -webkit-backdrop-filter: var(--glass-blur, blur(12px));
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.3));
+  border-radius: var(--radius-premium, 16px);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
   overflow: hidden;
   position: relative;
 }
 
 /* 호버 효과 */
 .notice-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04);
-  border-color: rgba(95, 178, 201, 0.4);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--penguin-skyblue);
+  box-shadow: var(--shadow-lg, 0 12px 32px rgba(0,0,0,0.08));
   z-index: 1;
 }
 
-/* 고정된 공지사항 (Pinned) - 미묘한 배경색만 유지, 테두리 제거 */
+/* 고정된 공지사항 (Pinned) */
 .notice-item.pinned {
-  background: linear-gradient(to right, rgba(95, 178, 201, 0.04), rgba(255, 255, 255, 0.4));
-  border: 1px solid rgba(95, 178, 201, 0.2);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(95, 178, 201, 0.25);
 }
 
 /* 공지사항 링크 */
@@ -58,7 +60,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  gap: 16px;
+  padding: 14px 18px;
   text-decoration: none;
   color: inherit;
   width: 100%;
@@ -71,46 +74,42 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
-/* 헤더 행 (뱃지 + 제목) */
+/* 헤더 행 (레거시, 배지 제거됨) */
 .notice-header-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 /* 제목 Typography */
 .notice-title {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: #1D2F4E;
-  line-height: 1.4;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--penguin-navy, #1D2F4E);
+  line-height: 1.5;
   margin: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   transition: color 0.2s ease;
 }
 
 .notice-item:hover .notice-title {
-  color: #0c4a6e;
+  color: var(--penguin-skyblue, #5FB2C9);
 }
 
-/* 메타 정보 (날짜 등) */
+/* 메타 정보 (날짜 — 오른쪽 배치) */
 .notice-meta {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 4px;
+  display: none;
 }
 
 .notice-date {
-  font-family: "Inter Variable", sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #94a3b8;
-  font-weight: 400;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .notice-views {
@@ -123,39 +122,23 @@
   font-weight: 500;
 }
 
-/* 배지 스타일 */
-.notice-badge {
-  font-family: "Inter Variable", sans-serif;
-  font-size: 0.75rem;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
+/* NEW 도트 — 제목 옆에 작은 빨간 점 + 펄스 애니메이션 */
+.notice-new-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #ef4444;
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+  animation: notice-dot-pulse 2s ease-in-out infinite;
 }
 
-/* 배지 색상 */
-.notice-badge.important {
-  background: rgba(245, 158, 11, 0.1);
-  color: #b45309;
-}
-
-.notice-badge.new {
-  background: rgba(239, 68, 68, 0.1);
-  color: #b91c1c;
-}
-
-.notice-badge.notice {
-  background: rgba(6, 182, 212, 0.1);
-  color: #0e7490;
-}
-
-.notice-badge.update {
-  background: rgba(16, 185, 129, 0.1);
-  color: #047857;
+@keyframes notice-dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
 }
 
 /* 핀 아이콘 */
@@ -346,31 +329,12 @@
   }
 
   .notice-link {
-    padding: 7px 12px;
-    align-items: flex-start;
-    /* 모바일에서 위쪽 정렬 */
-  }
-
-  /* 모바일에서 뱃지와 제목 정렬 수정 */
-  .notice-header-row {
-    /* 모바일에서는 뱃지와 제목을 분리하여 정렬 문제 해결 (들여쓰기 이슈) */
-    display: block;
-    width: 100%;
-  }
-
-  .notice-badge {
-    display: inline-flex;
-    margin-bottom: 6px;
-    /* 제목 위로 이동 및 간격 추가 */
-    margin-right: 4px;
+    padding: 12px 14px;
+    align-items: center;
   }
 
   .notice-title {
-    display: block;
-    /* 블록으로 변경하여 항상 새 줄에서 시작 */
-    font-size: 1rem;
-    line-height: 1.5;
-    width: 100%;
+    font-size: 0.95rem;
   }
 
   .pin-icon {

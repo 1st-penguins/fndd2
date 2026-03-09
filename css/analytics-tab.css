@@ -93,28 +93,31 @@
 }
 
 .question-card {
-    background: #f8f9fa;
-    border-radius: 12px;
+    background: var(--glass-bg, rgba(255,255,255,0.7));
+    backdrop-filter: var(--glass-blur, blur(12px));
+    -webkit-backdrop-filter: var(--glass-blur, blur(12px));
+    border: 1px solid var(--glass-border, rgba(255,255,255,0.3));
+    border-radius: var(--radius-premium, 16px);
     padding: 16px;
-    border-left: 4px solid var(--penguin-skyblue);
-    transition: background-color 0.2s;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
     cursor: pointer;
     text-decoration: none;
     display: block;
 }
 
 .question-card:hover {
-    background: #edf2ff;
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--penguin-skyblue);
+    box-shadow: var(--shadow-lg, 0 12px 32px rgba(0,0,0,0.1));
 }
 
 .question-card.priority-high {
-    border-left-color: #ff6b6b;
-    /* 빨강 (오답) */
-    background: #fff5f5;
+    background: var(--glass-bg, rgba(255,255,255,0.7));
 }
 
 .question-card.priority-high:hover {
-    background: #ffe3e3;
+    background: rgba(255, 255, 255, 0.9);
 }
 
 .q-header {

@@ -91,16 +91,27 @@ async function ensureRegularSessionForPage({ year, subject, isResume, resumeSess
   }
 }
 
+// 세션 ID 무관하게 과목/연도 기준 키 (세션 변경돼도 복원 가능)
+function getProgressBaseKey() {
+  if (!currentYear || !currentSubject) return null;
+  return `quiz_progress_${currentYear}_${encodeURIComponent(currentSubject)}`;
+}
+
 function saveQuizProgress(lastQuestionIndex = currentQuestionIndex) {
   try {
     const storageKey = getProgressStorageKey();
     if (!storageKey) return;
-    localStorage.setItem(storageKey, JSON.stringify({
+    const data = JSON.stringify({
       answers: userAnswers,
       perQuestionChecked,
       lastQuestionIndex,
-      timestamp: Date.now()
-    }));
+      timestamp: Date.now(),
+      sessionId: getActiveSessionId()
+    });
+    localStorage.setItem(storageKey, data);
+    // 세션 ID 없는 베이스 키로도 저장 (세션 변경 시 폴백용)
+    const baseKey = getProgressBaseKey();
+    if (baseKey) localStorage.setItem(baseKey, data);
   } catch (error) {
     window.Logger?.warn('진행 상태 로컬 저장 실패:', error);
   }
@@ -108,13 +119,31 @@ function saveQuizProgress(lastQuestionIndex = currentQuestionIndex) {
 
 function restoreQuizProgress() {
   try {
+    // 1차: 현재 세션 ID 기준 키로 복원
     const storageKey = getProgressStorageKey();
-    if (!storageKey) return null;
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || !Array.isArray(parsed.answers)) return null;
-    return parsed;
+    if (storageKey) {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.answers)) return parsed;
+      }
+    }
+    // 2차: 세션 ID 없는 베이스 키로 폴백 (세션이 바뀌었을 때)
+    const baseKey = getProgressBaseKey();
+    if (baseKey) {
+      const raw = localStorage.getItem(baseKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.answers)) {
+          // 24시간 이내 데이터만 복원
+          if (parsed.timestamp && Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+            window.Logger?.info('세션 변경 후 베이스 키로 진행 상태 복원');
+            return parsed;
+          }
+        }
+      }
+    }
+    return null;
   } catch (error) {
     window.Logger?.warn('진행 상태 로컬 복원 실패:', error);
     return null;
@@ -265,58 +294,62 @@ export async function initializeQuiz() {
     firstAttemptTracking = new Array(questions.length).fill(true);
     window.perQuestionChecked = perQuestionChecked;
 
-    // ✅ 이어서 풀기: 세션에서 이전 답변 복원
+    // ✅ 진행 상태 복원: 이어풀기 모드 또는 로컬에 미완료 데이터가 있을 때
     // urlParams와 isResume은 위에서 이미 선언됨
     let lastQuestionNumber = null;
 
-    if (isResume) {
-      window.Logger?.info('이어서 풀기 모드: 마지막 문제 위치 확인 중...');
+    // 이어풀기 모드가 아니어도 로컬에 저장된 미완료 진행 데이터가 있으면 자동 복원
+    // (뒤로가기로 나갔다가 다시 들어온 경우)
+    {
       try {
-        // 1) 로컬 진행 상태 우선 복원 (끊김/새로고침 대응)
         const restoredProgress = restoreQuizProgress();
         if (restoredProgress) {
-          restoredProgress.answers.forEach((answer, index) => {
-            if (index < userAnswers.length && answer !== null && answer !== undefined) {
-              userAnswers[index] = answer;
-            }
-          });
+          const answeredCount = restoredProgress.answers.filter(a => a !== null && a !== undefined).length;
+          // 24시간 이내이고, 답변이 있는 미완료 데이터만 복원
+          const isRecent = restoredProgress.timestamp && (Date.now() - restoredProgress.timestamp < 24 * 60 * 60 * 1000);
+          const isIncomplete = answeredCount > 0 && answeredCount < questions.length;
 
-          if (Array.isArray(restoredProgress.perQuestionChecked)) {
-            restoredProgress.perQuestionChecked.forEach((checked, index) => {
-              if (index < perQuestionChecked.length) {
-                perQuestionChecked[index] = !!checked;
+          if (isRecent && isIncomplete) {
+            restoredProgress.answers.forEach((answer, index) => {
+              if (index < userAnswers.length && answer !== null && answer !== undefined) {
+                userAnswers[index] = answer;
               }
             });
-            window.perQuestionChecked = perQuestionChecked;
-          }
 
-          if (typeof restoredProgress.lastQuestionIndex === 'number' && restoredProgress.lastQuestionIndex >= 0) {
-            lastQuestionNumber = restoredProgress.lastQuestionIndex + 1;
-          }
+            if (Array.isArray(restoredProgress.perQuestionChecked)) {
+              restoredProgress.perQuestionChecked.forEach((checked, index) => {
+                if (index < perQuestionChecked.length) {
+                  perQuestionChecked[index] = !!checked;
+                }
+              });
+              window.perQuestionChecked = perQuestionChecked;
+            }
 
-          window.Logger?.info(`로컬 복원 완료: ${userAnswers.filter(a => a !== null).length}문제 답안`);
+            if (typeof restoredProgress.lastQuestionIndex === 'number' && restoredProgress.lastQuestionIndex >= 0) {
+              lastQuestionNumber = restoredProgress.lastQuestionIndex + 1;
+            }
+
+            window.Logger?.info(`진행 상태 자동 복원: ${answeredCount}문제 답안 (${isResume ? '이어풀기' : '자동감지'})`);
+          }
         }
 
-        // URL 파라미터나 로컬 스토리지에서 세션 ID 가져오기
-        const sessionIdToRestore = resumeSessionId || localStorage.getItem('resumeSessionId');
-        // 2) 로컬에 없을 때 서버의 마지막 위치로 보정
-        if (!lastQuestionNumber) {
+        // 이어풀기 모드에서만 서버 폴백으로 마지막 위치 보정
+        if (isResume && !lastQuestionNumber) {
+          const sessionIdToRestore = resumeSessionId || localStorage.getItem('resumeSessionId');
           lastQuestionNumber = await getLastQuestionNumber(year, subject, sessionIdToRestore);
         }
-        window.Logger?.info('마지막 풀었던 문제 번호:', lastQuestionNumber);
 
-        // ✅ 이어서 풀기 모드에서 마지막 문제 번호로 currentQuestionIndex 초기화
+        // 마지막 문제 위치로 이동
         if (lastQuestionNumber && lastQuestionNumber > 0) {
-          const targetIndex = lastQuestionNumber - 1; // 1-based → 0-based
+          const targetIndex = lastQuestionNumber - 1;
           if (targetIndex >= 0 && targetIndex < questions.length) {
             currentQuestionIndex = targetIndex;
             window.currentQuestionIndex = currentQuestionIndex;
-            window.Logger?.info(`이어서 풀기: currentQuestionIndex를 ${currentQuestionIndex}로 설정 (답변 복원 없이 위치만 이동)`);
+            window.Logger?.info(`진행 복원: ${currentQuestionIndex + 1}번 문제로 이동`);
           }
         }
       } catch (error) {
-        window.Logger?.error('마지막 문제 위치 확인 오류:', error);
-        // 오류 발생해도 계속 진행
+        window.Logger?.error('진행 상태 복원 오류:', error);
       }
     }
 
@@ -330,7 +363,13 @@ export async function initializeQuiz() {
     loadQuestion(currentQuestionIndex);
     initQuestionIndicators();
 
-    // ✅ 이어서 풀기 모드에서는 답변 복원을 하지 않으므로 인디케이터 복원도 필요 없음
+    // 복원된 답변이 있으면 인디케이터와 UI 반영
+    if (userAnswers.some(a => a !== null)) {
+      setTimeout(() => {
+        updateSelectedOption();
+        updateQuestionIndicators();
+      }, 100);
+    }
 
     startTimer();
 
@@ -416,6 +455,15 @@ export async function initializeQuiz() {
     if (!window.__quizBeforeUnloadBound) {
       window.addEventListener('beforeunload', () => {
         saveQuizProgress(currentQuestionIndex);
+      });
+      // 모바일 뒤로가기/탭 전환 시에도 진행 저장 (beforeunload가 안 불리는 경우 대비)
+      window.addEventListener('pagehide', () => {
+        saveQuizProgress(currentQuestionIndex);
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          saveQuizProgress(currentQuestionIndex);
+        }
       });
       window.__quizBeforeUnloadBound = true;
     }
@@ -1490,6 +1538,14 @@ export async function submitQuiz() {
   } catch (error) {
     console.warn('일반문제 세션 종료 오류 (무시됨):', error);
   }
+
+  // 제출 완료 후 로컬 진행 데이터 정리 (다음 진입 시 새로 시작하도록)
+  try {
+    const storageKey = getProgressStorageKey();
+    if (storageKey) localStorage.removeItem(storageKey);
+    const baseKey = getProgressBaseKey();
+    if (baseKey) localStorage.removeItem(baseKey);
+  } catch (_) {}
 
   // 결과 화면 표시
   showResults();
