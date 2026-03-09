@@ -2699,14 +2699,13 @@ function createScoreModal(sessionData, attempts) {
   const summary = document.createElement('div');
   summary.className = 'sc-summary scorecard-summary';
 
-  // ✅ 정답률 계산 (첫 시도 답변 우선 사용)
+  // ✅ 정답/점수 계산 (첫 시도 답변 우선 사용)
   const correctCount = attempts.filter(a => {
-    // 첫 시도 답변이 있으면 첫 시도 답변 사용, 없으면 기존 답변 사용 (하위 호환성)
     return a.firstAttemptIsCorrect !== undefined ? a.firstAttemptIsCorrect : a.isCorrect;
   }).length;
   const totalQuestions = attempts.length;
-  const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   const wrongCount = totalQuestions - correctCount;
+  const score = correctCount * 5; // 개당 5점
 
   // 타임스탬프 처리 (서버 타임스탬프 또는 일반 날짜)
   let displayDate = new Date().toLocaleString();
@@ -2746,12 +2745,12 @@ function createScoreModal(sessionData, attempts) {
         <div class="sc-stat-value red">${wrongCount}</div>
       </div>
       <div class="sc-stat">
-        <div class="sc-stat-label">정답률</div>
-        <div class="sc-stat-value">${accuracy}%</div>
+        <div class="sc-stat-label">점수</div>
+        <div class="sc-stat-value">${score}점</div>
       </div>
     </div>
     <div class="sc-progress-bar-wrap">
-      <div class="sc-progress-bar-fill" style="width:${accuracy}%"></div>
+      <div class="sc-progress-bar-fill" style="width:${totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0}%"></div>
     </div>
     <div class="sc-date">${displayDate}</div>
   `;
@@ -2811,15 +2810,13 @@ function createScoreModal(sessionData, attempts) {
     let questionId;
 
     if (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null) {
-      questionId = `g_${attempt.questionData.globalIndex}`; // "g_0", "g_1", ..., "g_79"
+      questionId = `g_${attempt.questionData.globalIndex}`;
     } else if (attempt.questionNumber != null && attempt.questionNumber !== '') {
-      // questionNumber 1 = 문제 1 → g_0 로 통일 (정오표에서 1~20 다음에 1이 또 나오는 현상 방지)
       questionId = `g_${Number(attempt.questionNumber) - 1}`;
     } else {
       const subject = attempt.subject || attempt.questionData?.subject || '';
       const number = Number(attempt.questionData?.number ?? attempt.number ?? 0);
-      // 20문제 세트: number 1~20 → g_0~g_19 로 통일
-      if (totalCount <= 20 && number >= 1 && number <= 20) {
+      if (number >= 1 && number <= 20) {
         questionId = `g_${number - 1}`;
       } else {
         questionId = `${subject}_${number}`;
@@ -2844,6 +2841,41 @@ function createScoreModal(sessionData, attempts) {
     uniqueAttempts.push(attempt);
   }
 
+  // 중복 제거 후 summary 재계산 (중복 포함 데이터로 계산 방지)
+  if (uniqueAttempts.length !== attempts.length) {
+    const deduplicatedCorrect = uniqueAttempts.filter(a => {
+      return a.firstAttemptIsCorrect !== undefined ? a.firstAttemptIsCorrect : a.isCorrect;
+    }).length;
+    const deduplicatedTotal = uniqueAttempts.length;
+    const deduplicatedWrong = deduplicatedTotal - deduplicatedCorrect;
+    const deduplicatedScore = deduplicatedCorrect * 5;
+    const deduplicatedAccuracy = deduplicatedTotal > 0 ? Math.round((deduplicatedCorrect / deduplicatedTotal) * 100) : 0;
+
+    summary.innerHTML = `
+      <div class="sc-stats-row">
+        <div class="sc-stat">
+          <div class="sc-stat-label">총 문제</div>
+          <div class="sc-stat-value">${deduplicatedTotal}</div>
+        </div>
+        <div class="sc-stat">
+          <div class="sc-stat-label">정답</div>
+          <div class="sc-stat-value green">${deduplicatedCorrect}</div>
+        </div>
+        <div class="sc-stat">
+          <div class="sc-stat-label">오답</div>
+          <div class="sc-stat-value red">${deduplicatedWrong}</div>
+        </div>
+        <div class="sc-stat">
+          <div class="sc-stat-label">점수</div>
+          <div class="sc-stat-value">${deduplicatedScore}점</div>
+        </div>
+      </div>
+      <div class="sc-progress-bar-wrap">
+        <div class="sc-progress-bar-fill" style="width:${deduplicatedAccuracy}%"></div>
+      </div>
+      <div class="sc-date">${summary.querySelector('.sc-date')?.textContent || ''}</div>
+    `;
+  }
 
   // 정답 데이터 추출 유틸리티 함수
   function toDisplayChoice(value) {
