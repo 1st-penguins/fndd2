@@ -46,53 +46,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="//firestore.googleapis.com">
 
-  <!-- 캐시 버스팅 스크립트 (CSS/JS 파일에 버전 쿼리 파라미터 자동 추가) -->
-  <!-- CSS는 이미 로드된 후에 버전 추가하여 렌더링 지연 방지 -->
-  <script>
-    (function () {
-      const VERSION = document.querySelector('meta[name="app-version"]')?.content || new Date().toISOString().split('T')[0].replace(/-/g, '');
-      const addVersionToAssets = () => {
-        // CSS 파일에 버전 추가 (이미 로드된 후에만 버전 추가)
-        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-          if (link.href && !link.href.includes('?v=') && (link.href.startsWith(window.location.origin) || link.href.startsWith('/'))) {
-            // CSS가 이미 로드된 경우에만 버전 추가 (렌더링 지연 방지)
-            if (link.sheet || link.href.includes('base.css') || link.href.includes('linear-header.css')) {
-              const url = new URL(link.href, window.location.origin);
-              url.searchParams.set('v', VERSION);
-              link.href = url.pathname + url.search + url.hash;
-            }
-          }
-        });
-        // JS 파일에 버전 추가 (type="module"이 아닌 것만)
-        document.querySelectorAll('script[src]:not([type="module"])').forEach(script => {
-          if (script.src && !script.src.includes('?v=') && (script.src.startsWith(window.location.origin) || script.src.startsWith('/'))) {
-            const url = new URL(script.src, window.location.origin);
-            url.searchParams.set('v', VERSION);
-            script.src = url.pathname + url.search + url.hash;
-          }
-        });
-      };
-      // CSS 로딩 후 버전 추가 (렌더링 지연 방지)
-      if (document.readyState === 'loading') {
-        // CSS 로드 완료 후 버전 추가
-        window.addEventListener('load', () => {
-          setTimeout(addVersionToAssets, 100);
-        });
-        document.addEventListener('DOMContentLoaded', () => {
-          // JS는 DOMContentLoaded 시 버전 추가
-          document.querySelectorAll('script[src]:not([type="module"])').forEach(script => {
-            if (script.src && !script.src.includes('?v=') && (script.src.startsWith(window.location.origin) || script.src.startsWith('/'))) {
-              const url = new URL(script.src, window.location.origin);
-              url.searchParams.set('v', VERSION);
-              script.src = url.pathname + url.search + url.hash;
-            }
-          });
-        });
-      } else {
-        setTimeout(addVersionToAssets, 100);
-      }
-    })();
-  </script>
+  <!-- 캐시 버스팅: 아래 CSS/JS 태그에 ?v= 쿼리가 직접 포함됨. 배포 시 버전 갱신 필요. -->
 
   <!-- Hero 배경 이미지 preload (데스크톱) -->
   <link rel="preload" as="image" href="images/background_hero.webp" media="(min-width: 769px)">
@@ -103,42 +57,36 @@
   <!-- Hero 로고 preload (LCP 최적화) -->
   <link rel="preload" as="image" href="images/firstpenguin-logo.png" fetchpriority="high">
 
-  <!-- Critical CSS 파일 preload (초기 렌더링 최적화) -->
-  <link rel="preload" as="style" href="css/base.css">
-  <link rel="preload" as="style" href="css/linear-header.css">
+  <!-- Critical CSS 파일 preload -->
+  <link rel="preload" as="style" href="css/base.css?v=2026031007">
+  <link rel="preload" as="style" href="css/linear-header.css?v=2026031007">
 
-  <!-- Critical CSS: 초기 렌더링을 위한 인라인 스타일 (FOUC 방지) -->
-
-  <!-- External CSS files are preloaded for performance. 
-       Inline styles have been removed to prevent consistency issues. -->
-
-  <!-- 외부 CSS 파일 연결 (Critical CSS 우선 로드) -->
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/linear-header.css" />
-  <!-- 나머지 CSS 파일 (비동기 로드로 변경 가능하지만 호환성을 위해 유지) -->
-  <link rel="stylesheet" href="css/linear-footer.css" />
-  <link rel="stylesheet" href="css/linear-hero.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/home.css" />
-  <link rel="stylesheet" href="css/pages/notice.css" />
-  <link rel="stylesheet" href="css/pages/progress.css" />
-  <link rel="stylesheet" href="css/login.css" />
-  <link rel="stylesheet" href="css/tabs.css" />
-  <link rel="stylesheet" href="css/cert-selector.css" />
-  <link rel="stylesheet" href="css/mobile-ux-improvements.css" />
-  <link rel="stylesheet" href="css/premium-ui.css" />
-  <link rel="stylesheet" href="css/analytics-tab.css" />
-  <link rel="stylesheet" href="css/analytics-dashboard.css" />
-  <link rel="stylesheet" href="css/floating-buttons.css" />
+  <!-- 외부 CSS 파일 (버전 쿼리로 CDN 캐시 버스팅) -->
+  <link rel="stylesheet" href="css/base.css?v=2026031007" />
+  <link rel="stylesheet" href="css/linear-header.css?v=2026031007" />
+  <link rel="stylesheet" href="css/linear-footer.css?v=2026031007" />
+  <link rel="stylesheet" href="css/linear-hero.css?v=2026031007" />
+  <link rel="stylesheet" href="css/layout.css?v=2026031007" />
+  <link rel="stylesheet" href="css/components.css?v=2026031007" />
+  <link rel="stylesheet" href="css/home.css?v=2026031007" />
+  <link rel="stylesheet" href="css/pages/notice.css?v=2026031007" />
+  <link rel="stylesheet" href="css/pages/progress.css?v=2026031007" />
+  <link rel="stylesheet" href="css/login.css?v=2026031007" />
+  <link rel="stylesheet" href="css/tabs.css?v=2026031007" />
+  <link rel="stylesheet" href="css/cert-selector.css?v=2026031007" />
+  <link rel="stylesheet" href="css/mobile-ux-improvements.css?v=2026031007" />
+  <link rel="stylesheet" href="css/premium-ui.css?v=2026031007" />
+  <link rel="stylesheet" href="css/analytics-tab.css?v=2026031007" />
+  <link rel="stylesheet" href="css/analytics-dashboard.css?v=2026031007" />
+  <link rel="stylesheet" href="css/floating-buttons.css?v=2026031007" />
 
 
 
   <!-- 로거 스크립트: 모든 JS 파일보다 먼저 로드 -->
-  <script src="js/logger.js"></script>
+  <script src="js/logger.js?v=2026031007"></script>
 
   <!-- 모바일 Viewport 최적화 스크립트 (iOS Safari 배경 확대 방지) -->
-  <script src="js/mobile-viewport-fix.js"></script>
+  <script src="js/mobile-viewport-fix.js?v=2026031007"></script>
 
   <!-- Chart.js 라이브러리 (분석 대시보드용) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -153,21 +101,21 @@
   <!-- auth-core는 초기 렌더에서 로드하지 않고 필요 시 동적 로드 -->
 
   <!-- 유틸리티 모듈 (코어 모듈에 의존성이 있는 유틸리티) -->
-  <script type="module" src="js/utils/date-utils.js"></script>
-  <script type="module" src="js/utils/ui-utils.js"></script>
-  <script type="module" src="js/auth/auth-utils.js"></script>
-  <script type="module" src="js/data/firestore-utils.js"></script>
+  <script type="module" src="js/utils/date-utils.js?v=2026031007"></script>
+  <script type="module" src="js/utils/ui-utils.js?v=2026031007"></script>
+  <script type="module" src="js/auth/auth-utils.js?v=2026031007"></script>
+  <script type="module" src="js/data/firestore-utils.js?v=2026031007"></script>
 
-  <!-- 데이터 접근 모듈 (유틸리티에 의존성이 있는 모듈) -->
-  <script type="module" src="js/data/notice-repository.js"></script>
+  <!-- 데이터 접근 모듈 -->
+  <script type="module" src="js/data/notice-repository.js?v=2026031007"></script>
 
-  <!-- UI 모듈 (데이터 모듈에 의존성이 있는 UI 컴포넌트) -->
-  <script type="module" src="js/auth/auth-ui.js"></script>
+  <!-- UI 모듈 -->
+  <script type="module" src="js/auth/auth-ui.js?v=2026031007"></script>
 
   <!-- 메인 애플리케이션 스크립트 -->
   <script type="module">
-    import { initApp } from './js/app.js';
-    import UIUtils from './js/utils/ui-utils.js';
+    import { initApp } from './js/app.js?v=2026031007';
+    import UIUtils from './js/utils/ui-utils.js?v=2026031007';
     document.addEventListener('DOMContentLoaded', initApp);
     document.addEventListener('DOMContentLoaded', UIUtils.enableGlobalLazyLoading);
 
