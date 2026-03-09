@@ -27,6 +27,23 @@ import { sessionManager } from '../data/session-manager.js';
 import { showLoading, hideLoading, showError, showToast } from "../utils/ui-utils.js";
 import { getScoreColor, getWeaknessColor } from './chart-utils.js';
 import { isDevMode } from "../config/dev-config.js";
+
+// URL 인코딩된 한글 안전 디코딩 (%EC%9A%B4... → 운동생리학)
+function safeDecodeText(text) {
+  if (!text || typeof text !== 'string') return text || '';
+  if (!text.includes('%')) return text;
+  try {
+    let decoded = text;
+    for (let i = 0; i < 3; i++) {
+      const temp = decodeURIComponent(decoded);
+      if (temp === decoded) break;
+      decoded = temp;
+    }
+    return decoded;
+  } catch (e) {
+    return text;
+  }
+}
 import { getTodayVisitorCount, getRecentVisitorStats } from "./daily-visitor.js";
 import {
   renderWeakQuestions,
@@ -1875,7 +1892,7 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter,
         }
 
         // 세션 제목 설정 개선
-        let sessionTitle = sessionData.title || '문제풀이기록';
+        let sessionTitle = safeDecodeText(sessionData.title) || '문제풀이기록';
 
         // 제목이 없는 경우 메타데이터로 제목 생성
         if (!sessionData.title) {
@@ -1904,9 +1921,9 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter,
 
           // 과목 정보가 있는 경우
           if (sessionData.subject && sessionData.year) {
-            sessionTitle = `${sessionData.year}년 ${sessionData.subject}${formattedDate}`;
+            sessionTitle = `${sessionData.year}년 ${safeDecodeText(sessionData.subject)}${formattedDate}`;
           } else if (sessionData.subject) {
-            sessionTitle = `${sessionData.subject}${formattedDate}`;
+            sessionTitle = `${safeDecodeText(sessionData.subject)}${formattedDate}`;
           } else if (sessionData.type === 'mockexam' && sessionData.year) {
             sessionTitle = `${sessionData.year}년 모의고사${formattedDate}`;
           } else {
@@ -2626,9 +2643,9 @@ function createScoreModal(sessionData, attempts) {
   let year = '';
 
   if (sessionData.subject) {
-    subject = sessionData.subject;
+    subject = safeDecodeText(sessionData.subject);
   } else if (attempts.length > 0 && attempts[0].questionData) {
-    subject = attempts[0].questionData.subject || '';
+    subject = safeDecodeText(attempts[0].questionData.subject || '');
   }
 
   if (sessionData.year) {
@@ -2679,7 +2696,7 @@ function createScoreModal(sessionData, attempts) {
 
   const title = document.createElement('h3');
   title.className = 'sc-modal-title';
-  title.textContent = fullTitle;
+  title.textContent = safeDecodeText(fullTitle);
 
   const closeBtn = document.createElement('button');
   closeBtn.innerHTML = '&times;';
@@ -5396,13 +5413,8 @@ function createCardElement(card) {
   });
 
   // 카드 제목 URL 디코딩
-  let decodedTitle = card.title || '문제풀이기록';
+  let decodedTitle = safeDecodeText(card.title || '문제풀이기록');
   try {
-    if (decodedTitle.includes('%')) {
-      decodedTitle = decodeURIComponent(decodedTitle);
-    }
-  } catch (e) {
-    // 디코딩 실패 시 원본 사용
   }
 
   // 간단한 HTML 구조로 변경 (모바일은 가로형 컴팩트, 데스크톱은 세로형)
