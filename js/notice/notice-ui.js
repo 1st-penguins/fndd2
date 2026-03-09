@@ -107,6 +107,7 @@ export async function loadNotices(containerId = 'notice-container', options = {}
  */
 // 공지사항 데이터 캐시 (페이지 이동 시 Firestore 재요청 방지)
 let _cachedNotices = null;
+let _loadingInProgress = false;
 
 export async function loadNoticesWithPagination(containerId = 'notice-container', options = {}) {
   const container = document.getElementById(containerId);
@@ -139,12 +140,17 @@ export async function loadNoticesWithPagination(containerId = 'notice-container'
     if (_cachedNotices) {
       allNotices = _cachedNotices;
     } else {
+      // 이미 로드 중이면 중복 요청 방지
+      if (_loadingInProgress) return;
+      _loadingInProgress = true;
+
       if (loadingEl) loadingEl.style.display = 'flex';
       if (emptyEl) emptyEl.style.display = 'none';
       container.innerHTML = '<div class="notice-loading">공지사항을 불러오는 중...</div>';
 
       allNotices = await getNotices(0);
       _cachedNotices = allNotices; // 캐시 저장
+      _loadingInProgress = false;
     }
 
     if (!allNotices || allNotices.length === 0) {
