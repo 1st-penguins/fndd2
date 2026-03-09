@@ -107,7 +107,7 @@ export async function loadNotices(containerId = 'notice-container', options = {}
  */
 // 공지사항 데이터 캐시 (페이지 이동 시 Firestore 재요청 방지)
 let _cachedNotices = null;
-let _loadingInProgress = false;
+let _loadingPromise = null;
 
 export async function loadNoticesWithPagination(containerId = 'notice-container', options = {}) {
   const container = document.getElementById(containerId);
@@ -135,22 +135,22 @@ export async function loadNoticesWithPagination(containerId = 'notice-container'
     const loadingEl = document.getElementById('notices-loading');
     const emptyEl = document.getElementById('notices-empty');
 
-    // 캐시가 없을 때만 로딩 표시 + Firestore 요청
+    // 캐시 또는 진행 중인 요청 재사용 (중복 Firestore 요청 방지)
     let allNotices;
     if (_cachedNotices) {
       allNotices = _cachedNotices;
     } else {
-      // 이미 로드 중이면 중복 요청 방지
-      if (_loadingInProgress) return;
-      _loadingInProgress = true;
-
-      if (loadingEl) loadingEl.style.display = 'flex';
-      if (emptyEl) emptyEl.style.display = 'none';
-      container.innerHTML = '<div class="notice-loading">공지사항을 불러오는 중...</div>';
-
-      allNotices = await getNotices(0);
-      _cachedNotices = allNotices; // 캐시 저장
-      _loadingInProgress = false;
+      if (!_loadingPromise) {
+        // 첫 요청: 로딩 표시 + Firestore 쿼리 시작
+        if (loadingEl) loadingEl.style.display = 'flex';
+        if (emptyEl) emptyEl.style.display = 'none';
+        container.innerHTML = '<div class="notice-loading">공지사항을 불러오는 중...</div>';
+        _loadingPromise = getNotices(0);
+      }
+      // 첫 요청이든 중복 요청이든 같은 Promise를 await
+      allNotices = await _loadingPromise;
+      _cachedNotices = allNotices;
+      _loadingPromise = null;
     }
 
     if (!allNotices || allNotices.length === 0) {
