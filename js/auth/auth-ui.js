@@ -82,11 +82,7 @@ export function closeLoginModal() {
 
   if (modal) {
     modal.classList.remove('show');
-
-    // 애니메이션 종료 후 display: none 처리
-    setTimeout(() => {
-      modal.style.display = 'none';
-    }, 300); // CSS transition 시간과 맞춤
+    modal.style.display = 'none'; // 즉시 숨김 (300ms 지연 제거 — 밀림 현상 방지)
   }
 
   // 모달 닫힐 때 오버레이 상태 업데이트 (즉시 반영)
@@ -218,16 +214,18 @@ function setupLoginModalEvents(modal) {
       googleButton.disabled = true;
       googleButton.innerHTML = '<span class="spinner"></span> Google 로그인 중...';
       try {
+        // 로그인 시작 시 모달 즉시 숨김 (체감 속도 개선)
+        closeLoginModal();
         const result = await handleGoogleLogin();
-        // redirect 방식으로 전환된 경우 현재 페이지는 곧 이동/복귀됨
         if (result === null) {
           Toast.info('로그인 창으로 이동합니다. 완료 후 자동으로 반영됩니다.');
         }
       } catch (error) {
         console.error('Google 로그인 오류:', error);
         Toast.error(error?.message || 'Google 로그인에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        // 에러 시 모달 다시 표시
+        showLoginModal();
       } finally {
-        // redirect로 페이지가 이동되지 않은 경우 버튼 상태 복구
         googleButton.disabled = false;
         googleButton.innerHTML = originalText;
       }
