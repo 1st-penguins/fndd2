@@ -186,7 +186,7 @@
 @media (max-width: 768px) {
   .access-tabs {
     flex-wrap: nowrap;
-    justify-content: center;
+    justify-content: flex-start;
     overflow-x: auto;
     padding: 5px;
     margin: 0 16px 24px;
@@ -266,6 +266,7 @@
     max-width: calc(100% - 24px);
     padding: 4px;
     gap: 3px;
+    justify-content: flex-start;
   }
 }
 
