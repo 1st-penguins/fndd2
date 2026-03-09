@@ -652,13 +652,8 @@ export function updateLoginUI() {
     button.style.display = isLoggedIn ? 'block' : 'none';
   });
 
-  // 제한된 콘텐츠 업데이트
+  // 제한된 콘텐츠 업데이트 (내부적으로 syncLoginOverlays 포함)
   updateRestrictedContent();
-
-  // 로그인 오버레이 업데이트
-  if (typeof window.updateLoginOverlays === 'function') {
-    window.updateLoginOverlays();
-  }
 
   // Body 클래스 토글 (CSS 제어용)
   document.body.classList.toggle('logged-in', isLoggedIn);

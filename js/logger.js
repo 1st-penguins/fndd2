@@ -9,20 +9,20 @@ const Logger = {
     return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   },
   
-  error: function(message) {
-    if (this.level >= 1) console.error(message);
+  error: function(message, ...args) {
+    if (this.level >= 1) console.error(message, ...args);
   },
-  
-  warn: function(message) {
-    if (this.level >= 2) console.warn(message);
+
+  warn: function(message, ...args) {
+    if (this.level >= 2) console.warn(message, ...args);
   },
-  
-  info: function(message) {
-    if (this.level >= 3) console.info(message);
+
+  info: function(message, ...args) {
+    if (this.level >= 3) console.info(message, ...args);
   },
-  
-  log: function(message) {
-    if (this.level >= 4) console.log(message);
+
+  log: function(message, ...args) {
+    if (this.level >= 4) console.log(message, ...args);
   },
   
   // 디버그 로깅 (개발 환경에서만, 객체도 지원)
