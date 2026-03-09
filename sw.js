@@ -1,5 +1,5 @@
-// 캐시 버전을 날짜 기반으로 설정 (매일 자동 업데이트)
-const CACHE_VERSION = new Date().toISOString().split('T')[0].replace(/-/g, '');
+// 배포할 때마다 이 버전을 올려야 이전 캐시가 모두 삭제됩니다
+const CACHE_VERSION = '2026030902';
 const CACHE_NAME = `fp-cache-v${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
