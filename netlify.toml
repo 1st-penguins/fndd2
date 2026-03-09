@@ -9,64 +9,6 @@
   to = "/index.html"
   status = 200
 
-# 헤더 설정
-[[headers]]
-  # 모든 파일에 적용
-  for = "/*"
-  [headers.values]
-    # 보안 헤더
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    
-    # 캐시 설정
-    Cache-Control = "public, max-age=31536000"
-
-# HTML 파일 캐시 설정
-[[headers]]
-  for = "*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-# CSS/JS 파일 캐시 설정 (버전 쿼리 파라미터가 있으면 재검증)
-[[headers]]
-  for = "*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=86400, must-revalidate"
-    
-[[headers]]
-  for = "*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=86400, must-revalidate"
-
-# 이미지 파일 캐시 설정
-[[headers]]
-  for = "*.png"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-    
-[[headers]]
-  for = "*.jpg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-    
-[[headers]]
-  for = "*.jpeg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-    
-[[headers]]
-  for = "*.svg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-
-# Firebase 관련 파일 캐시 설정
-[[headers]]
-  for = "/js/core/firebase-core.js"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"
-
 # 환경 변수
 [context.production.environment]
   NODE_ENV = "production"
