@@ -51,7 +51,7 @@ import {
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
-import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031116';
+import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031117';
 
 // 차트 및 분석 데이터 상태
 const state = {
@@ -3232,7 +3232,10 @@ function createScoreModal(sessionData, attempts) {
     `;
 
     row.querySelector('.sc-check-btn')?.addEventListener('click', () => {
-      window.location.href = `exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${questionNumber}`;
+      showQuestionPreview({
+        year, subject, number: questionNumber,
+        userAnswer, correctAnswer, isCorrect
+      });
     });
 
     return row;
@@ -6651,21 +6654,18 @@ function showMockExamScorecard(sessionId) {
             </td>
           `;
 
-          // 정오표에서 해당 문제로 이동 (모의고사 페이지)
+          // 정오표에서 문제 미리보기 모달
           row.addEventListener('click', () => {
             try {
-              const subjectIdx = subjectNames.indexOf(attempt.questionData.subject);
-              const numberInSubject = Number(attempt.questionData.number || 1);
-              const questionNumber = (attempt.questionData.globalIndex !== undefined && attempt.questionData.globalIndex !== null)
-                ? Number(attempt.questionData.globalIndex) + 1
-                : (subjectIdx >= 0 ? (subjectIdx * 20) + numberInSubject : numberInSubject);
-
-              const encodedYear = encodeURIComponent(String(year));
-              const encodedHour = encodeURIComponent(String(hour));
-              const targetUrl = `exam/${encodedYear}_모의고사_${encodedHour}교시.html?year=${encodedYear}&hour=${encodedHour}&question=${questionNumber}&resume=true`;
-              window.location.href = targetUrl;
-            } catch (moveError) {
-              console.warn('정오표 문제 이동 실패:', moveError);
+              const subj = attempt.questionData.subject;
+              const num = Number(attempt.questionData.number || 1);
+              showQuestionPreview({
+                year, subject: subj, number: num,
+                userAnswer, correctAnswer,
+                isCorrect: attempt.isCorrect
+              });
+            } catch (previewError) {
+              console.warn('문제 미리보기 실패:', previewError);
             }
           });
 
@@ -7225,6 +7225,65 @@ async function loadMockExamAttemptsForSession(sessionId) {
 // 함수를 전역으로 노출
 window.showMockExamScorecard = showMockExamScorecard;
 window.loadMockExamAttemptsForSession = loadMockExamAttemptsForSession;
+
+/**
+ * 문제 미리보기 모달 (페이지 이동 없이 문제 확인)
+ */
+async function showQuestionPreview({ year, subject, number, userAnswer, correctAnswer, isCorrect }) {
+  // 기존 모달 제거
+  document.getElementById('question-preview-modal')?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'question-preview-modal';
+  modal.innerHTML = `
+    <div class="qp-backdrop"></div>
+    <div class="qp-container">
+      <div class="qp-header">
+        <span class="qp-title">${year}년 ${subject} ${number}번</span>
+        <button class="qp-close">&times;</button>
+      </div>
+      <div class="qp-body">
+        <div class="qp-loading">문제 불러오는 중...</div>
+      </div>
+      <div class="qp-footer">
+        <div class="qp-answer-info">
+          <span class="qp-badge ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? '정답' : '오답'}</span>
+          <span class="qp-answer-text">내 답: <strong>${userAnswer}</strong> / 정답: <strong>${correctAnswer}</strong></span>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // 닫기 이벤트
+  const close = () => modal.remove();
+  modal.querySelector('.qp-backdrop').addEventListener('click', close);
+  modal.querySelector('.qp-close').addEventListener('click', close);
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escHandler); }
+  });
+
+  // JSON 데이터에서 문제 로드
+  const bodyEl = modal.querySelector('.qp-body');
+  try {
+    const resp = await fetch(`data/${year}_${subject}.json`);
+    if (!resp.ok) throw new Error('데이터 없음');
+    const questions = await resp.json();
+    const q = questions.find(item => item.id === number) || questions[number - 1];
+    if (!q) throw new Error('문제 없음');
+
+    let html = '';
+    if (q.questionImage) {
+      html += `<img class="qp-image" src="${q.questionImage}" alt="${number}번 문제" />`;
+    }
+    if (q.explanation) {
+      html += `<div class="qp-explanation"><strong>해설</strong><br/>${q.explanation}</div>`;
+    }
+    bodyEl.innerHTML = html || '<p>문제 데이터를 표시할 수 없습니다.</p>';
+  } catch (e) {
+    bodyEl.innerHTML = `<p class="qp-error">문제를 불러올 수 없습니다.<br/><a href="exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${number}" class="qp-link">문제 페이지로 이동</a></p>`;
+  }
+}
 
 function reviewQuiz() {
   // 오답 모드 플래그 설정
