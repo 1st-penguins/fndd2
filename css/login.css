@@ -532,9 +532,12 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.btn-auth-google img {
+.btn-auth-google img,
+.modern-google-button img,
+.google-logo {
   width: 20px;
   height: 20px;
+  object-fit: contain;
 }
 
 /* 구분선 */
