@@ -242,56 +242,71 @@ export function renderProgressTabStandalone(data) {
     const renderHourCard = (hour, best) => {
       const isCompleted = !!best;
       const examUrl = `exam/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}`;
-      const PASS_SCORE = 40; // 과목별 과락 기준
-      const TOTAL_PASS = 60; // 전체 합격 기준
+      const PASS_PCT = 40;       // 과목별 과락 기준 (%)
+      const TOTAL_PASS_PCT = 60; // 총점 합격 기준 (%)
+      const PTS_PER_Q = 5;       // 1문제당 배점
 
-      // 과목별 막대 그래프
-      let subjectBarsHtml = '';
+      let subjectHtml = '';
+      let passTagHtml = '';
+      let totalPts = '';
+      let totalMax = '';
+
+      if (isCompleted) {
+        // 실제 점수 계산 (문제수 × 5점)
+        const cc = best.correctCount ?? 0;
+        const tq = best.totalQuestions ?? 0;
+        totalPts = cc * PTS_PER_Q;
+        totalMax = tq * PTS_PER_Q;
+      }
+
       if (isCompleted && best.subjectResults) {
         const subjects = Object.entries(best.subjectResults);
-        const allSubjectsPass = subjects.every(([, s]) => s.score >= PASS_SCORE);
-        const totalPass = best.score >= TOTAL_PASS;
+        const allSubjectsPass = subjects.every(([, s]) => (s.score || 0) >= PASS_PCT);
+        const totalPass = (best.score || 0) >= TOTAL_PASS_PCT;
         const isPass = allSubjectsPass && totalPass;
 
-        subjectBarsHtml = `
-          <div class="subject-bars-grid">
-            ${subjects.map(([name, s]) => {
-              const pct = s.score || 0;
-              const pass = pct >= PASS_SCORE;
-              const shortName = name.length > 4 ? name.slice(0, 4) : name;
-              return `
-                <div class="subject-bar-item">
-                  <div class="bar-label">${shortName}</div>
-                  <div class="bar-track">
-                    <div class="bar-fill ${pass ? 'pass' : 'fail'}" style="height:${Math.max(pct, 4)}%"></div>
-                    <div class="bar-cutline" style="bottom:${PASS_SCORE}%"></div>
+        passTagHtml = `<span class="pass-tag ${isPass ? 'pass' : 'fail'}">${isPass ? '합격' : (!allSubjectsPass ? '과락' : '불합격')}</span>`;
+
+        subjectHtml = `<div class="subject-detail-list">
+          ${subjects.map(([name, s]) => {
+            const pct = s.score || 0;
+            const pass = pct >= PASS_PCT;
+            const pts = (s.correct || 0) * PTS_PER_Q;
+            const maxPts = (s.total || 0) * PTS_PER_Q;
+            const barColor = pass ? (pct >= 80 ? '#1D2F4E' : '#5FB2C9') : '#ef4444';
+            return `
+              <div class="subj-row">
+                <span class="subj-name">${name}</span>
+                <div class="subj-bar-wrap">
+                  <div class="subj-bar-bg">
+                    <div class="subj-bar-fill" style="width:${Math.max(pct, 3)}%;background:${barColor}"></div>
+                    <div class="subj-cutline"></div>
                   </div>
-                  <div class="bar-value ${pass ? 'pass' : 'fail'}">${pct}</div>
-                </div>`;
-            }).join('')}
-          </div>
-          <div class="pass-result ${isPass ? 'pass' : 'fail'}">
-            ${isPass ? '합격' : (totalPass ? '과락' : '불합격')}
-          </div>`;
+                </div>
+                <span class="subj-score ${pass ? '' : 'fail'}">${pts}/${maxPts}</span>
+              </div>`;
+          }).join('')}
+        </div>`;
       }
 
       return `
         <div class="progress-hour-card ${isCompleted ? 'completed' : 'not-taken'}">
           <div class="hour-header">
             <span class="hour-label">${hour}교시</span>
-            <span class="hour-badge ${isCompleted ? 'badge-done' : 'badge-yet'}">${isCompleted ? '응시완료' : '미응시'}</span>
+            <div class="hour-tags">
+              ${passTagHtml}
+              <span class="hour-badge ${isCompleted ? 'badge-done' : 'badge-yet'}">${isCompleted ? '응시완료' : '미응시'}</span>
+            </div>
           </div>
-          <div class="hour-score">
-            ${isCompleted ? `
-              <span class="score-value">${best.score}<span class="score-unit">점</span></span>
-              ${best.correctCount != null && best.totalQuestions != null ? `
-                <span class="score-detail">${best.correctCount}/${best.totalQuestions}</span>
-              ` : ''}
-            ` : `<span class="score-placeholder">—</span>`}
-          </div>
-          ${subjectBarsHtml}
+          ${isCompleted ? `
+            <div class="hour-score-row">
+              <span class="score-big">${totalPts}</span><span class="score-unit-big">/ ${totalMax}점</span>
+              <span class="score-sub">(${best.correctCount}/${best.totalQuestions}문제)</span>
+            </div>
+          ` : `<div class="hour-empty">아직 응시하지 않았습니다</div>`}
+          ${subjectHtml}
           <a href="${examUrl}" class="hour-action-btn ${isCompleted ? 'btn-retry' : 'btn-start'}">
-            ${isCompleted ? '다시 풀기' : '지금 풀기'}
+            ${isCompleted ? '다시 풀기' : '응시하기'}
           </a>
         </div>`;
     };
@@ -326,45 +341,45 @@ export function renderProgressTabStandalone(data) {
       .progress-year-group.all-done .year-group-badge { background: #1D2F4E; color: #fff; }
       .progress-year-group.partial .year-group-badge { background: #5FB2C9; color: #fff; }
       .year-group-hours { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-      .progress-hour-card { padding: 16px; border-radius: 10px; text-align: center; }
+      .progress-hour-card { padding: 16px; border-radius: 10px; }
       .progress-hour-card.completed { background: rgba(29,47,78,0.04); }
-      .progress-hour-card.not-taken { background: var(--color-bg-level-1, #f8fafc); }
-      .hour-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .progress-hour-card.not-taken { background: var(--color-bg-level-1, #f8fafc); text-align: center; }
+      .hour-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
       .hour-label { font-size: 0.9rem; font-weight: 600; color: var(--color-text-primary, #1D2F4E); }
+      .hour-tags { display: flex; align-items: center; gap: 6px; }
       .hour-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
       .hour-badge.badge-done { background: #1D2F4E; color: #fff; }
       .hour-badge.badge-yet { background: var(--color-bg-level-1, #e2e8f0); color: var(--color-text-secondary, #94a3b8); }
-      .hour-score { margin-bottom: 12px; }
-      .hour-score .score-value { font-size: 1.6rem; font-weight: 700; color: var(--color-text-primary, #1D2F4E); }
-      .hour-score .score-unit { font-size: 0.85rem; font-weight: 500; color: var(--color-text-secondary, #64748b); margin-left: 2px; }
-      .hour-score .score-detail { display: block; font-size: 0.75rem; color: var(--color-text-tertiary, #94a3b8); margin-top: 2px; }
-      .hour-score .score-placeholder { font-size: 1.4rem; color: var(--color-text-tertiary, #cbd5e1); }
-      .hour-action-btn { display: inline-block; padding: 7px 18px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
+      .pass-tag { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+      .pass-tag.pass { background: rgba(29,47,78,0.1); color: #1D2F4E; }
+      .pass-tag.fail { background: rgba(239,68,68,0.1); color: #ef4444; }
+      .hour-score-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 10px; }
+      .score-big { font-size: 1.5rem; font-weight: 800; color: var(--color-text-primary, #1D2F4E); }
+      .score-unit-big { font-size: 0.8rem; font-weight: 500; color: var(--color-text-secondary, #64748b); }
+      .score-sub { font-size: 0.75rem; color: var(--color-text-tertiary, #94a3b8); margin-left: 4px; }
+      .hour-empty { font-size: 0.85rem; color: var(--color-text-tertiary, #94a3b8); padding: 16px 0; }
+      .hour-action-btn { display: inline-block; padding: 7px 18px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s; margin-top: 4px; }
       .hour-action-btn:hover { opacity: 0.85; }
       .hour-action-btn.btn-start { background: #1D2F4E; color: #fff; }
       .hour-action-btn.btn-retry { background: var(--color-bg-level-1, #e2e8f0); color: var(--color-text-primary, #1D2F4E); }
-      /* 과목별 막대 그래프 */
-      .subject-bars-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 12px 0; padding: 10px 4px; background: rgba(0,0,0,0.02); border-radius: 8px; }
-      .subject-bar-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-      .bar-label { font-size: 0.6rem; font-weight: 600; color: var(--color-text-secondary, #64748b); white-space: nowrap; }
-      .bar-track { position: relative; width: 20px; height: 50px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
-      .bar-fill { position: absolute; bottom: 0; width: 100%; border-radius: 4px 4px 0 0; transition: height 0.6s ease; }
-      .bar-fill.pass { background: #1D2F4E; }
-      .bar-fill.fail { background: #ef4444; }
-      .bar-cutline { position: absolute; left: -2px; right: -2px; height: 1px; border-top: 1.5px dashed rgba(239,68,68,0.5); }
-      .bar-value { font-size: 0.65rem; font-weight: 700; }
-      .bar-value.pass { color: #1D2F4E; }
-      .bar-value.fail { color: #ef4444; }
-      .pass-result { font-size: 0.75rem; font-weight: 700; padding: 3px 0; margin-bottom: 8px; }
-      .pass-result.pass { color: #1D2F4E; }
-      .pass-result.fail { color: #ef4444; }
+      /* 과목별 수평 막대 */
+      .subject-detail-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+      .subj-row { display: flex; align-items: center; gap: 8px; }
+      .subj-name { font-size: 0.72rem; font-weight: 600; color: var(--color-text-secondary, #64748b); min-width: 58px; flex-shrink: 0; }
+      .subj-bar-wrap { flex: 1; min-width: 0; }
+      .subj-bar-bg { position: relative; height: 14px; background: rgba(0,0,0,0.06); border-radius: 7px; overflow: hidden; }
+      .subj-bar-fill { height: 100%; border-radius: 7px; transition: width 0.6s ease; }
+      .subj-cutline { position: absolute; left: 40%; top: 0; bottom: 0; width: 1.5px; background: rgba(239,68,68,0.4); }
+      .subj-score { font-size: 0.7rem; font-weight: 700; color: #1D2F4E; min-width: 40px; text-align: right; flex-shrink: 0; }
+      .subj-score.fail { color: #ef4444; }
       @media (max-width: 480px) {
-        .year-group-hours { grid-template-columns: 1fr 1fr; gap: 8px; }
-        .progress-hour-card { padding: 12px 8px; }
-        .hour-score .score-value { font-size: 1.3rem; }
-        .hour-action-btn { padding: 6px 12px; font-size: 0.75rem; }
-        .bar-track { height: 40px; width: 16px; }
-        .bar-label { font-size: 0.55rem; }
+        .year-group-hours { grid-template-columns: 1fr; gap: 8px; }
+        .progress-hour-card { padding: 12px 10px; }
+        .score-big { font-size: 1.3rem; }
+        .hour-action-btn { padding: 6px 14px; font-size: 0.75rem; }
+        .subj-name { font-size: 0.68rem; min-width: 50px; }
+        .subj-bar-bg { height: 12px; }
+        .subj-score { font-size: 0.65rem; min-width: 36px; }
       }
     </style>
   `;
