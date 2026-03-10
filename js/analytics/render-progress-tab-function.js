@@ -363,23 +363,23 @@ export function renderProgressTabStandalone(data) {
       .hour-action-btn.btn-start { background: #1D2F4E; color: #fff; }
       .hour-action-btn.btn-retry { background: var(--color-bg-level-1, #e2e8f0); color: var(--color-text-primary, #1D2F4E); }
       /* 과목별 수평 막대 */
-      .subject-detail-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
-      .subj-row { display: flex; align-items: center; gap: 8px; }
-      .subj-name { font-size: 0.72rem; font-weight: 600; color: var(--color-text-secondary, #64748b); width: 62px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .subject-detail-list { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+      .subj-row { display: flex; align-items: center; gap: 6px; }
+      .subj-name { font-size: 0.68rem; font-weight: 600; color: var(--color-text-secondary, #64748b); width: 5.2em; flex-shrink: 0; white-space: nowrap; }
       .subj-bar-wrap { flex: 1; min-width: 0; }
-      .subj-bar-bg { position: relative; height: 14px; background: rgba(0,0,0,0.06); border-radius: 7px; overflow: hidden; }
-      .subj-bar-fill { height: 100%; border-radius: 7px; transition: width 0.6s ease; }
-      .subj-cutline { position: absolute; left: 40%; top: 0; bottom: 0; width: 1.5px; background: rgba(239,68,68,0.4); }
-      .subj-score { font-size: 0.7rem; font-weight: 700; color: #1D2F4E; min-width: 40px; text-align: right; flex-shrink: 0; }
+      .subj-bar-bg { position: relative; height: 10px; background: rgba(0,0,0,0.06); border-radius: 5px; overflow: hidden; }
+      .subj-bar-fill { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+      .subj-cutline { position: absolute; left: 40%; top: 0; bottom: 0; width: 1.5px; background: rgba(239,68,68,0.35); }
+      .subj-score { font-size: 0.65rem; font-weight: 700; color: #1D2F4E; min-width: 38px; text-align: right; flex-shrink: 0; }
       .subj-score.fail { color: #ef4444; }
       @media (max-width: 480px) {
         .year-group-hours { grid-template-columns: 1fr; gap: 8px; }
         .progress-hour-card { padding: 12px 10px; }
         .score-big { font-size: 1.3rem; }
         .hour-action-btn { padding: 6px 14px; font-size: 0.75rem; }
-        .subj-name { font-size: 0.68rem; width: 56px; }
-        .subj-bar-bg { height: 12px; }
-        .subj-score { font-size: 0.65rem; min-width: 36px; }
+        .subj-name { font-size: 0.63rem; width: 4.8em; }
+        .subj-bar-bg { height: 8px; }
+        .subj-score { font-size: 0.6rem; min-width: 34px; }
       }
     </style>
   `;
