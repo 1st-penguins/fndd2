@@ -611,7 +611,7 @@ function injectFooter() {
             </div>
             <span class="linear-footer__brand-text">퍼스트펭귄</span>
           </a>
-          <p class="linear-footer__brand-description">본 사이트의 기출문제는 국민체육진흥공단(KSPO)에서 출제한 문제로, 저작권은 KSPO에 있습니다. 퍼스트펭귄은 해당 문제를 비영리 학습 목적으로 제공합니다.</p>
+          <p class="linear-footer__brand-description">본 사이트의 기출문제는 국민체육진흥공단(KSPO)에서 출제한 문제로, 저작권은 KSPO에 있습니다. 퍼스트펭귄은 해당 문제를 학습 지원 목적으로 제공합니다.</p>
         </div>
 
         <div class="linear-footer__section">
