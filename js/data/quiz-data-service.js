@@ -536,6 +536,9 @@ export async function getUserAttempts(count = 50, certificateType = null) {
       for (const d of snapshot.docs) {
         const data = d.data();
         const attempt = { id: d.id, ...data, timestamp: data.timestamp?.toDate() || new Date() };
+        if (totalFetched <= snapshot.docs.length && results.length === 0 && totalFetched <= 5) {
+          console.log(`[디버그 attempt] certType=${attempt.certificateType}, year=${attempt.year}, subject=${attempt.subject}`);
+        }
         if (!certificateType || (attempt.certificateType || 'health-manager') === certificateType) {
           results.push(attempt);
           if (results.length >= count) break;
