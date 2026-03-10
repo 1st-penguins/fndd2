@@ -436,6 +436,7 @@ export function initAnalyticsSubTabs() {
     // 초기 탭 렌더링 호출
     if (activeTabId === 'overview-tab') renderOverviewTab();
     else if (activeTabId === 'question-sets-tab') renderQuestionSetsTab();
+    else if (activeTabId === 'progress-tab') renderProgressTab();
   } else {
     console.warn('초기 활성 서브탭 버튼을 찾을 수 없습니다.');
   }
