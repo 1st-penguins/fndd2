@@ -258,27 +258,25 @@ const subjectColors = {
 
 // 학습 진행률 탭 스타일은 css/analytics-dashboard.css에서 관리됨
 
+// 중복 초기화 방지 플래그
+let dashboardInitialized = false;
+
 /**
- * 대시보드 초기화
+ * 대시보드 초기화 (최초 1회만 실행)
  */
 export function initDashboard() {
-  // console.log('대시보드 초기화 시작');
+  if (dashboardInitialized) return;
+  dashboardInitialized = true;
 
   // 로그인 상태 확인 및 오버레이 처리
   if (auth && auth.currentUser) {
-    // 로그인 상태: 오버레이 숨기기
     const analyticsOverlay = document.getElementById('analytics-login-overlay');
-    if (analyticsOverlay) {
-      analyticsOverlay.style.display = 'none';
-    }
+    if (analyticsOverlay) analyticsOverlay.style.display = 'none';
     const restrictedOverlay = document.querySelector('.restricted-content-overlay');
-    if (restrictedOverlay) {
-      restrictedOverlay.style.display = 'none';
-    }
+    if (restrictedOverlay) restrictedOverlay.style.display = 'none';
   }
 
-  // 로딩 UI 표시
-  showLoading();
+  // showLoading()은 여기서 제거 — loadAnalyticsData()에서 관리
 
   // 탭 변경 이벤트 리스너
   document.addEventListener('tabChanged', handleTabChange);
@@ -3391,15 +3389,18 @@ function createProSessionCard(session) {
         <div class="session-progress-bar">
           <div class="session-progress-fill ${scoreClass}" style="width:${pct}%"></div>
         </div>
-        <span class="session-progress-text">
-          ${session.completed}/${session.total}문제 &middot; <strong>${points}/${totalPoints}점</strong>
-        </span>
+        <span class="session-progress-pct ${scoreClass}">${pct}%</span>
       </div>
-    </div>
-
-    <div class="session-card-score">
-      <div class="session-score-value ${scoreClass}">${points}</div>
-      <div class="session-score-label">/${totalPoints}점</div>
+      <div class="session-info-row">
+        <div class="session-info-item">
+          <span class="session-info-label">풀이 문항</span>
+          <span class="session-info-value">${session.completed}<span class="session-info-denom">/${session.total}문제</span></span>
+        </div>
+        <div class="session-info-item">
+          <span class="session-info-label">취득 점수</span>
+          <span class="session-info-value ${scoreClass}">${points}<span class="session-info-denom">/${totalPoints}점</span></span>
+        </div>
+      </div>
     </div>
 
     <div class="session-card-actions">

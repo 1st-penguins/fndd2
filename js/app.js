@@ -493,17 +493,17 @@ window.handleAnalyticsTabClick = async function () {
       // 컨테이너에 로드 완료 클래스 표시
       if (container) container.classList.add('dashboard-loaded');
 
-      // 대시보드 이벤트 리스너 및 초기화 (한 번만 실행되도록 모듈이 알아서 처리하거나 여기서 명시적 호출)
+      // 대시보드 초기화 (내부 guard로 최초 1회만 실행됨)
       if (dashboardModule && typeof dashboardModule.initDashboard === 'function') {
         dashboardModule.initDashboard();
       }
 
-      if (dashboardModule && dashboardModule.renderHomeDashboard) {
-        // Firebase 초기화 보장 후 사용자 정보 가져오기
+      // 데이터 로드 — 매 탭 방문마다 호출 (loadAnalyticsData 내부에서 isLoading 중복 방지)
+      if (dashboardModule && typeof dashboardModule.loadAnalyticsData === 'function') {
         const { ensureFirebase } = await import('./core/firebase-core.js');
         const { auth } = await ensureFirebase();
         const user = auth ? auth.currentUser : null;
-        dashboardModule.renderHomeDashboard(user);
+        dashboardModule.loadAnalyticsData(user);
       }
     } catch (e) {
       console.error('대시보드 로드 실패:', e);

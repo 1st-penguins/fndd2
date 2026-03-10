@@ -520,7 +520,7 @@
 /* 카드 전체 — 3열 그리드: 본문 | 점수 | 액션 */
 .session-card {
   display: grid;
-  grid-template-columns: 1fr 72px auto;
+  grid-template-columns: 1fr auto;
   align-items: stretch;
   background: #ffffff;
   border-radius: 14px;
@@ -619,6 +619,52 @@
   color: var(--text-secondary, #6b7280);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* 진행률 퍼센트 (프로그레스 바 옆) */
+.session-progress-pct {
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.session-progress-pct.score-high { color: #059669; }
+.session-progress-pct.score-good { color: var(--penguin-skyblue, #5FB2C9); }
+.session-progress-pct.score-mid  { color: #F59E0B; }
+.session-progress-pct.score-low  { color: #EF4444; }
+
+/* 풀이 문항 / 취득 점수 인포 행 */
+.session-info-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+.session-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.session-info-label {
+  font-size: 0.68rem;
+  color: var(--text-tertiary, #9ca3af);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.session-info-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--penguin-navy, #1D2F4E);
+  line-height: 1.2;
+}
+.session-info-value.score-high { color: #059669; }
+.session-info-value.score-good { color: var(--penguin-skyblue, #5FB2C9); }
+.session-info-value.score-mid  { color: #F59E0B; }
+.session-info-value.score-low  { color: #EF4444; }
+.session-info-denom {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
 }
 
 /* 점수 영역 */
