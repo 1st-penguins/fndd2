@@ -629,7 +629,8 @@
         const urlParams2 = new URLSearchParams(window.location.search);
         let gotoQuestion = urlParams2.get('goto') || urlParams2.get('question');
 
-        // ✅ 세션 복구 시 자동으로 마지막 풀었던 문제로 이동 (isResume 조건 제거)
+        // ✅ 세션 복구 시 자동으로 마지막 풀었던 문제로 이동
+        const lastQuestionNumber = window.sessionManager?.getLastQuestionNumber?.() || 0;
         if (!gotoQuestion && lastQuestionNumber) {
           const targetIndex = lastQuestionNumber - 1;
           // currentQuestionIndex가 이미 마지막 문제로 설정되어 있으면 이동하지 않음
