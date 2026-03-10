@@ -51,7 +51,7 @@ import {
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
-import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031110';
+import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031111';
 
 // 차트 및 분석 데이터 상태
 const state = {
@@ -811,136 +811,230 @@ function handleLoadAdminStats(e) {
 }
 
 /**
- * 🎯 개요 통계 렌더링 (자격증 완전 분리)
+ * 개요 통계 렌더링 (자격증 필터링)
  */
 function renderOverviewStats() {
   const container = document.getElementById('overview-stats');
   if (!container) return;
 
-  // 🎯 현재 선택된 자격증
   const currentCertType = getCurrentCertificateType();
   const certName = getCertificateName(currentCertType);
-  const certEmoji = getCertificateEmoji(currentCertType);
+  const filteredAttempts = state.attempts || [];
 
-  console.log(`[개요 통계] ${certName} 자격증 데이터 렌더링 중...`);
-
-  // 🔒 현재 자격증으로 필터링
-  const filteredAttempts = state.attempts || []; // state.attempts는 이미 필터링되어 있을 수 있음 (loadAnalyticsData에서)
-
-  // 데이터 없는 경우 처리
   if (filteredAttempts.length === 0) {
     container.innerHTML = `
       <div class="no-data-message">
-        <div style="font-size: 48px; margin-bottom: 16px;">${certEmoji}</div>
-        <p><strong>${certName}</strong>에 대한 학습 데이터가 아직 없습니다.</p>
-        <p style="margin-top: 8px; color: #6b7280;">문제를 풀어보면 학습 통계가 표시됩니다.</p>
+        <p><strong>${certName}</strong> 학습 데이터가 아직 없습니다.</p>
+        <p style="margin-top: 8px; color: var(--color-text-tertiary, #6b7280);">문제를 풀어보면 학습 통계가 표시됩니다.</p>
       </div>
     `;
     return;
   }
 
-  // 🔧 중복 제거: 같은 문제를 여러 번 풀었을 때 최신 기록만 카운트
-  const uniqueAttempts = [];
-  const processedQuestions = new Map(); // questionId -> 최신 attempt
-
+  // 중복 제거: 같은 문제 여러 번 풀었을 때 최신 기록만
+  const processedQuestions = new Map();
   for (const attempt of filteredAttempts) {
-    // 고유 문제 ID 생성
     let questionId;
-    if (attempt.questionData?.globalIndex !== undefined && attempt.questionData?.globalIndex !== null) {
+    if (attempt.questionData?.globalIndex != null) {
       questionId = `g_${attempt.questionData.globalIndex}`;
-    } else if (attempt.questionNumber) {
-      questionId = `n_${attempt.questionNumber}`;
     } else {
       const subject = attempt.subject || attempt.questionData?.subject || '';
       const number = attempt.questionData?.number || attempt.number || 0;
       questionId = `${subject}_${number}`;
     }
-
-    // 타임스탬프 비교
-    const timestamp = attempt.timestamp?.toDate ? attempt.timestamp.toDate() :
+    const ts = attempt.timestamp?.toDate ? attempt.timestamp.toDate() :
       (attempt.timestamp instanceof Date ? attempt.timestamp : new Date(attempt.timestamp));
-
-    if (!processedQuestions.has(questionId)) {
-      processedQuestions.set(questionId, attempt);
-    } else {
-      const existingAttempt = processedQuestions.get(questionId);
-      const existingTimestamp = existingAttempt.timestamp?.toDate ? existingAttempt.timestamp.toDate() :
-        (existingAttempt.timestamp instanceof Date ? existingAttempt.timestamp : new Date(existingAttempt.timestamp));
-
-      if (timestamp > existingTimestamp) {
-        processedQuestions.set(questionId, attempt);
-      }
+    const existing = processedQuestions.get(questionId);
+    if (!existing) {
+      processedQuestions.set(questionId, { attempt, ts });
+    } else if (ts > existing.ts) {
+      processedQuestions.set(questionId, { attempt, ts });
     }
   }
 
-  uniqueAttempts.push(...processedQuestions.values());
-
-  // 🎯 현재 자격증 통계 계산
+  const uniqueAttempts = [...processedQuestions.values()].map(v => v.attempt);
   const totalAttempts = uniqueAttempts.length;
-  const totalCorrect = uniqueAttempts.filter(attempt => attempt.isCorrect).length;
-  const correctPercentage = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+  const totalCorrect = uniqueAttempts.filter(a => a.isCorrect).length;
+  const correctPct = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
-  // 최근 활동
-  const sortedUniqueAttempts = [...uniqueAttempts].sort((a, b) => {
-    const timeA = a.timestamp?.toDate ? a.timestamp.toDate() :
+  // 학습 일수 계산 (고유 날짜 수)
+  const studyDays = new Set();
+  filteredAttempts.forEach(a => {
+    const ts = a.timestamp?.toDate ? a.timestamp.toDate() :
       (a.timestamp instanceof Date ? a.timestamp : new Date(a.timestamp));
-    const timeB = b.timestamp?.toDate ? b.timestamp.toDate() :
-      (b.timestamp instanceof Date ? b.timestamp : new Date(b.timestamp));
-    return timeB - timeA;
+    if (ts && !isNaN(ts)) studyDays.add(ts.toISOString().slice(0, 10));
   });
 
-  const lastActivity = sortedUniqueAttempts.length > 0
-    ? formatRelativeDate(sortedUniqueAttempts[0].timestamp)
-    : '없음';
+  const pctColor = correctPct >= 60 ? '#059669' : (correctPct >= 40 ? '#D97706' : '#DC2626');
 
-  // 통계 카드 HTML
-  const certHeader = `
-    <div class="cert-summary-banner">
-      <div class="cert-banner-icon">${certEmoji}</div>
-      <div class="cert-banner-info">
-        <div class="cert-banner-name">${certName}</div>
-        <div class="cert-banner-desc">학습 리포트</div>
-      </div>
-    </div>
-  `;
-
-  const html = certHeader + `
+  container.innerHTML = `
     <div class="overview-stats-grid">
       <div class="overview-stat-item">
         <div class="overview-stat-value">${totalAttempts}</div>
-        <div class="overview-stat-label">총 문제 풀이</div>
+        <div class="overview-stat-label">총 풀이 문제</div>
       </div>
-      
       <div class="overview-stat-item">
-        <div class="overview-stat-value" style="color: ${correctPercentage >= 60 ? '#059669' : (correctPercentage >= 40 ? '#D97706' : '#DC2626')}">${correctPercentage}%</div>
+        <div class="overview-stat-value" style="color: ${pctColor}">${correctPct}%</div>
         <div class="overview-stat-label">평균 정답률</div>
       </div>
-      
       <div class="overview-stat-item">
-        <div class="overview-stat-value" style="color: #0284C7; font-size: 1.8rem; margin-top: 4px; margin-bottom: 12px;">${lastActivity}</div>
-        <div class="overview-stat-label">최근 학습일</div>
+        <div class="overview-stat-value">${studyDays.size}일</div>
+        <div class="overview-stat-label">총 학습 일수</div>
       </div>
     </div>
   `;
-
-  container.innerHTML = html;
 }
 
 /**
  * 학습 개요 탭 렌더링
  */
 function renderOverviewTab() {
-  // console.log('학습 개요 탭 렌더링...');
-
-  // 개요 통계 렌더링
   renderOverviewStats();
-
-  // 과목별 학습 현황 렌더링
+  renderScoreTrendChart();
   renderSubjectProgress();
+}
 
-  // 취약 문제 및 복습 추천 렌더링
-  renderWeakQuestions(state.attempts);
-  renderReviewRecommendations(state.attempts);
+/**
+ * 성적 추이 차트 (모의고사 점수 변화)
+ */
+function renderScoreTrendChart() {
+  const section = document.getElementById('score-trend-section');
+  const canvas = document.getElementById('score-trend-chart');
+  if (!section || !canvas) return;
+
+  const mockResults = state.mockExamResults || [];
+  if (mockResults.length < 2) {
+    section.style.display = 'none';
+    return;
+  }
+
+  // 시간순 정렬
+  const sorted = [...mockResults].sort((a, b) => {
+    const tA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+    const tB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+    return tA - tB;
+  });
+
+  // 1교시 / 2교시 분리
+  const PTS = 5;
+  const h1Data = [];
+  const h2Data = [];
+  sorted.forEach(r => {
+    const ts = r.timestamp?.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+    const hour = String(r.mockExamHour || r.hour || '1');
+    const pts = (r.correctCount || 0) * PTS;
+    const label = `${(ts.getMonth() + 1)}/${ts.getDate()}`;
+    const entry = { x: label, y: pts, meta: `${r.year || ''}년 ${hour}교시` };
+    if (hour === '2') h2Data.push(entry);
+    else h1Data.push(entry);
+  });
+
+  // 모든 라벨 합치기 (시간순 유지)
+  const allLabels = sorted.map(r => {
+    const ts = r.timestamp?.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+    return `${(ts.getMonth() + 1)}/${ts.getDate()}`;
+  });
+  const uniqueLabels = [...new Set(allLabels)];
+
+  section.style.display = '';
+
+  // 기존 차트 파괴
+  if (window._scoreTrendChart) {
+    window._scoreTrendChart.destroy();
+    window._scoreTrendChart = null;
+  }
+
+  if (typeof Chart === 'undefined') {
+    section.style.display = 'none';
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
+  window._scoreTrendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: uniqueLabels,
+      datasets: [
+        {
+          label: '1교시',
+          data: h1Data.map(d => ({ x: d.x, y: d.y })),
+          borderColor: '#1D2F4E',
+          backgroundColor: 'rgba(29,47,78,0.1)',
+          borderWidth: 2.5,
+          pointRadius: 5,
+          pointBackgroundColor: '#1D2F4E',
+          tension: 0.3,
+          fill: false,
+        },
+        {
+          label: '2교시',
+          data: h2Data.map(d => ({ x: d.x, y: d.y })),
+          borderColor: '#5FB2C9',
+          backgroundColor: 'rgba(95,178,201,0.1)',
+          borderWidth: 2.5,
+          pointRadius: 5,
+          pointBackgroundColor: '#5FB2C9',
+          tension: 0.3,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { font: { size: 12, weight: '600' }, usePointStyle: true, pointStyle: 'circle', padding: 16 }
+        },
+        tooltip: {
+          backgroundColor: '#1D2F4E',
+          titleFont: { size: 13 },
+          bodyFont: { size: 12 },
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            label: function(ctx) { return `${ctx.dataset.label}: ${ctx.parsed.y}점`; }
+          }
+        }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 400,
+          ticks: { stepSize: 100, font: { size: 11 }, callback: v => v + '점' },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        },
+        x: {
+          ticks: { font: { size: 11 } },
+          grid: { display: false }
+        }
+      },
+      // 합격선 annotation (plugin 없이 직접 그리기)
+    },
+    plugins: [{
+      id: 'passLine',
+      afterDraw(chart) {
+        const yScale = chart.scales.y;
+        const passY = yScale.getPixelForValue(240);
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = 'rgba(239,68,68,0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(chart.chartArea.left, passY);
+        ctx.lineTo(chart.chartArea.right, passY);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(239,68,68,0.7)';
+        ctx.font = '11px sans-serif';
+        ctx.fillText('합격선 240점', chart.chartArea.right - 75, passY - 6);
+        ctx.restore();
+      }
+    }]
+  });
 }
 
 /**
@@ -1343,16 +1437,12 @@ function renderRecentActivityChart() {
 }
 
 /**
- * 과목별 학습 현황 렌더링
- */
-/**
- * 과목별 학습 현황 렌더링 (Premium Glass Grid Redesign)
+ * 과목별 정답률 렌더링 (수평 막대)
  */
 function renderSubjectProgress() {
   const container = document.getElementById('subject-progress');
   if (!container) return;
 
-  // 데이터가 없는 경우
   if (!state.attempts || state.attempts.length === 0) {
     container.innerHTML = `
       <div class="no-data-message">
@@ -1362,92 +1452,65 @@ function renderSubjectProgress() {
     return;
   }
 
-  // 과목별 통계 계산
-  const subjectStats = {};
-  const _certTypeForSubjects = getCurrentCertificateType();
-  const allSubjects = _certTypeForSubjects === 'sports-instructor'
+  const certType = getCurrentCertificateType();
+  const allSubjects = certType === 'sports-instructor'
     ? ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론']
     : ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사', '운동상해', '기능해부학', '병태생리학', '스포츠심리학'];
 
-  // 이모지 매핑
-  const subjectEmojis = {
-    '운동생리학': '🧬', '건강체력평가': '💪', '운동처방론': '📝', '운동부하검사': '🏃',
-    '운동상해': '🩹', '기능해부학': '💀', '병태생리학': '🦠', '스포츠심리학': '🧠',
-    '스포츠사회학': '🌐', '스포츠교육학': '📚', '한국체육사': '🏛️', '운동역학': '⚙️',
-    '스포츠윤리': '⚖️', '특수체육론': '♿', '유아체육론': '🧸', '노인체육론': '👴'
-  };
+  const subjectStats = {};
+  allSubjects.forEach(s => { subjectStats[s] = { attempts: 0, correct: 0 }; });
 
-  // 통계 초기화
-  allSubjects.forEach(subject => {
-    subjectStats[subject] = {
-      attempts: 0,
-      correct: 0,
-      percentage: 0
-    };
-  });
-
-  // 시도 데이터 집계
-  state.attempts.forEach(attempt => {
-    const subject = attempt.questionData?.subject;
-    if (subject && subjectStats[subject]) {
-      subjectStats[subject].attempts++;
-
-      if (attempt.isCorrect) {
-        subjectStats[subject].correct++;
-      }
+  state.attempts.forEach(a => {
+    const s = a.questionData?.subject;
+    if (s && subjectStats[s]) {
+      subjectStats[s].attempts++;
+      if (a.isCorrect) subjectStats[s].correct++;
     }
   });
 
-  // 백분율 계산
-  Object.keys(subjectStats).forEach(subject => {
+  const PASS_LINE = 40;
+  let html = '<div class="overview-subject-list">';
+
+  allSubjects.forEach(subject => {
     const { attempts, correct } = subjectStats[subject];
-    subjectStats[subject].percentage = attempts > 0 ? Math.round((correct / attempts) * 100) : 0;
-  });
-
-  // HTML 생성 - Glass Grid
-  let html = `<div class="subject-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">`;
-
-  allSubjects.forEach(subject => {
-    const { attempts, correct, percentage } = subjectStats[subject];
-    const color = subjectColors[subject] || '#4285F4';
-    const emoji = subjectEmojis[subject] || '📚';
-
-    // 레벨 뱃지 (5문제 이상부터 표시)
-    let weaknessBadge = '';
-    if (attempts >= 5) {
-      if (percentage < 40)      weaknessBadge = `<span style="background:var(--danger-bg); color:var(--danger-color); font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">취약</span>`;
-      else if (percentage < 60) weaknessBadge = `<span style="background:rgba(251,191,36,0.15); color:#B45309; font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">보통</span>`;
-      else if (percentage < 80) weaknessBadge = `<span style="background:rgba(16,185,129,0.12); color:#059669; font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">양호</span>`;
-      else                       weaknessBadge = `<span style="background:var(--success-bg); color:var(--success-color); font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:700;">우수</span>`;
-    }
+    const pct = attempts > 0 ? Math.round((correct / attempts) * 100) : 0;
+    const pass = pct >= PASS_LINE;
+    const barColor = attempts === 0 ? '#cbd5e1' : (pass ? (pct >= 80 ? '#1D2F4E' : '#5FB2C9') : '#ef4444');
 
     html += `
-      <div class="glass-card subject-card-premium" style="padding: 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.5rem; background: rgba(0,0,0,0.03); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">${emoji}</span>
-            <div>
-                <div class="subject-name" style="font-size: 1rem; font-weight: 700;">${subject}</div>
-                <div style="font-size: 0.8rem; color: var(--text-tertiary); margin-top: 2px;">${attempts}문제 풀이</div>
-            </div>
-          </div>
-          ${weaknessBadge}
-        </div>
-        
-        <div class="progress-section">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">
-            <span style="color: var(--text-secondary);">정답률</span>
-            <span style="color: ${color};">${percentage}%</span>
-          </div>
-          <div class="progress-bar-bg" style="height: 10px; background: rgba(0,0,0,0.05); border-radius: 99px; overflow: hidden;">
-            <div class="progress-bar-fill" style="width: ${percentage}%; height: 100%; background: linear-gradient(90deg, ${color}, ${adjustColorBrightness(color, 20)}); border-radius: 99px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+      <div class="ov-subj-row">
+        <span class="ov-subj-name">${subject}</span>
+        <div class="ov-subj-bar-wrap">
+          <div class="ov-subj-bar-bg">
+            <div class="ov-subj-bar-fill" style="width:${Math.max(pct, 2)}%;background:${barColor}"></div>
+            <div class="ov-subj-cutline"></div>
           </div>
         </div>
-      </div>
-    `;
+        <span class="ov-subj-pct ${!pass && attempts > 0 ? 'fail' : ''}">${attempts > 0 ? pct + '%' : '-'}</span>
+        <span class="ov-subj-count">${attempts > 0 ? correct + '/' + attempts : ''}</span>
+      </div>`;
   });
 
   html += '</div>';
+  html += `<style>
+    .overview-subject-list { display: flex; flex-direction: column; gap: 8px; }
+    .ov-subj-row { display: flex; align-items: center; gap: 12px; }
+    .ov-subj-name { font-size: 0.8rem; font-weight: 600; color: var(--color-text-primary, #1D2F4E); width: 6em; flex-shrink: 0; }
+    .ov-subj-bar-wrap { flex: 1; min-width: 0; }
+    .ov-subj-bar-bg { position: relative; height: 10px; background: rgba(0,0,0,0.05); border-radius: 5px; overflow: hidden; }
+    .ov-subj-bar-fill { height: 100%; border-radius: 5px; transition: width 0.8s ease; }
+    .ov-subj-cutline { position: absolute; left: 40%; top: 0; bottom: 0; width: 1.5px; background: rgba(239,68,68,0.3); }
+    .ov-subj-pct { font-size: 0.8rem; font-weight: 700; color: #1D2F4E; min-width: 32px; text-align: right; }
+    .ov-subj-pct.fail { color: #ef4444; }
+    .ov-subj-count { font-size: 0.7rem; color: var(--color-text-tertiary, #94a3b8); min-width: 40px; text-align: right; }
+    @media (max-width: 480px) {
+      .ov-subj-name { font-size: 0.72rem; width: 5em; }
+      .ov-subj-bar-bg { height: 8px; }
+      .ov-subj-pct { font-size: 0.72rem; }
+      .ov-subj-count { font-size: 0.65rem; min-width: 36px; }
+    }
+  </style>`;
+
   container.innerHTML = html;
 }
 
