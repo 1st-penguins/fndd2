@@ -490,8 +490,8 @@ function renderDashboard() {
   // 각 탭 렌더링
   renderOverviewTab();
 
-  // 현재 활성화된 탭 확인
-  const activeTab = document.querySelector('.tab-button.active');
+  // 현재 활성화된 탭 확인 (메인 .tab-button 또는 서브 .sub-tab-button)
+  const activeTab = document.querySelector('.tab-button.active, .sub-tab-button.active');
   if (activeTab) {
     const tabId = activeTab.dataset.tab;
 
