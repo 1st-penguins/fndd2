@@ -365,7 +365,7 @@ export function renderProgressTabStandalone(data) {
       /* 과목별 수평 막대 */
       .subject-detail-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
       .subj-row { display: flex; align-items: center; gap: 8px; }
-      .subj-name { font-size: 0.72rem; font-weight: 600; color: var(--color-text-secondary, #64748b); min-width: 58px; flex-shrink: 0; }
+      .subj-name { font-size: 0.72rem; font-weight: 600; color: var(--color-text-secondary, #64748b); width: 62px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .subj-bar-wrap { flex: 1; min-width: 0; }
       .subj-bar-bg { position: relative; height: 14px; background: rgba(0,0,0,0.06); border-radius: 7px; overflow: hidden; }
       .subj-bar-fill { height: 100%; border-radius: 7px; transition: width 0.6s ease; }
@@ -377,7 +377,7 @@ export function renderProgressTabStandalone(data) {
         .progress-hour-card { padding: 12px 10px; }
         .score-big { font-size: 1.3rem; }
         .hour-action-btn { padding: 6px 14px; font-size: 0.75rem; }
-        .subj-name { font-size: 0.68rem; min-width: 50px; }
+        .subj-name { font-size: 0.68rem; width: 56px; }
         .subj-bar-bg { height: 12px; }
         .subj-score { font-size: 0.65rem; min-width: 36px; }
       }
