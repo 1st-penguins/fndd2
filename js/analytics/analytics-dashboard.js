@@ -2322,10 +2322,26 @@ async function deleteAllQuestionSets(certType = null) {
       totalDeleted += await deleteQueryBatch(db, attemptsQuery, BATCH_SIZE);
     }
 
-    // 2. mockExamResults 삭제 (certType 없으면 전체, 있으면 해당 세션 기반)
+    // 2. mockExamResults 삭제
     if (!certType) {
       const mockQ = query(collection(db, 'mockExamResults'), where('userId', '==', user.uid));
       totalDeleted += await deleteQueryBatch(db, mockQ, BATCH_SIZE);
+    } else {
+      // certType 기반 삭제: certificateType 필드로 직접 삭제
+      const certTypeValue = certType === 'health' ? 'health-manager' : 'sports-instructor';
+      const mockCertQ = query(collection(db, 'mockExamResults'), where('userId', '==', user.uid), where('certificateType', '==', certTypeValue));
+      totalDeleted += await deleteQueryBatch(db, mockCertQ, BATCH_SIZE);
+      // certificateType 필드 없는 레거시 모의고사 결과도 삭제 (health인 경우)
+      if (certType === 'health') {
+        const allMockSnap = await getDocs(query(collection(db, 'mockExamResults'), where('userId', '==', user.uid)));
+        const legacyMocks = allMockSnap.docs.filter(d => !d.data().certificateType);
+        for (let i = 0; i < legacyMocks.length; i += BATCH_SIZE) {
+          const batch = writeBatch(db);
+          legacyMocks.slice(i, i + BATCH_SIZE).forEach(d => batch.delete(d.ref));
+          await batch.commit();
+          totalDeleted += Math.min(BATCH_SIZE, legacyMocks.length - i);
+        }
+      }
     }
 
     // 3. sessions 삭제
@@ -2366,14 +2382,15 @@ async function deleteAllQuestionSets(certType = null) {
     showToast(`${label} 문제풀이기록이 삭제되었습니다. (총 ${totalDeleted}개 항목)`, 'success');
 
     // state에서 삭제된 데이터 제거 (약점분석/학습진행률 탭 반영)
-    if (certType && targetSessionIds) {
-      // 특정 자격증만 삭제: 해당 세션 데이터만 제거
+    if (certType) {
+      // 특정 자격증 삭제: 해당 certType 데이터 제거
+      const certTypeValue = certType === 'health' ? 'health-manager' : 'sports-instructor';
       if (state.attempts) {
-        state.attempts = state.attempts.filter(a => !targetSessionIds.has(a.sessionId));
+        state.attempts = state.attempts.filter(a => (a.certificateType || 'health-manager') !== certTypeValue);
         window.userAttempts = state.attempts;
       }
       if (state.mockExamResults) {
-        state.mockExamResults = state.mockExamResults.filter(r => !targetSessionIds.has(r.sessionId));
+        state.mockExamResults = state.mockExamResults.filter(r => (r.certificateType || 'health-manager') !== certTypeValue);
         if (window.state) window.state.mockExamResults = state.mockExamResults;
       }
     } else {
