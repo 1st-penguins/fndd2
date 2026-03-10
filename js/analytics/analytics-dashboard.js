@@ -3508,6 +3508,11 @@ function normalizeSessionPresentation(session) {
  * 학습 진행률 탭 렌더링
  */
 function renderProgressTab() {
+  console.log('[진행률탭] attempts:', state.attempts?.length, '| certType:', getCurrentCertificateType());
+  if (state.attempts?.length > 0) {
+    const sample = state.attempts[0];
+    console.log('[진행률탭] 샘플 attempt:', { year: sample.year, subject: sample.subject, certType: sample.certificateType, qYear: sample.questionData?.year, qSubject: sample.questionData?.subject });
+  }
   renderProgressTabStandalone({
     userProgress:    state.userProgress,
     mockExamResults: state.mockExamResults,
