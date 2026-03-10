@@ -626,8 +626,8 @@
         updateProgressDisplay();
 
         // URL에서 goto 또는 question 파라미터 확인하여 특정 문제 번호로 이동
-        // ✅ urlParams는 이미 위에서 선언됨 (중복 선언 제거)
-        let gotoQuestion = urlParams.get('goto') || urlParams.get('question');
+        const urlParams2 = new URLSearchParams(window.location.search);
+        let gotoQuestion = urlParams2.get('goto') || urlParams2.get('question');
 
         // ✅ 세션 복구 시 자동으로 마지막 풀었던 문제로 이동 (isResume 조건 제거)
         if (!gotoQuestion && lastQuestionNumber) {
