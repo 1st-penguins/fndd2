@@ -51,7 +51,7 @@ import {
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
-import { renderProgressTabStandalone } from './render-progress-tab-function.js';
+import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031025';
 
 // 차트 및 분석 데이터 상태
 const state = {
