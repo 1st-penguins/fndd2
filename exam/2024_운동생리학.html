@@ -347,47 +347,42 @@
 
   <!-- Firebase 인증 상태 감지 (문제 페이지 전용) -->
   <script type="module">
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-    import { auth } from "../js/core/firebase-core.js";
+    import { ensureFirebase } from "../js/core/firebase-core.js";
     import { isDevMode } from "../js/config/dev-config.js";
     import { updateRestrictedContent } from "../js/auth/auth-ui.js";
 
-    document.addEventListener("DOMContentLoaded", () => {
-      onAuthStateChanged(auth, (user) => {
-        // 개발 모드에서는 항상 로그인된 것으로 처리
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
         if (isDevMode()) {
-          console.log("개발 모드: 로그인 제한 우회");
           localStorage.setItem("userLoggedIn", "true");
           localStorage.setItem("userName", "개발자");
           localStorage.setItem("emailVerified", "true");
-          
-          // 제한된 콘텐츠 즉시 해제
           if (typeof updateRestrictedContent === 'function') {
             updateRestrictedContent(true);
           }
           return;
         }
-        
-        if (user) {
-          console.log("Firebase 인증 상태: 로그인됨", user.displayName || user.email);
-          localStorage.setItem("userLoggedIn", "true");
-          localStorage.setItem("userName", user.displayName || user.email || "사용자");
-          
-          // 로그인 후 제한된 콘텐츠 해제
-          if (typeof updateRestrictedContent === 'function') {
-            updateRestrictedContent(true);
+
+        const { auth } = await ensureFirebase();
+        const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js");
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            localStorage.setItem("userLoggedIn", "true");
+            localStorage.setItem("userName", user.displayName || user.email || "사용자");
+            if (typeof updateRestrictedContent === 'function') {
+              updateRestrictedContent(true);
+            }
+          } else {
+            localStorage.removeItem("userLoggedIn");
+            localStorage.removeItem("userName");
+            if (typeof updateRestrictedContent === 'function') {
+              updateRestrictedContent(false);
+            }
           }
-        } else {
-          console.log("Firebase 인증 상태: 로그아웃됨");
-          localStorage.removeItem("userLoggedIn");
-          localStorage.removeItem("userName");
-          
-          // 로그아웃 후 제한된 콘텐츠 블러 처리
-          if (typeof updateRestrictedContent === 'function') {
-            updateRestrictedContent(false);
-          }
-        }
-      });
+        });
+      } catch (e) {
+        console.error("Firebase 인증 초기화 실패:", e);
+      }
     });
   </script>
   <!-- Linear Header -->
