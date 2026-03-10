@@ -576,15 +576,14 @@ function initTabs() {
     }
   });
 
-  // 페이지 처음 로드 시 항상 notice-tab을 표시하도록 설정
-  // 이전 코드: const lastActiveTab = localStorage.getItem('lastActiveTab') || 'notice-tab';
-
-  // 항상 공지사항 탭부터 시작
-  const defaultTab = 'notice-tab';
+  // URL 해시 또는 referrer 기반으로 탭 복원 (뒤로가기 지원)
+  const hash = window.location.hash.replace('#', '');
+  const validTabs = ['notice-tab', 'quiz-tab', 'analytics-tab', 'lecture-tab'];
+  const defaultTab = (hash && validTabs.includes(hash)) ? hash : 'notice-tab';
   localStorage.setItem('lastActiveTab', defaultTab);
   window.Logger?.debug('탭 초기화', { defaultTab });
 
-  // 공지사항 탭 표시
+  // 탭 표시
   showTab(defaultTab);
 }
 
@@ -700,8 +699,11 @@ function showTab(tabId) {
     selectedButton.classList.add('active');
   }
 
-  // 탭 선택 상태 로컬 스토리지에 저장 (페이지 새로고침 시 유지)
+  // 탭 선택 상태 저장 + URL 해시 업데이트 (뒤로가기 지원)
   localStorage.setItem('lastActiveTab', tabId);
+  if (window.location.hash !== `#${tabId}`) {
+    history.pushState({ tab: tabId }, '', `#${tabId}`);
+  }
 }
 
 /**
@@ -802,6 +804,25 @@ function updateFloatingButtonsVisibility() {
     }
   }
 }
+
+// 뒤로가기/앞으로가기 시 탭 복원
+window.addEventListener('popstate', (e) => {
+  const tabId = e.state?.tab || window.location.hash.replace('#', '') || 'notice-tab';
+  const validTabs = ['notice-tab', 'quiz-tab', 'analytics-tab', 'lecture-tab'];
+  if (validTabs.includes(tabId)) {
+    // pushState 중복 방지를 위해 직접 탭 전환
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+      document.querySelectorAll('.tab-content').forEach(t => { t.style.display = 'none'; t.classList.remove('active'); });
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      selectedTab.style.display = 'block';
+      selectedTab.classList.add('active');
+      const btn = document.querySelector(`[data-tab="${tabId}"]`);
+      if (btn) btn.classList.add('active');
+      localStorage.setItem('lastActiveTab', tabId);
+    }
+  }
+});
 
 // 전역 함수 노출 (마이그레이션 호환성 유지)
 window.showTab = showTab;
