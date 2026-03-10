@@ -677,10 +677,15 @@ export async function loadAnalyticsData(user) {
       window.Logger?.info(`📊 [${certName}] 학습 데이터 로드 시작...`);
 
       // 문제 풀이 기록 가져오기 (최근 3000개까지 페이지네이션, 자격증 필터링)
-      state.attempts = await getUserAttempts(3000, currentCertType);
-      state.attempts = state.attempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
-      // V4-D1: 완주 세션만 통계에 반영 (기록보기 탭은 state.sessions 사용 — 영향 없음)
+      const _rawAttempts = await getUserAttempts(3000, currentCertType);
+      console.log(`[디버그] getUserAttempts(${currentCertType}) 원본:`, _rawAttempts.length, '개');
+      if (_rawAttempts.length > 0) {
+        const s = _rawAttempts[0];
+        console.log('[디버그] 첫 attempt:', { certType: s.certificateType, year: s.year, subject: s.subject, sessionId: s.sessionId });
+      }
+      state.attempts = _rawAttempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
       state.attempts = filterCompletedAttempts(state.attempts);
+      console.log(`[디버그] filterCompletedAttempts 후:`, state.attempts.length, '개');
       window.Logger?.debug(`📊 [${certName}] 문제 풀이 기록 (완주 세션): ${state.attempts.length}개`);
 
       // 모의고사 결과 가져오기 (최근 30개, 자격증 필터링)
