@@ -1,7 +1,7 @@
 // analytics-dashboard.js - 통합된 학습 분석 대시보드 기능
 // Last updated: 2025-01-21 - Fixed totalQuestions duplicate declaration
 
-import { getUserAttempts, getUserMockExamResults } from "../data/quiz-data-service.js";
+import { getUserAttempts, getUserMockExamResults } from "../data/quiz-data-service.js?v=2026031016";
 import { getUserProgress } from "../data/quiz-repository.js";
 import { db, ADMIN_EMAILS, ensureAuthReady } from "../core/firebase-core.js";
 import { getCurrentCertificateType, getCertificateName, getCertificateEmoji } from "../utils/certificate-utils.js";
