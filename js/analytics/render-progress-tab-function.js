@@ -364,7 +364,7 @@ export function renderProgressTabStandalone(data) {
       .hour-action-btn.btn-retry { background: var(--color-bg-level-1, #e2e8f0); color: var(--color-text-primary, #1D2F4E); }
       /* 과목별 수평 막대 */
       .subject-detail-list { display: flex; flex-direction: column; gap: 5px; margin: 8px 0; }
-      .subj-row { display: flex; align-items: center; gap: 8px; }
+      .subj-row { display: flex; align-items: center; gap: 12px; }
       .subj-name { font-size: 0.68rem; font-weight: 600; color: var(--color-text-secondary, #64748b); width: 5.2em; flex-shrink: 0; white-space: nowrap; }
       .subj-bar-wrap { flex: 1; min-width: 0; }
       .subj-bar-bg { position: relative; height: 8px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
