@@ -682,3 +682,14 @@ function injectFooter() {
 }
 
 document.addEventListener('DOMContentLoaded', injectFooter);
+
+// 뒤로가기 링크: 들어온 곳으로 돌아가기 (history.back)
+document.addEventListener('DOMContentLoaded', () => {
+  const backLink = document.querySelector('.back-link');
+  if (backLink && window.history.length > 1) {
+    backLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      history.back();
+    });
+  }
+});
