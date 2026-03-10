@@ -2377,6 +2377,28 @@ async function deleteAllQuestionSets(certType = null) {
       }
     }
 
+    // 4. userProgress 삭제 (학습진행률 데이터)
+    try {
+      const progressDoc = doc(db, 'userProgress', user.uid);
+      const progressSnap = await getDoc(progressDoc);
+      if (progressSnap.exists()) {
+        if (!certType) {
+          // 전체 삭제: 문서 자체 삭제
+          await deleteDoc(progressDoc);
+          totalDeleted++;
+        } else {
+          // certType별 삭제: yearlyMockExams에서 해당 데이터 제거
+          const progressData = progressSnap.data();
+          if (progressData.yearlyMockExams) {
+            await updateDoc(progressDoc, { yearlyMockExams: {} });
+            totalDeleted++;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('userProgress 삭제 중 오류 (무시):', e);
+    }
+
     // 성공 메시지 표시
     hideLoading();
     showToast(`${label} 문제풀이기록이 삭제되었습니다. (총 ${totalDeleted}개 항목)`, 'success');
@@ -2393,6 +2415,7 @@ async function deleteAllQuestionSets(certType = null) {
         state.mockExamResults = state.mockExamResults.filter(r => (r.certificateType || 'health-manager') !== certTypeValue);
         if (window.state) window.state.mockExamResults = state.mockExamResults;
       }
+      state.userProgress = null;
     } else {
       // 전체 삭제: state 비우기
       state.attempts = [];
