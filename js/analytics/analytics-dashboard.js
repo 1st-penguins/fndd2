@@ -2289,13 +2289,33 @@ async function deleteAllQuestionSets(certType = null) {
 
     // 1. attempts 삭제
     let attemptsQuery;
-    if (targetSessionIds) {
+    if (targetSessionIds && targetSessionIds.size > 0) {
       // sessionId 기준으로 필터 (IN 쿼리는 최대 10개 → 배치 처리)
       const ids = [...targetSessionIds];
       for (let i = 0; i < ids.length; i += 10) {
         const chunk = ids.slice(i, i + 10);
         const q = query(collection(db, 'attempts'), where('userId', '==', user.uid), where('sessionId', 'in', chunk));
         totalDeleted += await deleteQueryBatch(db, q, BATCH_SIZE);
+      }
+      // 세션ID 없는 고아 attempts도 삭제 (certType 필드 기반)
+      const certTypeValue = certType === 'health' ? 'health-manager' : 'sports-instructor';
+      const orphanQ = query(collection(db, 'attempts'), where('userId', '==', user.uid), where('certificateType', '==', certTypeValue));
+      totalDeleted += await deleteQueryBatch(db, orphanQ, BATCH_SIZE);
+    } else if (certType) {
+      // 세션이 이미 삭제된 경우: certType 기반으로 attempts 직접 삭제
+      const certTypeValue = certType === 'health' ? 'health-manager' : 'sports-instructor';
+      const certQ = query(collection(db, 'attempts'), where('userId', '==', user.uid), where('certificateType', '==', certTypeValue));
+      totalDeleted += await deleteQueryBatch(db, certQ, BATCH_SIZE);
+      // certificateType 필드가 없는 레거시 데이터도 삭제 (health인 경우)
+      if (certType === 'health') {
+        const allAttemptsSnap = await getDocs(query(collection(db, 'attempts'), where('userId', '==', user.uid)));
+        const legacyBatch = allAttemptsSnap.docs.filter(d => !d.data().certificateType);
+        for (let i = 0; i < legacyBatch.length; i += BATCH_SIZE) {
+          const batch = writeBatch(db);
+          legacyBatch.slice(i, i + BATCH_SIZE).forEach(d => batch.delete(d.ref));
+          await batch.commit();
+          totalDeleted += Math.min(BATCH_SIZE, legacyBatch.length - i);
+        }
       }
     } else {
       attemptsQuery = query(collection(db, 'attempts'), where('userId', '==', user.uid));
@@ -2345,12 +2365,40 @@ async function deleteAllQuestionSets(certType = null) {
     hideLoading();
     showToast(`${label} 문제풀이기록이 삭제되었습니다. (총 ${totalDeleted}개 항목)`, 'success');
 
+    // state에서 삭제된 데이터 제거 (약점분석/학습진행률 탭 반영)
+    if (certType && targetSessionIds) {
+      // 특정 자격증만 삭제: 해당 세션 데이터만 제거
+      if (state.attempts) {
+        state.attempts = state.attempts.filter(a => !targetSessionIds.has(a.sessionId));
+        window.userAttempts = state.attempts;
+      }
+      if (state.mockExamResults) {
+        state.mockExamResults = state.mockExamResults.filter(r => !targetSessionIds.has(r.sessionId));
+        if (window.state) window.state.mockExamResults = state.mockExamResults;
+      }
+    } else {
+      // 전체 삭제: state 비우기
+      state.attempts = [];
+      state.mockExamResults = [];
+      window.userAttempts = [];
+      if (window.state) window.state.mockExamResults = [];
+    }
+
+    // StatsCache 무효화
+    if (StatsCache && typeof StatsCache.clear === 'function') {
+      StatsCache.clear();
+    }
+
     // 문제풀이기록 탭 다시 렌더링
     if (typeof renderFilteredQuestionSets === 'function') {
       setTimeout(async () => {
         await renderFilteredQuestionSets('all', 'all', 'all', 'all');
       }, 500);
     }
+
+    // 약점분석/학습진행률 탭도 갱신
+    try { renderWeakAreasTab(); } catch (e) { console.warn('약점분석 탭 갱신 실패:', e); }
+    try { renderProgressTab(); } catch (e) { console.warn('학습진행률 탭 갱신 실패:', e); }
 
     return true;
   } catch (error) {
@@ -2412,10 +2460,29 @@ async function deleteSession(sessionId, typeFilter = 'all', subjectFilter = 'all
     hideLoading();
     showToast('세션 기록이 삭제되었습니다.', 'success');
 
+    // state에서 삭제된 세션 데이터 제거 (약점분석/학습진행률 탭 반영)
+    if (state.attempts) {
+      state.attempts = state.attempts.filter(a => a.sessionId !== sessionId);
+      window.userAttempts = state.attempts;
+    }
+    if (state.mockExamResults) {
+      state.mockExamResults = state.mockExamResults.filter(r => r.sessionId !== sessionId);
+      if (window.state) window.state.mockExamResults = state.mockExamResults;
+    }
+
+    // StatsCache 무효화 (캐시된 통계가 이전 데이터를 서빙하지 않도록)
+    if (StatsCache && typeof StatsCache.clear === 'function') {
+      StatsCache.clear();
+    }
+
     // UI 업데이트: 문제풀이기록 목록 다시 렌더링
     if (typeof renderFilteredQuestionSets === 'function') {
       await renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter);
     }
+
+    // 약점분석/학습진행률 탭도 갱신
+    try { renderWeakAreasTab(); } catch (e) { console.warn('약점분석 탭 갱신 실패:', e); }
+    try { renderProgressTab(); } catch (e) { console.warn('학습진행률 탭 갱신 실패:', e); }
 
     return true;
   } catch (error) {
