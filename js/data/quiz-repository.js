@@ -405,8 +405,8 @@ export async function batchRecordAttempts(attempts) {
         // 🎓 자격증 구분 필드 (NEW)
         certificateType: attempt.questionData?.certificateType || 'health-manager',  // 'health-manager' | 'sports-instructor'
 
-        // 원본 유지 (호환성)
-        questionData: attempt.questionData || {},
+        // 원본 유지 (호환성) - undefined 값 제거 (Firestore 호환)
+        questionData: JSON.parse(JSON.stringify(attempt.questionData || {})),
 
         userAnswer: attempt.userAnswer,
         isCorrect: attempt.isCorrect,
