@@ -677,15 +677,19 @@ export async function loadAnalyticsData(user) {
       window.Logger?.info(`📊 [${certName}] 학습 데이터 로드 시작...`);
 
       // 문제 풀이 기록 가져오기 (최근 3000개까지 페이지네이션, 자격증 필터링)
-      const _rawAttempts = await getUserAttempts(3000, currentCertType);
-      console.log(`[디버그] getUserAttempts(${currentCertType}) 원본:`, _rawAttempts.length, '개');
-      if (_rawAttempts.length > 0) {
-        const s = _rawAttempts[0];
-        console.log('[디버그] 첫 attempt:', { certType: s.certificateType, year: s.year, subject: s.subject, sessionId: s.sessionId });
-      }
-      state.attempts = _rawAttempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
+      state.attempts = await getUserAttempts(3000, currentCertType);
+      state.attempts = state.attempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
       state.attempts = filterCompletedAttempts(state.attempts);
-      console.log(`[디버그] filterCompletedAttempts 후:`, state.attempts.length, '개');
+
+      // 🔧 스포츠 자격증 fallback: certificateType이 잘못 저장된 경우 과목명 기반으로 재조회
+      if (currentCertType === 'sports-instructor' && state.attempts.length === 0) {
+        const _SPORTS_SUBJECTS = new Set(['스포츠사회학','스포츠교육학','스포츠심리학','한국체육사','운동생리학','운동역학','스포츠윤리','특수체육론','유아체육론','노인체육론']);
+        const _decodeSubject = (v) => { try { let s = String(v||''); for (let i=0;i<3;i++){const t=decodeURIComponent(s);if(t===s)break;s=t;} return s; } catch{return String(v||'');} };
+        const _all = await getUserAttempts(3000, null);
+        const _sportsOnly = _all.filter(a => _SPORTS_SUBJECTS.has(_decodeSubject(a.subject || a.questionData?.subject)));
+        state.attempts = filterCompletedAttempts(_sportsOnly.filter(a => !shouldExcludeAttemptFromAnalytics(a)));
+        console.log(`[스포츠 fallback] 과목명 기반 재조회: ${_all.length}개 중 ${state.attempts.length}개 (완주세션)`);
+      }
       window.Logger?.debug(`📊 [${certName}] 문제 풀이 기록 (완주 세션): ${state.attempts.length}개`);
 
       // 모의고사 결과 가져오기 (최근 30개, 자격증 필터링)
