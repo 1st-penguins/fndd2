@@ -96,25 +96,25 @@
       return;
     }
 
-    // 🔧 테스트용: Ctrl+Shift+A 로 모든 문제 1번으로 자동 선택
-    if (event.ctrlKey && event.shiftKey && event.key === 'A') {
+    // 🔧 테스트용: Q+W 동시 입력 → 전체 1번 선택 + 자동 제출 (관리자 전용)
+    if (event.key === 'q' || event.key === 'Q') { window._testKeyQ = Date.now(); }
+    if (event.key === 'w' || event.key === 'W') { window._testKeyW = Date.now(); }
+    if ((event.key === 'q' || event.key === 'Q' || event.key === 'w' || event.key === 'W') &&
+        window._testKeyQ && window._testKeyW && Math.abs(window._testKeyQ - window._testKeyW) < 300) {
+      window._testKeyQ = null;
+      window._testKeyW = null;
       event.preventDefault();
-      console.log('🧪 테스트 모드: 모든 문제를 1번으로 자동 선택합니다...');
 
-      // 모든 문제에 1번 답 선택 (0번 인덱스)
-      allQuestions.forEach(q => {
-        userAnswers[q.globalIndex] = 0; // 1번 = 인덱스 0
-      });
+      // 관리자 확인
+      const ADMIN_EMAILS = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+      const currentEmail = window.auth?.currentUser?.email;
+      if (!currentEmail || !ADMIN_EMAILS.includes(currentEmail)) return;
 
-      // 인디케이터 업데이트
+      console.log('🧪 테스트 모드: 모든 문제를 1번으로 선택 후 자동 제출...');
+      allQuestions.forEach(q => { userAnswers[q.globalIndex] = 0; });
       updateQuestionIndicators();
-
-      // 현재 문제 선택 상태 업데이트
       updateSelectedOption();
-
-      console.log('✅ 테스트 모드 완료: 80개 문제 모두 1번으로 선택됨');
-      alert('테스트 모드: 모든 문제가 1번으로 선택되었습니다!');
-
+      submitQuiz();
       return;
     }
 
