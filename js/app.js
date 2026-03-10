@@ -824,6 +824,13 @@ window.addEventListener('popstate', (e) => {
   }
 });
 
+// bfcache 복원 시 학습 데이터 갱신 (문제 풀고 뒤로가기 시)
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted && window.location.hash === '#analytics-tab' && window.auth?.currentUser && window.loadAnalyticsData) {
+    window.loadAnalyticsData(window.auth.currentUser);
+  }
+});
+
 // 전역 함수 노출 (마이그레이션 호환성 유지)
 window.showTab = showTab;
 window.updateRestrictedContent = updateRestrictedContent;
