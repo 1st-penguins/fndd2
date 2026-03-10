@@ -512,10 +512,10 @@
 /* ── 문제풀이기록 세션 카드 ─────────────────────────────── */
 
 .session-list-container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  max-width: 560px;
+  max-width: 100%;
 }
 
 /* 카드 전체 — 3열 그리드: 본문 | 점수 | 액션 */
@@ -750,6 +750,10 @@
 
 /* 모바일 반응형 */
 @media (max-width: 640px) {
+  .session-list-container {
+    grid-template-columns: 1fr;
+  }
+
   .session-card {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
