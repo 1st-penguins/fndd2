@@ -156,6 +156,7 @@ export function renderProgressTabStandalone(data) {
         score,
         correctCount:   result.correctCount   ?? null,
         totalQuestions: result.totalQuestions  ?? null,
+        subjectResults: result.subjectResults  ?? null,
       };
     }
   });
@@ -241,6 +242,39 @@ export function renderProgressTabStandalone(data) {
     const renderHourCard = (hour, best) => {
       const isCompleted = !!best;
       const examUrl = `exam/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}`;
+      const PASS_SCORE = 40; // 과목별 과락 기준
+      const TOTAL_PASS = 60; // 전체 합격 기준
+
+      // 과목별 막대 그래프
+      let subjectBarsHtml = '';
+      if (isCompleted && best.subjectResults) {
+        const subjects = Object.entries(best.subjectResults);
+        const allSubjectsPass = subjects.every(([, s]) => s.score >= PASS_SCORE);
+        const totalPass = best.score >= TOTAL_PASS;
+        const isPass = allSubjectsPass && totalPass;
+
+        subjectBarsHtml = `
+          <div class="subject-bars-grid">
+            ${subjects.map(([name, s]) => {
+              const pct = s.score || 0;
+              const pass = pct >= PASS_SCORE;
+              const shortName = name.length > 4 ? name.slice(0, 4) : name;
+              return `
+                <div class="subject-bar-item">
+                  <div class="bar-label">${shortName}</div>
+                  <div class="bar-track">
+                    <div class="bar-fill ${pass ? 'pass' : 'fail'}" style="height:${Math.max(pct, 4)}%"></div>
+                    <div class="bar-cutline" style="bottom:${PASS_SCORE}%"></div>
+                  </div>
+                  <div class="bar-value ${pass ? 'pass' : 'fail'}">${pct}</div>
+                </div>`;
+            }).join('')}
+          </div>
+          <div class="pass-result ${isPass ? 'pass' : 'fail'}">
+            ${isPass ? '합격' : (totalPass ? '과락' : '불합격')}
+          </div>`;
+      }
+
       return `
         <div class="progress-hour-card ${isCompleted ? 'completed' : 'not-taken'}">
           <div class="hour-header">
@@ -255,6 +289,7 @@ export function renderProgressTabStandalone(data) {
               ` : ''}
             ` : `<span class="score-placeholder">—</span>`}
           </div>
+          ${subjectBarsHtml}
           <a href="${examUrl}" class="hour-action-btn ${isCompleted ? 'btn-retry' : 'btn-start'}">
             ${isCompleted ? '다시 풀기' : '지금 풀기'}
           </a>
@@ -308,11 +343,28 @@ export function renderProgressTabStandalone(data) {
       .hour-action-btn:hover { opacity: 0.85; }
       .hour-action-btn.btn-start { background: #1D2F4E; color: #fff; }
       .hour-action-btn.btn-retry { background: var(--color-bg-level-1, #e2e8f0); color: var(--color-text-primary, #1D2F4E); }
+      /* 과목별 막대 그래프 */
+      .subject-bars-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 12px 0; padding: 10px 4px; background: rgba(0,0,0,0.02); border-radius: 8px; }
+      .subject-bar-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .bar-label { font-size: 0.6rem; font-weight: 600; color: var(--color-text-secondary, #64748b); white-space: nowrap; }
+      .bar-track { position: relative; width: 20px; height: 50px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
+      .bar-fill { position: absolute; bottom: 0; width: 100%; border-radius: 4px 4px 0 0; transition: height 0.6s ease; }
+      .bar-fill.pass { background: #1D2F4E; }
+      .bar-fill.fail { background: #ef4444; }
+      .bar-cutline { position: absolute; left: -2px; right: -2px; height: 1px; border-top: 1.5px dashed rgba(239,68,68,0.5); }
+      .bar-value { font-size: 0.65rem; font-weight: 700; }
+      .bar-value.pass { color: #1D2F4E; }
+      .bar-value.fail { color: #ef4444; }
+      .pass-result { font-size: 0.75rem; font-weight: 700; padding: 3px 0; margin-bottom: 8px; }
+      .pass-result.pass { color: #1D2F4E; }
+      .pass-result.fail { color: #ef4444; }
       @media (max-width: 480px) {
         .year-group-hours { grid-template-columns: 1fr 1fr; gap: 8px; }
         .progress-hour-card { padding: 12px 8px; }
         .hour-score .score-value { font-size: 1.3rem; }
         .hour-action-btn { padding: 6px 12px; font-size: 0.75rem; }
+        .bar-track { height: 40px; width: 16px; }
+        .bar-label { font-size: 0.55rem; }
       }
     </style>
   `;
