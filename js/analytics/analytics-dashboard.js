@@ -51,7 +51,7 @@ import {
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
-import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031111';
+import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031112';
 
 // 차트 및 분석 데이터 상태
 const state = {
@@ -868,20 +868,34 @@ function renderOverviewStats() {
   const pctColor = correctPct >= 60 ? '#059669' : (correctPct >= 40 ? '#D97706' : '#DC2626');
 
   container.innerHTML = `
-    <div class="overview-stats-grid">
-      <div class="overview-stat-item">
-        <div class="overview-stat-value">${totalAttempts}</div>
-        <div class="overview-stat-label">총 풀이 문제</div>
+    <div class="ov-summary-row">
+      <div class="ov-summary-item">
+        <span class="ov-summary-label">총 풀이</span>
+        <span class="ov-summary-val">${totalAttempts}문제</span>
       </div>
-      <div class="overview-stat-item">
-        <div class="overview-stat-value" style="color: ${pctColor}">${correctPct}%</div>
-        <div class="overview-stat-label">평균 정답률</div>
+      <span class="ov-summary-sep"></span>
+      <div class="ov-summary-item">
+        <span class="ov-summary-label">정답률</span>
+        <span class="ov-summary-val" style="color:${pctColor}">${correctPct}%</span>
       </div>
-      <div class="overview-stat-item">
-        <div class="overview-stat-value">${studyDays.size}일</div>
-        <div class="overview-stat-label">총 학습 일수</div>
+      <span class="ov-summary-sep"></span>
+      <div class="ov-summary-item">
+        <span class="ov-summary-label">학습일</span>
+        <span class="ov-summary-val">${studyDays.size}일</span>
       </div>
     </div>
+    <style>
+      .ov-summary-row { display:flex; align-items:center; justify-content:center; gap:0; padding:14px 16px; background:var(--color-bg-level-0,#fff); border:1px solid var(--color-border-primary,#e2e8f0); border-radius:12px; margin-bottom:16px; }
+      .ov-summary-item { display:flex; align-items:center; gap:8px; padding:0 20px; }
+      .ov-summary-label { font-size:0.8rem; font-weight:600; color:var(--color-text-secondary,#64748b); }
+      .ov-summary-val { font-size:1.1rem; font-weight:800; color:var(--color-text-primary,#1D2F4E); }
+      .ov-summary-sep { width:1px; height:24px; background:var(--color-border-primary,#e2e8f0); flex-shrink:0; }
+      @media (max-width:480px) {
+        .ov-summary-item { padding:0 12px; gap:6px; }
+        .ov-summary-label { font-size:0.72rem; }
+        .ov-summary-val { font-size:0.95rem; }
+      }
+    </style>
   `;
 }
 
@@ -915,30 +929,23 @@ function renderScoreTrendChart() {
     return tA - tB;
   });
 
-  // 1교시 / 2교시 분리
+  // 순차 인덱스 기반 데이터 구성 (같은 날짜 겹침 방지)
   const PTS = 5;
-  const h1Data = [];
-  const h2Data = [];
-  sorted.forEach(r => {
-    const ts = r.timestamp?.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+  const labels = [];
+  const h1Points = [];
+  const h2Points = [];
+
+  sorted.forEach((r, i) => {
     const hour = String(r.mockExamHour || r.hour || '1');
     const pts = (r.correctCount || 0) * PTS;
-    const label = `${(ts.getMonth() + 1)}/${ts.getDate()}`;
-    const entry = { x: label, y: pts, meta: `${r.year || ''}년 ${hour}교시` };
-    if (hour === '2') h2Data.push(entry);
-    else h1Data.push(entry);
+    const yr = r.year ? String(r.year).slice(2) : '';
+    labels.push(`${yr}년${hour}교시`);
+    h1Points.push(hour === '1' ? pts : null);
+    h2Points.push(hour === '2' ? pts : null);
   });
-
-  // 모든 라벨 합치기 (시간순 유지)
-  const allLabels = sorted.map(r => {
-    const ts = r.timestamp?.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
-    return `${(ts.getMonth() + 1)}/${ts.getDate()}`;
-  });
-  const uniqueLabels = [...new Set(allLabels)];
 
   section.style.display = '';
 
-  // 기존 차트 파괴
   if (window._scoreTrendChart) {
     window._scoreTrendChart.destroy();
     window._scoreTrendChart = null;
@@ -953,11 +960,11 @@ function renderScoreTrendChart() {
   window._scoreTrendChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: uniqueLabels,
+      labels: labels,
       datasets: [
         {
           label: '1교시',
-          data: h1Data.map(d => ({ x: d.x, y: d.y })),
+          data: h1Points,
           borderColor: '#1D2F4E',
           backgroundColor: 'rgba(29,47,78,0.1)',
           borderWidth: 2.5,
@@ -965,10 +972,11 @@ function renderScoreTrendChart() {
           pointBackgroundColor: '#1D2F4E',
           tension: 0.3,
           fill: false,
+          spanGaps: true,
         },
         {
           label: '2교시',
-          data: h2Data.map(d => ({ x: d.x, y: d.y })),
+          data: h2Points,
           borderColor: '#5FB2C9',
           backgroundColor: 'rgba(95,178,201,0.1)',
           borderWidth: 2.5,
@@ -976,6 +984,7 @@ function renderScoreTrendChart() {
           pointBackgroundColor: '#5FB2C9',
           tension: 0.3,
           fill: false,
+          spanGaps: true,
         }
       ]
     },
