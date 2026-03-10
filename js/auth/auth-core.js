@@ -141,9 +141,10 @@ export async function initAuth() {
       }));
     });
 
-    // DOM 이벤트 리스너 - 이 기능은 auth-ui.js로 이동해야 하지만 
+    // DOM 이벤트 리스너 - 이 기능은 auth-ui.js로 이동해야 하지만
     // 마이그레이션 기간 동안 호환성을 위해 유지
-    document.addEventListener('DOMContentLoaded', () => {
+    // ⚡ readyState 체크: 이미 로드된 경우 즉시 실행 (DOMContentLoaded 누락 방지)
+    function onDomReady() {
       // 제한된 페이지 접근 체크
       if (typeof window.checkRestrictedPageAccess === 'function') {
         window.checkRestrictedPageAccess();
@@ -162,7 +163,13 @@ export async function initAuth() {
       if (typeof window.updateLoginOverlays === 'function') {
         window.updateLoginOverlays();
       }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', onDomReady);
+    } else {
+      onDomReady();
+    }
 
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       console.log('인증 모듈 초기화 완료');
@@ -422,20 +429,28 @@ export async function handleSignup(email, password, displayName) {
  */
 export async function handleLogout() {
   try {
+    // 1) 세션 즉시 무효화 — signOut 전에 실행해 이후 recordAttempt 호출 방지
+    if (window.sessionManager) {
+      window.sessionManager.currentSessionId = null;
+    }
+    localStorage.removeItem('currentSessionId');
+    localStorage.removeItem('resumeSessionId');
+
     const ensured = await ensureFirebase();
     const auth = ensured.auth;
     await signOut(auth);
     clearLoginState();
 
+    // 2) 메모리 전역 변수 정리
+    window.userId = null;
+    window.userEmail = null;
+    window.isAdmin = null;
+    window.userName = null;
+
     console.log('로그아웃 성공');
 
-    // 제한된 페이지인 경우 홈페이지로 리디렉션
-    if (isRestrictedPage()) {
-      window.location.href = '/';
-    } else {
-      // 페이지 새로고침
-      window.location.reload();
-    }
+    // 3) 항상 href로 전체 페이지 재로드 — reload()는 메모리 state 잔존 위험
+    window.location.href = '/';
   } catch (error) {
     console.error('로그아웃 오류:', error);
     alert('로그아웃 중 오류가 발생했습니다. 다시 시도해 주세요.');

@@ -1366,34 +1366,30 @@ const filtered = filterCompletedAttempts(rawAttempts);
 
 ### Phase V5-A — 로그인 안정화 (🔴 1-1, 🟡 1-4)
 
-**V5-A1**: `auth-core.js` DOMContentLoaded 폴백 추가
-- 조건: `document.readyState === 'complete'` 또는 `'interactive'`이면 리스너 대신 즉시 실행
-- 위치: `auth-core.js:146` 근처 DOMContentLoaded 추가 위치
-
-**V5-A2**: `handleLogout()` 개선
-- 로그아웃 전 sessionManager 세션ID 즉시 null + localStorage 삭제
-- `window.userId/userEmail/isAdmin = null` 정리
-- `window.location.href = '/'` (reload 대신)
-- 위치: `auth-core.js:423-443`
+- [v] **V5-A1**: `auth-core.js` DOMContentLoaded 폴백 추가
+  - `document.readyState === 'loading'`이면 이벤트 리스너, 아니면 즉시 실행
+  - `onDomReady()` 함수로 추출, `readyState` 분기로 래핑
+- [v] **V5-A2**: `handleLogout()` 개선
+  - 로그아웃 전 `sessionManager.currentSessionId = null` + localStorage 삭제
+  - `window.userId/userEmail/isAdmin/userName = null` 정리
+  - `window.location.href = '/'` 통일 (isRestrictedPage 분기 제거)
 
 ### Phase V5-B — 퀴즈 저장 실패 알림 (🔴 3-1)
 
-**V5-B1**: `quiz-core.js` — `recordAttempt()` 결과 검사 + 실패 시 토스트/재시도
-- result.success === false → 사용자에게 "저장 실패" 알림
-- 단순 1회 재시도 (setTimeout 2s) 추가
-
-**V5-B2**: `mock-exam.js` — `batchRecordAttempts()` 실패 시 처리
-- 모의고사 제출 후 실패 시 Toast 경고 + 로컬 백업 localStorage 저장
+- [v] **V5-B1**: `quiz-core.js` — batchRecordAttempts 결과 검사
+  - `_batchFn` 단일 변수로 window/import 분기 통합
+  - `result.success === false` 시 `window.showToast(...)` 경고
+- [v] **V5-B2**: `mock-exam.js` — 배치 저장 실패 시 폴백 + Toast
+  - `!result?.success` → throw → 기존 catch 블록의 개별 저장 폴백 트리거
+  - `savedCount < total` 시 `window.showToast(...)` 경고
 
 ### Phase V5-C — 세션ID 경쟁 조건 방어 (🔴 3-3)
 
-**V5-C1**: `session-manager.js` — `getCurrentSessionId()` defensive 패턴
-- localStorage 값과 메모리 값 비교; 불일치 시 localStorage 우선
-- 위치: `session-manager.js:100-109`
-
-**V5-C2**: `handleLogout()` 내 캐시 정리 (analytics state reset)
-- 로그아웃 시 `state.attempts = [], state.mockExamResults = []` (analytics-dashboard)
-- sessionCompatibilityCache 비우기 (quiz-repository.js:28)
+- [v] **V5-C1**: `session-manager.js` — `getCurrentSessionId()` defensive 패턴
+  - localStorage 항상 읽어 메모리와 비교 → 불일치 시 localStorage 우선
+- [v] **V5-C2**: 로그아웃 후 analytics state/cache 정리
+  - V5-A2의 `window.location.href = '/'`로 전체 페이지 재로드 → 모든 메모리 state 자동 초기화
+  - 별도 코드 불필요 (V5-A2에서 커버됨)
 
 ### Phase V5-D — 분석 데이터 정확도 (🔴 3-6)
 

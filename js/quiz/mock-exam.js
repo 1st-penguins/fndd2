@@ -2160,24 +2160,18 @@
       try {
         console.log(`${attemptsToSave.length}개 문제 결과를 배치 저장합니다.`);
         const result = await window.batchRecordAttempts(attemptsToSave);
+        // result.success === false도 개별 저장 폴백으로 처리
+        if (!result?.success) throw new Error(result?.error || '배치 저장 실패');
         console.log('배치 저장 완료:', result);
       } catch (error) {
-        console.error("배치 저장 오류:", error);
+        console.error("배치 저장 오류 — 개별 저장으로 재시도:", error);
 
-        // 개별 저장 시도
-        console.log("개별 저장 방식으로 다시 시도합니다...");
         let savedCount = 0;
-
         for (let i = 0; i < attemptsToSave.length; i++) {
           try {
             const attempt = attemptsToSave[i];
-
             if (typeof window.recordAttempt === 'function') {
-              await window.recordAttempt(
-                attempt.questionData,
-                attempt.userAnswer,
-                attempt.isCorrect
-              );
+              await window.recordAttempt(attempt.questionData, attempt.userAnswer, attempt.isCorrect);
               savedCount++;
             }
           } catch (individualError) {
@@ -2186,6 +2180,9 @@
         }
 
         console.log(`개별 저장 결과: ${savedCount}/${attemptsToSave.length}개 성공`);
+        if (savedCount < attemptsToSave.length && typeof window.showToast === 'function') {
+          window.showToast(`풀이 기록 일부(${attemptsToSave.length - savedCount}개)가 저장되지 않았습니다.`, 'error');
+        }
       }
     } else {
       console.warn('배치 저장 함수를 찾을 수 없거나 저장할 데이터가 없습니다.');

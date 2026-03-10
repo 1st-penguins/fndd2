@@ -1637,12 +1637,22 @@ export async function submitQuiz() {
       console.log(`${attemptsToSave.length}개 문제 결과를 한 번에 저장합니다.`);
 
       // 배치 저장 함수 호출
-      if (typeof window.batchRecordAttempts === 'function') {
-        const result = await window.batchRecordAttempts(attemptsToSave);
-        console.log('배치 저장 완료:', result);
-      } else if (typeof batchRecordAttempts === 'function') {
-        const result = await batchRecordAttempts(attemptsToSave);
-        console.log('배치 저장 완료:', result);
+      const _batchFn = typeof window.batchRecordAttempts === 'function'
+        ? window.batchRecordAttempts
+        : typeof batchRecordAttempts === 'function'
+          ? batchRecordAttempts
+          : null;
+
+      if (_batchFn) {
+        const result = await _batchFn(attemptsToSave);
+        if (result?.success) {
+          console.log('배치 저장 완료:', result);
+        } else {
+          console.warn('배치 저장 실패:', result?.error);
+          if (typeof window.showToast === 'function') {
+            window.showToast('풀이 기록 일부가 저장되지 않았습니다. 잠시 후 다시 시도해 주세요.', 'error');
+          }
+        }
       } else {
         // 배치 함수가 없으면 기존 방식대로 개별 저장
         console.warn('배치 저장 함수를 찾을 수 없어 개별 저장으로 진행합니다.');

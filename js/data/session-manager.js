@@ -100,11 +100,11 @@ class SessionManager {
    * @returns {string|null} 현재 세션 ID
    */
   getCurrentSessionId() {
-    // 현재 세션 ID가 없으면 localStorage에서 찾아볼 수 있음
-    if (!this.currentSessionId) {
-      this.currentSessionId = localStorage.getItem('currentSessionId');
+    const stored = localStorage.getItem('currentSessionId');
+    // 메모리와 localStorage 불일치 시 localStorage 우선 (멀티탭 로그아웃 대응)
+    if (this.currentSessionId !== stored) {
+      this.currentSessionId = stored;
     }
-
     return this.currentSessionId;
   }
 
