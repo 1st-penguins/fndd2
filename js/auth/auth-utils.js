@@ -13,8 +13,7 @@ export function setLoggedIn(user) {
   localStorage.setItem('userName', user.displayName || user.email || '사용자');
   localStorage.setItem('userEmail', user.email || '');
   localStorage.setItem('userId', user.uid);
-  localStorage.setItem('isAdmin', isAdmin(user) ? 'true' : 'false');
-  
+
   // 이메일 인증 상태 저장
   localStorage.setItem('emailVerified', user.emailVerified ? 'true' : 'false');
 }
@@ -27,7 +26,6 @@ export function clearLoginState() {
   localStorage.removeItem('userName');
   localStorage.removeItem('userEmail');
   localStorage.removeItem('userId');
-  localStorage.removeItem('isAdmin');
   localStorage.removeItem('emailVerified');
 }
 

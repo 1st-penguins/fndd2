@@ -1,6 +1,27 @@
 // dev-config.js - 개발 환경 설정
 // 로컬 개발 시 Firebase 연동 없이 모든 기능을 테스트할 수 있도록 하는 설정
 
+// dev-mode 키의 SHA-256 해시 (평문 키는 소스에 포함하지 않음)
+export const DEV_KEY_HASH = '243b8a8b497f312601438c161449961cad5dbc3baf3704c16c0d2ab44c3be5df';
+
+/**
+ * 입력된 키를 SHA-256 해시하여 검증 후 localStorage에 해시값 저장
+ * @param {string} input - 사용자가 입력한 키
+ * @returns {Promise<boolean>} 유효한 키인지 여부
+ */
+export async function validateAndStoreDevKey(input) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  if (hashHex === DEV_KEY_HASH) {
+    localStorage.setItem('dev-mode-key', hashHex);
+    return true;
+  }
+  return false;
+}
+
 /**
  * 개발 모드 설정
  * 로컬 개발 시 true로 설정하여 로그인 없이 모든 기능 사용 가능
@@ -93,9 +114,9 @@ export function isDevMode() {
     return true;
   }
   
-  // 추가 보안: 특별한 키가 있을 때만 활성화 (공백 제거 후 비교)
+  // 추가 보안: localStorage에 저장된 해시와 비교 (평문 키는 소스에 없음)
   const devKey = (localStorage.getItem('dev-mode-key') || '').trim();
-  const hasValidDevKey = devKey === '4578';
+  const hasValidDevKey = devKey === DEV_KEY_HASH;
   
   return DEV_CONFIG.isDevMode && hasValidDevKey;
 }

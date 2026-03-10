@@ -1,7 +1,5 @@
 // dev-mode-toggle.js - 개발 모드 토글 기능
-import { isDevMode, toggleDevMode } from './config/dev-config.js';
-
-const DEV_MODE_KEY = '4578';
+import { isDevMode, toggleDevMode, DEV_KEY_HASH, validateAndStoreDevKey } from './config/dev-config.js';
 
 function notifyDevModeChanged() {
   window.dispatchEvent(new CustomEvent('devModeChanged', {
@@ -58,9 +56,10 @@ function showDevKeyInput() {
     };
 
     cancelBtn?.addEventListener('click', () => close(false));
-    saveBtn?.addEventListener('click', () => {
+    saveBtn?.addEventListener('click', async () => {
       const value = (input?.value || '').trim();
-      if (value !== DEV_MODE_KEY) {
+      const valid = await validateAndStoreDevKey(value);
+      if (!valid) {
         if (input) {
           input.value = '';
           input.placeholder = '키가 올바르지 않습니다';
@@ -68,7 +67,6 @@ function showDevKeyInput() {
         }
         return;
       }
-      localStorage.setItem('dev-mode-key', DEV_MODE_KEY);
       close(true);
     });
 
@@ -89,7 +87,7 @@ function updateDevModeUI() {
   if (!devModeBtn) return;
 
   const devKey = (localStorage.getItem('dev-mode-key') || '').trim();
-  const hasValidKey = devKey === DEV_MODE_KEY;
+  const hasValidKey = devKey === DEV_KEY_HASH;
   const enabled = isDevMode() && hasValidKey;
 
   if (enabled) {
