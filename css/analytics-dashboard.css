@@ -2381,9 +2381,48 @@
 .cal-legend-box.lv3 { background: rgba(29,47,78,0.4); }
 .cal-legend-box.lv4 { background: rgba(29,47,78,0.7); }
 
+.cal-cell.clickable { cursor: pointer; }
+.cal-cell.clickable:hover { transform: scale(1.1); z-index: 1; }
+.cal-cell.selected {
+  outline: 2.5px solid #5FB2C9;
+  outline-offset: -2px;
+}
+.cal-detail {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--color-bg-level-1, #f8fafc);
+  border-radius: 10px;
+}
+.cal-detail-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #1D2F4E);
+  margin-bottom: 8px;
+}
+.cal-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--color-border-primary, #e2e8f0);
+}
+.cal-detail-row:last-child { border-bottom: none; }
+.cal-detail-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #64748b);
+}
+.cal-detail-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #1D2F4E);
+}
+
 @media (max-width: 480px) {
   #study-calendar-container { padding: 14px 10px; }
   .cal-cell { border-radius: 6px; }
   .cal-date { font-size: 0.65rem; }
   .cal-month-title { font-size: 0.9rem; }
+  .cal-detail { padding: 10px 12px; }
+  .cal-detail-label { font-size: 0.72rem; }
 }

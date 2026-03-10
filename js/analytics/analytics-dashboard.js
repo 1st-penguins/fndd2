@@ -51,7 +51,7 @@ import {
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
-import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031114';
+import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031115';
 
 // 차트 및 분석 데이터 상태
 const state = {
@@ -920,23 +920,42 @@ function renderStudyCalendar() {
     return;
   }
 
-  // 학습일별 문제 수 집계
-  const dayMap = {};
+  // 학습일별 문제 수 + 세트 정보 집계
+  const dayMap = {};   // dateStr -> count
+  const dayDetail = {}; // dateStr -> [{label, count}]
+
   attempts.forEach(a => {
     const ts = a.timestamp?.toDate ? a.timestamp.toDate() :
       (a.timestamp instanceof Date ? a.timestamp : new Date(a.timestamp));
     if (!ts || isNaN(ts)) return;
     const key = ts.toISOString().slice(0, 10);
     dayMap[key] = (dayMap[key] || 0) + 1;
+
+    // 세트 라벨 생성
+    const q = a.questionData || {};
+    const yr = q.year || a.year || '';
+    const isMock = q.isFromMockExam || q.mockExamHour != null;
+    let setLabel;
+    if (isMock) {
+      const hour = q.mockExamHour || q.mockExamPart || q.hour || '1';
+      setLabel = `${yr} 모의고사 ${hour}교시`;
+    } else {
+      const subj = q.subject || a.subject || '기타';
+      setLabel = `${yr} ${subj}`;
+    }
+
+    if (!dayDetail[key]) dayDetail[key] = {};
+    dayDetail[key][setLabel] = (dayDetail[key][setLabel] || 0) + 1;
   });
 
   // 현재 월 기준 캘린더
   const now = new Date();
   let calYear = now.getFullYear();
-  let calMonth = now.getMonth(); // 0-based
+  let calMonth = now.getMonth();
+  let selectedDate = null;
 
   function renderMonth(year, month) {
-    const firstDay = new Date(year, month, 1).getDay(); // 0=일
+    const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const monthName = `${year}년 ${month + 1}월`;
 
@@ -944,32 +963,43 @@ function renderStudyCalendar() {
     let headerHtml = dayNames.map(d => `<div class="cal-day-name">${d}</div>`).join('');
 
     let cellsHtml = '';
-    // 빈 칸 (월 시작 전)
     for (let i = 0; i < firstDay; i++) {
       cellsHtml += '<div class="cal-cell empty"></div>';
     }
-    // 날짜 칸
     const today = now.toISOString().slice(0, 10);
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const count = dayMap[dateStr] || 0;
       const isToday = dateStr === today;
+      const isSelected = dateStr === selectedDate;
       const level = count === 0 ? '' : count <= 20 ? 'lv1' : count <= 40 ? 'lv2' : count <= 60 ? 'lv3' : 'lv4';
-      cellsHtml += `<div class="cal-cell ${level} ${isToday ? 'today' : ''}" title="${dateStr}: ${count}문제">
+      const clickable = count > 0 ? 'clickable' : '';
+      cellsHtml += `<div class="cal-cell ${level} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${clickable}" data-date="${dateStr}">
         <span class="cal-date">${d}</span>
       </div>`;
     }
 
-    // 연속 학습일(스트릭) 계산
+    // 연속 학습일(스트릭)
     let streak = 0;
     const checkDate = new Date(now);
-    // 오늘 학습 안했으면 어제부터 체크
     const todayKey = checkDate.toISOString().slice(0, 10);
     if (!dayMap[todayKey]) checkDate.setDate(checkDate.getDate() - 1);
     while (true) {
-      const key = checkDate.toISOString().slice(0, 10);
-      if (dayMap[key]) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
+      const ck = checkDate.toISOString().slice(0, 10);
+      if (dayMap[ck]) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
       else break;
+    }
+
+    // 선택된 날짜 디테일
+    let detailHtml = '';
+    if (selectedDate && dayDetail[selectedDate]) {
+      const sets = Object.entries(dayDetail[selectedDate]).sort((a, b) => b[1] - a[1]);
+      const dateLabel = selectedDate.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$1년 $2월 $3일');
+      detailHtml = `
+        <div class="cal-detail">
+          <div class="cal-detail-title">${dateLabel}</div>
+          ${sets.map(([label, cnt]) => `<div class="cal-detail-row"><span class="cal-detail-label">${label}</span><span class="cal-detail-count">${cnt}문제</span></div>`).join('')}
+        </div>`;
     }
 
     container.innerHTML = `
@@ -978,7 +1008,7 @@ function renderStudyCalendar() {
         <span class="cal-month-title">${monthName}</span>
         <button class="cal-nav" id="cal-next">&gt;</button>
       </div>
-      <div class="cal-streak">연속 ${streak}일째 학습 중</div>
+      ${streak > 0 ? `<div class="cal-streak">연속 ${streak}일째 학습 중</div>` : ''}
       <div class="cal-grid">
         ${headerHtml}
         ${cellsHtml}
@@ -991,18 +1021,28 @@ function renderStudyCalendar() {
         <span class="cal-legend-box lv4"></span>
         <span class="cal-legend-label">많음</span>
       </div>
+      ${detailHtml}
     `;
 
-    // 네비게이션 이벤트
+    // 이벤트
     document.getElementById('cal-prev')?.addEventListener('click', () => {
       calMonth--;
       if (calMonth < 0) { calMonth = 11; calYear--; }
+      selectedDate = null;
       renderMonth(calYear, calMonth);
     });
     document.getElementById('cal-next')?.addEventListener('click', () => {
       calMonth++;
       if (calMonth > 11) { calMonth = 0; calYear++; }
+      selectedDate = null;
       renderMonth(calYear, calMonth);
+    });
+    container.querySelectorAll('.cal-cell.clickable').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const d = cell.dataset.date;
+        selectedDate = (selectedDate === d) ? null : d;
+        renderMonth(calYear, calMonth);
+      });
     });
   }
 
