@@ -51,7 +51,7 @@ import {
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
-import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031112';
+import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031113';
 
 // 차트 및 분석 데이터 상태
 const state = {
@@ -904,146 +904,109 @@ function renderOverviewStats() {
  */
 function renderOverviewTab() {
   renderOverviewStats();
-  renderScoreTrendChart();
-  renderSubjectProgress();
+  renderStudyCalendar();
 }
 
 /**
- * 성적 추이 차트 (모의고사 점수 변화)
+ * 학습 캘린더 렌더링 (월별 출석 체크)
  */
-function renderScoreTrendChart() {
-  const section = document.getElementById('score-trend-section');
-  const canvas = document.getElementById('score-trend-chart');
-  if (!section || !canvas) return;
+function renderStudyCalendar() {
+  const container = document.getElementById('study-calendar-container');
+  if (!container) return;
 
-  const mockResults = state.mockExamResults || [];
-  if (mockResults.length < 2) {
-    section.style.display = 'none';
+  const attempts = state.attempts || [];
+  if (attempts.length === 0) {
+    container.innerHTML = '';
     return;
   }
 
-  // 시간순 정렬
-  const sorted = [...mockResults].sort((a, b) => {
-    const tA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
-    const tB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
-    return tA - tB;
+  // 학습일별 문제 수 집계
+  const dayMap = {};
+  attempts.forEach(a => {
+    const ts = a.timestamp?.toDate ? a.timestamp.toDate() :
+      (a.timestamp instanceof Date ? a.timestamp : new Date(a.timestamp));
+    if (!ts || isNaN(ts)) return;
+    const key = ts.toISOString().slice(0, 10);
+    dayMap[key] = (dayMap[key] || 0) + 1;
   });
 
-  // 순차 인덱스 기반 데이터 구성 (같은 날짜 겹침 방지)
-  const PTS = 5;
-  const labels = [];
-  const h1Points = [];
-  const h2Points = [];
+  // 현재 월 기준 캘린더
+  const now = new Date();
+  let calYear = now.getFullYear();
+  let calMonth = now.getMonth(); // 0-based
 
-  sorted.forEach((r, i) => {
-    const hour = String(r.mockExamHour || r.hour || '1');
-    const pts = (r.correctCount || 0) * PTS;
-    const yr = r.year ? String(r.year).slice(2) : '';
-    labels.push(`${yr}년${hour}교시`);
-    h1Points.push(hour === '1' ? pts : null);
-    h2Points.push(hour === '2' ? pts : null);
-  });
+  function renderMonth(year, month) {
+    const firstDay = new Date(year, month, 1).getDay(); // 0=일
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const monthName = `${year}년 ${month + 1}월`;
 
-  section.style.display = '';
+    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    let headerHtml = dayNames.map(d => `<div class="cal-day-name">${d}</div>`).join('');
 
-  if (window._scoreTrendChart) {
-    window._scoreTrendChart.destroy();
-    window._scoreTrendChart = null;
+    let cellsHtml = '';
+    // 빈 칸 (월 시작 전)
+    for (let i = 0; i < firstDay; i++) {
+      cellsHtml += '<div class="cal-cell empty"></div>';
+    }
+    // 날짜 칸
+    const today = now.toISOString().slice(0, 10);
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const count = dayMap[dateStr] || 0;
+      const isToday = dateStr === today;
+      const level = count === 0 ? '' : count <= 10 ? 'lv1' : count <= 40 ? 'lv2' : count <= 80 ? 'lv3' : 'lv4';
+      cellsHtml += `<div class="cal-cell ${level} ${isToday ? 'today' : ''}" title="${dateStr}: ${count}문제">
+        <span class="cal-date">${d}</span>
+      </div>`;
+    }
+
+    // 연속 학습일(스트릭) 계산
+    let streak = 0;
+    const checkDate = new Date(now);
+    // 오늘 학습 안했으면 어제부터 체크
+    const todayKey = checkDate.toISOString().slice(0, 10);
+    if (!dayMap[todayKey]) checkDate.setDate(checkDate.getDate() - 1);
+    while (true) {
+      const key = checkDate.toISOString().slice(0, 10);
+      if (dayMap[key]) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
+      else break;
+    }
+
+    container.innerHTML = `
+      <div class="cal-header">
+        <button class="cal-nav" id="cal-prev">&lt;</button>
+        <span class="cal-month-title">${monthName}</span>
+        <button class="cal-nav" id="cal-next">&gt;</button>
+      </div>
+      <div class="cal-streak">연속 ${streak}일째 학습 중</div>
+      <div class="cal-grid">
+        ${headerHtml}
+        ${cellsHtml}
+      </div>
+      <div class="cal-legend">
+        <span class="cal-legend-label">적음</span>
+        <span class="cal-legend-box lv1"></span>
+        <span class="cal-legend-box lv2"></span>
+        <span class="cal-legend-box lv3"></span>
+        <span class="cal-legend-box lv4"></span>
+        <span class="cal-legend-label">많음</span>
+      </div>
+    `;
+
+    // 네비게이션 이벤트
+    document.getElementById('cal-prev')?.addEventListener('click', () => {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderMonth(calYear, calMonth);
+    });
+    document.getElementById('cal-next')?.addEventListener('click', () => {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderMonth(calYear, calMonth);
+    });
   }
 
-  if (typeof Chart === 'undefined') {
-    section.style.display = 'none';
-    return;
-  }
-
-  const ctx = canvas.getContext('2d');
-  window._scoreTrendChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: '1교시',
-          data: h1Points,
-          borderColor: '#1D2F4E',
-          backgroundColor: 'rgba(29,47,78,0.1)',
-          borderWidth: 2.5,
-          pointRadius: 5,
-          pointBackgroundColor: '#1D2F4E',
-          tension: 0.3,
-          fill: false,
-          spanGaps: true,
-        },
-        {
-          label: '2교시',
-          data: h2Points,
-          borderColor: '#5FB2C9',
-          backgroundColor: 'rgba(95,178,201,0.1)',
-          borderWidth: 2.5,
-          pointRadius: 5,
-          pointBackgroundColor: '#5FB2C9',
-          tension: 0.3,
-          fill: false,
-          spanGaps: true,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 2,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: { font: { size: 12, weight: '600' }, usePointStyle: true, pointStyle: 'circle', padding: 16 }
-        },
-        tooltip: {
-          backgroundColor: '#1D2F4E',
-          titleFont: { size: 13 },
-          bodyFont: { size: 12 },
-          padding: 10,
-          cornerRadius: 8,
-          callbacks: {
-            label: function(ctx) { return `${ctx.dataset.label}: ${ctx.parsed.y}점`; }
-          }
-        }
-      },
-      scales: {
-        y: {
-          min: 0,
-          max: 400,
-          ticks: { stepSize: 100, font: { size: 11 }, callback: v => v + '점' },
-          grid: { color: 'rgba(0,0,0,0.06)' }
-        },
-        x: {
-          ticks: { font: { size: 11 } },
-          grid: { display: false }
-        }
-      },
-      // 합격선 annotation (plugin 없이 직접 그리기)
-    },
-    plugins: [{
-      id: 'passLine',
-      afterDraw(chart) {
-        const yScale = chart.scales.y;
-        const passY = yScale.getPixelForValue(240);
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.setLineDash([6, 4]);
-        ctx.strokeStyle = 'rgba(239,68,68,0.5)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(chart.chartArea.left, passY);
-        ctx.lineTo(chart.chartArea.right, passY);
-        ctx.stroke();
-        ctx.fillStyle = 'rgba(239,68,68,0.7)';
-        ctx.font = '11px sans-serif';
-        ctx.fillText('합격선 240점', chart.chartArea.right - 75, passY - 6);
-        ctx.restore();
-      }
-    }]
-  });
+  renderMonth(calYear, calMonth);
 }
 
 /**

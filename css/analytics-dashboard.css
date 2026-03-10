@@ -2271,3 +2271,119 @@
     max-height: 260px;
   }
 }
+
+/* ── 학습 캘린더 ────────────────────────── */
+#study-calendar-container {
+  background: var(--color-bg-level-0, #fff);
+  border: 1px solid var(--color-border-primary, #e2e8f0);
+  border-radius: 14px;
+  padding: 20px;
+}
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+.cal-month-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #1D2F4E);
+  min-width: 100px;
+  text-align: center;
+}
+.cal-nav {
+  background: none;
+  border: 1px solid var(--color-border-primary, #e2e8f0);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-secondary, #64748b);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.cal-nav:hover {
+  background: var(--color-bg-level-1, #f1f5f9);
+}
+.cal-streak {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #64748b);
+  margin-bottom: 14px;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-day-name {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-tertiary, #94a3b8);
+  padding-bottom: 4px;
+}
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--color-bg-level-1, #f8fafc);
+  position: relative;
+  transition: transform 0.15s;
+}
+.cal-cell.empty {
+  background: transparent;
+}
+.cal-cell.lv1 { background: rgba(95,178,201,0.2); }
+.cal-cell.lv2 { background: rgba(95,178,201,0.4); }
+.cal-cell.lv3 { background: rgba(29,47,78,0.4); }
+.cal-cell.lv4 { background: rgba(29,47,78,0.7); }
+.cal-cell.lv3 .cal-date,
+.cal-cell.lv4 .cal-date { color: #fff; }
+.cal-cell.today {
+  outline: 2px solid #1D2F4E;
+  outline-offset: -2px;
+}
+.cal-date {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #64748b);
+}
+.cal-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 12px;
+}
+.cal-legend-label {
+  font-size: 0.65rem;
+  color: var(--color-text-tertiary, #94a3b8);
+  margin: 0 4px;
+}
+.cal-legend-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--color-bg-level-1, #f1f5f9);
+}
+.cal-legend-box.lv1 { background: rgba(95,178,201,0.2); }
+.cal-legend-box.lv2 { background: rgba(95,178,201,0.4); }
+.cal-legend-box.lv3 { background: rgba(29,47,78,0.4); }
+.cal-legend-box.lv4 { background: rgba(29,47,78,0.7); }
+
+@media (max-width: 480px) {
+  #study-calendar-container { padding: 14px 10px; }
+  .cal-cell { border-radius: 6px; }
+  .cal-date { font-size: 0.65rem; }
+  .cal-month-title { font-size: 0.9rem; }
+}
