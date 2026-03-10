@@ -2311,13 +2311,7 @@
 .cal-nav:hover {
   background: var(--color-bg-level-1, #f1f5f9);
 }
-.cal-streak {
-  text-align: center;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-text-secondary, #64748b);
-  margin-bottom: 14px;
-}
+/* cal-streak removed - replaced by cal-streak-badge */
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -2381,6 +2375,47 @@
 .cal-legend-box.lv3 { background: rgba(29,47,78,0.4); }
 .cal-legend-box.lv4 { background: rgba(29,47,78,0.7); }
 
+.cal-month-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.cal-streak-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  background: #1D2F4E;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+.cal-month-stat {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #64748b);
+}
+.cal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.cal-hint {
+  font-size: 0.68rem;
+  color: var(--color-text-tertiary, #94a3b8);
+}
+.cal-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.cal-detail-total {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1D2F4E;
+}
 .cal-cell.clickable { cursor: pointer; }
 .cal-cell.clickable:hover { transform: scale(1.1); z-index: 1; }
 .cal-cell.selected {

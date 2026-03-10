@@ -51,7 +51,7 @@ import {
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
-import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031115';
+import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031116';
 
 // 차트 및 분석 데이터 상태
 const state = {
@@ -990,14 +990,28 @@ function renderStudyCalendar() {
       else break;
     }
 
+    // 이번 달 학습 통계
+    let monthTotal = 0;
+    let monthDays = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const cnt = dayMap[dateStr] || 0;
+      if (cnt > 0) { monthTotal += cnt; monthDays++; }
+    }
+
     // 선택된 날짜 디테일
     let detailHtml = '';
     if (selectedDate && dayDetail[selectedDate]) {
       const sets = Object.entries(dayDetail[selectedDate]).sort((a, b) => b[1] - a[1]);
-      const dateLabel = selectedDate.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$1년 $2월 $3일');
+      const totalCount = sets.reduce((sum, [, c]) => sum + c, 0);
+      const dd = selectedDate.split('-');
+      const dateLabel = `${Number(dd[1])}월 ${Number(dd[2])}일`;
       detailHtml = `
         <div class="cal-detail">
-          <div class="cal-detail-title">${dateLabel}</div>
+          <div class="cal-detail-header">
+            <span class="cal-detail-title">${dateLabel} 학습 내역</span>
+            <span class="cal-detail-total">${totalCount}문제</span>
+          </div>
           ${sets.map(([label, cnt]) => `<div class="cal-detail-row"><span class="cal-detail-label">${label}</span><span class="cal-detail-count">${cnt}문제</span></div>`).join('')}
         </div>`;
     }
@@ -1008,18 +1022,25 @@ function renderStudyCalendar() {
         <span class="cal-month-title">${monthName}</span>
         <button class="cal-nav" id="cal-next">&gt;</button>
       </div>
-      ${streak > 0 ? `<div class="cal-streak">연속 ${streak}일째 학습 중</div>` : ''}
+      <div class="cal-month-summary">
+        ${streak > 0 ? `<span class="cal-streak-badge">연속 ${streak}일</span>` : ''}
+        <span class="cal-month-stat">${monthDays}일 학습</span>
+        <span class="cal-month-stat">${monthTotal}문제</span>
+      </div>
       <div class="cal-grid">
         ${headerHtml}
         ${cellsHtml}
       </div>
-      <div class="cal-legend">
-        <span class="cal-legend-label">적음</span>
-        <span class="cal-legend-box lv1"></span>
-        <span class="cal-legend-box lv2"></span>
-        <span class="cal-legend-box lv3"></span>
-        <span class="cal-legend-box lv4"></span>
-        <span class="cal-legend-label">많음</span>
+      <div class="cal-footer">
+        <div class="cal-legend">
+          <span class="cal-legend-label">적음</span>
+          <span class="cal-legend-box lv1"></span>
+          <span class="cal-legend-box lv2"></span>
+          <span class="cal-legend-box lv3"></span>
+          <span class="cal-legend-box lv4"></span>
+          <span class="cal-legend-label">많음</span>
+        </div>
+        ${!selectedDate ? '<div class="cal-hint">날짜를 눌러 학습 내역을 확인하세요</div>' : ''}
       </div>
       ${detailHtml}
     `;
