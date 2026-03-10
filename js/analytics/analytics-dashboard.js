@@ -3,7 +3,7 @@
 
 import { getUserAttempts, getUserMockExamResults } from "../data/quiz-data-service.js?v=2026031016";
 import { getUserProgress } from "../data/quiz-repository.js";
-import { db, ADMIN_EMAILS, ensureAuthReady } from "../core/firebase-core.js";
+import { db, ADMIN_EMAILS, ensureAuthReady, ensureFirebase } from "../core/firebase-core.js";
 import { getCurrentCertificateType, getCertificateName, getCertificateEmoji } from "../utils/certificate-utils.js";
 import {
   collection,
