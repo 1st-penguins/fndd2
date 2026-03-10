@@ -51,7 +51,7 @@ import {
 } from './advanced-analytics-ui.js';
 import { analyzeWeaknesses } from './user-analytics.js';
 import StatsCache from '../utils/stats-cache.js';
-import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031113';
+import { renderProgressTabStandalone } from './render-progress-tab-function.js?v=2026031114';
 
 // 차트 및 분석 데이터 상태
 const state = {
@@ -954,7 +954,7 @@ function renderStudyCalendar() {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const count = dayMap[dateStr] || 0;
       const isToday = dateStr === today;
-      const level = count === 0 ? '' : count <= 10 ? 'lv1' : count <= 40 ? 'lv2' : count <= 80 ? 'lv3' : 'lv4';
+      const level = count === 0 ? '' : count <= 20 ? 'lv1' : count <= 40 ? 'lv2' : count <= 60 ? 'lv3' : 'lv4';
       cellsHtml += `<div class="cal-cell ${level} ${isToday ? 'today' : ''}" title="${dateStr}: ${count}문제">
         <span class="cal-date">${d}</span>
       </div>`;
