@@ -626,6 +626,8 @@ function injectFooter() {
         <div class="linear-footer__section">
           <h3 class="linear-footer__section-title">지원</h3>
           <ul class="linear-footer__nav-list">
+            <li class="linear-footer__nav-item"><a href="/terms" class="linear-footer__nav-link">이용약관</a></li>
+            <li class="linear-footer__nav-item"><a href="/privacy-policy" class="linear-footer__nav-link">개인정보처리방침</a></li>
             <li class="linear-footer__nav-item"><a href="/refund-policy" class="linear-footer__nav-link">환불정책</a></li>
             <li class="linear-footer__nav-item"><a href="/company-info" class="linear-footer__nav-link">사업자정보</a></li>
           </ul>

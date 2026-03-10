@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이용약관 | 퍼스트펭귄</title>
+  <meta name="description" content="퍼스트펭귄 이용약관을 확인하세요.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="이용약관 | 퍼스트펭귄">
+  <meta property="og:description" content="퍼스트펭귄 이용약관을 확인하세요.">
+  <meta property="og:url" content="https://the1stpeng.com/terms.html">
+  <meta property="og:image" content="https://the1stpeng.com/images/firstpenguin-logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="이용약관 | 퍼스트펭귄">
+  <meta name="twitter:description" content="퍼스트펭귄 이용약관을 확인하세요.">
+
+  <!-- Linear Design System CSS -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/linear-themes.css">
+  <link rel="stylesheet" href="css/linear-header.css">
+  <link rel="stylesheet" href="css/linear-footer.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter Variable", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", sans-serif;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 64px 24px;
+    }
+
+    .terms-container {
+      background: var(--color-bg-level-0);
+      border: 1px solid var(--color-border-primary);
+      border-radius: 16px;
+      padding: 48px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 4px 16px var(--shadow-color);
+    }
+
+    .terms-header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--color-border-primary);
+    }
+
+    .terms-header h1 {
+      color: var(--color-text-primary);
+      margin-bottom: 12px;
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+
+    .terms-header .meta {
+      color: var(--color-text-tertiary);
+      font-size: 0.9rem;
+    }
+
+    .terms-intro {
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 36px;
+      padding: 20px 24px;
+      background: var(--color-bg-level-1);
+      border-radius: 10px;
+      border: 1px solid var(--color-border-secondary);
+    }
+
+    .terms-section {
+      margin-bottom: 32px;
+    }
+
+    .terms-section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--color-border-secondary);
+    }
+
+    .terms-section-num {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-brand, #1D2F4E);
+      min-width: 24px;
+    }
+
+    .terms-section-head h2 {
+      color: var(--color-text-primary);
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .terms-section p {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+
+    .terms-section ul {
+      margin-left: 24px;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+
+    .terms-section ul li {
+      margin-bottom: 4px;
+    }
+
+    .terms-note {
+      color: var(--color-text-tertiary);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .terms-contact-box {
+      background: var(--color-bg-level-1);
+      border: 1px solid var(--color-border-primary);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .terms-contact-box p {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .terms-contact-box a {
+      color: var(--color-brand, #1D2F4E);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-weight: 500;
+    }
+
+    .back-button {
+      display: block;
+      text-align: center;
+      margin-top: 36px;
+      padding: 16px 32px;
+      background: var(--color-brand);
+      color: var(--color-text-on-brand);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px var(--shadow-color);
+    }
+
+    .back-button:hover {
+      background: var(--color-accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--shadow-color-hover);
+    }
+
+    @media (max-width: 768px) {
+      .terms-container {
+        padding: 32px 20px;
+      }
+
+      .terms-header h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Linear Header -->
+  <header class="linear-header">
+    <div class="linear-header__container">
+      <a href="index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고">
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+      </a>
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="terms-container">
+      <div class="terms-header">
+        <h1>이용약관</h1>
+        <p class="meta">시행일: 2025년 4월 12일 · 최종 수정일: 2026년 3월 11일</p>
+      </div>
+
+      <div class="terms-intro">
+        본 약관은 퍼스트펭귄(이하 "서비스")이 제공하는 건강운동관리사 · 생활스포츠지도사 자격증 시험 대비 학습 서비스의 이용 조건을 규정합니다. 서비스에 가입하거나 이용함으로써 본 약관에 동의하는 것으로 간주합니다.
+      </div>
+
+      <!-- 1. 서비스 소개 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">1</span>
+          <h2>서비스 소개</h2>
+        </div>
+        <p>퍼스트펭귄은 건강운동관리사 및 2급 생활스포츠지도사 자격증 시험 대비를 위한 기출문제 풀이 및 학습 분석 서비스를 무료로 제공합니다.</p>
+        <p>사이트 내 일부 링크는 퍼스트펭귄이 운영하는 별도 유료 서비스(리틀리 페이지)로 연결될 수 있습니다. 해당 서비스의 결제 및 환불은 리틀리 이용약관을 따릅니다.</p>
+      </div>
+
+      <!-- 2. 저작권 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">2</span>
+          <h2>저작권</h2>
+        </div>
+        <p>본 서비스에 수록된 기출문제의 저작권은 국민체육진흥공단(KSPO)에 있으며, 퍼스트펭귄은 학습 지원 목적으로 이를 제공합니다.</p>
+        <p>서비스 내 UI, 디자인, 코드, 자체 제작 콘텐츠의 저작권은 퍼스트펭귄에 귀속됩니다. 무단 복제 및 배포를 금합니다.</p>
+      </div>
+
+      <!-- 3. 회원 가입 및 계정 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">3</span>
+          <h2>회원 가입 및 계정</h2>
+        </div>
+        <ul>
+          <li>이메일 또는 Google 계정으로 회원가입 할 수 있습니다.</li>
+          <li>하나의 이메일 주소당 하나의 계정만 생성할 수 있습니다.</li>
+          <li>계정 정보(이메일, 비밀번호)는 본인이 관리할 책임이 있으며, 타인에게 양도하거나 공유할 수 없습니다.</li>
+          <li>계정 도용 또는 무단 사용이 발견될 경우 즉시 운영자에게 알려야 합니다.</li>
+        </ul>
+      </div>
+
+      <!-- 4. 금지 행위 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">4</span>
+          <h2>금지 행위</h2>
+        </div>
+        <p>다음 행위는 금지되며, 확인 시 사전 통지 없이 계정이 정지 또는 삭제될 수 있습니다.</p>
+        <ul>
+          <li>서비스 내 콘텐츠를 무단으로 복제·배포·판매하는 행위</li>
+          <li>자동화 프로그램(크롤러, 봇 등)을 이용한 데이터 수집</li>
+          <li>서버 및 서비스 운영을 방해하는 행위</li>
+          <li>타인의 계정을 도용하거나 허위 정보로 가입하는 행위</li>
+          <li>관련 법령을 위반하는 일체의 행위</li>
+        </ul>
+      </div>
+
+      <!-- 5. 서비스 변경 및 중단 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">5</span>
+          <h2>서비스 변경 및 중단</h2>
+        </div>
+        <p>퍼스트펭귄은 운영상 필요에 의해 서비스의 전부 또는 일부를 변경하거나 중단할 수 있습니다.</p>
+        <p>서비스 중단 시 사전에 공지하며, 불가피한 경우(서버 장애 등)에는 사후 공지할 수 있습니다.</p>
+        <p class="terms-note">※ 무료 서비스 특성상 서비스 중단에 따른 별도 보상은 제공되지 않습니다.</p>
+      </div>
+
+      <!-- 6. 외부 링크 면책 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">6</span>
+          <h2>외부 링크 면책</h2>
+        </div>
+        <p>퍼스트펭귄이 운영하는 유료 서비스는 리틀리 플랫폼을 통해 제공되며, 결제·환불·정책은 리틀리 이용약관을 따릅니다.</p>
+        <p>리틀리 플랫폼 자체의 장애·정책 변경 등으로 인한 손해에 대해 퍼스트펭귄은 책임을 지지 않습니다.</p>
+      </div>
+
+      <!-- 7. 면책 조항 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">7</span>
+          <h2>면책 조항</h2>
+        </div>
+        <p>퍼스트펭귄은 서비스 내 학습 콘텐츠의 정확성을 위해 노력하나, 시험 합격을 보장하지 않습니다.</p>
+        <p>천재지변, 서버 장애, 이용자 귀책 사유 등으로 인한 손해에 대해 책임을 지지 않습니다.</p>
+      </div>
+
+      <!-- 8. 약관 변경 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">8</span>
+          <h2>약관 변경</h2>
+        </div>
+        <p>본 약관은 법령 변경 또는 서비스 정책에 따라 개정될 수 있으며, 변경 시 사이트 공지 또는 이메일로 7일 전 사전 안내합니다.</p>
+        <p>변경 후에도 서비스를 계속 이용하면 변경된 약관에 동의한 것으로 간주합니다.</p>
+      </div>
+
+      <!-- 9. 준거법 및 관할 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">9</span>
+          <h2>준거법 및 관할</h2>
+        </div>
+        <p>본 약관은 대한민국 법령에 따르며, 분쟁 발생 시 운영자 소재지를 관할하는 법원을 제1심 법원으로 합니다.</p>
+      </div>
+
+      <!-- 10. 문의 -->
+      <div class="terms-section">
+        <div class="terms-section-head">
+          <span class="terms-section-num">10</span>
+          <h2>문의</h2>
+        </div>
+        <div class="terms-contact-box">
+          <p>약관 관련 문의: <a href="mailto:the1stpeng@gmail.com">the1stpeng@gmail.com</a></p>
+        </div>
+      </div>
+
+      <a href="index.html" class="back-button">홈으로 돌아가기</a>
+    </div>
+  </main>
+
+  <!-- Linear Footer -->
+  <footer class="linear-footer"></footer>
+
+  <script src="js/linear-header.js"></script>
+</body>
+</html>
