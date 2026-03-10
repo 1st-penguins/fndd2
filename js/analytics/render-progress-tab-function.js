@@ -231,59 +231,90 @@ export function renderProgressTabStandalone(data) {
   // ── HTML 렌더링 ───────────────────────────────────────────────────
   const years = ['2025', '2024', '2023', '2022', '2021', '2020', '2019'];
 
-  let cardsHtml = '';
+  let yearsHtml = '';
   years.forEach(year => {
-    [1, 2].forEach(hour => {
-      const key         = `${year}_${hour}`;
-      const best        = bestScores[key];
+    const h1 = bestScores[`${year}_1`];
+    const h2 = bestScores[`${year}_2`];
+    const doneCount = (h1 ? 1 : 0) + (h2 ? 1 : 0);
+    const yearStatus = doneCount === 2 ? 'all-done' : doneCount === 1 ? 'partial' : 'none';
+
+    const renderHourCard = (hour, best) => {
       const isCompleted = !!best;
-      const examUrl     = `exam/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}`;
-
-      cardsHtml += `
-        <div class="progress-card ${isCompleted ? 'completed' : 'not-taken'}">
-          <div class="card-badge ${isCompleted ? 'badge-done' : 'badge-yet'}">
-            ${isCompleted ? '응시완료' : '미응시'}
+      const examUrl = `exam/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}`;
+      return `
+        <div class="progress-hour-card ${isCompleted ? 'completed' : 'not-taken'}">
+          <div class="hour-header">
+            <span class="hour-label">${hour}교시</span>
+            <span class="hour-badge ${isCompleted ? 'badge-done' : 'badge-yet'}">${isCompleted ? '응시완료' : '미응시'}</span>
           </div>
-
-          <div class="card-year-session">
-            <span class="year-text">${year}년</span>
-            <span class="session-text">${hour}교시 모의고사</span>
-          </div>
-
-          <div class="card-score-section">
+          <div class="hour-score">
             ${isCompleted ? `
-              <div class="score-display">
-                <span class="score-value">${best.score}</span>
-                <span class="score-unit">점</span>
-              </div>
+              <span class="score-value">${best.score}<span class="score-unit">점</span></span>
               ${best.correctCount != null && best.totalQuestions != null ? `
-                <div class="score-detail">정답 ${best.correctCount} / ${best.totalQuestions}</div>
+                <span class="score-detail">${best.correctCount}/${best.totalQuestions}</span>
               ` : ''}
-            ` : `
-              <div class="score-placeholder">미응시</div>
-            `}
+            ` : `<span class="score-placeholder">—</span>`}
           </div>
+          <a href="${examUrl}" class="hour-action-btn ${isCompleted ? 'btn-retry' : 'btn-start'}">
+            ${isCompleted ? '다시 풀기' : '지금 풀기'}
+          </a>
+        </div>`;
+    };
 
-          <div class="card-footer">
-            <a href="${examUrl}" class="progress-action-btn ${isCompleted ? 'btn-retry' : 'btn-start'}">
-              ${isCompleted ? '다시 풀기' : '지금 풀기'}
-            </a>
-          </div>
+    yearsHtml += `
+      <div class="progress-year-group ${yearStatus}">
+        <div class="year-group-header">
+          <span class="year-group-title">${year}년</span>
+          <span class="year-group-badge">${doneCount}/2</span>
         </div>
-      `;
-    });
+        <div class="year-group-hours">
+          ${renderHourCard(1, h1)}
+          ${renderHourCard(2, h2)}
+        </div>
+      </div>`;
   });
 
   container.innerHTML = `
     <div class="progress-container">
       <div class="progress-header-section">
         <h3>연도별 모의고사 학습 진행률</h3>
-        <p>각 연도별 모의고사 응시 현황과 최고 점수를 확인할 수 있습니다.</p>
+        <p>각 연도별 1교시·2교시 모의고사 응시 현황과 최고 점수를 확인할 수 있습니다.</p>
       </div>
-      <div class="mockexam-cards-grid">
-        ${cardsHtml}
-      </div>
+      ${yearsHtml}
     </div>
+    <style>
+      .progress-year-group { background: var(--color-bg-level-0, #fff); border: 1px solid var(--color-border-primary, #e2e8f0); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+      .progress-year-group.all-done { border-color: rgba(29,47,78,0.3); }
+      .year-group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+      .year-group-title { font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary, #1D2F4E); }
+      .year-group-badge { font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: var(--color-bg-level-1, #f1f5f9); color: var(--color-text-secondary, #64748b); }
+      .progress-year-group.all-done .year-group-badge { background: #1D2F4E; color: #fff; }
+      .progress-year-group.partial .year-group-badge { background: #5FB2C9; color: #fff; }
+      .year-group-hours { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .progress-hour-card { padding: 16px; border-radius: 10px; text-align: center; }
+      .progress-hour-card.completed { background: rgba(29,47,78,0.04); }
+      .progress-hour-card.not-taken { background: var(--color-bg-level-1, #f8fafc); }
+      .hour-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .hour-label { font-size: 0.9rem; font-weight: 600; color: var(--color-text-primary, #1D2F4E); }
+      .hour-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+      .hour-badge.badge-done { background: #1D2F4E; color: #fff; }
+      .hour-badge.badge-yet { background: var(--color-bg-level-1, #e2e8f0); color: var(--color-text-secondary, #94a3b8); }
+      .hour-score { margin-bottom: 12px; }
+      .hour-score .score-value { font-size: 1.6rem; font-weight: 700; color: var(--color-text-primary, #1D2F4E); }
+      .hour-score .score-unit { font-size: 0.85rem; font-weight: 500; color: var(--color-text-secondary, #64748b); margin-left: 2px; }
+      .hour-score .score-detail { display: block; font-size: 0.75rem; color: var(--color-text-tertiary, #94a3b8); margin-top: 2px; }
+      .hour-score .score-placeholder { font-size: 1.4rem; color: var(--color-text-tertiary, #cbd5e1); }
+      .hour-action-btn { display: inline-block; padding: 7px 18px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
+      .hour-action-btn:hover { opacity: 0.85; }
+      .hour-action-btn.btn-start { background: #1D2F4E; color: #fff; }
+      .hour-action-btn.btn-retry { background: var(--color-bg-level-1, #e2e8f0); color: var(--color-text-primary, #1D2F4E); }
+      @media (max-width: 480px) {
+        .year-group-hours { grid-template-columns: 1fr 1fr; gap: 8px; }
+        .progress-hour-card { padding: 12px 8px; }
+        .hour-score .score-value { font-size: 1.3rem; }
+        .hour-action-btn { padding: 6px 12px; font-size: 0.75rem; }
+      }
+    </style>
   `;
 }
 
