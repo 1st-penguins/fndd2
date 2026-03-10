@@ -25,6 +25,12 @@
   let year = '2025'; // 모의고사 년도 (전역 변수)
   let hour = '1';    // 모의고사 교시 (전역 변수)
 
+  // 문제별 메타데이터 추적 (globalIndex 기준)
+  const __mockQuestionStartTime = {};   // 문제 표시 시각
+  const __mockAnswerTimestamps = {};    // 선택지 최초 클릭 시각
+  const __mockViewedExplanation = {};   // 해설 조회 여부 (checkAnswer 호출 시 true)
+  let __timerPausedAt = null;           // visibilitychange 타이머 일시정지 시각
+
   // 개발 모드 확인
   const isDevMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
@@ -316,6 +322,74 @@
     return await getLastQuestionNumberForMockExam(year, hour);
   }
 
+  /* ===== R3: 중단된 모의고사 감지 유틸리티 ===== */
+
+  /** 24시간 이내 미완료 저장 데이터가 있으면 반환, 없으면 null */
+  function detectInterruptedMockExam() {
+    try {
+      const key = `mockexam_${year}_${hour}_answers`;
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      const answers = data.answers || [];
+      const answeredCount = answers.filter(a => a !== null && a !== undefined).length;
+      const age = Date.now() - (data.timestamp || 0);
+      if (answeredCount > 0 && answeredCount < questions.length && age < 24 * 60 * 60 * 1000) {
+        return { ...data, answeredCount };
+      }
+    } catch (e) { /* 무시 */ }
+    return null;
+  }
+
+  /** 이어서 풀기 배너 표시 → Promise<'resume' | 'fresh'> */
+  function showMockResumeBanner(data) {
+    return new Promise((resolve) => {
+      const existing = document.getElementById('resume-banner');
+      if (existing) existing.remove();
+
+      const banner = document.createElement('div');
+      banner.id = 'resume-banner';
+      banner.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+        background: #1d2f4e; color: #fff;
+        padding: 14px 20px;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 10px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s ease;
+      `;
+      banner.innerHTML = `
+        <style>
+          @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+          @keyframes slideUp   { from { transform: translateY(0); }     to { transform: translateY(-100%); } }
+          #resume-banner-btns button {
+            padding: 8px 18px; border-radius: 6px; border: none;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            min-height: 40px; min-width: 80px;
+          }
+        </style>
+        <span style="font-size:14px;">
+          📌 이전에 <strong>${data.answeredCount}문제</strong>까지 풀었습니다. 이어서 하시겠어요?
+        </span>
+        <div id="resume-banner-btns" style="display:flex; gap:8px;">
+          <button id="resume-btn-yes" style="background:#5fb2c9; color:#fff;">이어서 풀기</button>
+          <button id="resume-btn-no"  style="background:rgba(255,255,255,0.15); color:#fff;">처음부터</button>
+        </div>
+      `;
+
+      document.body.prepend(banner);
+
+      const close = (choice) => {
+        banner.style.animation = 'slideUp 0.25s ease forwards';
+        setTimeout(() => banner.remove(), 260);
+        resolve(choice);
+      };
+
+      document.getElementById('resume-btn-yes').addEventListener('click', () => close('resume'));
+      document.getElementById('resume-btn-no').addEventListener('click',  () => close('fresh'));
+    });
+  }
+
   /* ===== DOMContentLoaded 이벤트 (초기화 및 데이터 로드) ===== */
   document.addEventListener('DOMContentLoaded', async function () {
     // 이미 등록되었으면 무시
@@ -487,101 +561,33 @@
         // 첫 시도 추적 배열 초기화
         firstAttemptTracking = new Array(allQuestions.length).fill(true);
 
-        // ✅ 자동 복구: 세션에서 이전 답변 복원 (5분 이내 세션 자동 복구)
-        const urlParams = new URLSearchParams(window.location.search);
-        const isResume = urlParams.get('resume') === 'true';
-        let lastQuestionNumber = null;
-
-        // localStorage에서 빠른 복구 시도 (5분 이내 데이터)
+        // R3: 중단된 모의고사 감지 + 배너 (24시간 이내 미완료 데이터)
         const localStorageKey = `mockexam_${year}_${hour}_answers`;
-        const savedData = localStorage.getItem(localStorageKey);
-        if (savedData) {
-          try {
-            const parsed = JSON.parse(savedData);
-            const savedTime = parsed.timestamp || 0;
-            const now = Date.now();
-            const fiveMinutes = 5 * 60 * 1000; // 5분
-
-            // 5분 이내 데이터면 빠르게 복구
-            if (now - savedTime < fiveMinutes && parsed.answers) {
-              log('localStorage에서 빠른 복구 중...');
-              parsed.answers.forEach((answer, index) => {
-                if (answer !== null && answer !== undefined) {
-                  userAnswers[index] = answer;
-                }
-              });
-
-              if (parsed.perQuestionChecked) {
-                window.perQuestionChecked = parsed.perQuestionChecked;
+        const interrupted = detectInterruptedMockExam();
+        if (interrupted) {
+          const choice = await showMockResumeBanner(interrupted);
+          if (choice === 'resume') {
+            // 답변 복원
+            const answers = interrupted.answers || [];
+            answers.forEach((answer, idx) => {
+              if (answer !== null && answer !== undefined) {
+                userAnswers[idx] = answer;
               }
-
-              if (parsed.lastQuestionIndex !== undefined) {
-                lastQuestionNumber = parsed.lastQuestionIndex + 1;
-              }
-
-              log(`localStorage에서 ${parsed.answers.filter(a => a !== null).length}개 답변 복구 완료`);
+            });
+            if (interrupted.perQuestionChecked) {
+              window.perQuestionChecked = interrupted.perQuestionChecked;
             }
-          } catch (error) {
-            console.error('localStorage 복구 오류:', error);
-          }
-        }
-
-        // Firebase에서 세션 복구 시도 (5분 이내 세션, localStorage에 데이터가 없거나 오래된 경우)
-        const shouldRestoreFromFirebase = !savedData || (savedData && (() => {
-          try {
-            const parsed = JSON.parse(savedData);
-            const savedTime = parsed.timestamp || 0;
-            const now = Date.now();
-            const fiveMinutes = 5 * 60 * 1000;
-            return now - savedTime >= fiveMinutes; // 5분 이상 지났으면 Firebase에서 복구
-          } catch {
-            return true; // 파싱 실패 시 Firebase에서 복구
-          }
-        })());
-
-        if (shouldRestoreFromFirebase) {
-          log('Firebase 세션에서 마지막 문제 위치 확인 중...');
-          try {
-            // ✅ 답변 복원 없이 마지막 문제 번호만 가져오기
-            const restoredLastQuestion = await getLastQuestionNumberForMockExam(year, hour);
-            if (restoredLastQuestion && !lastQuestionNumber) {
-              lastQuestionNumber = restoredLastQuestion;
-              log('마지막 풀었던 문제 번호:', lastQuestionNumber);
-            }
-
-            // ✅ 이어서 풀기 모드에서 마지막 문제 번호로 currentQuestionIndex 초기화
-            if (lastQuestionNumber && lastQuestionNumber > 0) {
-              const targetIndex = lastQuestionNumber - 1; // 1-based → 0-based
-              if (targetIndex >= 0 && targetIndex < questions.length) {
-                currentQuestionIndex = targetIndex;
-                log(`이어서 풀기: currentQuestionIndex를 ${currentQuestionIndex}로 설정 (답변 복원 없이 위치만 이동)`);
+            if (interrupted.lastQuestionIndex !== undefined) {
+              const idx = interrupted.lastQuestionIndex;
+              if (idx >= 0 && idx < questions.length) {
+                currentQuestionIndex = idx;
               }
             }
-
-            // ✅ 답변 복원을 하지 않으므로 localStorage 저장도 위치 정보만 저장
-            if (restoredLastQuestion) {
-              try {
-                const saveData = {
-                  answers: userAnswers, // 빈 배열로 시작
-                  perQuestionChecked: window.perQuestionChecked || new Array(questions.length).fill(false),
-                  lastQuestionIndex: restoredLastQuestion - 1,
-                  timestamp: Date.now()
-                };
-                localStorage.setItem(localStorageKey, JSON.stringify(saveData));
-              } catch (error) {
-                console.warn('localStorage 저장 오류:', error);
-              }
-            }
-          } catch (error) {
-            console.error('마지막 문제 위치 확인 오류:', error);
-            // 오류 발생해도 계속 진행
-          }
-        } else if (lastQuestionNumber && lastQuestionNumber > 0) {
-          // ✅ localStorage에서 복구한 경우에도 currentQuestionIndex 업데이트
-          const targetIndex = lastQuestionNumber - 1; // 1-based → 0-based
-          if (targetIndex >= 0 && targetIndex < questions.length) {
-            currentQuestionIndex = targetIndex;
-            log(`localStorage 복구: currentQuestionIndex를 ${currentQuestionIndex}로 설정`);
+            log(`이어서 풀기: ${interrupted.answeredCount}개 답변 복원, 문제 ${currentQuestionIndex + 1}번부터`);
+          } else {
+            // 처음부터: 저장 데이터 삭제
+            localStorage.removeItem(localStorageKey);
+            localStorage.removeItem(`mockExamProgress_${year}_${hour}`);
           }
         }
 
@@ -966,6 +972,10 @@
 
     const question = questions[index];
 
+    // 문제 표시 시각 기록 (timeSpent 계산용)
+    const gIdx = question.globalIndex != null ? question.globalIndex : index;
+    __mockQuestionStartTime[gIdx] = Date.now();
+
     // 과목별 문제 번호 계산 (1~20)
     let displayNumber;
     if (currentSubject === "all") {
@@ -1229,6 +1239,11 @@
     const currentQuestion = questions[currentQuestionIndex];
     const globalIndex = currentQuestion.globalIndex;
     userAnswers[globalIndex] = optionIndex;
+
+    // 최초 선택 시각 기록 (변경 가능하므로 첫 클릭만 기록)
+    if (!__mockAnswerTimestamps[globalIndex]) {
+      __mockAnswerTimestamps[globalIndex] = Date.now();
+    }
     updateSelectedOption();
 
     // 화면 업데이트 - 모든 인디케이터 다시 그리기
@@ -1325,6 +1340,11 @@
       window.perQuestionChecked = new Array(questions.length).fill(false);
     }
     window.perQuestionChecked[currentQuestion.globalIndex] = true;
+
+    // 해설이 표시되는 시점 = 정답 확인 클릭 시점 → viewedExplanation 기록
+    if (currentQuestion.explanation && currentQuestion.explanation.trim().length > 0) {
+      __mockViewedExplanation[currentQuestion.globalIndex] = true;
+    }
 
     // ✅ localStorage에 빠른 저장 (정답체크 상태 포함)
     try {
@@ -1873,6 +1893,17 @@
       return false;
     }
 
+    // M3-D: 오프라인 상태 확인 → localStorage에 임시 저장 후 online 이벤트 시 재시도
+    if (!navigator.onLine) {
+      console.warn('오프라인 상태 — 모의고사 결과를 임시 저장합니다.');
+      try {
+        localStorage.setItem('pendingMockExamSave', JSON.stringify({
+          year, hour, savedAt: Date.now()
+        }));
+      } catch (e) { /* 무시 */ }
+      return false;
+    }
+
     // 사용자 ID 확인 (Firebase auth 객체 직접 사용)
     let userId = null;
     let userName = localStorage.getItem('userName') || '익명';
@@ -2075,8 +2106,16 @@
         subjectResults[subject].correct++;
       }
 
-      // ✅ 정답체크 상태 확인 (perQuestionChecked)
-      const viewedExplanation = window.perQuestionChecked && window.perQuestionChecked[globalIndex] ? true : false;
+      // viewedExplanation: checkAnswer 호출 시 해설 표시됐으면 true
+      const viewedExplanation = __mockViewedExplanation[globalIndex] === true
+        || (window.perQuestionChecked && window.perQuestionChecked[globalIndex] === true);
+
+      // timeSpent: 문제 표시 시각 ~ 최초 선택 시각 (초 단위)
+      const qStart = __mockQuestionStartTime[globalIndex];
+      const qAnswer = __mockAnswerTimestamps[globalIndex];
+      const timeSpent = (qStart && qAnswer && qAnswer > qStart)
+        ? Math.floor((qAnswer - qStart) / 1000)
+        : 0;
 
       // 문제 데이터 구성
       const questionData = {
@@ -2090,7 +2129,8 @@
         correctAnswer: correctAnswer,
         globalIndex: globalIndex,
         timestamp: new Date(),
-        viewedExplanation: viewedExplanation  // ✅ 정답체크 상태 저장
+        timeSpent: timeSpent,
+        viewedExplanation: viewedExplanation
       };
 
       // 저장 데이터 추가
@@ -2219,6 +2259,12 @@
     } catch (error) {
       console.warn('세션 종료 오류 (무시됨):', error);
     }
+
+    // R5: 제출 성공 후 임시 저장 데이터 삭제
+    try {
+      localStorage.removeItem(`mockexam_${year}_${hour}_answers`);
+      localStorage.removeItem(`mockExamProgress_${year}_${hour}`);
+    } catch (e) { /* 무시 */ }
 
     return true; // 저장 완료
   }
@@ -2614,6 +2660,70 @@
   window.goHomeAfterSave = goHomeAfterSave;
   window.reviewSubjectIncorrect = reviewSubjectIncorrect;
   window.exitReviewMode = exitReviewMode;
+
+  /* ===== M3: 모바일 안전성 핸들러 ===== */
+
+  // M3-A: visibilitychange — 백그라운드/화면잠금 시 타이머 일시정지
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      if (!reviewMode && timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        __timerPausedAt = Date.now();
+      }
+      // localStorage에 진행상황 백업
+      _saveExamProgressToLocal();
+    } else if (document.visibilityState === 'visible') {
+      if (__timerPausedAt !== null && !reviewMode && timeRemaining > 0) {
+        __timerPausedAt = null;
+        startTimer(); // 재시작 (잠금 시간은 타이머에서 제외됨)
+      }
+    }
+  });
+
+  // M3-B: pageshow — iOS Safari bfcache 복원 시 타이머 재시작
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted && !reviewMode && timeRemaining > 0 && !timerInterval) {
+      __timerPausedAt = null;
+      startTimer();
+    }
+  });
+
+  // R1: beforeunload — 저장만 (경고 없음, 세션 재진입 방식으로 대체)
+  window.addEventListener('beforeunload', () => {
+    if (!reviewMode) _saveExamProgressToLocal();
+  });
+
+  // pagehide: iOS Safari에서 beforeunload 대신 발생 (경고 없이 저장만)
+  window.addEventListener('pagehide', () => {
+    if (!reviewMode) {
+      _saveExamProgressToLocal();
+    }
+  });
+
+  // M3-D: 오프라인 시 저장 재시도 리스너 등록
+  window.addEventListener('online', () => {
+    const pending = localStorage.getItem('pendingMockExamSave');
+    if (pending) {
+      console.log('인터넷 연결 복구 — 모의고사 저장 재시도');
+      saveMockExamResults().then(() => {
+        localStorage.removeItem('pendingMockExamSave');
+      }).catch(err => {
+        console.error('재시도 저장 실패:', err);
+      });
+    }
+  });
+
+  // localStorage 진행상황 백업 함수
+  function _saveExamProgressToLocal() {
+    try {
+      localStorage.setItem(`mockExamProgress_${year}_${hour}`, JSON.stringify({
+        year, hour, timeRemaining,
+        userAnswers: Array.from(userAnswers),
+        savedAt: Date.now()
+      }));
+    } catch (e) { /* 무시 */ }
+  }
 
   // 개발 모드에서만 추가 디버깅 함수 노출
   if (isDevMode) {

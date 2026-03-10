@@ -1,4 +1,10 @@
 /**
+ * ⚠️ DEPRECATED: 이 파일(js/mockexam.js)은 어떤 HTML에서도 로드되지 않는 고아 파일입니다.
+ * 실제 모의고사 로직은 js/quiz/mock-exam.js (IIFE)에 구현되어 있습니다.
+ * 이 파일을 수정해도 사용자에게 영향이 없습니다. 향후 삭제 예정.
+ */
+
+/**
  * 모의고사 세션 초기화 함수
  */
 async function initializeMockExam() {
@@ -107,8 +113,10 @@ async function submitMockExam() {
   if (isUserLoggedIn()) {
     try {
       // 모의고사 정보 추출
-      const year = /* 년도 추출 */;
-      const hour = /* 교시 추출 */;
+      const _urlParams = new URLSearchParams(window.location.search);
+      const _pathMatch = window.location.pathname.split('/').pop().match(/(\d{4}).*?(\d)교시/) || [];
+      const year = _urlParams.get('year') || _pathMatch[1] || '2025';
+      const hour = _urlParams.get('hour') || _pathMatch[2] || '1';
       
       // 과목별 문제 분류
       const subjectNames = hour === '1' ? 

@@ -22,6 +22,8 @@
   
   <!-- Chart.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <!-- SheetJS (xlsx 다운로드용) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   
   <style>
     /* 헤더 로고 크기 */
@@ -344,9 +346,24 @@
             <option value="difficulty">난이도 순 (어려운 순)</option>
           </select>
         </div>
+
+        <div class="filter-group" style="display:flex; flex-direction:column; justify-content:flex-end;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+            <input type="checkbox" id="completedOnlyToggle" checked
+                   style="width:16px; height:16px; cursor:pointer;">
+            <span>완주 세션만 집계</span>
+          </label>
+          <span style="font-size:11px; color:#888; margin-top:4px;">일반 20문제·모의고사 80문제 기준</span>
+        </div>
       </div>
-      
-      <button class="btn btn-primary" onclick="loadStatistics()">통계 조회</button>
+
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="loadStatistics()">통계 조회</button>
+        <button id="downloadXlsxBtn" class="btn" onclick="downloadXlsx()"
+                style="background:#217346; color:#fff; display:none;">
+          📥 엑셀 다운로드 (.xlsx)
+        </button>
+      </div>
     </div>
 
     <!-- 요약 통계 -->
@@ -399,6 +416,59 @@
       });
     });
     
+    // ─── V4-A1: 완주 세션 필터 ────────────────────────────────────────────
+    // 일반문제: 세션당 attempts 수 >= 20, 모의고사: >= 80
+    // sessionId 없는 레거시 attempts는 필터 통과 (유지)
+    function filterCompletedAttempts(allAttempts) {
+      const groups = {};
+      allAttempts.forEach(a => {
+        if (!a.sessionId) return; // sessionId 없는 건 별도 처리
+        (groups[a.sessionId] = groups[a.sessionId] || []).push(a);
+      });
+      const completedIds = new Set();
+      Object.entries(groups).forEach(([sid, list]) => {
+        const isMock = list.some(a => a.questionData?.isFromMockExam === true);
+        if (list.length >= (isMock ? 80 : 20)) completedIds.add(sid);
+      });
+      return allAttempts.filter(a => !a.sessionId || completedIds.has(a.sessionId));
+    }
+
+    // ─── V4-C3: 오답 1위 선택지 ─────────────────────────────────────────
+    // correctAnswer: 0-based 인덱스 (V3 필드). undefined면 전체 중 최다 선택.
+    function getTopWrongAnswer(answers, correctAnswer, total) {
+      let topIdx = -1;
+      let topCount = 0;
+      for (let i = 0; i < 4; i++) {
+        if (correctAnswer !== undefined && correctAnswer !== null && i === correctAnswer) continue;
+        const cnt = answers[i] || 0;
+        if (cnt > topCount) { topCount = cnt; topIdx = i; }
+      }
+      const pct = total > 0 && topCount > 0 ? Math.round(topCount / total * 100) : 0;
+      return { idx: topIdx, count: topCount, pct };
+    }
+
+    // ─── V4-C5: xlsx 다운로드 ────────────────────────────────────────────
+    let _lastTableRows = []; // 마지막 테이블 데이터 저장
+    window.downloadXlsx = function() {
+      if (!_lastTableRows.length) { alert('먼저 통계를 조회하세요.'); return; }
+      const header = ['문제번호', '과목', '연도', '정답률(%)', '오답 1위 선택지', '오답 1위 비율(%)', '총 응시수'];
+      const rows = _lastTableRows.map(r => [
+        r.number, r.subject, r.year,
+        r.accuracy,
+        r.topWrong >= 0 ? (r.topWrong + 1) + '번' : '-',
+        r.topWrongPct,
+        r.total
+      ]);
+      const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+      // 열 너비 설정
+      ws['!cols'] = [8, 16, 8, 10, 14, 14, 10].map(w => ({ wch: w }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '문제별통계');
+      const yearVal = document.getElementById('yearFilter').value || '전체';
+      const subVal  = document.getElementById('subjectFilter').value || '전과목';
+      XLSX.writeFile(wb, `${yearVal}_${subVal}_문제별통계.xlsx`);
+    };
+
     // 통계 조회
     window.loadStatistics = async function() {
       try {
@@ -424,7 +494,14 @@
         snapshot.forEach(doc => {
           attempts.push({ id: doc.id, ...doc.data() });
         });
-        
+
+        // V4-A1: 완주 세션 필터 (토글 ON 시)
+        if (document.getElementById('completedOnlyToggle').checked) {
+          const before = attempts.length;
+          attempts = filterCompletedAttempts(attempts);
+          console.log(`✅ 완주 세션 필터: ${before}개 → ${attempts.length}개`);
+        }
+
         // 필터 적용
         if (yearFilter) {
           attempts = attempts.filter(a => a.questionData?.year === yearFilter);
@@ -494,8 +571,13 @@
             isFromMockExam: qData.isFromMockExam || false,
             total: 0,
             correct: 0,
-            answers: { 0: 0, 1: 0, 2: 0, 3: 0 }
+            answers: { 0: 0, 1: 0, 2: 0, 3: 0 },
+            correctAnswer: undefined  // V4-C3: 아래서 채워짐
           };
+        }
+        // correctAnswer 필드 (V3에서 추가된 필드, 0-based)
+        if (stats[key].correctAnswer === undefined && attempt.correctAnswer !== undefined) {
+          stats[key].correctAnswer = attempt.correctAnswer;
         }
         
         stats[key].total++;
@@ -516,17 +598,18 @@
     // 통계 렌더링
     function renderQuestionStats(questionStats) {
       const container = document.getElementById('questionStatsContent');
-      
+
       if (Object.keys(questionStats).length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">해당 조건의 데이터가 없습니다.</p>';
+        document.getElementById('downloadXlsxBtn').style.display = 'none';
         return;
       }
-      
+
       // 정렬 옵션
       const sortFilter = document.getElementById('sortFilter').value;
-      
+
       let sortedStats = Object.entries(questionStats);
-      
+
       if (sortFilter === 'difficulty') {
         // 난이도 순 (어려운 문제 먼저)
         sortedStats.sort((a, b) => {
@@ -535,84 +618,111 @@
           return accA - accB;
         });
       } else {
-        // 문제 번호 순
+        // 문제 번호 순 (연도 최신 → 과목 가나다 → 번호 오름차순)
         sortedStats.sort((a, b) => {
-          // 연도 비교 (최신순)
-          if (a[1].year !== b[1].year) {
-            return b[1].year.localeCompare(a[1].year);
-          }
-          // 과목 비교
-          if (a[1].subject !== b[1].subject) {
-            return a[1].subject.localeCompare(b[1].subject);
-          }
-          // 문제 번호 비교
-          return a[1].number - b[1].number;
+          if (a[1].year !== b[1].year) return b[1].year.localeCompare(a[1].year);
+          if (a[1].subject !== b[1].subject) return a[1].subject.localeCompare(b[1].subject);
+          return Number(a[1].number) - Number(b[1].number);
         });
       }
-      
-      let html = '<div class="question-stats-grid">';
-      
-      sortedStats.forEach(([key, stat]) => {
-        const accuracy = (stat.correct / stat.total * 100).toFixed(1);
-        let difficulty = 'medium';
-        let difficultyText = '보통';
-        
-        if (accuracy < 50) {
-          difficulty = 'hard';
-          difficultyText = '어려움';
-        } else if (accuracy >= 80) {
-          difficulty = 'easy';
-          difficultyText = '쉬움';
-        }
-        
-        // 문제 유형 배지
-        const typeBadge = stat.isFromMockExam ? 
-          '<span style="background: #9c27b0; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; margin-left: 5px;">모의고사</span>' :
-          '<span style="background: #2196f3; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; margin-left: 5px;">일반</span>';
-        
-        html += `
-          <div class="question-item ${difficulty}">
-            <div class="question-title">
-              <span>${stat.year}년 ${stat.subject} ${stat.number}번 ${typeBadge}</span>
-              <span class="difficulty-badge badge-${difficulty}">${difficultyText}</span>
-            </div>
-            
-            <div class="stat-row">
-              <span class="stat-label">응시 인원</span>
-              <span class="stat-value">${stat.total}명</span>
-            </div>
-            
-            <div class="stat-row">
-              <span class="stat-label">정답률</span>
-              <span class="stat-value" style="color: ${difficulty === 'hard' ? '#f44336' : difficulty === 'easy' ? '#4caf50' : '#ff9800'}">
-                ${accuracy}%
-              </span>
-            </div>
-            
-            <div class="answer-distribution">
-              <div style="font-weight: 600; margin-bottom: 10px; font-size: 13px;">답안 선택률</div>
-              ${[0, 1, 2, 3].map(i => {
-                const count = stat.answers[i] || 0;
-                const percentage = stat.total > 0 ? (count / stat.total * 100).toFixed(1) : 0;
-                return `
-                  <div class="answer-bar">
-                    <div class="answer-label">
-                      <span>${i + 1}번</span>
-                      <span>${count}명 (${percentage}%)</span>
-                    </div>
-                    <div class="bar-container">
-                      <div class="bar-fill" style="width: ${percentage}%"></div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
+
+      // ── V4-C4: 컴팩트 테이블 (상단) ──────────────────────────────────
+      _lastTableRows = sortedStats.map(([, stat]) => {
+        const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
+        const tw = getTopWrongAnswer(stat.answers, stat.correctAnswer, stat.total);
+        return { number: stat.number, subject: stat.subject, year: stat.year,
+                 accuracy, topWrong: tw.idx, topWrongPct: tw.pct, total: stat.total };
       });
-      
-      html += '</div>';
-      container.innerHTML = html;
+
+      const tableRows = sortedStats.map(([, stat]) => {
+        const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
+        const accColor = accuracy < 50 ? '#f44336' : accuracy >= 80 ? '#4caf50' : '#ff9800';
+        const tw = getTopWrongAnswer(stat.answers, stat.correctAnswer, stat.total);
+        const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
+        return `<tr>
+          <td style="text-align:center;">${stat.number}</td>
+          <td>${stat.subject}</td>
+          <td style="text-align:center;">${stat.year}</td>
+          <td style="text-align:center; font-weight:700; color:${accColor};">${accuracy}%</td>
+          <td style="text-align:center;">${twLabel}</td>
+          <td style="text-align:center;">${stat.total}명</td>
+        </tr>`;
+      }).join('');
+
+      const tableHtml = `
+        <div style="overflow-x:auto; margin-bottom:32px;">
+          <table style="width:100%; border-collapse:collapse; font-size:14px;">
+            <thead>
+              <tr style="background:#1d2f4e; color:#fff;">
+                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">문제번호</th>
+                <th style="padding:10px 8px; text-align:left; white-space:nowrap;">과목</th>
+                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">연도</th>
+                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답률</th>
+                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답 1위</th>
+                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시 수</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows.replace(/<tr>/g, '<tr style="border-bottom:1px solid #eee;">')}
+            </tbody>
+          </table>
+        </div>
+        <details style="margin-bottom:16px;">
+          <summary style="cursor:pointer; font-weight:600; color:#1d2f4e; padding:8px 0;">
+            ▶ 상세 분포 보기 (클릭하여 펼치기)
+          </summary>
+          <div id="detailCardsContainer"></div>
+        </details>
+      `;
+      container.innerHTML = tableHtml;
+      document.getElementById('downloadXlsxBtn').style.display = 'inline-flex';
+
+      // 상세 카드: details 펼칠 때 lazy 렌더링
+      const detailsEl = container.querySelector('details');
+      const detailContainer = container.querySelector('#detailCardsContainer');
+      let cardsRendered = false;
+      detailsEl.addEventListener('toggle', () => {
+        if (detailsEl.open && !cardsRendered) {
+          cardsRendered = true;
+          let html = '<div class="question-stats-grid">';
+          sortedStats.forEach(([, stat]) => {
+            const accuracy = (stat.correct / stat.total * 100).toFixed(1);
+            let difficulty = accuracy < 50 ? 'hard' : accuracy >= 80 ? 'easy' : 'medium';
+            let difficultyText = difficulty === 'hard' ? '어려움' : difficulty === 'easy' ? '쉬움' : '보통';
+            const typeBadge = stat.isFromMockExam
+              ? '<span style="background:#9c27b0;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;margin-left:5px;">모의고사</span>'
+              : '<span style="background:#2196f3;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;margin-left:5px;">일반</span>';
+            html += `
+              <div class="question-item ${difficulty}">
+                <div class="question-title">
+                  <span>${stat.year}년 ${stat.subject} ${stat.number}번 ${typeBadge}</span>
+                  <span class="difficulty-badge badge-${difficulty}">${difficultyText}</span>
+                </div>
+                <div class="stat-row">
+                  <span class="stat-label">응시 인원</span>
+                  <span class="stat-value">${stat.total}명</span>
+                </div>
+                <div class="stat-row">
+                  <span class="stat-label">정답률</span>
+                  <span class="stat-value" style="color:${difficulty === 'hard' ? '#f44336' : difficulty === 'easy' ? '#4caf50' : '#ff9800'}">${accuracy}%</span>
+                </div>
+                <div class="answer-distribution">
+                  <div style="font-weight:600;margin-bottom:10px;font-size:13px;">답안 선택률</div>
+                  ${[0, 1, 2, 3].map(i => {
+                    const count = stat.answers[i] || 0;
+                    const pct = stat.total > 0 ? (count / stat.total * 100).toFixed(1) : 0;
+                    return `<div class="answer-bar">
+                      <div class="answer-label"><span>${i + 1}번</span><span>${count}명 (${pct}%)</span></div>
+                      <div class="bar-container"><div class="bar-fill" style="width:${pct}%"></div></div>
+                    </div>`;
+                  }).join('')}
+                </div>
+              </div>`;
+          });
+          html += '</div>';
+          detailContainer.innerHTML = html;
+        }
+      });
     }
     
     // 요약 통계

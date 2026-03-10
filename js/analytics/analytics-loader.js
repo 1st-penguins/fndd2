@@ -535,6 +535,13 @@ function renderDashboard() {
   console.log('[analytics-loader] 대시보드 렌더링 완료');
 }
 
+// ✅ history-tab은 HTML에 없으므로 renderQuestionSetsTab으로 대체 (방어용)
+function renderHistoryTab() { if (typeof renderQuestionSetsTab === 'function') renderQuestionSetsTab(); }
+function renderQuestionSetsTab() { document.dispatchEvent(new CustomEvent('switchTab', { detail: { tab: 'question-sets-tab' } })); }
+function renderWeakAreasTab() { /* analytics-dashboard.js에서 처리 */ }
+function renderAdminTab() { /* analytics-dashboard.js에서 처리 */ }
+function renderProgressTab() { /* analytics-dashboard.js에서 처리 */ }
+
 /**
  * 학습 개요 탭 렌더링
  */

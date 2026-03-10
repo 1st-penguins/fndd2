@@ -151,6 +151,82 @@ function restoreQuizProgress() {
 }
 
 /**
+ * R2: 중단된 일반문제 진행 감지
+ * @param {number} totalQuestions
+ * @returns {Object|null} 중단된 데이터 또는 null
+ */
+function detectInterruptedProgress(totalQuestions) {
+  try {
+    const baseKey = getProgressBaseKey();
+    if (!baseKey) return null;
+    const raw = localStorage.getItem(baseKey);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    const answers = data.answers || [];
+    const answeredCount = answers.filter(a => a !== null && a !== undefined).length;
+    const age = Date.now() - (data.timestamp || 0);
+    if (answeredCount > 0 && answeredCount < totalQuestions && age < 24 * 60 * 60 * 1000) {
+      return { ...data, answeredCount, baseKey };
+    }
+  } catch (e) { /* 무시 */ }
+  return null;
+}
+
+/**
+ * R2: 이어서 풀기 배너 표시 (Promise → 'resume' | 'fresh')
+ * @param {{ answeredCount: number }} data
+ * @returns {Promise<string>}
+ */
+function showResumeBanner(data) {
+  return new Promise((resolve) => {
+    // 중복 방지
+    const existing = document.getElementById('resume-banner');
+    if (existing) existing.remove();
+
+    const banner = document.createElement('div');
+    banner.id = 'resume-banner';
+    banner.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      background: #1d2f4e; color: #fff;
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+      animation: slideDown 0.3s ease;
+    `;
+    banner.innerHTML = `
+      <style>
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        @keyframes slideUp { from { transform: translateY(0); } to { transform: translateY(-100%); } }
+        #resume-banner-btns button {
+          padding: 8px 18px; border-radius: 6px; border: none;
+          font-size: 14px; font-weight: 600; cursor: pointer;
+          min-height: 40px; min-width: 80px;
+        }
+      </style>
+      <span style="font-size:14px;">
+        📌 이전에 <strong>${data.answeredCount}문제</strong>까지 풀었습니다. 이어서 하시겠어요?
+      </span>
+      <div id="resume-banner-btns" style="display:flex; gap:8px;">
+        <button id="resume-btn-yes" style="background:#5fb2c9; color:#fff;">이어서 풀기</button>
+        <button id="resume-btn-no" style="background:rgba(255,255,255,0.15); color:#fff;">처음부터</button>
+      </div>
+    `;
+
+    document.body.prepend(banner);
+
+    const close = (choice) => {
+      banner.style.animation = 'slideUp 0.25s ease forwards';
+      setTimeout(() => banner.remove(), 260);
+      resolve(choice);
+    };
+
+    document.getElementById('resume-btn-yes').addEventListener('click', () => close('resume'));
+    document.getElementById('resume-btn-no').addEventListener('click', () => close('fresh'));
+  });
+}
+
+/**
  * 퀴즈 초기화 함수
  * @returns {Promise<boolean>} 초기화 성공 여부
  */
@@ -294,18 +370,36 @@ export async function initializeQuiz() {
     firstAttemptTracking = new Array(questions.length).fill(true);
     window.perQuestionChecked = perQuestionChecked;
 
-    // ✅ 진행 상태 복원: 이어풀기 모드 또는 로컬에 미완료 데이터가 있을 때
-    // urlParams와 isResume은 위에서 이미 선언됨
+    // R2: 진행 상태 복원 (이어풀기 모드 or 배너 선택)
     let lastQuestionNumber = null;
 
-    // 이어풀기 모드가 아니어도 로컬에 저장된 미완료 진행 데이터가 있으면 자동 복원
-    // (뒤로가기로 나갔다가 다시 들어온 경우)
-    {
-      try {
+    try {
+      // isResume=true(analytics 이어풀기 버튼): 배너 없이 자동 복원
+      // isResume=false: 중단 데이터 있으면 배너 표시 후 선택
+      const interrupted = detectInterruptedProgress(questions.length);
+      let shouldRestore = false;
+
+      if (isResume) {
+        // Analytics에서 이어풀기 버튼으로 진입 → 자동 복원
+        shouldRestore = true;
+      } else if (interrupted) {
+        // 일반 진입인데 중단 데이터 있음 → 배너 물어보기
+        const choice = await showResumeBanner(interrupted);
+        if (choice === 'resume') {
+          shouldRestore = true;
+        } else {
+          // 처음부터 → localStorage 클리어
+          const baseKey = getProgressBaseKey();
+          if (baseKey) localStorage.removeItem(baseKey);
+          const sessionKey = getProgressStorageKey();
+          if (sessionKey) localStorage.removeItem(sessionKey);
+        }
+      }
+
+      if (shouldRestore) {
         const restoredProgress = restoreQuizProgress();
         if (restoredProgress) {
           const answeredCount = restoredProgress.answers.filter(a => a !== null && a !== undefined).length;
-          // 24시간 이내이고, 답변이 있는 미완료 데이터만 복원
           const isRecent = restoredProgress.timestamp && (Date.now() - restoredProgress.timestamp < 24 * 60 * 60 * 1000);
           const isIncomplete = answeredCount > 0 && answeredCount < questions.length;
 
@@ -329,28 +423,28 @@ export async function initializeQuiz() {
               lastQuestionNumber = restoredProgress.lastQuestionIndex + 1;
             }
 
-            window.Logger?.info(`진행 상태 자동 복원: ${answeredCount}문제 답안 (${isResume ? '이어풀기' : '자동감지'})`);
+            window.Logger?.info(`진행 상태 복원: ${answeredCount}문제 답안`);
           }
         }
 
-        // 이어풀기 모드에서만 서버 폴백으로 마지막 위치 보정
+        // 이어풀기 모드에서 서버 폴백으로 마지막 위치 보정
         if (isResume && !lastQuestionNumber) {
           const sessionIdToRestore = resumeSessionId || localStorage.getItem('resumeSessionId');
           lastQuestionNumber = await getLastQuestionNumber(year, subject, sessionIdToRestore);
         }
-
-        // 마지막 문제 위치로 이동
-        if (lastQuestionNumber && lastQuestionNumber > 0) {
-          const targetIndex = lastQuestionNumber - 1;
-          if (targetIndex >= 0 && targetIndex < questions.length) {
-            currentQuestionIndex = targetIndex;
-            window.currentQuestionIndex = currentQuestionIndex;
-            window.Logger?.info(`진행 복원: ${currentQuestionIndex + 1}번 문제로 이동`);
-          }
-        }
-      } catch (error) {
-        window.Logger?.error('진행 상태 복원 오류:', error);
       }
+
+      // 마지막 문제 위치로 이동
+      if (lastQuestionNumber && lastQuestionNumber > 0) {
+        const targetIndex = lastQuestionNumber - 1;
+        if (targetIndex >= 0 && targetIndex < questions.length) {
+          currentQuestionIndex = targetIndex;
+          window.currentQuestionIndex = currentQuestionIndex;
+          window.Logger?.info(`진행 복원: ${currentQuestionIndex + 1}번 문제로 이동`);
+        }
+      }
+    } catch (error) {
+      window.Logger?.error('진행 상태 복원 오류:', error);
     }
 
     // 전역 변수 업데이트
@@ -453,18 +547,41 @@ export async function initializeQuiz() {
     document.addEventListener('keydown', handleKeyboardNavigation);
 
     if (!window.__quizBeforeUnloadBound) {
+      // R1: beforeunload — 저장만 (경고 없음, 세션 재진입 방식으로 대체)
       window.addEventListener('beforeunload', () => {
         saveQuizProgress(currentQuestionIndex);
       });
-      // 모바일 뒤로가기/탭 전환 시에도 진행 저장 (beforeunload가 안 불리는 경우 대비)
+
+      // M3-A/pagehide: iOS Safari — 경고 없이 저장만 (beforeunload 미발생 대비)
       window.addEventListener('pagehide', () => {
         saveQuizProgress(currentQuestionIndex);
       });
+
+      // M3-A: visibilitychange — 백그라운드 전환 시 타이머 일시정지 + 저장
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
           saveQuizProgress(currentQuestionIndex);
+          if (!reviewMode && timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            window.__quizTimerPausedAt = Date.now();
+          }
+        } else if (document.visibilityState === 'visible') {
+          if (window.__quizTimerPausedAt && !reviewMode && timeRemaining > 0) {
+            window.__quizTimerPausedAt = null;
+            startTimer(); // 타이머 재시작 (잠금 시간 제외)
+          }
         }
       });
+
+      // M3-B: pageshow — iOS Safari bfcache 복원 시 타이머 재시작
+      window.addEventListener('pageshow', (e) => {
+        if (e.persisted && !reviewMode && timeRemaining > 0 && !timerInterval) {
+          window.__quizTimerPausedAt = null;
+          startTimer();
+        }
+      });
+
       window.__quizBeforeUnloadBound = true;
     }
 
@@ -497,6 +614,11 @@ export function loadQuestion(index) {
     console.error('문제를 찾을 수 없습니다:', index);
     return;
   }
+
+  // ✅ 문제별 소요 시간 측정: 문제가 표시되는 시각 기록
+  window.__questionStartTime = Date.now();
+  window.__questionTimeSpent = 0;
+  window.__questionViewedExplanation = false;
 
   // 문제 번호 표시 (1-20번 순환)
   const displayNum = (index % 20) + 1;
@@ -928,10 +1050,20 @@ export function checkAnswer() {
   explanation = explanation.replace(/^\s*이\s*문제의\s*정답은\s*\d+번입니다\.\s*/i, '');
 
   // 정답 확인 결과 반환
+  // ✅ 정답 확인 시 소요 시간 계산 (window.__questionStartTime 기준)
+  if (window.__questionStartTime) {
+    window.__questionTimeSpent = Math.floor((Date.now() - window.__questionStartTime) / 1000);
+  }
+
   // 정답 확인 상태 기록 → updateQuestionIndicators가 checked-correct/checked-incorrect 클래스를 붙임
   perQuestionChecked[currentQuestionIndex] = true;
   window.perQuestionChecked = perQuestionChecked;
   updateQuestionIndicators();
+
+  // ✅ 해설이 표시되면 viewedExplanation = true (해설 내용이 있을 때만)
+  if (explanation && explanation.trim().length > 0) {
+    window.__questionViewedExplanation = true;
+  }
 
   const result = {
     status: 'answered',
@@ -939,7 +1071,8 @@ export function checkAnswer() {
     correctAnswerText: correctAnswerText,
     selectedAnswerText: (selectedAnswer + 1) + '번',
     explanation,
-    userAnswer: selectedAnswer
+    userAnswer: selectedAnswer,
+    correctAnswerIndex: Array.isArray(correctAnswerIndex) ? null : correctAnswerIndex
   };
 
   return result;
@@ -1297,6 +1430,20 @@ export async function submitQuiz() {
 
   // 결과 저장 시도
   console.log("퀴즈 결과 저장 시도");
+
+  // M3-D: 오프라인 상태 확인 → localStorage에 임시 저장
+  if (!navigator.onLine) {
+    console.warn('오프라인 상태 — 결과를 임시 저장합니다.');
+    try {
+      const pathMatch = window.location.pathname.split('/').pop().match(/(\d{4})_([^.]+)/);
+      localStorage.setItem('pendingQuizSave', JSON.stringify({
+        year: pathMatch ? pathMatch[1] : '2025',
+        subject: pathMatch ? pathMatch[2] : 'unknown',
+        savedAt: Date.now()
+      }));
+    } catch (e) { /* 무시 */ }
+    // 결과 화면은 그대로 표시 (오프라인이어도 UI 동작)
+  }
 
   // 로그인 상태 확인
   if (isUserLoggedIn()) {

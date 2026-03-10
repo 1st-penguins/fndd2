@@ -32,6 +32,10 @@ export async function recordQuizData(result) {
       subject = filenameMatch[2];  // 추출된 과목 (예: 운동생리학)
     }
     
+    // 현재 문제의 정답 정보 추출
+    const currentQ = window.questions?.[window.currentQuestionIndex];
+    const correctAnswer = currentQ?.correctAnswer ?? currentQ?.correctOption ?? currentQ?.correct ?? null;
+
     // 문제 데이터 구성
     const questionData = {
       year: year,
@@ -39,8 +43,16 @@ export async function recordQuizData(result) {
       number: window.currentQuestionIndex + 1,
       isFromMockExam: subject.includes('모의고사'),
       mockExamPart: subject.includes('1교시') ? 1 : (subject.includes('2교시') ? 2 : null),
-      certType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports' : 'health'
+      certType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports' : 'health',
+      certificateType: window.location.pathname.includes('/exam-sports/')
+        ? 'sports-instructor' : 'health-manager',
+      correctAnswer: correctAnswer,
+      timeSpent: window.__questionTimeSpent || 0,
+      viewedExplanation: window.__questionViewedExplanation || false
     };
+    // 플래그 리셋
+    window.__questionTimeSpent = 0;
+    window.__questionViewedExplanation = false;
     
     // 데이터 기록
     return await recordAttempt(

@@ -1,4 +1,7 @@
 // mock-exam-page.js - 모의고사 페이지 컨트롤러
+// ⚠️ DEPRECATED: 이 파일은 어떤 HTML에서도 로드되지 않는 고아 파일입니다.
+// 실제 모의고사 로직은 js/quiz/mock-exam.js (IIFE)에 구현되어 있습니다.
+// 이 파일을 수정해도 사용자에게 영향이 없습니다.
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import { auth } from "../core/firebase-core.js";
@@ -494,6 +497,7 @@ window.selectOption = selectOption;
 window.checkAnswer = checkAnswer;
 window.goToNextQuestion = goToNextQuestion;
 window.goToPreviousQuestion = goToPreviousQuestion;
-window.submitQuiz = submitMockExam;
+// ⚠️ window.submitQuiz 덮어쓰기 제거 — mock-exam.js IIFE의 submitQuiz가 단독 진입점
+// window.submitQuiz = submitMockExam;  ← 제거됨 (M1)
 window.showCurrentAnswer = showCurrentAnswer;
 window.filterQuestionsBySubject = filterQuestionsBySubject;

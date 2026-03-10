@@ -1,8 +1,25 @@
 # 퍼스트펭귄 (fndd2) 프로젝트 가이드
 
+## 새 세션 시작 시 읽기 순서
+
+1. `WORKSTATE.md` — 현재 상태 파악 (필수)
+2. `plan.md` 해당 Phase — 무엇을 해야 하는지
+3. `research.md` 관련 섹션 — 함수/파일 위치
+4. 실제 파일 Read — 코드 확인 후 작업
+
+---
+
 ## 배포 체크리스트
 
 ### ⚠️ 배포 시 반드시 확인
+
+**0. JS 구문 검사 먼저 실행**
+
+```bash
+bash scripts/check-syntax.sh
+```
+
+이 검사가 통과해야만 다음 단계 진행. 실패하면 배포 중단.
 
 **JS/CSS 변경이 있는 배포 시 `sw.js` CACHE_VERSION 올리기**
 
@@ -73,3 +90,58 @@ const CACHE_VERSION = '2026030903'; // ← 배포마다 숫자 올리기 (예: .
 - `_headers` — Cloudflare Pages 헤더 (HTML: no-cache, **sw.js: no-store**, JS/CSS: no-cache, images: 30일)
 - `netlify.toml` — 레거시 파일 (Cloudflare Pages에서 무시됨, 삭제 가능)
 - `/sw.js`에는 반드시 `no-store` 설정 — 없으면 Netlify CDN이 sw.js 자체를 캐시해서 CACHE_VERSION 변경이 사용자에게 반영 안 됨
+
+### 모의고사 관련 파일 주의
+
+- `js/mockexam.js` — **고아 파일** (어떤 HTML에서도 로드 안 함). 수정 불필요.
+- `js/quiz/mock-exam.js` — **실제 사용되는 IIFE** (모의고사 HTML들이 로드). 모의고사 수정은 여기.
+- `js/exam/mock-exam-page.js` — ESM 모듈. 497줄에 window.submitQuiz 덮어쓰기 주의.
+
+---
+
+## 코드 품질 규칙 (반드시 지킬 것)
+
+### 절대 금지 패턴
+
+```javascript
+// ❌ 주석을 값으로 대입 — SyntaxError 유발
+const year = /* 년도 추출 */;
+
+// ❌ 빈 try 블록 — ESM SyntaxError 유발
+try {
+}
+
+// ❌ window.xxx 덮어쓰기 (의도 없이)
+window.submitQuiz = myFunction;  // 기존 submitQuiz를 파괴할 수 있음
+```
+
+### 올바른 패턴
+
+```javascript
+// ✅ 미완성 시 실제 기본값 + 주석
+const year = '2025'; // TODO: URL에서 추출 필요
+
+// ✅ try는 반드시 catch 또는 finally
+try {
+  doSomething();
+} catch (e) {
+  console.error('설명:', e);
+}
+
+// ✅ 전역 덮어쓰기 시 주석 필수
+// mock-exam-page.js가 IIFE의 submitQuiz를 대체함 (의도적)
+window.submitQuiz = submitMockExam;
+```
+
+### 새 함수 작성 전 중복 확인
+
+```bash
+# 동일 기능 함수 검색 먼저
+grep -r "functionName" js/
+```
+
+### 단계 완료 시 업데이트 필수
+
+- plan.md 해당 Todo에 [v] 체크
+- WORKSTATE.md 업데이트 (다음 작업 명시)
+- research.md에 새 발견 사항 추가

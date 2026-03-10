@@ -64,6 +64,23 @@ const state = {
   lastRefreshTime: null
 };
 
+// ─── V4-A2: 완주 세션 필터 ──────────────────────────────────────────────
+// 일반문제: 세션당 attempts 수 >= 20, 모의고사: >= 80
+// sessionId 없는 레거시 attempts는 필터 통과 (유지)
+function filterCompletedAttempts(allAttempts) {
+  const groups = {};
+  allAttempts.forEach(a => {
+    if (!a.sessionId) return;
+    (groups[a.sessionId] = groups[a.sessionId] || []).push(a);
+  });
+  const completedIds = new Set();
+  Object.entries(groups).forEach(([sid, list]) => {
+    const isMock = list.some(a => a.questionData?.isFromMockExam === true);
+    if (list.length >= (isMock ? 80 : 20)) completedIds.add(sid);
+  });
+  return allAttempts.filter(a => !a.sessionId || completedIds.has(a.sessionId));
+}
+
 // 과거 오염 세션 정리(1회성) 버전 키
 const LEGACY_SESSION_CLEANUP_VERSION = 'v1';
 
@@ -503,6 +520,9 @@ function renderDashboard() {
   // console.log('대시보드 렌더링 완료');
 }
 
+// ✅ history-tab은 HTML에 없는 dead code이지만 호출 방어용 alias
+const renderHistoryTab = renderQuestionSetsTab;
+
 /**
  * 개발자 모드용 가상 문제 풀이 데이터 생성
  * @param {string} certificateType - 자격증 타입
@@ -661,7 +681,9 @@ export async function loadAnalyticsData(user) {
       // 문제 풀이 기록 가져오기 (최근 1000개, 자격증 필터링)
       state.attempts = await getUserAttempts(1000, currentCertType);
       state.attempts = state.attempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
-      window.Logger?.debug(`📊 [${certName}] 문제 풀이 기록: ${state.attempts.length}개`);
+      // V4-D1: 완주 세션만 통계에 반영 (기록보기 탭은 state.sessions 사용 — 영향 없음)
+      state.attempts = filterCompletedAttempts(state.attempts);
+      window.Logger?.debug(`📊 [${certName}] 문제 풀이 기록 (완주 세션): ${state.attempts.length}개`);
 
       // 모의고사 결과 가져오기 (최근 30개, 자격증 필터링)
       state.mockExamResults = await getUserMockExamResults(30, currentCertType);
@@ -1877,15 +1899,17 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter,
           ? Math.min(attemptCount, 80)  // 모의고사는 최대 80문제
           : Math.min(attemptCount, totalQuestions);  // 일반 문제는 전체 문항 수를 넘지 않도록 제한
         
-        // ✅ 이어서 풀기 조건: 활성 세션이고, 풀이한 문제 수가 전체 문제 수보다 적을 때만
-        const canResume = isActive && completed > 0 && completed < totalQuestions;
+        // ✅ 이어서 풀기 조건: 24시간 이내 미완료 세션이면 isActive 관계없이 허용
+        const sessionAgeMs = startTime ? (Date.now() - startTime.getTime()) : Infinity;
+        const isWithin24h = sessionAgeMs < 24 * 60 * 60 * 1000;
+        const canResume = completed > 0 && completed < totalQuestions && isWithin24h;
 
         // 디버깅 로그 - 이어서 풀기 버튼 표시 조건 확인
         if (!canResume) {
           const reasons = [];
-          if (!isActive) reasons.push('세션이 비활성화됨');
           if (completed === 0) reasons.push('아직 문제를 풀지 않음');
           if (completed >= totalQuestions) reasons.push(`모든 문제 완료 (${completed}/${totalQuestions})`);
+          if (!isWithin24h) reasons.push('24시간 초과');
           console.log(`세션 ${sessionId}: 이어서 풀기 불가 - ${reasons.join(', ')}`);
         } else {
           console.log(`세션 ${sessionId}: 이어서 풀기 가능 (${completed}/${totalQuestions})`);
@@ -2472,7 +2496,7 @@ function showSessionScorecard(sessionIdOrData) {
           sessionsRef,
           where("userId", "==", user.uid),
           where("year", "==", year),
-          where("examType", "==", "모의고사")
+          where("type", "==", "mockexam")
         );
 
         getDocs(sessionsQuery).then(async sessionsSnapshot => {
@@ -3379,7 +3403,11 @@ function createProSessionCard(session) {
     </div>
 
     <div class="session-card-actions">
-      ${session.canResume ? '<button class="session-btn session-btn-resume">이어풀기 →</button>' : ''}
+      ${session.canResume
+        ? '<button class="session-btn session-btn-resume">이어풀기 →</button>'
+        : (session.completed >= session.total && session.total > 0
+          ? '<button class="session-btn session-btn-retry">다시 풀기</button>'
+          : '')}
       <button class="session-btn session-btn-record">기록보기</button>
       <button class="session-btn session-btn-delete" title="기록 삭제">🗑</button>
     </div>
@@ -3390,8 +3418,17 @@ function createProSessionCard(session) {
   if (resumeBtn) {
     resumeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      // 세션 타입별 라우팅은 공통 resumeSession 함수에서 처리
+      showToast('이전 위치에서 이어서 풀기를 시작합니다.');
       resumeSession(session.id);
+    });
+  }
+
+  // 다시 풀기 (완료 세션 재도전)
+  const retryBtn = el.querySelector('.session-btn-retry');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      retrySession(session.id);
     });
   }
 
@@ -4283,8 +4320,8 @@ async function loadQuestionStatistics(year, subject, setType, container) {
     // 관리자 데이터 포함 여부
     const includeAdmin = document.getElementById('include-admin-data')?.checked || false;
 
-    // 캐시 키 생성
-    const cacheKey = StatsCache.generateKey('question-stats', { year, subject, setType, includeAdmin });
+    // 캐시 키 생성 (completedOnly: true 포함 — 미필터 캐시와 분리)
+    const cacheKey = StatsCache.generateKey('question-stats', { year, subject, setType, includeAdmin, completedOnly: true });
 
     // 캐시 확인
     const cached = StatsCache.get(cacheKey);
@@ -4342,6 +4379,11 @@ async function loadQuestionStatistics(year, subject, setType, container) {
     } else {
       console.log('✅ 관리자 데이터 포함');
     }
+
+    // V4-D2: 완주 세션만 집계 (일반 20문제 / 모의고사 80문제 기준)
+    const beforeCompleted = attempts.length;
+    attempts = filterCompletedAttempts(attempts);
+    console.log(`✅ 완주 세션 필터: ${beforeCompleted}개 → ${attempts.length}개`);
 
     // 관리자 통계는 항상 일반 + 모의고사 통합 집계
     console.log('✅ 전체 세트 (일반 + 모의고사 통합)');
@@ -4418,12 +4460,23 @@ function renderQuestionStatsHTML(data, container) {
   }, 0) / totalQuestions : 0;
 
   const hardQuestions = Object.values(questionStats).filter(s => (s.correct / s.total * 100) < 50).length;
+  const veryHardQuestions = Object.values(questionStats).filter(s => (s.correct / s.total * 100) < 40).length;
 
   // HTML 렌더링
   let html = `
     <div class="stats-section" style="margin-bottom: 30px;">
-      <h3>요약 통계</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <h3 style="margin: 0;">요약 통계</h3>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="export-hard-50-btn" style="background: #fff3e0; color: #e65100; border: 1.5px solid #ffb74d; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+            📋 고난도 내보내기 (50% 미만, ${hardQuestions}개)
+          </button>
+          <button id="export-hard-40-btn" style="background: #ffebee; color: #c62828; border: 1.5px solid #ef9a9a; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+            🔥 최고난도 내보내기 (40% 미만, ${veryHardQuestions}개)
+          </button>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
         <div style="text-align: center; padding: 20px; background: #e3f2fd; border-radius: 8px;">
           <div style="font-size: 32px; font-weight: bold; color: var(--penguin-skyblue);">${totalQuestions}</div>
           <div style="color: #666; margin-top: 8px; font-size: 14px;">분석된 문제 수</div>
@@ -4588,6 +4641,14 @@ function renderQuestionStatsHTML(data, container) {
 
   container.innerHTML = html;
 
+  // Export 버튼 이벤트 리스너
+  document.getElementById('export-hard-50-btn')?.addEventListener('click', () => {
+    exportHardQuestions(questionStats, 50);
+  });
+  document.getElementById('export-hard-40-btn')?.addEventListener('click', () => {
+    exportHardQuestions(questionStats, 40);
+  });
+
   // ✅ 과목 필터 이벤트 리스너 추가
   const subjectFilterRegular = document.getElementById('subject-filter-regular');
   if (subjectFilterRegular) {
@@ -4655,53 +4716,97 @@ function renderQuestionCard(stat) {
     ? `../exam/${stat.year}_모의고사_${stat.mockExamPart || '1'}교시.html?question=${stat.number}`
     : `../exam/${stat.year}_${decodedSubject}.html?question=${stat.number}`;
   const mostWrongOption = getMostSelectedWrongOption(stat);
+  const avgTimeSpent = stat.total > 0 && stat.totalTimeSpent > 0
+    ? Math.round(stat.totalTimeSpent / stat.total)
+    : null;
+
+  // 답안 분포 (정답 강조)
+  const correctIdx = stat.correctAnswerIndex;
+
+  // 상세 바 차트 HTML (확장 시 표시)
+  const barChartHtml = [0, 1, 2, 3].map(i => {
+    const count = stat.answers[i] || 0;
+    const pct = stat.total > 0 ? (count / stat.total * 100) : 0;
+    const isCorrect = correctIdx === i;
+    const isWrongMax = mostWrongOption && mostWrongOption.option === (i + 1);
+    const barBg = isCorrect ? '#34d399' : (isWrongMax ? '#fca5a5' : '#93c5fd');
+    const rowBg = isCorrect ? '#f0fdf4' : '#fafafa';
+    const label = isCorrect ? `${i + 1}번 ✓ 정답` : `${i + 1}번${isWrongMax ? ' (최다오답)' : ''}`;
+    return `
+      <div style="padding: 5px 8px; background: ${rowBg}; border-radius: 4px; margin-bottom: 4px;">
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+          <span style="font-size: 11px; font-weight: 600; color: ${isCorrect ? '#065f46' : '#374151'}; min-width: 80px;">${label}</span>
+          <span style="font-size: 11px; color: #64748b; margin-left: auto;">${count}명 (${pct.toFixed(0)}%)</span>
+        </div>
+        <div style="height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+          <div style="height: 100%; width: ${pct.toFixed(1)}%; background: ${barBg}; border-radius: 4px; transition: width 0.4s ease;"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const cardKey = `${stat.year}_${stat.subject}_${stat.number}`;
 
   return `
-    <div onclick="window.open('${questionUrl}', '_blank')" style="background: #fff; border: 2px solid ${color}; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
+    <div data-card-key="${cardKey}" onclick="(function(e){var d=e.currentTarget.querySelector('.q-detail');if(d){d.style.display=d.style.display==='none'?'block':'none';}})(event)" style="background: #fff; border: 2px solid ${color}; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
         <div style="font-weight: 600; color: var(--penguin-navy); font-size: 12px; line-height: 1.3; flex: 1;">
           ${stat.year} ${decodedSubject}
         </div>
         ${typeBadge}
       </div>
-      
+
       <div style="font-size: 28px; font-weight: bold; color: ${color}; margin: 8px 0; text-align: center;">
         ${stat.number}
       </div>
-      
+
       <div style="text-align: center; margin-bottom: 8px;">
         <div style="background: ${color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block;">
           ${difficultyText}
         </div>
       </div>
-      
+
       <div style="font-size: 12px; color: #666; text-align: center; line-height: 1.6;">
         <div style="margin-bottom: 4px;"><span style="font-weight: 600;">응시</span> ${stat.total}명</div>
         <div style="color: ${color}; font-weight: bold; font-size: 14px; line-height: 1.5;">
           정답 ${stat.correct}명 <span style="color: #94a3b8; font-weight: 500;">(정답률 ${accuracy}%)</span>
         </div>
+        ${avgTimeSpent !== null ? `<div style="color: #64748b; font-size: 11px;">평균 풀이시간: <strong>${avgTimeSpent}초</strong></div>` : ''}
       </div>
       <div style="margin-top: 6px; text-align: center; font-size: 11px; color: #475569;">
         ${mostWrongOption
       ? `최다 오답: <strong style="color: #b91c1c;">${mostWrongOption.option}번</strong> (${mostWrongOption.rate}%, ${mostWrongOption.count}명)`
       : '최다 오답: 데이터 부족'}
       </div>
-      
+
       <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e0e0e0;">
-        <div style="font-weight: 600; margin-bottom: 5px; font-size: 10px; color: #999; text-align: center;">답안 선택률</div>
+        <div style="font-weight: 600; margin-bottom: 5px; font-size: 10px; color: #999; text-align: center;">답안 선택률 (클릭으로 상세보기)</div>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px;">
         ${[0, 1, 2, 3].map(i => {
     const count = stat.answers[i] || 0;
     const percentage = stat.total > 0 ? (count / stat.total * 100).toFixed(0) : 0;
+    const isCorrect = correctIdx === i;
+    const bg = isCorrect ? '#d1fae5' : '#f8f9fa';
+    const border = isCorrect ? '1px solid #34d399' : '1px solid #e0e0e0';
+    const numColor = isCorrect ? '#065f46' : '#666';
     return `
-            <div style="padding: 3px 5px; background: #f8f9fa; border-radius: 3px; border: 1px solid #e0e0e0;">
-              <div style="font-size: 9px; color: #666; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: 600;">${i + 1}</span>
+            <div style="padding: 3px 5px; background: ${bg}; border-radius: 3px; border: ${border};">
+              <div style="font-size: 9px; color: ${numColor}; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600;">${i + 1}${isCorrect ? ' ✓' : ''}</span>
                 <span>${percentage}%</span>
               </div>
             </div>
           `;
   }).join('')}
+        </div>
+      </div>
+
+      <!-- 상세 확장 뷰 (기본 숨김) -->
+      <div class="q-detail" style="display:none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;">
+        <div style="font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 6px; text-align: center;">답안 분포 상세</div>
+        ${barChartHtml}
+        ${avgTimeSpent !== null ? `<div style="margin-top: 6px; font-size: 11px; text-align: center; color: #64748b;">평균 소요시간: <strong>${avgTimeSpent}초</strong></div>` : ''}
+        <div style="margin-top: 8px; text-align: center;">
+          <a href="${questionUrl}" target="_blank" onclick="event.stopPropagation()" style="display: inline-block; background: var(--penguin-navy); color: white; padding: 5px 14px; border-radius: 6px; font-size: 12px; text-decoration: none; font-weight: 600;">문제 보기 →</a>
         </div>
       </div>
     </div>
@@ -4734,7 +4839,9 @@ function calculateQuestionStats(attempts) {
         correct: 0,
         answers: { 0: 0, 1: 0, 2: 0, 3: 0 },
         correctVotes: { 0: 0, 1: 0, 2: 0, 3: 0 },
-        correctAnswerIndex: null
+        correctAnswerIndex: null,
+        totalTimeSpent: 0,   // ✅ 소요 시간 합계 (초)
+        viewedExplanationCount: 0  // ✅ 해설 조회 횟수
       };
     }
 
@@ -4770,6 +4877,14 @@ function calculateQuestionStats(attempts) {
     // 명시된 정답 인덱스가 있으면 우선 반영
     if (Number.isInteger(correctAnswerIndex) && correctAnswerIndex >= 0 && correctAnswerIndex <= 3) {
       stats[key].correctAnswerIndex = correctAnswerIndex;
+    }
+
+    // 메타데이터 집계
+    if (typeof attempt.timeSpent === 'number' && attempt.timeSpent > 0) {
+      stats[key].totalTimeSpent += attempt.timeSpent;
+    }
+    if (attempt.viewedExplanation === true) {
+      stats[key].viewedExplanationCount++;
     }
   });
 
@@ -4834,6 +4949,60 @@ function getMostSelectedWrongOption(stat) {
     count: bestCount,
     rate: ((bestCount / stat.total) * 100).toFixed(0)
   };
+}
+
+/**
+ * 고난도 문제 내보내기 (CSV 다운로드)
+ * @param {Object} questionStats - calculateQuestionStats() 결과
+ * @param {number} threshold - 정답률 임계값 (%)
+ */
+function exportHardQuestions(questionStats, threshold) {
+  const hard = Object.values(questionStats)
+    .filter(s => s.total >= 3 && (s.correct / s.total * 100) < threshold)
+    .sort((a, b) => (a.correct / a.total) - (b.correct / b.total));
+
+  if (hard.length === 0) {
+    showToast(`정답률 ${threshold}% 미만 문제가 없습니다.`, 'info');
+    return;
+  }
+
+  const decodeSubject = (s) => {
+    let d = s;
+    try { for (let i = 0; i < 3; i++) { const t = decodeURIComponent(d); if (t === d) break; d = t; } } catch (e) { /* ignore */ }
+    return d;
+  };
+
+  const rows = [
+    ['연도', '과목', '문제번호', '응시수', '정답수', '정답률(%)', '정답번호', '최다오답번호', '최다오답률(%)', '평균풀이시간(초)']
+  ];
+
+  hard.forEach(s => {
+    const accuracy = (s.correct / s.total * 100).toFixed(1);
+    const wrong = getMostSelectedWrongOption(s);
+    const avgTime = s.total > 0 && s.totalTimeSpent > 0 ? Math.round(s.totalTimeSpent / s.total) : '';
+    rows.push([
+      s.year,
+      decodeSubject(s.subject),
+      s.number,
+      s.total,
+      s.correct,
+      accuracy,
+      Number.isInteger(s.correctAnswerIndex) ? s.correctAnswerIndex + 1 : '',
+      wrong ? wrong.option : '',
+      wrong ? wrong.rate : '',
+      avgTime
+    ]);
+  });
+
+  const csvContent = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `고난도문제_${threshold}미만_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`${hard.length}개 문제를 CSV로 내보냈습니다.`);
 }
 
 /**
@@ -5414,8 +5583,6 @@ function createCardElement(card) {
 
   // 카드 제목 URL 디코딩
   let decodedTitle = safeDecodeText(card.title || '문제풀이기록');
-  try {
-  }
 
   // 간단한 HTML 구조로 변경 (모바일은 가로형 컴팩트, 데스크톱은 세로형)
   if (useMobileCompact) {
@@ -5973,8 +6140,49 @@ function resumeSession(sessionId) {
 }
 
 /**
+ * 완료된 세션을 처음부터 다시 풀기
+ * @param {string} sessionId - 세션 ID
+ */
+function retrySession(sessionId) {
+  try {
+    const sessionData = window.sessionCards?.find(c => c.id === sessionId);
+    if (!sessionData) {
+      showToast('세션 정보를 찾을 수 없습니다.', 'error');
+      return;
+    }
+
+    const { year, subject, certType, type, hour } = sessionData;
+    const examFolder = certType === 'sports' ? 'exam-sports' : 'exam';
+
+    let url;
+    if (type === 'mockexam') {
+      if (!year || !hour) {
+        showToast('모의고사 정보가 불완전합니다.', 'error');
+        return;
+      }
+      url = `${examFolder}/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}`;
+    } else {
+      if (!subject) {
+        showToast('세션 정보가 불완전합니다.', 'error');
+        return;
+      }
+      url = `${examFolder}/${year}_${subject}.html`;
+    }
+
+    // 이전 이어풀기 세션 ID 초기화 (새 세션으로 시작)
+    localStorage.removeItem('resumeSessionId');
+    showToast('처음부터 다시 풀기를 시작합니다.');
+    window.location.href = url;
+
+  } catch (error) {
+    console.error('다시 풀기 오류:', error);
+    showToast('다시 풀기 중 오류가 발생했습니다.', 'error');
+  }
+}
+
+/**
  * 세션 상세 보기 함수
- * 
+ *
  * 세션 카드에서 "상세 보기" 버튼을 클릭할 때 호출됩니다.
  * @param {string} sessionId - 세션 ID
  */

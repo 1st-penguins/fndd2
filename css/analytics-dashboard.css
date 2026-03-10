@@ -678,6 +678,13 @@
 }
 .session-btn-resume:hover { background: var(--penguin-skyblue, #5FB2C9); }
 
+.session-btn-retry {
+  background: #f0fdf4;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+.session-btn-retry:hover { background: #d1fae5; }
+
 .session-btn-record {
   background: #f0f7ff;
   color: var(--penguin-navy, #1D2F4E);
