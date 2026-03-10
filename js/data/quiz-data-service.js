@@ -10,9 +10,10 @@ import {
   where,
   orderBy,
   limit,
+  startAfter,
   serverTimestamp,
-  setDoc,   // setDoc 추가
-  updateDoc // updateDoc 추가
+  setDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 import { db, auth } from "../core/firebase-core.js";
@@ -498,8 +499,8 @@ export async function getUserLearningStatus() {
 }
 
 /**
- * 사용자의 최근 문제 풀이 기록 가져오기 (수정)
- * @param {number} count - 가져올 기록 수
+ * 사용자의 문제 풀이 기록 가져오기 (페이지네이션, 최대 3000개)
+ * @param {number} count - 가져올 기록 수 (certificateType 필터 적용 후 기준)
  * @param {string|null} certificateType - 필터링할 자격증 타입 (null이면 모두 가져옴)
  * @returns {Promise<Array>} 문제 풀이 기록 배열
  */
@@ -511,44 +512,47 @@ export async function getUserAttempts(count = 50, certificateType = null) {
       return [];
     }
 
-    // 🔧 기본 쿼리 - 최신순 정렬
     // ⚠️ certificateType 필터는 클라이언트에서 적용 (기존 데이터 호환)
-    const attemptsQuery = query(
-      collection(db, "attempts"),
-      where("userId", "==", user.uid),
-      orderBy("timestamp", "desc"),
-      limit(certificateType ? count * 2 : count)  // 필터링할 경우 더 많이 가져옴
-    );
+    // 페이지네이션: 500개씩 최대 3000개까지 읽어 필터 후 count개 반환
+    const PAGE_SIZE = 500;
+    const MAX_FETCH = 3000;
+    const results = [];
+    let lastDoc = null;
+    let totalFetched = 0;
 
-    const snapshot = await getDocs(attemptsQuery);
+    while (totalFetched < MAX_FETCH) {
+      const constraints = [
+        where("userId", "==", user.uid),
+        orderBy("timestamp", "desc"),
+        ...(lastDoc ? [startAfter(lastDoc)] : []),
+        limit(PAGE_SIZE)
+      ];
 
-    if (snapshot.empty) {
-      console.log('[quiz-data-service] 문제 풀이 기록이 없습니다.');
-      return [];
+      const snapshot = await getDocs(query(collection(db, "attempts"), ...constraints));
+      if (snapshot.empty) break;
+
+      totalFetched += snapshot.docs.length;
+
+      for (const d of snapshot.docs) {
+        const data = d.data();
+        const attempt = { id: d.id, ...data, timestamp: data.timestamp?.toDate() || new Date() };
+        if (!certificateType || (attempt.certificateType || 'health-manager') === certificateType) {
+          results.push(attempt);
+          if (results.length >= count) break;
+        }
+      }
+
+      if (results.length >= count) break;
+      if (snapshot.docs.length < PAGE_SIZE) break; // 마지막 페이지
+
+      lastDoc = snapshot.docs[snapshot.docs.length - 1];
     }
 
-    // 결과 변환
-    let results = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      timestamp: doc.data().timestamp?.toDate() || new Date()
-    }));
-
-    // 🔧 클라이언트 필터링: certificateType 처리 (기존 데이터 호환)
-    if (certificateType) {
-      results = results.filter(attempt => {
-        const attemptCertType = attempt.certificateType || 'health-manager';  // 기본값 처리
-        return attemptCertType === certificateType;
-      });
-
-      // 원하는 개수만큼 자르기
-      results = results.slice(0, count);
-
-      console.log(`[quiz-data-service] ${results.length}개의 ${certificateType} 문제 풀이 기록을 로드했습니다.`);
-    } else {
-      console.log(`[quiz-data-service] ${results.length}개의 문제 풀이 기록을 로드했습니다.`);
+    if (totalFetched >= MAX_FETCH && results.length < count) {
+      console.warn(`[quiz-data-service] 최대 조회 한도(${MAX_FETCH}개) 도달. ${results.length}개 반환 (요청: ${count}개)`);
     }
 
+    console.log(`[quiz-data-service] 문제 풀이 기록 ${results.length}개 로드 (Firestore 읽기: ${totalFetched}개${certificateType ? `, 자격증: ${certificateType}` : ''})`);
     return results;
   } catch (error) {
     console.error("[quiz-data-service] 문제 풀이 기록 조회 오류:", error);

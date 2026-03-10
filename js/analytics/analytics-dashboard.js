@@ -678,8 +678,8 @@ export async function loadAnalyticsData(user) {
 
       window.Logger?.info(`📊 [${certName}] 학습 데이터 로드 시작...`);
 
-      // 문제 풀이 기록 가져오기 (최근 1000개, 자격증 필터링)
-      state.attempts = await getUserAttempts(1000, currentCertType);
+      // 문제 풀이 기록 가져오기 (최근 3000개까지 페이지네이션, 자격증 필터링)
+      state.attempts = await getUserAttempts(3000, currentCertType);
       state.attempts = state.attempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
       // V4-D1: 완주 세션만 통계에 반영 (기록보기 탭은 state.sessions 사용 — 영향 없음)
       state.attempts = filterCompletedAttempts(state.attempts);
@@ -1006,7 +1006,7 @@ export async function renderHomeDashboard(user) {
     // 🎯 현재 선택된 자격증 가져오기
     const currentCertType = getCurrentCertificateType();
 
-    // 문제 풀이 기록 가져오기 (최근 1000개)
+    // 문제 풀이 기록 가져오기 (홈 화면용 최근 1000개, 페이지네이션)
     state.attempts = await getUserAttempts(1000, currentCertType);
 
     // 모의고사 결과 가져오기 (최근 10개만 - 홈 화면용)

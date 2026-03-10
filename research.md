@@ -793,3 +793,64 @@ const purchasesSnap = await getDocs(collection(db, 'purchases'));
 | `admin/statistics.html` | `attempts` | — |
 | `admin/dashboard.html` | `purchases`, `sessions` | — |
 | `js/data/notice-repository.js` | `notices` | `notices` |
+
+---
+
+## 섹션 13. 심층 분석 — 로그인·성능·퀴즈·분석 버그 리포트 (2026-03-10)
+
+### 13-1. 로그인 안정성 이슈
+
+| ID | 심각도 | 파일:줄 | 문제 요약 |
+|----|--------|---------|----------|
+| 1-1 | 🔴 | `auth-core.js:146` | DOMContentLoaded가 이미 fired된 경우 리스너 실행 안 됨 (`readyState === 'complete'` 미처리) |
+| 1-2 | 🟡 | `auth-core.js:228-242` | Google 팝업→리디렉션 폴백: `return null` 후 로딩 UI 없음, `onAuthStateChanged` + `getRedirectResult` 경쟁 조건 |
+| 1-3 | 🟡 | `auth-utils.js:38-59` | `localStorage.userLoggedIn` vs Firebase 실제 상태 불일치; 멀티탭 로그아웃 미동기화; 토큰 만료(1시간) 미처리 |
+| 1-4 | 🟡 | `auth-core.js:423-443` | `handleLogout()`: sessionId 미삭제, `window.userId/userEmail/isAdmin` 미정리, `reload()` 대신 `href='/'` 권장 |
+| 1-5 | 🔴 | `auth-utils.js:81-95` | `isDevMode()` = localhost만 확인 → localhost에서 항상 admin=true (개발/프로덕션 환경 분리 불완전) |
+| 1-7 | 🟡 | `access-guard.js:3-17` | `lazyAuthAndShowLoginModal`/`showLoginModal` 모두 undefined면 redirect loop 가능 |
+
+**auth-core.js 1-1 해결책**: `document.readyState === 'complete'` 또는 `'interactive'`면 즉시 실행 fallback 추가.
+
+**handleLogout 1-4 해결책**: signOut 전 즉시 sessionManager.currentSessionId = null, localStorage.removeItem('currentSessionId'), 이후 window.* 전역 변수 null로 정리, `window.location.href = '/'` 사용.
+
+---
+
+### 13-2. 성능 이슈
+
+| ID | 심각도 | 파일:줄 | 문제 요약 |
+|----|--------|---------|----------|
+| 2-1 | 🔴 | `firebase-core.js:32-36` | Firebase SDK 3개 CDN 병렬 로딩 (~50-100KB×3); 복수 `ensureFirebase()` 동시 호출; 3G TTI ~5초 |
+| 2-2 | 🟡 | `app.js:420-526` | `analytics-dashboard.js` Firestore 쿼리 중복 실행 (initDashboard + renderHomeDashboard); `isInitialized` 플래그 누락; 탭 전환 시 CLS |
+
+**2-1 해결책**: Firebase SDK 싱글턴 보장 (이미 `ensureFirebase` 있지만 동시 호출 dedup 강화), `isLoaded` 플래그로 중복 import 방지.
+
+---
+
+### 13-3. 퀴즈·분석 이슈
+
+| ID | 심각도 | 파일:줄 | 문제 요약 |
+|----|--------|---------|----------|
+| 3-1 | 🔴 | `quiz-repository.js` | `recordAttempt()` 실패 시 UI 피드백 없음; 호출처(quiz-core.js, mock-exam.js)에서 result 미검사 → 사용자가 저장 실패 인지 불가 |
+| 3-2 | 🟡 | `quiz-core.js:14`, `mock-exam.js:24` | `perQuestionChecked` globalIndex vs array index 혼동; 세션 변경 후 배열 오염 (다중 사용자 같은 기기) |
+| 3-3 | 🔴 | `session-manager.js:100-109` | 메모리 세션ID vs localStorage 불일치; 멀티탭 로그아웃 시 이전 사용자 세션ID로 기록 가능 |
+| 3-4 | 🟡 | `auth-core.js:423`, `auth-utils.js:25` | 로그아웃 후 sessionCompatibilityCache, analytics state 미정리 |
+| 3-5 | 🟡 | `quiz-core.js`, `mock-exam.js` | `timerInterval` 변수 누수 가능: `clearInterval` 직접 호출 혼재, stopTimer() 패턴 미통일 |
+| 3-6 | 🔴 | `analytics-dashboard.js:200+` | `getUserAttempts()` 1000개 하드리미트 → 헤비 유저 오래된 기록 누락, 정답률 통계 왜곡 |
+| 3-7 | 🟡 | `stats-cache.js` | StatsCache 5분 만료 → UI 깜빡임; stale-while-revalidate 미적용; 전역 캐시 다중 사용자 환경 데이터 유출 가능 |
+
+**3-1 상세**: `recordAttempt()` 반환값 `{ success: false, reason: 'not-logged-in' }` — 호출처가 무시. Firestore quota 초과 시 일부 문제 미저장 위험.
+
+**3-3 상세**: `sessionManager.getCurrentSessionId()` — 메모리 우선 반환. 탭 B 로그아웃해도 탭 A 메모리에 이전 세션ID 잔존. 해결: localStorage와 메모리 비교하는 defensive get 패턴.
+
+**3-6 상세**: Firestore `limit(1000)` → 2년간 매일 10문제 유저는 ~7300개 중 1000개만 분석. 정답률 고평가 (최근 기록 = 실력 좋아진 상태). 해결: `startAfter()` 페이지네이션.
+
+---
+
+### 13-4. 공지사항 조회수 현황
+
+- `incrementNoticeViewCount(id)`: `notice-repository.js:138` — Firestore transaction으로 `viewCount` 필드 증가, `lastViewedAt` 업데이트
+- `notice-detail.js:68, 107-113`: 공지 상세 진입 시 조회수 증가 + 관리자에게만 조회수 표시 (`notices/detail.html#notice-view-count`)
+- **admin/notices.html 목록에는 `viewCount` 표시 없음** — 카드 렌더링(`notices-admin.js:79-94`)에서 `viewCount` 미사용
+- `getNoticeUsageStats()`: 관리자 전용 통계 함수 (전체 notices viewCount 합계) — 현재 호출처 불명확
+- **결론**: viewCount 저장은 완성되어 있으나, 관리자 목록 화면에 노출이 빠져있음
+

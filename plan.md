@@ -918,7 +918,7 @@ bash scripts/check-syntax.sh
 ## Phase R6 — 배포
 - [v] **R6-A**: bash scripts/check-syntax.sh 통과
 - [v] **R6-B**: sw.js CACHE_VERSION 2026031003 → 2026031004
-- [ ] **R6-C**: GitHub 푸시 (사용자 확인 후)
+- [v] **R6-C**: GitHub 푸시 완료 (18be985)
 
 ---
 
@@ -1309,14 +1309,11 @@ const filtered = filterCompletedAttempts(rawAttempts);
 
 ### Phase V4-E — 검증 및 배포
 - [v] **V4-E1**: `bash scripts/check-syntax.sh` 통과 확인 ✅
-- [ ] **V4-E2**: admin/statistics.html 수동 테스트
-  - 과목 선택 → 테이블 출력 확인
-  - 완주 토글 ON/OFF 전환 시 숫자 변화 확인
-  - xlsx 다운로드 → 한글 깨짐 없는지 확인
-- [ ] **V4-E3**: analytics.html (독립 분석 페이지) 취약과목 탭 숫자 변화 확인
-- [ ] **V4-E4**: index.html 학습분석 탭 취약과목 탭 숫자 변화 확인
+- [v] **V4-E2**: admin/statistics.html 수동 테스트 (푸시 전 확인 완료)
+- [v] **V4-E3**: analytics.html (독립 분석 페이지) 취약과목 탭 숫자 변화 확인 (푸시 전 확인 완료)
+- [v] **V4-E4**: index.html 학습분석 탭 취약과목 탭 숫자 변화 확인 (푸시 전 확인 완료)
 - [v] **V4-E5**: `sw.js` CACHE_VERSION 2026031004 → 2026031005
-- [ ] **V4-E6**: GitHub 푸시 (사용자 확인 후)
+- [v] **V4-E6**: GitHub 푸시 완료 (18be985)
 
 ---
 
@@ -1355,3 +1352,100 @@ const filtered = filterCompletedAttempts(rawAttempts);
 | `WORKSTATE.md` | **수정** | 작업 상태 업데이트 (작업 시작 시) |
 
 신규 생성 파일 없음.
+
+---
+
+# Plan V5 — 기능 안정화 (로그인·퀴즈 저장·분석 데이터) 2026-03-10
+
+## 배경
+심층 분석(섹션 13)에서 발견된 🔴 심각 3건 + 🟡 주의 7건. 사용자 데이터 손실·오염 가능성 있는 항목 우선.
+
+---
+
+## V5 Phase별 작업
+
+### Phase V5-A — 로그인 안정화 (🔴 1-1, 🟡 1-4)
+
+**V5-A1**: `auth-core.js` DOMContentLoaded 폴백 추가
+- 조건: `document.readyState === 'complete'` 또는 `'interactive'`이면 리스너 대신 즉시 실행
+- 위치: `auth-core.js:146` 근처 DOMContentLoaded 추가 위치
+
+**V5-A2**: `handleLogout()` 개선
+- 로그아웃 전 sessionManager 세션ID 즉시 null + localStorage 삭제
+- `window.userId/userEmail/isAdmin = null` 정리
+- `window.location.href = '/'` (reload 대신)
+- 위치: `auth-core.js:423-443`
+
+### Phase V5-B — 퀴즈 저장 실패 알림 (🔴 3-1)
+
+**V5-B1**: `quiz-core.js` — `recordAttempt()` 결과 검사 + 실패 시 토스트/재시도
+- result.success === false → 사용자에게 "저장 실패" 알림
+- 단순 1회 재시도 (setTimeout 2s) 추가
+
+**V5-B2**: `mock-exam.js` — `batchRecordAttempts()` 실패 시 처리
+- 모의고사 제출 후 실패 시 Toast 경고 + 로컬 백업 localStorage 저장
+
+### Phase V5-C — 세션ID 경쟁 조건 방어 (🔴 3-3)
+
+**V5-C1**: `session-manager.js` — `getCurrentSessionId()` defensive 패턴
+- localStorage 값과 메모리 값 비교; 불일치 시 localStorage 우선
+- 위치: `session-manager.js:100-109`
+
+**V5-C2**: `handleLogout()` 내 캐시 정리 (analytics state reset)
+- 로그아웃 시 `state.attempts = [], state.mockExamResults = []` (analytics-dashboard)
+- sessionCompatibilityCache 비우기 (quiz-repository.js:28)
+
+### Phase V5-D — 분석 데이터 정확도 (🔴 3-6)
+
+- [v] **V5-D1**: `getUserAttempts()` 1000개 제한 해소
+  - `startAfter()` 페이지네이션: 500개씩 최대 3000개 (6페이지)
+  - `quiz-data-service.js` import에 `startAfter` 추가
+  - 호출 지점 `analytics-dashboard.js:682` → `getUserAttempts(3000, ...)`
+  - 홈 대시보드(`analytics-dashboard.js:1010`) → 1000 유지 (홈 화면 경량)
+  - `check-syntax.sh` 통과 ✅
+
+### Phase V5-E — 검증 및 배포
+
+- [v] **V5-E1**: `bash scripts/check-syntax.sh` 통과 ✅
+- [ ] **V5-E2**: 로컬 로그인/로그아웃 수동 테스트 (팝업, redirect, 멀티탭)
+- [ ] **V5-E3**: 퀴즈 저장 실패 시뮬레이션 (네트워크 차단 → 토스트 확인)
+- [ ] **V5-E4**: sw.js CACHE_VERSION 증가
+- [ ] **V5-E5**: GitHub 푸시
+
+---
+
+# Plan W — 관리자 공지사항 조회수 목록 표시 2026-03-10
+
+## 배경
+- `viewCount` 필드는 이미 Firestore에 저장됨 (`incrementNoticeViewCount` 완성)
+- `notices/detail.html`에는 관리자용 조회수 표시 있음
+- **admin/notices.html 카드 목록에 조회수가 없음** — 관리자가 한눈에 인기 공지를 파악 불가
+
+## 범위
+- 파일: `js/admin/notices-admin.js` (카드 렌더링 1곳)
+- UI: 카드 `card-meta` 영역에 `조회 N` 텍스트 추가 (발행된 공지만)
+- 스타일: 기존 `.card-date` 옆에 인라인, 별도 CSS 불필요
+
+## Phase W-A — 구현
+
+**W-A1**: `notices-admin.js:85` `card-meta` 에 조회수 추가
+```
+// 변경 전
+<span class="card-date">${formatSimpleDate(n.timestamp)}</span>
+
+// 변경 후
+<span class="card-date">${formatSimpleDate(n.timestamp)}</span>
+${!n.isDraft && n.viewCount ? `<span class="card-view">조회 ${n.viewCount}</span>` : ''}
+```
+
+**W-A2**: `admin/notices.html` `.card-view` 스타일 추가 (인라인 또는 `<style>`)
+```css
+.card-view { font-size: 11px; color: #868e96; }
+```
+
+## Phase W-B — 검증 및 배포
+
+- [ ] **W-B1**: admin/notices.html에서 발행된 공지 목록 조회수 표시 확인
+- [ ] **W-B2**: 초안 공지에는 조회수 미표시 확인 (isDraft=true)
+- [ ] **W-B3**: sw.js CACHE_VERSION 증가 + GitHub 푸시
+
