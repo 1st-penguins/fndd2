@@ -1424,7 +1424,8 @@ const filtered = filterCompletedAttempts(rawAttempts);
 
 ## Phase W-A — 구현
 
-**W-A1**: `notices-admin.js:85` `card-meta` 에 조회수 추가
+- [v] **W-A1**: `notices-admin.js` `card-meta` 에 조회수 추가
+  - `!n.isDraft && n.viewCount` 조건부 렌더링
 ```
 // 변경 전
 <span class="card-date">${formatSimpleDate(n.timestamp)}</span>
@@ -1434,14 +1435,12 @@ const filtered = filterCompletedAttempts(rawAttempts);
 ${!n.isDraft && n.viewCount ? `<span class="card-view">조회 ${n.viewCount}</span>` : ''}
 ```
 
-**W-A2**: `admin/notices.html` `.card-view` 스타일 추가 (인라인 또는 `<style>`)
-```css
-.card-view { font-size: 11px; color: #868e96; }
-```
+- [v] **W-A2**: `admin/notices.html` `.card-view` 스타일 추가
+  - `.card-view { font-size: 11px; color: #adb5bd; }`
 
 ## Phase W-B — 검증 및 배포
 
 - [ ] **W-B1**: admin/notices.html에서 발행된 공지 목록 조회수 표시 확인
 - [ ] **W-B2**: 초안 공지에는 조회수 미표시 확인 (isDraft=true)
-- [ ] **W-B3**: sw.js CACHE_VERSION 증가 + GitHub 푸시
+- [v] **W-B3**: sw.js CACHE_VERSION 증가 + GitHub 푸시
 

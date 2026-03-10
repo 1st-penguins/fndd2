@@ -7,26 +7,28 @@
 
 ## 지금 하고 있는 것
 
-V5-A (로그인 안정화) 작업 중.
+Plan W (공지사항 관리자 조회수 표시) 작업 예정.
 
 ---
 
 ## 직전 완료
 
-- Plan V4 전체 + V5-D 완료 (commit aa0fba0, 2026-03-10)
-  - V4: filterCompletedAttempts / admin 통계 테이블+xlsx / analytics 완주 필터
-  - V5-D: getUserAttempts 페이지네이션 (500×6페이지, 최대 3000개) — 1000 하드리미트 제거
-  - sw.js CACHE_VERSION → 2026031006
+- V4 + V5-D + V5-A/B/C 전체 완료 (commits aa0fba0, 6ca34b9, 2026-03-10)
+  - V4: filterCompletedAttempts / admin 통계 테이블+xlsx
+  - V5-D: getUserAttempts 페이지네이션 (최대 3000개)
+  - V5-A: DOMContentLoaded 폴백 / handleLogout 세션정리
+  - V5-B: batchRecordAttempts 실패 Toast 알림
+  - V5-C: getCurrentSessionId defensive 패턴
+  - sw.js CACHE_VERSION → 2026031007
 
 ---
 
 ## 다음 할 것
 
-**V5-A 로그인 안정화** (현재 진행 예정):
-1. auth-core.js DOMContentLoaded 폴백 (readyState 체크)
-2. handleLogout() 개선 (sessionId 즉시 null, window.* 정리, href='/')
-
-이후: V5-B (퀴즈 저장 실패 토스트) → V5-C (세션ID 경쟁 조건) → Plan W (공지 조회수)
+**Plan W**: admin/notices.html 카드 목록에 조회수(viewCount) 표시
+- 파일: js/admin/notices-admin.js (card-meta 1줄 추가)
+- 파일: admin/notices.html (.card-view CSS)
+- 발행된 공지만 표시 (!n.isDraft && n.viewCount)
 
 ---
 

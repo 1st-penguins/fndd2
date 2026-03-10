@@ -83,6 +83,7 @@ async function loadNotices() {
             <span class="badge ${n.isDraft ? 'badge-draft' : 'badge-published'}">${n.isDraft ? '초안' : '발행됨'}</span>
             ${n.badge ? `<span class="badge badge-${n.badge}">${n.badge}</span>` : ''}
             <span class="card-date">${formatSimpleDate(n.timestamp)}</span>
+            ${!n.isDraft && n.viewCount ? `<span class="card-view">조회 ${n.viewCount}</span>` : ''}
           </div>
         </div>
         <div class="card-controls">
