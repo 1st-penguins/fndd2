@@ -677,9 +677,13 @@ export async function loadAnalyticsData(user) {
       window.Logger?.info(`📊 [${certName}] 학습 데이터 로드 시작...`);
 
       // 문제 풀이 기록 가져오기 (최근 3000개까지 페이지네이션, 자격증 필터링)
+      console.log('[DEBUG A] getUserAttempts 호출, certType:', currentCertType);
       state.attempts = await getUserAttempts(3000, currentCertType);
+      console.log('[DEBUG B] getUserAttempts 결과:', state.attempts.length);
       state.attempts = state.attempts.filter((attempt) => !shouldExcludeAttemptFromAnalytics(attempt));
+      console.log('[DEBUG C] shouldExclude 필터 후:', state.attempts.length);
       state.attempts = filterCompletedAttempts(state.attempts);
+      console.log('[DEBUG D] filterCompleted 후:', state.attempts.length);
 
       // 🔧 스포츠 자격증 fallback: certificateType이 잘못 저장된 경우 과목명 기반으로 재조회
       if (currentCertType === 'sports-instructor' && state.attempts.length === 0) {
