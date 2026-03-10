@@ -515,6 +515,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  max-width: 560px;
 }
 
 /* 카드 전체 — 3열 그리드: 본문 | 점수 | 액션 */
@@ -638,6 +639,7 @@
   display: flex;
   gap: 16px;
   margin-top: 8px;
+  justify-content: space-between;
 }
 .session-info-item {
   display: flex;

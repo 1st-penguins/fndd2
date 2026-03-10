@@ -29,7 +29,17 @@ export async function recordQuizData(result) {
     
     if (filenameMatch) {
       year = filenameMatch[1];  // 추출된 년도 (예: 2024)
-      subject = filenameMatch[2];  // 추출된 과목 (예: 운동생리학)
+      subject = filenameMatch[2];  // 추출된 과목 (예: 운동생리학 or URL 인코딩)
+      // ✅ URL 디코딩 (quiz-core.js와 동일하게 처리)
+      try {
+        let decoded = subject;
+        for (let i = 0; i < 3; i++) {
+          const temp = decodeURIComponent(decoded);
+          if (temp === decoded) break;
+          decoded = temp;
+        }
+        subject = decoded;
+      } catch (e) { /* 원본 유지 */ }
     }
     
     // 현재 문제의 정답 정보 추출

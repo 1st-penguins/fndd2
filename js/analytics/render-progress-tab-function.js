@@ -9,13 +9,21 @@ const SPORTS_SUBJECTS_ALL = [...SPORTS_CATEGORIES['기본'], ...SPORTS_CATEGORIE
 
 function renderSportsInstructorProgress(container, attempts) {
   const normalizeYear = (v) => { const m = String(v ?? '').match(/(20\d{2})/); return m ? m[1] : null; };
+  const normalizeSubject = (v) => {
+    if (!v) return null;
+    try {
+      let s = String(v);
+      for (let i = 0; i < 3; i++) { const t = decodeURIComponent(s); if (t === s) break; s = t; }
+      return s;
+    } catch (e) { return String(v); }
+  };
 
   // 연도×과목별 풀이 집계
   const done = {};
   attempts.forEach(a => {
     const q = a?.questionData || {};
     const year = normalizeYear(q.year || a.year);
-    const subject = q.subject || a.subject;
+    const subject = normalizeSubject(q.subject || a.subject);
     if (!year || !subject || !SPORTS_YEARS.includes(year)) return;
     if (!done[year]) done[year] = {};
     if (!done[year][subject]) done[year][subject] = { count: 0, correct: 0 };
