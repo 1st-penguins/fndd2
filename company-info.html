@@ -188,27 +188,48 @@
 </head>
 <body>
   <!-- Linear Header -->
-  <header class="linear-header">
+  <header class="linear-header" id="linear-header">
     <div class="linear-header__container">
       <a href="index.html" class="linear-header__brand">
         <div class="linear-header__logo">
-          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고">
+          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
         </div>
         <span class="linear-header__brand-text">퍼스트펭귄</span>
       </a>
+
       <nav class="linear-header__nav">
         <ul class="linear-header__nav-list">
           <li class="linear-header__nav-item">
             <a href="index.html" class="linear-header__nav-link">홈</a>
           </li>
           <li class="linear-header__nav-item">
-            <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
           </li>
           <li class="linear-header__nav-item">
-            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+            <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
           </li>
         </ul>
       </nav>
+
+      <div class="linear-header__actions">
+        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
+          aria-expanded="false">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <a href="index.html" class="linear-header__nav-link">홈</a>
+      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
     </div>
   </header>
 

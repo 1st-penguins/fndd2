@@ -249,27 +249,48 @@
 </head>
 <body>
   <!-- Linear Header -->
-  <header class="linear-header">
+  <header class="linear-header" id="linear-header">
     <div class="linear-header__container">
       <a href="index.html" class="linear-header__brand">
         <div class="linear-header__logo">
-          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고">
+          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
         </div>
         <span class="linear-header__brand-text">퍼스트펭귄</span>
       </a>
+
       <nav class="linear-header__nav">
         <ul class="linear-header__nav-list">
           <li class="linear-header__nav-item">
             <a href="index.html" class="linear-header__nav-link">홈</a>
           </li>
           <li class="linear-header__nav-item">
-            <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
           </li>
           <li class="linear-header__nav-item">
-            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+            <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
           </li>
         </ul>
       </nav>
+
+      <div class="linear-header__actions">
+        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
+          aria-expanded="false">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <a href="index.html" class="linear-header__nav-link">홈</a>
+      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
     </div>
   </header>
 
@@ -277,7 +298,7 @@
     <div class="privacy-container">
       <div class="privacy-header">
         <h1>개인정보처리방침</h1>
-        <p class="meta">시행일: 2025년 1월 1일 · 최종 수정일: 2025년 1월 1일</p>
+        <p class="meta">시행일: 2025년 4월 12일 · 최종 수정일: 2026년 3월 11일</p>
       </div>
 
       <div class="privacy-intro">
@@ -365,14 +386,12 @@
       <!-- 5. 이용자의 권리 -->
       <div class="privacy-section">
         <h2>5. 이용자의 권리</h2>
-        <p>이용자는 언제든지 아래 권리를 행사할 수 있습니다.</p>
+        <p>이용자는 언제든지 아래 권리를 행사할 수 있습니다. 요청은 이메일로 접수하며, 확인 가능한 범위 내에서 처리합니다.</p>
         <ul>
-          <li>개인정보 열람 요청</li>
-          <li>정정·삭제 요청</li>
-          <li>처리 정지 요청</li>
-          <li>회원 탈퇴</li>
+          <li>수집된 이메일 주소 확인 요청</li>
+          <li>계정 삭제(탈퇴) 요청</li>
         </ul>
-        <p class="privacy-note">※ 요청은 하단의 이메일로 연락주시면 지체 없이 처리합니다.</p>
+        <p class="privacy-note">※ 요청 이메일: <a href="mailto:the1stpeng@gmail.com">the1stpeng@gmail.com</a></p>
       </div>
 
       <!-- 6. 개인정보 보호책임자 -->
