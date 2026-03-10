@@ -738,7 +738,7 @@ export async function loadAnalyticsData(user) {
     }));
 
   } catch (error) {
-    // console.error('분석 데이터 로드 오류:', error);
+    console.error('[loadAnalyticsData 오류]', error);
     state.error = error.message || '데이터를 불러오는 중 오류가 발생했습니다.';
     showError(state.error);
   } finally {
