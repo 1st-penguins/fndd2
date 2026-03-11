@@ -95,88 +95,33 @@
     
     .question-stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
     }
-    
+
     .question-item {
       background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      border: 2px solid #e0e0e0;
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border-left: 4px solid #e0e0e0;
     }
-    
-    .question-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 6px;
-      height: 100%;
-      background: var(--penguin-skyblue);
-    }
-    
-    .question-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-      border-color: var(--penguin-skyblue);
-    }
-    
-    .question-item.hard {
-      border-color: #ffcdd2;
-    }
-    
-    .question-item.hard::before {
-      background: #f44336;
-    }
-    
-    .question-item.medium {
-      border-color: #ffe0b2;
-    }
-    
-    .question-item.medium::before {
-      background: #ff9800;
-    }
-    
-    .question-item.easy {
-      border-color: #c8e6c9;
-    }
-    
-    .question-item.easy::before {
-      background: #4caf50;
-    }
-    
+
+    .question-item.hard { border-left-color: #f44336; }
+    .question-item.medium { border-left-color: #ff9800; }
+    .question-item.easy { border-left-color: #4caf50; }
+
     .question-title {
-      font-weight: bold;
+      font-weight: 700;
       color: var(--penguin-navy);
-      margin-bottom: 15px;
-      font-size: 16px;
+      margin-bottom: 8px;
+      font-size: 13px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      font-size: 14px;
-    }
-    
-    .stat-label {
-      color: #666;
-    }
-    
-    .stat-value {
-      font-weight: 600;
-      color: var(--penguin-navy);
-    }
-    
+
     .answer-distribution {
-      margin-top: 15px;
+      margin-top: 0;
       padding-top: 15px;
       border-top: 1px solid #e0e0e0;
     }
@@ -188,34 +133,21 @@
     .answer-label {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 4px;
-      font-size: 13px;
+      margin-bottom: 2px;
+      font-size: 11px;
     }
-    
+
     .bar-container {
       background: #e0e0e0;
-      height: 8px;
-      border-radius: 4px;
+      height: 6px;
+      border-radius: 3px;
       overflow: hidden;
+      margin-bottom: 4px;
     }
-    
+
     .bar-fill {
       height: 100%;
       background: var(--penguin-skyblue);
-      transition: width 0.5s ease;
-    }
-    
-    .bar-fill.correct {
-      background: #4caf50;
-    }
-    
-    .difficulty-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-      color: white;
     }
     
     .badge-easy {
@@ -768,37 +700,24 @@
           cardsRendered = true;
           let html = '<div class="question-stats-grid">';
           sortedStats.forEach(([, stat]) => {
-            const accuracy = (stat.correct / stat.total * 100).toFixed(1);
+            const accuracy = Math.round(stat.correct / stat.total * 100);
             let difficulty = accuracy < 50 ? 'hard' : accuracy >= 80 ? 'easy' : 'medium';
-            let difficultyText = difficulty === 'hard' ? '어려움' : difficulty === 'easy' ? '쉬움' : '보통';
-            const typeBadge = stat.isFromMockExam
-              ? '<span style="background:#9c27b0;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;margin-left:5px;">모의고사</span>'
-              : '<span style="background:#2196f3;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;margin-left:5px;">일반</span>';
+            const accColor = difficulty === 'hard' ? '#f44336' : difficulty === 'easy' ? '#4caf50' : '#ff9800';
             html += `
               <div class="question-item ${difficulty}">
                 <div class="question-title">
-                  <span>${stat.year}년 ${stat.subject} ${stat.number}번 ${typeBadge}</span>
-                  <span class="difficulty-badge badge-${difficulty}">${difficultyText}</span>
-                </div>
-                <div class="stat-row">
-                  <span class="stat-label">응시 인원</span>
-                  <span class="stat-value">${stat.total}명</span>
-                </div>
-                <div class="stat-row">
-                  <span class="stat-label">정답률</span>
-                  <span class="stat-value" style="color:${difficulty === 'hard' ? '#f44336' : difficulty === 'easy' ? '#4caf50' : '#ff9800'}">${accuracy}%</span>
+                  <span>${stat.number}번</span>
+                  <span style="font-size:13px;font-weight:700;color:${accColor};">${accuracy}% <span style="font-size:11px;color:#999;font-weight:400;">(${stat.total}명)</span></span>
                 </div>
                 <div class="answer-distribution">
-                  <div style="font-weight:600;margin-bottom:10px;font-size:13px;">답안 선택률</div>
                   ${[0, 1, 2, 3].map(i => {
                     const count = stat.answers[i] || 0;
-                    const pct = stat.total > 0 ? (count / stat.total * 100).toFixed(1) : 0;
+                    const pct = stat.total > 0 ? (count / stat.total * 100).toFixed(0) : 0;
                     const isCorrect = stat.correctAnswer !== undefined && stat.correctAnswer !== null && i === stat.correctAnswer;
-                    const barColor = isCorrect ? '#4caf50' : '#5fb2c9';
-                    const label = isCorrect ? `${i + 1}번 ✓` : `${i + 1}번`;
-                    const labelStyle = isCorrect ? 'font-weight:700;color:#4caf50;' : '';
-                    return `<div class="answer-bar">
-                      <div class="answer-label"><span style="${labelStyle}">${label}</span><span>${count}명 (${pct}%)</span></div>
+                    const barColor = isCorrect ? '#4caf50' : '#ddd';
+                    const labelStyle = isCorrect ? 'font-weight:700;color:#4caf50;' : 'color:#888;';
+                    return `<div>
+                      <div class="answer-label"><span style="${labelStyle}">${i + 1}번${isCorrect ? ' ✓' : ''}</span><span style="${labelStyle}">${pct}%</span></div>
                       <div class="bar-container"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
                     </div>`;
                   }).join('')}
