@@ -681,10 +681,13 @@
           const accColor = accuracy < 50 ? '#f44336' : accuracy >= 80 ? '#4caf50' : '#ff9800';
           const tw = getTopWrongAnswer(stat.answers, stat.correctAnswer, stat.total);
           const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
+          const correctLabel = stat.correctAnswer !== undefined && stat.correctAnswer !== null
+            ? `${stat.correctAnswer + 1}번` : '-';
           return `<tr style="border-bottom:1px solid #eee;">
             <td style="text-align:center;">${stat.number}</td>
             <td>${stat.subject}</td>
             <td style="text-align:center;">${stat.year}</td>
+            <td style="text-align:center; font-weight:700; color:#4caf50;">${correctLabel}</td>
             <td style="text-align:center; font-weight:700; color:${accColor};">${accuracy}%</td>
             <td style="text-align:center;">${twLabel}</td>
             <td style="text-align:center;">${stat.total}명</td>
@@ -699,6 +702,7 @@
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">문제번호</th>
                   <th style="padding:10px 8px; text-align:left; white-space:nowrap;">과목</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">연도</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답률</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답 1위</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시 수</th>
