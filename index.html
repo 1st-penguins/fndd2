@@ -276,6 +276,10 @@
           <li class="linear-header__nav-item">
             <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
           </li>
+          <li class="linear-header__nav-item admin-only" id="admin-stats-nav" style="display:none">
+            <a href="#admin-tab" class="linear-header__nav-link"
+              onclick="window.showAdminTab(); return false;">관리자 통계</a>
+          </li>
         </ul>
       </nav>
 
@@ -335,6 +339,11 @@
       <a href="notices.html" class="linear-header__nav-link">공지사항</a>
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
       <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+      <!-- 관리자 전용 메뉴 -->
+      <a href="#admin-tab" class="linear-header__nav-link admin-only" id="admin-stats-link" style="display:none"
+        onclick="document.getElementById('mobile-toggle').click(); window.showAdminTab(); return false;">
+        관리자 통계
+      </a>
       <!-- 모바일 메뉴에 로그인/로그아웃 링크 추가 -->
       <div class="mobile-menu-auth">
         <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">
@@ -436,7 +445,6 @@
             <button class="sub-tab-button" data-tab="wrong-note-tab">오답노트</button>
             <button class="sub-tab-button" data-tab="weak-areas-tab">약점 분석</button>
             <button class="sub-tab-button" data-tab="overview-tab">나의 통계</button>
-            <button class="sub-tab-button admin-only" data-tab="admin-tab" style="display:none">관리자 통계</button>
           </div>
 
           <!-- 나의 통계 탭 -->

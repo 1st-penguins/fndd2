@@ -819,5 +819,26 @@ window.showTab = showTab;
 window.updateRestrictedContent = updateRestrictedContent;
 window.applyContentRestrictions = applyContentRestrictions;
 
+// 관리자 통계 탭 열기 (헤더/햄버거 메뉴에서 호출)
+window.showAdminTab = function () {
+  showTab('analytics-tab');
+  setTimeout(() => {
+    // 모든 서브탭 비활성화
+    const analyticsTab = document.getElementById('analytics-tab');
+    if (!analyticsTab) return;
+    analyticsTab.querySelectorAll('.sub-tab-button').forEach(b => b.classList.remove('active'));
+    analyticsTab.querySelectorAll('.sub-tab-content').forEach(c => {
+      c.classList.remove('active');
+      c.style.display = '';
+    });
+    // admin-tab 활성화
+    const adminContent = document.getElementById('admin-tab');
+    if (adminContent) {
+      adminContent.classList.add('active');
+      adminContent.style.display = 'block';
+    }
+  }, 150);
+};
+
 // 함수 내보내기 추가
 export { initApp };
