@@ -11,9 +11,14 @@ import {
     getDoc
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-import { db } from "../core/firebase-core.js";
+import { ensureFirebase } from "../core/firebase-core.js";
 
 const COLLECTION_NAME = "wrong_answers";
+
+async function getDb() {
+    const { db } = await ensureFirebase();
+    return db;
+}
 
 /**
  * 오답 노트에 문제 저장
@@ -25,12 +30,14 @@ const COLLECTION_NAME = "wrong_answers";
 export async function saveWrongAnswer(userId, questionData, examName, section) {
     if (!userId || !questionData) return;
 
+    const fireDb = await getDb();
+
     // 고유 ID 생성 (userId_questionId 조합으로 중복 방지)
     // questionData.id가 없으면 임시 ID 생성 (거의 없겠지만)
     const questionId = questionData.id || `temp_${Date.now()}`;
     const docId = `${userId}_${questionId}`;
 
-    const docRef = doc(db, COLLECTION_NAME, docId);
+    const docRef = doc(fireDb, COLLECTION_NAME, docId);
 
     // 이미 존재하는지 확인 (불필요한 쓰기 방지) -> setDoc {merge: true}로 대체 가능
     // 하지만 'solvedCount' 같은 걸 늘리고 싶다면 읽어야 함.
@@ -69,7 +76,8 @@ export async function saveWrongAnswer(userId, questionData, examName, section) {
  * @param {boolean} includeResolved - 해결된 문제도 포함할지 여부
  */
 export async function getWrongAnswers(userId, includeResolved = false) {
-    const collectionRef = collection(db, COLLECTION_NAME);
+    const fireDb = await getDb();
+    const collectionRef = collection(fireDb, COLLECTION_NAME);
     let q;
 
     if (includeResolved) {
@@ -106,8 +114,9 @@ export async function getWrongAnswers(userId, includeResolved = false) {
  * @param {string} questionId 
  */
 export async function markAsResolved(userId, questionId) {
+    const fireDb = await getDb();
     const docId = `${userId}_${questionId}`;
-    const docRef = doc(db, COLLECTION_NAME, docId);
+    const docRef = doc(fireDb, COLLECTION_NAME, docId);
 
     try {
         await setDoc(docRef, {
@@ -123,8 +132,9 @@ export async function markAsResolved(userId, questionId) {
  * 오답 노트에서 삭제 (완전히 제거)
  */
 export async function removeWrongAnswer(userId, questionId) {
+    const fireDb = await getDb();
     const docId = `${userId}_${questionId}`;
-    const docRef = doc(db, COLLECTION_NAME, docId);
+    const docRef = doc(fireDb, COLLECTION_NAME, docId);
     try {
         await deleteDoc(docRef);
     } catch (error) {
