@@ -1,5 +1,5 @@
 import { getWrongAnswers, markAsResolved } from "./wrong-note-service.js";
-import { auth } from "../core/firebase-core.js";
+import { ensureFirebase } from "../core/firebase-core.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 // DOM Elements
@@ -29,9 +29,13 @@ let activeFilter = 'all';
 let selectMode = false;
 let selectedIds = new Set();
 let currentModalItem = null;
+let firebaseAuth = null; // ensureFirebase()로 초기화
 
 // Initialize
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const { auth } = await ensureFirebase();
+  firebaseAuth = auth;
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
       loadData(user.uid);
@@ -266,7 +270,7 @@ async function handleResolveSelected() {
   const count = selectedIds.size;
   if (!confirm(`${count}개 문제를 이해 완료 처리하시겠습니까?\n목록에서 제거됩니다.`)) return;
 
-  const user = auth.currentUser;
+  const user = firebaseAuth?.currentUser;
   if (!user) return;
 
   const promises = [];
@@ -355,7 +359,7 @@ async function handleModalResolve() {
   if (!currentModalItem) return;
   if (!confirm('이 문제를 이해 완료 처리하시겠습니까?\n목록에서 제거됩니다.')) return;
 
-  const user = auth.currentUser;
+  const user = firebaseAuth?.currentUser;
   if (!user) return;
 
   await markAsResolved(user.uid, currentModalItem.questionId);
