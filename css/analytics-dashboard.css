@@ -561,6 +561,8 @@
 
 .session-badge.regular  { background: #EFF6FF; color: #1D4ED8; }
 .session-badge.mockexam { background: #F5F3FF; color: #6D28D9; }
+.session-badge.cert-health { background: #FEF2F2; color: #1D2F4E; }
+.session-badge.cert-sports { background: #ECFDF5; color: #059669; }
 
 .session-badge-resume {
   padding: 3px 10px;

@@ -2,10 +2,11 @@
 
 const SPORTS_YEARS = ['2025', '2024', '2023', '2022'];
 const SPORTS_CATEGORIES = {
-  '기본': ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리'],
+  '기본 ①': ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사'],
+  '기본 ②': ['운동생리학', '운동역학', '스포츠윤리'],
   '전문': ['특수체육론', '유아체육론', '노인체육론'],
 };
-const SPORTS_SUBJECTS_ALL = [...SPORTS_CATEGORIES['기본'], ...SPORTS_CATEGORIES['전문']];
+const SPORTS_SUBJECTS_ALL = [...SPORTS_CATEGORIES['기본 ①'], ...SPORTS_CATEGORIES['기본 ②'], ...SPORTS_CATEGORIES['전문']];
 
 function renderSportsInstructorProgress(container, attempts) {
   const normalizeYear = (v) => { const m = String(v ?? '').match(/(20\d{2})/); return m ? m[1] : null; };
@@ -94,7 +95,8 @@ function renderSportsInstructorProgress(container, attempts) {
     .sports-category-section { margin-bottom: 16px; }
     .sports-category-label { font-size: 0.8rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
     .cat-count { font-weight: 600; color: var(--color-text-tertiary, #94a3b8); }
-    .sports-subjects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .sports-subjects-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    @media (max-width: 480px) { .sports-subjects-grid { grid-template-columns: repeat(2, 1fr); } }
     .sports-subject-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-radius: 10px; font-size: 0.875rem; }
     .sports-subject-item.done { background: rgba(5,150,105,0.08); color: #059669; font-weight: 600; }
     .sports-subject-item.not-done { background: var(--color-bg-level-1, #f8fafc); color: var(--color-text-secondary); }

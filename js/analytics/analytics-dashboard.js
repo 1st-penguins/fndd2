@@ -3580,6 +3580,10 @@ function createProSessionCard(session) {
   const badgeClass  = isMockExam ? 'mockexam' : 'regular';
   const badgeText   = isMockExam ? '모의고사' : '기출문제';
 
+  const certType = session.certType || 'health';
+  const certBadgeClass = certType === 'sports' ? 'cert-sports' : 'cert-health';
+  const certBadgeText  = certType === 'sports' ? '생활체육지도사' : '건강운동관리사';
+
   // 실제 점수 계산 (문제당 5점)
   const correct = session.correctCount || Math.round((session.score || 0) * session.completed / 100);
   const points = correct * 5;
@@ -3600,6 +3604,7 @@ function createProSessionCard(session) {
   el.innerHTML = `
     <div class="session-card-body">
       <div class="session-card-header">
+        <span class="session-badge ${certBadgeClass}">${certBadgeText}</span>
         <span class="session-badge ${badgeClass}">${badgeText}</span>
         ${session.canResume ? '<span class="session-badge-resume">이어풀기 가능</span>' : ''}
         <span class="session-card-date">${dateStr}</span>
