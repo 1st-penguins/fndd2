@@ -698,20 +698,16 @@
         const rows = stats.map(([, stat]) => {
           const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
           const accColor = accuracy < 50 ? '#f44336' : accuracy >= 80 ? '#4caf50' : '#ff9800';
-          const mp = getMostPicked(stat.answers, stat.total);
           const tw = getTopWrongPick(stat.answers, stat.correctAnswer, stat.total);
           const correctLabel = stat.correctAnswer !== undefined && stat.correctAnswer !== null
             ? `${stat.correctAnswer + 1}번` : '-';
-          const mpLabel = mp.idx >= 0 ? `${mp.idx + 1}번 (${mp.pct}%)` : '-';
-          const mpIsCorrect = stat.correctAnswer !== undefined && mp.idx === stat.correctAnswer;
-          const mpColor = mpIsCorrect ? '#4caf50' : '#f44336';
+          // 오답1위: 전체 대비 % (정답률과 합산하면 의미 있는 비교)
           const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
           return `<tr style="border-bottom:1px solid #eee;">
             <td style="text-align:center;">${stat.number}</td>
             <td>${stat.subject}</td>
             <td style="text-align:center;">${stat.year}</td>
             <td style="text-align:center; font-weight:700; color:#4caf50;">${correctLabel}</td>
-            <td style="text-align:center; font-weight:700; color:${mpColor};">${mpLabel}</td>
             <td style="text-align:center; font-weight:700; color:${accColor};">${accuracy}%</td>
             <td style="text-align:center; color:#e65100;">${twLabel}</td>
             <td style="text-align:center;">${stat.total}명</td>
@@ -727,7 +723,6 @@
                   <th style="padding:10px 8px; text-align:left; white-space:nowrap;">과목</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">연도</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답</th>
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">최다선택</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답률</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답1위</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시</th>
