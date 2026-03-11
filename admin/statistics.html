@@ -333,9 +333,9 @@
         <div class="filter-group">
           <label>문제 유형</label>
           <select id="typeFilter">
-            <option value="">전체</option>
-            <option value="regular">일반 문제</option>
+            <option value="regular" selected>일반 문제</option>
             <option value="mockexam">모의고사</option>
+            <option value="">전체 (통합)</option>
           </select>
         </div>
         
@@ -358,7 +358,7 @@
       </div>
 
       <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="loadStatistics()">통계 조회</button>
+        <button id="loadStatsBtn" class="btn btn-primary" onclick="loadStatistics()">통계 조회</button>
         <button id="downloadXlsxBtn" class="btn" onclick="downloadXlsx()"
                 style="background:#217346; color:#fff; display:none;">
           📥 엑셀 다운로드 (.xlsx)
@@ -470,19 +470,24 @@
 
     // 통계 조회
     window.loadStatistics = async function() {
+      const btn = document.getElementById('loadStatsBtn');
+      const originalText = btn.textContent;
       try {
         const yearFilter = document.getElementById('yearFilter').value;
         const subjectFilter = document.getElementById('subjectFilter').value;
         const difficultyFilter = document.getElementById('difficultyFilter').value;
         const typeFilter = document.getElementById('typeFilter').value;
-        
-        // (연도/과목 필수 선택은 아래에서 체크)
-        
+
         // 연도 또는 과목 필수 선택 강제
         if (!yearFilter && !subjectFilter) {
           alert('Firebase 비용 절감을 위해 연도 또는 과목을 반드시 선택해주세요.');
           return;
         }
+
+        // 로딩 상태 표시
+        btn.disabled = true;
+        btn.textContent = '조회 중...';
+        btn.style.opacity = '0.7';
 
         // Firestore 서버 측 필터링 (읽기 비용 대폭 절감)
         let q = collection(db, 'attempts');
@@ -547,7 +552,11 @@
         
       } catch (error) {
         console.error('통계 조회 오류:', error);
-        alert('통계를 불러오는 중 오류가 발생했습니다.');
+        alert('통계를 불러오는 중 오류가 발생했습니다.\n\n' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        btn.style.opacity = '';
       }
     };
     
@@ -634,15 +643,20 @@
                  accuracy, topWrong: tw.idx, topWrongPct: tw.pct, total: stat.total };
       });
 
+      const showType = document.getElementById('typeFilter').value === '';
       const tableRows = sortedStats.map(([, stat]) => {
         const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
         const accColor = accuracy < 50 ? '#f44336' : accuracy >= 80 ? '#4caf50' : '#ff9800';
         const tw = getTopWrongAnswer(stat.answers, stat.correctAnswer, stat.total);
         const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
+        const typeBadge = stat.isFromMockExam
+          ? '<span style="background:#9c27b0;color:#fff;padding:2px 6px;border-radius:8px;font-size:11px;">모의</span>'
+          : '<span style="background:#2196f3;color:#fff;padding:2px 6px;border-radius:8px;font-size:11px;">일반</span>';
         return `<tr>
           <td style="text-align:center;">${stat.number}</td>
           <td>${stat.subject}</td>
           <td style="text-align:center;">${stat.year}</td>
+          ${showType ? `<td style="text-align:center;">${typeBadge}</td>` : ''}
           <td style="text-align:center; font-weight:700; color:${accColor};">${accuracy}%</td>
           <td style="text-align:center;">${twLabel}</td>
           <td style="text-align:center;">${stat.total}명</td>
@@ -657,6 +671,7 @@
                 <th style="padding:10px 8px; text-align:center; white-space:nowrap;">문제번호</th>
                 <th style="padding:10px 8px; text-align:left; white-space:nowrap;">과목</th>
                 <th style="padding:10px 8px; text-align:center; white-space:nowrap;">연도</th>
+                ${showType ? '<th style="padding:10px 8px; text-align:center; white-space:nowrap;">유형</th>' : ''}
                 <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답률</th>
                 <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답 1위</th>
                 <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시 수</th>
