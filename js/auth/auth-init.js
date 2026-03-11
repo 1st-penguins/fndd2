@@ -122,11 +122,13 @@ function updateAdminUI(isAdmin) {
   // 관리자 전용 요소 표시/숨김
   document.querySelectorAll('.admin-only').forEach(element => {
     if (isAdmin) {
-      // 관리자: 인라인 스타일 제거하여 CSS 원래 값 사용
-      // 빈 문자열로 설정하면 브라우저가 CSS의 원래 값을 사용
-      element.style.display = '';
+      // sub-tab-button은 CSS :not(.admin-only)로 제외되어 기본 display 없음
+      if (element.classList.contains('sub-tab-button')) {
+        element.style.display = 'inline-block';
+      } else {
+        element.style.display = '';
+      }
     } else {
-      // 일반 사용자: 숨김
       element.style.display = 'none';
     }
   });
