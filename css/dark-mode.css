@@ -77,6 +77,11 @@ body,
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
+/* 로고 이미지 반전 (검정 로고 → 밝게) */
+[data-theme="dark"] .linear-header__logo img {
+  filter: brightness(0) invert(1);
+}
+
 [data-theme="dark"] .linear-header__brand-text {
   color: #f0f0f0;
 }
@@ -94,15 +99,28 @@ body,
   border-color: rgba(255, 255, 255, 0.06);
 }
 
-/* ===== 탭 ===== */
+/* ===== 탭 컨테이너 ===== */
+[data-theme="dark"] .access-tabs {
+  background: #1a1c20;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== 메인 탭 (홈/문제풀기/학습분석 등) ===== */
 [data-theme="dark"] .tab-button {
-  color: #8a8f9a;
+  color: #6a7080;
   background: transparent;
 }
 
-[data-theme="dark"] .tab-button.active {
+[data-theme="dark"] .tab-button:hover {
+  color: #d0d5e0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .tab-button.active,
+[data-theme="dark"] .tab-button.link-clicked {
   color: #ffffff;
-  border-bottom-color: var(--penguin-skyblue);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] .sub-tab-button {
@@ -131,6 +149,43 @@ body,
 
 [data-theme="dark"] .stats-section {
   border-color: #2a2a30;
+}
+
+/* ===== 과목/연도 카드 ===== */
+[data-theme="dark"] .subject-item,
+[data-theme="dark"] .year-item {
+  background: rgba(25, 28, 35, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .subject-item:hover,
+[data-theme="dark"] .year-item:hover {
+  background: rgba(35, 40, 50, 0.9);
+  border-color: var(--penguin-skyblue);
+}
+
+[data-theme="dark"] .subject-name,
+[data-theme="dark"] .year-header {
+  color: #e8eaef;
+}
+
+[data-theme="dark"] .subject-code,
+[data-theme="dark"] .question-count {
+  background: rgba(255, 255, 255, 0.08);
+  color: #b0b5c0;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .subject-item:hover .subject-code,
+[data-theme="dark"] .year-item:hover .question-count {
+  background: var(--penguin-skyblue);
+  color: #ffffff;
+  border-color: var(--penguin-skyblue);
+}
+
+[data-theme="dark"] .pass-rate {
+  color: var(--penguin-skyblue);
 }
 
 /* ===== 약점 분석 ===== */
