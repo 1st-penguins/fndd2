@@ -436,10 +436,16 @@ async function saveMockExamResults() {
 function setupBackLink() {
   const backLink = document.querySelector('.back-link');
   if (!backLink) return;
-  
-  // 현재 모의고사 연도 가져오기
+
+  // referrer가 index.html이면 학습진행률 탭으로 돌아가기
+  const referrer = document.referrer || '';
+  if (referrer.includes('index.html') || referrer.endsWith('/') || referrer.endsWith('.com')) {
+    backLink.href = '../index.html#analytics-tab';
+    return;
+  }
+
+  // 그 외: 연도 페이지로
   const year = document.body.getAttribute('data-year');
-  
   if (year) {
     backLink.href = `../years/year_${year}.html`;
   } else {
