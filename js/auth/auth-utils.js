@@ -89,7 +89,7 @@ export function isAdmin(user) {
     return false;
   }
   
-  return ADMIN_EMAILS.includes(currentUser.email);
+  return ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
 }
 
 /**

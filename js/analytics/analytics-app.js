@@ -156,17 +156,19 @@ function setupEventListeners() {
  * 문제풀이기록 필터 적용
  */
 function applySetFilters() {
+  const certFilter = document.getElementById('set-cert-filter')?.value || 'all';
   const typeFilter = document.getElementById('set-type-filter').value;
   const subjectFilter = document.getElementById('set-subject-filter').value;
   const yearFilter = document.getElementById('set-year-filter').value;
-  
+
   // 필터 이벤트 발생
-  document.dispatchEvent(new CustomEvent('setFiltersChanged', { 
-    detail: { 
+  document.dispatchEvent(new CustomEvent('setFiltersChanged', {
+    detail: {
+      cert: certFilter,
       type: typeFilter,
       subject: subjectFilter,
       year: yearFilter
-    } 
+    }
   }));
 }
 

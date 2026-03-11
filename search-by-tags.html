@@ -38,12 +38,11 @@
     // 관리자 권한 체크
     import { auth } from './js/core/firebase-core.js';
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-
-    const ADMIN_EMAILS = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+    import { isAdmin } from './js/auth/auth-utils.js';
 
     function checkAdminAccess() {
       onAuthStateChanged(auth, (user) => {
-        if (!user || !ADMIN_EMAILS.includes(user.email)) {
+        if (!user || !isAdmin(user)) {
           alert('관리자 권한이 필요합니다.');
           window.location.href = 'index.html';
         }

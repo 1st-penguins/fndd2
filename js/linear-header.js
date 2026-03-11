@@ -619,7 +619,7 @@ function injectFooter() {
           <ul class="linear-footer__nav-list">
             <li class="linear-footer__nav-item"><a href="/notices" class="linear-footer__nav-link">공지사항</a></li>
             <li class="linear-footer__nav-item"><a href="/" class="linear-footer__nav-link">문제풀기</a></li>
-            <li class="linear-footer__nav-item"><a href="/lectures" class="linear-footer__nav-link">강의</a></li>
+            <li class="linear-footer__nav-item"><a href="/#lecture-tab" class="linear-footer__nav-link">강의</a></li>
           </ul>
         </div>
 

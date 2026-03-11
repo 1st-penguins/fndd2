@@ -2,11 +2,10 @@
 
 const SPORTS_YEARS = ['2025', '2024', '2023', '2022'];
 const SPORTS_CATEGORIES = {
-  '기본 ①': ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사'],
-  '기본 ②': ['운동생리학', '운동역학', '스포츠윤리'],
+  '기본': ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리'],
   '전문': ['특수체육론', '유아체육론', '노인체육론'],
 };
-const SPORTS_SUBJECTS_ALL = [...SPORTS_CATEGORIES['기본 ①'], ...SPORTS_CATEGORIES['기본 ②'], ...SPORTS_CATEGORIES['전문']];
+const SPORTS_SUBJECTS_ALL = [...SPORTS_CATEGORIES['기본'], ...SPORTS_CATEGORIES['전문']];
 
 function renderSportsInstructorProgress(container, attempts) {
   const normalizeYear = (v) => { const m = String(v ?? '').match(/(20\d{2})/); return m ? m[1] : null; };

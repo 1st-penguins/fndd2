@@ -105,10 +105,9 @@
       window._testKeyW = null;
       event.preventDefault();
 
-      // 관리자 확인
-      const ADMIN_EMAILS = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+      // 관리자 확인 (firebase-core.js에서 window.ADMIN_EMAILS 노출)
       const currentEmail = window.auth?.currentUser?.email;
-      if (!currentEmail || !ADMIN_EMAILS.includes(currentEmail)) return;
+      if (!currentEmail || !(window.ADMIN_EMAILS || []).includes(currentEmail)) return;
 
       console.log('🧪 테스트 모드: 모든 문제를 1번으로 선택 후 자동 제출...');
       allQuestions.forEach(q => { userAnswers[q.globalIndex] = 0; });

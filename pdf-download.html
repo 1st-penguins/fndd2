@@ -304,7 +304,7 @@
   <script type="module">
     import { auth, db } from './js/core/firebase-core.js';
     import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    import { isAdmin } from './js/utils/admin-utils.js';
+    import { isAdmin } from './js/auth/auth-utils.js';
     
     // URL에서 상품 ID 가져오기
     const urlParams = new URLSearchParams(window.location.search);

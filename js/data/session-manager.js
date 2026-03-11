@@ -297,6 +297,7 @@ class SessionManager {
         })(),
         type: finalType,
         certType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports' : 'health',
+        certificateType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports-instructor' : 'health-manager',
         ...cleanedMetadata
       };
 
@@ -534,6 +535,11 @@ class SessionManager {
       });
 
       console.log('세션이 종료되었습니다:', sessionId);
+
+      // StatsCache 무효화 (학습분석 탭에서 즉시 최신 데이터 표시)
+      if (window.StatsCache && typeof window.StatsCache.clear === 'function') {
+        window.StatsCache.clear();
+      }
 
       // 세션 카운터 초기화
       this.currentSessionId = null;

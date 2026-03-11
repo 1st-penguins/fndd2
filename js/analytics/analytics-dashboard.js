@@ -1563,21 +1563,67 @@ function adjustColorBrightness(hex, percent) {
 function renderQuestionSetsTab() {
   console.log('문제풀이기록 탭 렌더링...');
 
+  // 자격증 선택에 따라 과목 드롭다운 동적 갱신
+  const certSelect = document.getElementById('set-cert-filter');
+  const subjectSelect = document.getElementById('set-subject-filter');
+  if (certSelect && subjectSelect && certSelect.dataset.subjectLinked !== 'true') {
+    const HEALTH_SUBJECTS = ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사', '운동상해', '기능해부학', '병태생리학', '스포츠심리학'];
+    const SPORTS_SUBJECTS = ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론'];
+
+    function updateSubjectOptions() {
+      const cert = certSelect.value;
+      subjectSelect.innerHTML = '<option value="all">전체 과목</option>';
+
+      if (cert === 'all' || cert === 'health') {
+        const grp = document.createElement('optgroup');
+        grp.label = '건강운동관리사';
+        HEALTH_SUBJECTS.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; grp.appendChild(o); });
+        subjectSelect.appendChild(grp);
+      }
+      if (cert === 'all' || cert === 'sports') {
+        const grp = document.createElement('optgroup');
+        grp.label = '생활스포츠지도사';
+        SPORTS_SUBJECTS.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; grp.appendChild(o); });
+        subjectSelect.appendChild(grp);
+      }
+    }
+
+    certSelect.addEventListener('change', updateSubjectOptions);
+    updateSubjectOptions(); // 초기 렌더
+    certSelect.dataset.subjectLinked = 'true';
+  }
+
+  // 필터 적용 함수
+  function applyCurrentFilters() {
+    const certFilter = document.getElementById('set-cert-filter')?.value || 'all';
+    const typeFilter = document.getElementById('set-type-filter')?.value || 'all';
+    const subjectFilter = document.getElementById('set-subject-filter')?.value || 'all';
+    const yearFilter = document.getElementById('set-year-filter')?.value || 'all';
+
+    document.dispatchEvent(new CustomEvent('setFiltersChanged', {
+      detail: { cert: certFilter, type: typeFilter, subject: subjectFilter, year: yearFilter }
+    }));
+  }
+
   // 필터 이벤트 리스너 등록 (중복 방지)
   const applyFilterButton = document.getElementById('apply-set-filters');
   if (applyFilterButton && applyFilterButton.dataset.listenerAttached !== 'true') {
-    applyFilterButton.addEventListener('click', function () {
-      const certFilter = document.getElementById('set-cert-filter')?.value || 'all';
-      const typeFilter = document.getElementById('set-type-filter').value;
-      const subjectFilter = document.getElementById('set-subject-filter').value;
-      const yearFilter = document.getElementById('set-year-filter').value;
-
-      document.dispatchEvent(new CustomEvent('setFiltersChanged', {
-        detail: { cert: certFilter, type: typeFilter, subject: subjectFilter, year: yearFilter }
-      }));
-    });
+    applyFilterButton.addEventListener('click', applyCurrentFilters);
     applyFilterButton.dataset.listenerAttached = 'true';
   }
+
+  // select 변경 시 즉시 필터 적용 (debounce 300ms)
+  let filterDebounce = null;
+  ['set-cert-filter', 'set-type-filter', 'set-subject-filter', 'set-year-filter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.dataset.autoFilterAttached !== 'true') {
+      el.addEventListener('change', () => {
+        clearTimeout(filterDebounce);
+        filterDebounce = setTimeout(applyCurrentFilters, 300);
+      });
+      el.dataset.autoFilterAttached = 'true';
+    }
+  });
 
   // 자격증별 삭제 버튼
   ['health', 'sports'].forEach(certType => {

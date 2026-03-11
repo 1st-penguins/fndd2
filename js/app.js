@@ -10,6 +10,7 @@ import {
   setupRestrictedLinkDelegation,
   syncLoginOverlays
 } from './auth/access-guard.js';
+import { isAdmin } from './auth/auth-utils.js';
 
 /**
  * 홈 페이지 클래스 추가 (모바일 푸터 제어용)
@@ -35,29 +36,6 @@ let currentTab = 'notice-tab';
 function getAppVersion() {
   return document.querySelector('meta[name="app-version"]')?.content
     || new Date().toISOString().split('T')[0].replace(/-/g, '');
-}
-
-// 관리자 이메일 목록
-const ADMIN_EMAILS = [
-  'kspo0324@gmail.com',
-  'mingdy7283@gmail.com',
-  'sungsoo702@gmail.com'
-];
-
-/**
- * 현재 사용자가 관리자인지 확인
- */
-function isAdmin() {
-  const user = (window.auth && window.auth.currentUser) ? window.auth.currentUser : null;
-  window.Logger?.debug('🔍 관리자 확인:', {
-    user: user?.email || 'null',
-    isAdmin: user ? ADMIN_EMAILS.includes(user.email) : false
-  });
-
-  if (!user || !user.email) {
-    return false;
-  }
-  return ADMIN_EMAILS.includes(user.email);
 }
 
 /**
