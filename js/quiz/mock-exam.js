@@ -2188,6 +2188,28 @@
       console.warn('배치 저장 함수를 찾을 수 없거나 저장할 데이터가 없습니다.');
     }
 
+    // 오답노트 자동 저장 (틀린 문제)
+    try {
+      const userId = window.auth?.currentUser?.uid;
+      if (userId) {
+        const { saveWrongAnswer } = await import('./wrong-note-service.js');
+        const wrongItems = attemptsToSave.filter(a => !a.isCorrect);
+        const examNameVal = `${year}년 모의고사`;
+        for (const item of wrongItems) {
+          const qData = item.questionData;
+          const fullQData = questions[qData.globalIndex] || qData;
+          const saveData = { ...fullQData, ...qData, id: `mock_${year}_${qData.subject}_${qData.number}` };
+          saveWrongAnswer(userId, saveData, examNameVal, qData.subject)
+            .catch(err => console.error('오답 자동 저장 실패:', err));
+        }
+        if (wrongItems.length > 0) {
+          console.log(`오답노트: ${wrongItems.length}개 틀린 문제 저장`);
+        }
+      }
+    } catch (e) {
+      console.error('오답노트 저장 중 오류:', e);
+    }
+
     let mockExamResultSaved = false;
 
     // ✅ 모의고사 결과를 mockExamResults 컬렉션에 저장
