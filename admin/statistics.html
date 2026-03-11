@@ -714,7 +714,7 @@
                     const count = stat.answers[i] || 0;
                     const pct = stat.total > 0 ? (count / stat.total * 100).toFixed(0) : 0;
                     const isCorrect = stat.correctAnswer !== undefined && stat.correctAnswer !== null && i === stat.correctAnswer;
-                    const barColor = isCorrect ? '#4caf50' : '#ddd';
+                    const barColor = isCorrect ? '#4caf50' : '#f44336';
                     const labelStyle = isCorrect ? 'font-weight:700;color:#4caf50;' : 'color:#888;';
                     return `<div>
                       <div class="answer-label"><span style="${labelStyle}">${i + 1}번${isCorrect ? ' ✓' : ''}</span><span style="${labelStyle}">${pct}%</span></div>
