@@ -455,15 +455,23 @@
       return allAttempts.filter(a => !a.sessionId || !excludeIds.has(a.sessionId));
     }
 
-    // ─── V4-C3: 오답 1위 선택지 ─────────────────────────────────────────
-    // correctAnswer: 0-based 인덱스 (V3 필드). undefined면 전체 중 최다 선택.
-    function getTopWrongAnswer(answers, correctAnswer, total) {
-      // correctAnswer가 없으면 오답 1위를 판별할 수 없음
+    // ─── 최다 선택: 전체 중 가장 많이 고른 답 (전체 대비 %) ──────────
+    function getMostPicked(answers, total) {
+      let topIdx = -1;
+      let topCount = 0;
+      for (let i = 0; i < 4; i++) {
+        const cnt = answers[i] || 0;
+        if (cnt > topCount) { topCount = cnt; topIdx = i; }
+      }
+      const pct = total > 0 && topCount > 0 ? Math.round(topCount / total * 100) : 0;
+      return { idx: topIdx, count: topCount, pct };
+    }
+
+    // ─── 오답 1위: 정답 제외 가장 많이 고른 답 (전체 대비 %) ──────────
+    function getTopWrongPick(answers, correctAnswer, total) {
       if (correctAnswer === undefined || correctAnswer === null) {
         return { idx: -1, count: 0, pct: 0 };
       }
-      const correctCount = answers[correctAnswer] || 0;
-      const wrongTotal = total - correctCount; // 오답자 수
       let topIdx = -1;
       let topCount = 0;
       for (let i = 0; i < 4; i++) {
@@ -471,8 +479,7 @@
         const cnt = answers[i] || 0;
         if (cnt > topCount) { topCount = cnt; topIdx = i; }
       }
-      // 오답자 중 비율
-      const pct = wrongTotal > 0 && topCount > 0 ? Math.round(topCount / wrongTotal * 100) : 0;
+      const pct = total > 0 && topCount > 0 ? Math.round(topCount / total * 100) : 0;
       return { idx: topIdx, count: topCount, pct };
     }
 
@@ -480,17 +487,19 @@
     let _lastTableRows = []; // 마지막 테이블 데이터 저장
     window.downloadXlsx = function() {
       if (!_lastTableRows.length) { alert('먼저 통계를 조회하세요.'); return; }
-      const header = ['문제번호', '과목', '연도', '정답률(%)', '오답 1위 선택지', '오답 1위 비율(%)', '총 응시수'];
+      const header = ['문제번호', '과목', '연도', '정답', '최다선택', '최다선택(%)', '정답률(%)', '오답1위', '오답1위(%)', '응시수'];
       const rows = _lastTableRows.map(r => [
         r.number, r.subject, r.year,
+        r.correctAnswer !== undefined && r.correctAnswer !== null ? (r.correctAnswer + 1) + '번' : '-',
+        r.mostPicked >= 0 ? (r.mostPicked + 1) + '번' : '-',
+        r.mostPickedPct,
         r.accuracy,
         r.topWrong >= 0 ? (r.topWrong + 1) + '번' : '-',
         r.topWrongPct,
         r.total
       ]);
       const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-      // 열 너비 설정
-      ws['!cols'] = [8, 16, 8, 10, 14, 14, 10].map(w => ({ wch: w }));
+      ws['!cols'] = [8, 12, 8, 8, 10, 12, 10, 10, 12, 8].map(w => ({ wch: w }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, '문제별통계');
       const yearVal = document.getElementById('yearFilter').value || '전체';
@@ -675,9 +684,12 @@
       // ── V4-C4: 컴팩트 테이블 (상단) ──────────────────────────────────
       _lastTableRows = sortedStats.map(([, stat]) => {
         const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
-        const tw = getTopWrongAnswer(stat.answers, stat.correctAnswer, stat.total);
+        const mp = getMostPicked(stat.answers, stat.total);
+        const tw = getTopWrongPick(stat.answers, stat.correctAnswer, stat.total);
         return { number: stat.number, subject: stat.subject, year: stat.year,
-                 accuracy, topWrong: tw.idx, topWrongPct: tw.pct, total: stat.total };
+                 correctAnswer: stat.correctAnswer, accuracy,
+                 mostPicked: mp.idx, mostPickedPct: mp.pct,
+                 topWrong: tw.idx, topWrongPct: tw.pct, total: stat.total };
       });
 
       const isAllTypes = document.getElementById('typeFilter').value === '';
@@ -686,17 +698,22 @@
         const rows = stats.map(([, stat]) => {
           const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
           const accColor = accuracy < 50 ? '#f44336' : accuracy >= 80 ? '#4caf50' : '#ff9800';
-          const tw = getTopWrongAnswer(stat.answers, stat.correctAnswer, stat.total);
-          const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
+          const mp = getMostPicked(stat.answers, stat.total);
+          const tw = getTopWrongPick(stat.answers, stat.correctAnswer, stat.total);
           const correctLabel = stat.correctAnswer !== undefined && stat.correctAnswer !== null
             ? `${stat.correctAnswer + 1}번` : '-';
+          const mpLabel = mp.idx >= 0 ? `${mp.idx + 1}번 (${mp.pct}%)` : '-';
+          const mpIsCorrect = stat.correctAnswer !== undefined && mp.idx === stat.correctAnswer;
+          const mpColor = mpIsCorrect ? '#4caf50' : '#f44336';
+          const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
           return `<tr style="border-bottom:1px solid #eee;">
             <td style="text-align:center;">${stat.number}</td>
             <td>${stat.subject}</td>
             <td style="text-align:center;">${stat.year}</td>
             <td style="text-align:center; font-weight:700; color:#4caf50;">${correctLabel}</td>
+            <td style="text-align:center; font-weight:700; color:${mpColor};">${mpLabel}</td>
             <td style="text-align:center; font-weight:700; color:${accColor};">${accuracy}%</td>
-            <td style="text-align:center;">${twLabel}</td>
+            <td style="text-align:center; color:#e65100;">${twLabel}</td>
             <td style="text-align:center;">${stat.total}명</td>
           </tr>`;
         }).join('');
@@ -706,13 +723,14 @@
             <table style="width:100%; border-collapse:collapse; font-size:14px;">
               <thead>
                 <tr style="background:#1d2f4e; color:#fff;">
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">문제번호</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">번호</th>
                   <th style="padding:10px 8px; text-align:left; white-space:nowrap;">과목</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">연도</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">최다선택</th>
                   <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답률</th>
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답 1위</th>
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시 수</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답1위</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시</th>
                 </tr>
               </thead>
               <tbody>${rows}</tbody>
