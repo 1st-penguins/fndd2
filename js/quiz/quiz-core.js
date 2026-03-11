@@ -2148,8 +2148,8 @@ export function showResults() {
     </div>
     
     <div class="results-actions">
-      <button onclick="reviewQuiz()" class="action-button review-button">오답 확인하기</button>
-      <button onclick="resetQuiz()" class="action-button retry-button">다시 풀어보기</button>
+      <button onclick="reviewQuiz()" class="action-button review-button">오답 리뷰</button>
+      <button onclick="location.href='../index.html#analytics-tab'" class="action-button home-button">홈으로</button>
     </div>
   `;
 

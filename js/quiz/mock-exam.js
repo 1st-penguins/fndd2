@@ -2958,17 +2958,15 @@
           <p>모든 문제를 맞혔습니다! 축하합니다! 🎉</p>
         </div>
         <div class="action-buttons">
-          <button onclick="goHomeAfterSave()" class="action-button">처음으로 돌아가기</button>
-          <button onclick="resetQuiz()" class="action-button retry-button">다시 풀기</button>
+          <button onclick="goHomeAfterSave()" class="action-button">홈으로</button>
         </div>
       `;
     } else {
       // 틀린 문제가 있는 경우
       resultsActions.innerHTML = `
-        <button onclick="reviewQuiz()" class="action-button review-button">전체 오답 확인</button>
+        <button onclick="reviewQuiz()" class="action-button review-button">오답 리뷰</button>
         <div class="action-buttons">
-          <button onclick="goHomeAfterSave()" class="action-button">처음으로 돌아가기</button>
-          <button onclick="resetQuiz()" class="action-button retry-button">다시 풀기</button>
+          <button onclick="goHomeAfterSave()" class="action-button">홈으로</button>
         </div>
       `;
 
