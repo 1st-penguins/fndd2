@@ -33,6 +33,8 @@ let firebaseAuth = null; // ensureFirebase()로 초기화
 
 // Initialize
 document.addEventListener("DOMContentLoaded", async () => {
+  if (!container) return; // DOM 요소 없으면 무시
+
   const { auth } = await ensureFirebase();
   firebaseAuth = auth;
 
@@ -41,8 +43,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       loadData(user.uid);
     } else {
       container.innerHTML = `
-        <div class="empty-state">
-          <span class="empty-icon">&#128274;</span>
+        <div class="wrong-note-empty-state">
+          <span class="wrong-note-empty-icon">&#128274;</span>
           <p>로그인이 필요한 서비스입니다.</p>
         </div>
       `;
@@ -52,8 +54,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 과목 필터
   if (filterGroup) {
     filterGroup.addEventListener("click", (e) => {
-      if (e.target.classList.contains("filter-btn")) {
-        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+      if (e.target.classList.contains("wrong-note-filter-btn")) {
+        filterGroup.querySelectorAll(".wrong-note-filter-btn").forEach(btn => btn.classList.remove("active"));
         e.target.classList.add("active");
         activeFilter = e.target.dataset.subject;
         renderList();
@@ -110,7 +112,7 @@ async function loadData(userId) {
 }
 
 function updateFilterButtons() {
-  if (!currentWrongAnswers.length) return;
+  if (!currentWrongAnswers.length || !filterGroup) return;
 
   const sections = [...new Set(currentWrongAnswers.map(item => item.section).filter(Boolean))];
   const existingButtons = Array.from(filterGroup.querySelectorAll('button')).map(b => b.dataset.subject);
@@ -118,7 +120,7 @@ function updateFilterButtons() {
   sections.forEach(section => {
     if (!existingButtons.includes(section)) {
       const btn = document.createElement("button");
-      btn.className = "filter-btn";
+      btn.className = "wrong-note-filter-btn";
       btn.dataset.subject = section;
       btn.textContent = section;
       filterGroup.appendChild(btn);
@@ -141,14 +143,14 @@ function renderList() {
   if (filtered.length === 0) {
     if (currentWrongAnswers.length === 0) {
       container.innerHTML = `
-        <div class="empty-state">
-          <span class="empty-icon">&#128079;</span>
+        <div class="wrong-note-empty-state">
+          <span class="wrong-note-empty-icon">&#128079;</span>
           <p>틀린 문제가 없습니다.<br>완벽해요!</p>
         </div>
       `;
     } else {
       container.innerHTML = `
-        <div class="empty-state">
+        <div class="wrong-note-empty-state">
           <p>해당 과목의 오답이 없습니다.</p>
         </div>
       `;
@@ -167,13 +169,13 @@ function renderList() {
   // 과목별 섹션 렌더링
   Object.entries(grouped).forEach(([section, items]) => {
     const sectionEl = document.createElement("div");
-    sectionEl.className = "subject-section";
+    sectionEl.className = "wn-subject-section";
 
     const headerEl = document.createElement("div");
-    headerEl.className = "subject-section__header";
+    headerEl.className = "wn-subject-section__header";
     headerEl.innerHTML = `
-      <span class="subject-section__title">${section}</span>
-      <span class="subject-section__count">${items.length}문제</span>
+      <span class="wn-subject-section__title">${section}</span>
+      <span class="wn-subject-section__count">${items.length}문제</span>
     `;
     sectionEl.appendChild(headerEl);
 

@@ -1,0 +1,528 @@
+/* 오답노트 스타일 */
+
+/* 컨트롤 바 */
+.wrong-note-controls-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.wrong-note-filter-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.wrong-note-filter-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 20px;
+    background: white;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.wrong-note-filter-btn.active {
+    background: var(--penguin-navy);
+    color: white;
+    border-color: var(--penguin-navy);
+}
+
+.wrong-note-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wrong-note-stats-summary {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* 액션 바 (선택 모드) */
+.wrong-note-action-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background: var(--penguin-navy);
+    border-radius: 12px;
+    color: white;
+}
+
+.wrong-note-action-bar.visible {
+    display: flex;
+}
+
+.wrong-note-action-bar__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.wrong-note-action-bar__btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.wrong-note-action-bar__btn--quiz {
+    background: var(--penguin-skyblue);
+    color: white;
+}
+
+.wrong-note-action-bar__btn--quiz:hover {
+    background: #4da0b8;
+}
+
+.wrong-note-action-bar__btn--quiz:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.wrong-note-action-bar__btn--resolve {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.wrong-note-action-bar__btn--resolve:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.wrong-note-action-bar__btn--cancel {
+    background: none;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 8px 12px;
+}
+
+.wrong-note-select-mode-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--penguin-navy);
+    border-radius: 8px;
+    background: white;
+    color: var(--penguin-navy);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.wrong-note-select-mode-btn:hover {
+    background: var(--penguin-navy);
+    color: white;
+}
+
+/* 과목별 섹션 */
+.wn-subject-section {
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.wn-subject-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border-radius: 10px 10px 0 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.wn-subject-section__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--penguin-navy);
+}
+
+.wn-subject-section__count {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* 컴팩트 리스트 아이템 */
+.wrong-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.wrong-item:last-child {
+    border-bottom: none;
+    border-radius: 0 0 10px 10px;
+}
+
+.wrong-item:hover {
+    background: #f8fafc;
+}
+
+.wrong-item__checkbox {
+    display: none;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    transition: all 0.15s;
+}
+
+.wrong-item__checkbox:checked {
+    background: var(--penguin-navy);
+    border-color: var(--penguin-navy);
+}
+
+.wrong-item__checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.select-mode .wrong-item__checkbox {
+    display: block;
+}
+
+.wrong-item__number {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--penguin-navy);
+}
+
+.wrong-item__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.wrong-item__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wrong-item__meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--text-secondary, #94a3b8);
+}
+
+.wrong-item__count {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: #ef4444;
+    font-weight: 600;
+    background: #fef2f2;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.wrong-item__arrow {
+    flex-shrink: 0;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.select-mode .wrong-item__arrow {
+    display: none;
+}
+
+/* 빈 상태 */
+.wrong-note-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.wrong-note-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+}
+
+/* 상세 모달 */
+.wrong-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
+
+.wrong-modal-overlay.open {
+    display: flex;
+}
+
+.wrong-modal {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.wrong-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.wrong-modal__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--penguin-navy);
+}
+
+.wrong-modal__close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 4px;
+}
+
+.wrong-modal__question {
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.wrong-modal__question img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 8px 0;
+}
+
+.wrong-modal__option {
+    margin: 6px 0;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.wrong-modal__option.correct {
+    background: #f0fdf4;
+    border-color: #86efac;
+    font-weight: 600;
+}
+
+.wrong-modal__explanation {
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 8px;
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #475569;
+}
+
+.wrong-modal__explanation strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--penguin-navy);
+}
+
+.wrong-modal__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.wrong-modal__btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.wrong-modal__btn--resolve {
+    background: var(--penguin-navy);
+    color: white;
+}
+
+.wrong-modal__btn--close {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+    .wrong-note-controls-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .wrong-item {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .wrong-item__title {
+        font-size: 13px;
+    }
+
+    .wrong-note-action-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .wrong-note-action-bar__left {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* ===== 다크모드 ===== */
+[data-theme="dark"] .wrong-note-controls-bar {
+    background: #181a1e;
+    border-color: #2a2a30;
+}
+
+[data-theme="dark"] .wrong-note-filter-btn {
+    background: #1a1a1e;
+    color: #a0a5b0;
+    border-color: #2a2a30;
+}
+
+[data-theme="dark"] .wrong-note-filter-btn.active {
+    background: var(--penguin-navy);
+    color: white;
+}
+
+[data-theme="dark"] .wrong-note-select-mode-btn {
+    background: #1a1a1e;
+    color: #c0c5d0;
+    border-color: #2a2a30;
+}
+
+[data-theme="dark"] .wrong-note-select-mode-btn:hover {
+    background: var(--penguin-navy);
+    color: white;
+}
+
+[data-theme="dark"] .wn-subject-section {
+    background: #181a1e;
+    box-shadow: none;
+}
+
+[data-theme="dark"] .wn-subject-section__header {
+    background: #1e2024;
+    border-bottom-color: #2a2a30;
+}
+
+[data-theme="dark"] .wn-subject-section__title {
+    color: #e0e4ea;
+}
+
+[data-theme="dark"] .wn-subject-section__count {
+    background: #2a2a30;
+    color: #a0a5b0;
+}
+
+[data-theme="dark"] .wrong-item {
+    background: #181a1e;
+    border-bottom-color: #2a2a30;
+}
+
+[data-theme="dark"] .wrong-item:hover {
+    background: #1e2024;
+}
+
+[data-theme="dark"] .wrong-item__number {
+    background: #2a2a30;
+    color: var(--penguin-skyblue);
+}
+
+[data-theme="dark"] .wrong-item__title {
+    color: #e0e4ea;
+}
+
+[data-theme="dark"] .wrong-modal {
+    background: #1a1c20;
+}
+
+[data-theme="dark"] .wrong-modal__title {
+    color: var(--penguin-skyblue);
+}
+
+[data-theme="dark"] .wrong-modal__question {
+    color: #e0e4ea;
+}
+
+[data-theme="dark"] .wrong-modal__option {
+    border-color: #2a2a30;
+    color: #d0d0d4;
+}
+
+[data-theme="dark"] .wrong-modal__option.correct {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: #22c55e;
+}
+
+[data-theme="dark"] .wrong-modal__explanation {
+    background: #0f1012;
+    color: #a0a5b0;
+}
+
+[data-theme="dark"] .wrong-modal__btn--close {
+    background: #2a2a30;
+    color: #c0c5d0;
+}

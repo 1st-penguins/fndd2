@@ -81,6 +81,7 @@
   <link rel="stylesheet" href="css/floating-buttons.css?v=2026031119" />
   <link rel="stylesheet" href="css/linear-themes.css?v=2026031119" />
   <link rel="stylesheet" href="css/dark-mode.css?v=2026031119" />
+  <link rel="stylesheet" href="css/wrong-note.css?v=2026031101" />
 
 
 
@@ -432,6 +433,7 @@
           <div class="sub-tabs">
             <button class="sub-tab-button active" data-tab="progress-tab">학습 진행률</button>
             <button class="sub-tab-button" data-tab="question-sets-tab">문제풀이기록</button>
+            <button class="sub-tab-button" data-tab="wrong-note-tab">오답노트</button>
             <button class="sub-tab-button" data-tab="weak-areas-tab">약점 분석</button>
             <button class="sub-tab-button" data-tab="overview-tab">나의 통계</button>
             <button class="sub-tab-button admin-only" data-tab="admin-tab" style="display:none">관리자 통계</button>
@@ -494,6 +496,36 @@
                 <div id="question-sets-container">
                   <!-- 문제풀이기록 목록이 여기에 렌더링됨 -->
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 오답노트 탭 -->
+          <div id="wrong-note-tab" class="sub-tab-content">
+            <div id="wrong-note-root">
+              <div class="wrong-note-controls-bar">
+                <div class="wrong-note-filter-group" id="subject-filters">
+                  <button class="wrong-note-filter-btn active" data-subject="all">전체</button>
+                </div>
+                <div class="wrong-note-controls-right">
+                  <span class="wrong-note-stats-summary">총 <strong id="total-wrong-count">0</strong>문제</span>
+                  <button class="wrong-note-select-mode-btn" id="select-mode-btn">선택</button>
+                </div>
+              </div>
+
+              <div class="wrong-note-action-bar" id="action-bar">
+                <div class="wrong-note-action-bar__left">
+                  <span id="selected-count">0개 선택됨</span>
+                  <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--cancel" id="cancel-select-btn">취소</button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--resolve" id="resolve-selected-btn">이해 완료</button>
+                  <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--quiz" id="quiz-selected-btn" disabled>다시 풀기</button>
+                </div>
+              </div>
+
+              <div id="wrong-list-container">
+                <div style="text-align:center; padding:40px; color:var(--text-secondary);">로그인 후 오답노트가 표시됩니다.</div>
               </div>
             </div>
           </div>
@@ -1229,11 +1261,31 @@
     </div>
   </main>
 
+  <!-- 오답노트 상세 모달 -->
+  <div class="wrong-modal-overlay" id="wrong-detail-modal">
+    <div class="wrong-modal">
+      <div class="wrong-modal__header">
+        <span class="wrong-modal__title" id="modal-title">문제 확인</span>
+        <button class="wrong-modal__close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="wrong-modal__question" id="modal-question"></div>
+      <div id="modal-options"></div>
+      <div class="wrong-modal__explanation" id="modal-explanation"></div>
+      <div class="wrong-modal__actions">
+        <button class="wrong-modal__btn wrong-modal__btn--close" id="modal-dismiss-btn">닫기</button>
+        <button class="wrong-modal__btn wrong-modal__btn--resolve" id="modal-resolve-btn">이해 완료 (목록에서 제거)</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Linear Footer -->
   <footer class="linear-footer"></footer>
 
   <!-- 탭 핸들러 -->
   <script type="module" src="js/tab-handler.js"></script>
+
+  <!-- 오답노트 -->
+  <script type="module" src="js/quiz/wrong-note-ui.js"></script>
 
   <!-- 자격증 전환 핸들러 -->
   <script type="module">
