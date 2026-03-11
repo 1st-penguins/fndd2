@@ -396,25 +396,24 @@
   </footer>
 
   <script type="module">
-    import { auth, db } from '../js/core/firebase-core.js';
+    import { ensureFirebase, ensureAuthReady } from '../js/core/firebase-core.js';
     import { isAdmin } from '../js/auth/auth-utils.js';
-    import { 
-      collection, 
-      query, 
-      where, 
-      getDocs 
+    import {
+      collection,
+      query,
+      where,
+      getDocs
     } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    
-    window.addEventListener('DOMContentLoaded', () => {
-      // 관리자 권한 확인
-      auth.onAuthStateChanged(async (user) => {
-        if (!user || !isAdmin(user)) {
-          alert('관리자만 접근할 수 있습니다.');
-          window.location.href = '../index.html';
-          return;
-        }
-      });
-    });
+
+    // Firebase 초기화 대기 후 auth, db 참조
+    const { auth, db } = await ensureFirebase();
+
+    // 관리자 권한 확인
+    const user = await ensureAuthReady();
+    if (!user || !isAdmin(user)) {
+      alert('관리자만 접근할 수 있습니다.');
+      window.location.href = '../index.html';
+    }
     
     // ─── V4-A1: 완주 세션 필터 ────────────────────────────────────────────
     // 일반문제: 세션당 attempts 수 >= 20, 모의고사: >= 80
@@ -477,19 +476,28 @@
         const difficultyFilter = document.getElementById('difficultyFilter').value;
         const typeFilter = document.getElementById('typeFilter').value;
         
-        // 전체 조회 경고
+        // (연도/과목 필수 선택은 아래에서 체크)
+        
+        // 연도 또는 과목 필수 선택 강제
         if (!yearFilter && !subjectFilter) {
-          if (!confirm('⚠️ 전체 데이터를 조회하면 많은 Firebase 읽기 비용이 발생합니다.\n\n연도 또는 과목을 선택하는 것을 권장합니다.\n\n그래도 조회하시겠습니까?')) {
-            return;
-          }
+          alert('Firebase 비용 절감을 위해 연도 또는 과목을 반드시 선택해주세요.');
+          return;
         }
-        
-        // 모든 attempts 가져오기 (최적화 필요)
+
+        // Firestore 서버 측 필터링 (읽기 비용 대폭 절감)
         let q = collection(db, 'attempts');
-        const snapshot = await getDocs(q);
-        
+        const constraints = [];
+        if (yearFilter) {
+          constraints.push(where('questionData.year', '==', yearFilter));
+        }
+        if (subjectFilter) {
+          constraints.push(where('questionData.subject', '==', subjectFilter));
+        }
+        const finalQuery = constraints.length > 0 ? query(q, ...constraints) : q;
+        const snapshot = await getDocs(finalQuery);
+
         console.log(`📊 Firebase reads: ${snapshot.size}개 문서 읽음`);
-        
+
         let attempts = [];
         snapshot.forEach(doc => {
           attempts.push({ id: doc.id, ...doc.data() });
@@ -500,14 +508,6 @@
           const before = attempts.length;
           attempts = filterCompletedAttempts(attempts);
           console.log(`✅ 완주 세션 필터: ${before}개 → ${attempts.length}개`);
-        }
-
-        // 필터 적용
-        if (yearFilter) {
-          attempts = attempts.filter(a => a.questionData?.year === yearFilter);
-        }
-        if (subjectFilter) {
-          attempts = attempts.filter(a => a.questionData?.subject === subjectFilter);
         }
         
         // ✅ 문제 유형 필터링
