@@ -458,14 +458,21 @@
     // ─── V4-C3: 오답 1위 선택지 ─────────────────────────────────────────
     // correctAnswer: 0-based 인덱스 (V3 필드). undefined면 전체 중 최다 선택.
     function getTopWrongAnswer(answers, correctAnswer, total) {
+      // correctAnswer가 없으면 오답 1위를 판별할 수 없음
+      if (correctAnswer === undefined || correctAnswer === null) {
+        return { idx: -1, count: 0, pct: 0 };
+      }
+      const correctCount = answers[correctAnswer] || 0;
+      const wrongTotal = total - correctCount; // 오답자 수
       let topIdx = -1;
       let topCount = 0;
       for (let i = 0; i < 4; i++) {
-        if (correctAnswer !== undefined && correctAnswer !== null && i === correctAnswer) continue;
+        if (i === correctAnswer) continue;
         const cnt = answers[i] || 0;
         if (cnt > topCount) { topCount = cnt; topIdx = i; }
       }
-      const pct = total > 0 && topCount > 0 ? Math.round(topCount / total * 100) : 0;
+      // 오답자 중 비율
+      const pct = wrongTotal > 0 && topCount > 0 ? Math.round(topCount / wrongTotal * 100) : 0;
       return { idx: topIdx, count: topCount, pct };
     }
 
