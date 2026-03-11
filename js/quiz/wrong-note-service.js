@@ -8,7 +8,7 @@ import {
     orderBy,
     serverTimestamp,
     deleteDoc,
-    getDoc
+    increment
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 import { ensureFirebase } from "../core/firebase-core.js";
@@ -48,25 +48,16 @@ export async function saveWrongAnswer(userId, questionData, examName, section) {
         questionId,
         examName,
         section,
-        questionData, // 전체 문제 데이터 저장 (조회 시 원본 불필요)
+        questionData,
         lastIncorrectAt: serverTimestamp(),
         isResolved: false,
-        incorrectCount: 1 // 초기값
+        incorrectCount: increment(1)
     };
 
     try {
-        // 기존 데이터가 있으면 count 증가
-        const snapshot = await getDoc(docRef);
-        if (snapshot.exists()) {
-            const data = snapshot.data();
-            payload.incorrectCount = (data.incorrectCount || 1) + 1;
-        }
-
         await setDoc(docRef, payload, { merge: true });
-        // console.log("오답노트 저장 완료:", docId);
     } catch (error) {
         console.error("오답노트 저장 실패:", error);
-        // 사용자에게 에러를 굳이 보여줄 필요는 없음 (백그라운드 저장)
     }
 }
 
