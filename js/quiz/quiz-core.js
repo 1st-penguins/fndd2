@@ -1625,9 +1625,7 @@ export async function submitQuiz() {
             // ❌ 오답 노트 자동 저장 (Fire and Forget)
             if (!isCorrect && auth.currentUser) {
               const examNameVal = `${year}년 ${subject}`;
-              // pass full question object (including options, images, etc.)
-              // question is already defined in the loop
-              saveWrongAnswer(auth.currentUser.uid, question, examNameVal, subject)
+              saveWrongAnswer(auth.currentUser.uid, question, examNameVal, subject, certificateType)
                 .catch(err => console.error("오답 자동 저장 실패:", err));
             }
           }

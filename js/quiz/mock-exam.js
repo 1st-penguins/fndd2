@@ -2195,11 +2195,12 @@
         const { saveWrongAnswer } = await import('./wrong-note-service.js');
         const wrongItems = attemptsToSave.filter(a => !a.isCorrect);
         const examNameVal = `${year}년 모의고사`;
+        const certType = getActiveCertificateType();
         for (const item of wrongItems) {
           const qData = item.questionData;
           const fullQData = questions[qData.globalIndex] || qData;
           const saveData = { ...fullQData, ...qData, id: `mock_${year}_${qData.subject}_${qData.number}` };
-          saveWrongAnswer(userId, saveData, examNameVal, qData.subject)
+          saveWrongAnswer(userId, saveData, examNameVal, qData.subject, certType)
             .catch(err => console.error('오답 자동 저장 실패:', err));
         }
         if (wrongItems.length > 0) {

@@ -1,5 +1,57 @@
 /* 오답노트 스타일 */
 
+/* 자격증 구분 탭 */
+.wrong-note-cert-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.wrong-note-cert-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.wrong-note-cert-btn.active {
+    border-color: var(--penguin-navy);
+    background: var(--penguin-navy);
+    color: white;
+}
+
+.wrong-note-cert-btn:not(.active):hover {
+    border-color: var(--penguin-navy);
+    color: var(--penguin-navy);
+}
+
+.wrong-note-cert-count {
+    display: inline-block;
+    min-width: 18px;
+    padding: 1px 6px;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 4px;
+}
+
+.wrong-note-cert-btn.active .wrong-note-cert-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+.wrong-note-cert-btn:not(.active) .wrong-note-cert-count {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+
 /* 컨트롤 바 */
 .wrong-note-controls-bar {
     display: flex;
@@ -426,6 +478,23 @@
 }
 
 /* ===== 다크모드 ===== */
+[data-theme="dark"] .wrong-note-cert-btn {
+    background: #181a1e;
+    border-color: #2a2a30;
+    color: #a0a5b0;
+}
+
+[data-theme="dark"] .wrong-note-cert-btn.active {
+    background: var(--penguin-navy);
+    border-color: var(--penguin-navy);
+    color: white;
+}
+
+[data-theme="dark"] .wrong-note-cert-btn:not(.active) .wrong-note-cert-count {
+    background: #2a2a30;
+    color: #808590;
+}
+
 [data-theme="dark"] .wrong-note-controls-bar {
     background: #181a1e;
     border-color: #2a2a30;

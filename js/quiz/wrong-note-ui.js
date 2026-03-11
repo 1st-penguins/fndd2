@@ -24,12 +24,14 @@ const modalCloseBtn = document.getElementById("modal-close-btn");
 const modalDismissBtn = document.getElementById("modal-dismiss-btn");
 const modalResolveBtn = document.getElementById("modal-resolve-btn");
 
-let currentWrongAnswers = [];
+let allWrongAnswers = []; // 전체 오답 (모든 자격증)
+let currentWrongAnswers = []; // 현재 자격증 필터링 결과
+let activeCertType = localStorage.getItem('currentCertificateType') || 'health-manager';
 let activeFilter = 'all';
 let selectMode = false;
 let selectedIds = new Set();
 let currentModalItem = null;
-let firebaseAuth = null; // ensureFirebase()로 초기화
+let firebaseAuth = null;
 
 // Initialize
 document.addEventListener("DOMContentLoaded", async () => {
@@ -103,28 +105,62 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function loadData(userId) {
   try {
-    currentWrongAnswers = await getWrongAnswers(userId);
-    updateFilterButtons();
-    renderList();
+    allWrongAnswers = await getWrongAnswers(userId);
+    filterByCertType();
   } catch (error) {
     container.innerHTML = `<p style="text-align:center; color:#ef4444; padding:40px;">오답 노트를 불러오는 중 오류가 발생했습니다.<br>${error.message}</p>`;
   }
 }
 
+function filterByCertType() {
+  currentWrongAnswers = allWrongAnswers.filter(item => {
+    const cert = item.certType || 'health-manager';
+    return cert === activeCertType;
+  });
+  activeFilter = 'all';
+  updateCertTabs();
+  updateFilterButtons();
+  renderList();
+}
+
+function updateCertTabs() {
+  const certTabGroup = document.getElementById('cert-type-tabs');
+  if (!certTabGroup) return;
+
+  // 각 자격증의 오답 수 계산
+  const healthCount = allWrongAnswers.filter(i => (i.certType || 'health-manager') === 'health-manager').length;
+  const sportsCount = allWrongAnswers.filter(i => i.certType === 'sports-instructor').length;
+
+  certTabGroup.innerHTML = `
+    <button class="wrong-note-cert-btn ${activeCertType === 'health-manager' ? 'active' : ''}" data-cert="health-manager">
+      건강운동관리사 <span class="wrong-note-cert-count">${healthCount}</span>
+    </button>
+    <button class="wrong-note-cert-btn ${activeCertType === 'sports-instructor' ? 'active' : ''}" data-cert="sports-instructor">
+      생활스포츠지도사 <span class="wrong-note-cert-count">${sportsCount}</span>
+    </button>
+  `;
+
+  certTabGroup.querySelectorAll('.wrong-note-cert-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCertType = btn.dataset.cert;
+      filterByCertType();
+    });
+  });
+}
+
 function updateFilterButtons() {
-  if (!currentWrongAnswers.length || !filterGroup) return;
+  if (!filterGroup) return;
 
   const sections = [...new Set(currentWrongAnswers.map(item => item.section).filter(Boolean))];
-  const existingButtons = Array.from(filterGroup.querySelectorAll('button')).map(b => b.dataset.subject);
 
+  // 전체 버튼 + 과목 버튼 새로 생성
+  filterGroup.innerHTML = '<button class="wrong-note-filter-btn active" data-subject="all">전체</button>';
   sections.forEach(section => {
-    if (!existingButtons.includes(section)) {
-      const btn = document.createElement("button");
-      btn.className = "wrong-note-filter-btn";
-      btn.dataset.subject = section;
-      btn.textContent = section;
-      filterGroup.appendChild(btn);
-    }
+    const btn = document.createElement("button");
+    btn.className = "wrong-note-filter-btn";
+    btn.dataset.subject = section;
+    btn.textContent = section;
+    filterGroup.appendChild(btn);
   });
 }
 

@@ -38,31 +38,27 @@ function removeUndefined(obj) {
 /**
  * 오답 노트에 문제 저장
  * @param {string} userId - 사용자 UID
- * @param {object} questionData - 문제 데이터 (question, options, answer, explanation 등)
- * @param {string} examName - 시험 이름 (예: 2024년 1월 모의고사)
+ * @param {object} questionData - 문제 데이터
+ * @param {string} examName - 시험 이름 (예: 2024년 모의고사)
  * @param {string} section - 과목 (예: 운동생리학)
+ * @param {string} certType - 자격증 타입 ('health-manager' | 'sports-instructor')
  */
-export async function saveWrongAnswer(userId, questionData, examName, section) {
+export async function saveWrongAnswer(userId, questionData, examName, section, certType) {
     if (!userId || !questionData) return;
 
     const fireDb = await getDb();
+    const cert = certType || 'health-manager';
 
-    // 고유 ID 생성 (userId_questionId 조합으로 중복 방지)
-    // questionData.id가 없으면 임시 ID 생성 (거의 없겠지만)
     const questionId = questionData.id || `temp_${Date.now()}`;
     const docId = `${userId}_${questionId}`;
-
     const docRef = doc(fireDb, COLLECTION_NAME, docId);
-
-    // 이미 존재하는지 확인 (불필요한 쓰기 방지) -> setDoc {merge: true}로 대체 가능
-    // 하지만 'solvedCount' 같은 걸 늘리고 싶다면 읽어야 함.
-    // 여기서는 단순히 덮어쓰거나 새로 생성. 'lastIncorrectAt' 갱신.
 
     const payload = {
         userId,
         questionId,
         examName,
         section,
+        certType: cert,
         questionData: removeUndefined(questionData),
         lastIncorrectAt: serverTimestamp(),
         isResolved: false,
