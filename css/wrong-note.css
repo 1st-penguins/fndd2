@@ -245,6 +245,16 @@
     text-overflow: ellipsis;
 }
 
+.wrong-item__title--image {
+    color: var(--penguin-navy);
+    font-weight: 600;
+}
+
+.wrong-item__image-icon {
+    font-size: 13px;
+    margin-right: 2px;
+}
+
 .wrong-item__meta {
     display: flex;
     gap: 8px;
@@ -493,6 +503,10 @@
 
 [data-theme="dark"] .wrong-item__title {
     color: #e0e4ea;
+}
+
+[data-theme="dark"] .wrong-item__title--image {
+    color: var(--penguin-skyblue);
 }
 
 [data-theme="dark"] .wrong-modal {

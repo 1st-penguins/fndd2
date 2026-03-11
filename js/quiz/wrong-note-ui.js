@@ -189,16 +189,32 @@ function renderList() {
         : '';
 
       const qData = item.questionData || {};
-      const questionText = qData.question || '(이미지 문제)';
+      const hasText = !!qData.question;
+      const hasImage = !!qData.questionImage;
+      const isImageOnly = !hasText && hasImage;
       const examName = item.examName || '';
       const count = item.incorrectCount || 1;
-      const qNumber = qData.id || qData.number || (idx + 1);
+      const qNumber = qData.number || (idx + 1);
+
+      // 문제 번호 표시: mock_2020_과목_3 → 3번, 아니면 원래 number 사용
+      let displayNumber = qNumber;
+      if (typeof qData.id === 'string' && qData.id.startsWith('mock_')) {
+        const parts = qData.id.split('_');
+        displayNumber = parts[parts.length - 1];
+      }
+
+      let titleHtml;
+      if (hasText) {
+        titleHtml = `<div class="wrong-item__title">${escapeHtml(qData.question)}</div>`;
+      } else {
+        titleHtml = `<div class="wrong-item__title wrong-item__title--image"><span class="wrong-item__image-icon">&#128247;</span> ${displayNumber}번 문제</div>`;
+      }
 
       itemEl.innerHTML = `
         <input type="checkbox" class="wrong-item__checkbox" data-id="${item.id}" ${selectedIds.has(item.id) ? 'checked' : ''}>
-        <div class="wrong-item__number">${qNumber}</div>
+        <div class="wrong-item__number">${displayNumber}</div>
         <div class="wrong-item__info">
-          <div class="wrong-item__title">${escapeHtml(questionText)}</div>
+          ${titleHtml}
           <div class="wrong-item__meta">
             <span>${examName}</span>
             ${date ? `<span>${date}</span>` : ''}
