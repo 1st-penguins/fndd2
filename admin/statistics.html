@@ -347,13 +347,18 @@
           </select>
         </div>
 
-        <div class="filter-group" style="display:flex; flex-direction:column; justify-content:flex-end;">
+        <div class="filter-group" style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
           <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
             <input type="checkbox" id="completedOnlyToggle" checked
                    style="width:16px; height:16px; cursor:pointer;">
             <span>완주 세션만 집계</span>
           </label>
-          <span style="font-size:11px; color:#888; margin-top:4px;">일반 20문제·모의고사 80문제 기준</span>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+            <input type="checkbox" id="lowAccuracyToggle" checked
+                   style="width:16px; height:16px; cursor:pointer;">
+            <span>정답률 30% 미만 세션 제외</span>
+          </label>
+          <span style="font-size:11px; color:#888;">오염 데이터(랜덤 클릭 등) 방지</span>
         </div>
       </div>
 
@@ -421,7 +426,7 @@
     function filterCompletedAttempts(allAttempts) {
       const groups = {};
       allAttempts.forEach(a => {
-        if (!a.sessionId) return; // sessionId 없는 건 별도 처리
+        if (!a.sessionId) return;
         (groups[a.sessionId] = groups[a.sessionId] || []).push(a);
       });
       const completedIds = new Set();
@@ -430,6 +435,24 @@
         if (list.length >= (isMock ? 80 : 20)) completedIds.add(sid);
       });
       return allAttempts.filter(a => !a.sessionId || completedIds.has(a.sessionId));
+    }
+
+    // ─── 세션 정답률 필터: 30% 미만 세션 제외 (오염 데이터 방지) ──────────
+    function filterLowAccuracySessions(allAttempts, minAccuracy = 0.3) {
+      const groups = {};
+      allAttempts.forEach(a => {
+        if (!a.sessionId) return;
+        (groups[a.sessionId] = groups[a.sessionId] || []).push(a);
+      });
+      const excludeIds = new Set();
+      Object.entries(groups).forEach(([sid, list]) => {
+        const correct = list.filter(a => a.isCorrect).length;
+        const accuracy = correct / list.length;
+        if (accuracy < minAccuracy) excludeIds.add(sid);
+      });
+      const excluded = excludeIds.size;
+      if (excluded > 0) console.log(`✅ 정답률 ${Math.round(minAccuracy * 100)}% 미만 세션 ${excluded}개 제외`);
+      return allAttempts.filter(a => !a.sessionId || !excludeIds.has(a.sessionId));
     }
 
     // ─── V4-C3: 오답 1위 선택지 ─────────────────────────────────────────
@@ -513,6 +536,13 @@
           const before = attempts.length;
           attempts = filterCompletedAttempts(attempts);
           console.log(`✅ 완주 세션 필터: ${before}개 → ${attempts.length}개`);
+        }
+
+        // 세션 정답률 30% 미만 제외 (대충 클릭한 오염 데이터 방지)
+        if (document.getElementById('lowAccuracyToggle').checked) {
+          const before = attempts.length;
+          attempts = filterLowAccuracySessions(attempts);
+          console.log(`✅ 저정답률 세션 필터: ${before}개 → ${attempts.length}개`);
         }
         
         // ✅ 문제 유형 필터링
