@@ -20,6 +20,21 @@ async function getDb() {
     return db;
 }
 
+/** undefined 값을 재귀적으로 제거 (Firestore는 undefined 허용 안 함) */
+function removeUndefined(obj) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(removeUndefined);
+    const clean = {};
+    for (const [key, val] of Object.entries(obj)) {
+        if (val !== undefined) {
+            clean[key] = (val !== null && typeof val === 'object' && !(val instanceof Date))
+                ? removeUndefined(val)
+                : val;
+        }
+    }
+    return clean;
+}
+
 /**
  * 오답 노트에 문제 저장
  * @param {string} userId - 사용자 UID
@@ -48,7 +63,7 @@ export async function saveWrongAnswer(userId, questionData, examName, section) {
         questionId,
         examName,
         section,
-        questionData,
+        questionData: removeUndefined(questionData),
         lastIncorrectAt: serverTimestamp(),
         isResolved: false,
         incorrectCount: increment(1)
