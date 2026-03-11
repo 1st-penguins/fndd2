@@ -723,6 +723,16 @@ document.addEventListener('authStateChanged', function (e) {
 
   // 플로팅 버튼 표시 여부 업데이트
   updateFloatingButtonsVisibility();
+
+  // 관리자 전용 요소 표시/숨김
+  const adminStatus = isAdmin();
+  document.querySelectorAll('.admin-only').forEach(el => {
+    if (adminStatus) {
+      el.classList.add('admin-visible');
+    } else {
+      el.classList.remove('admin-visible');
+    }
+  });
 });
 
 window.addEventListener('loginStateChanged', function (e) {
