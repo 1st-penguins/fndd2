@@ -338,6 +338,33 @@ body,
   background: #1e2024;
 }
 
+[data-theme="dark"] .notice-title {
+  color: #e0e4ea;
+}
+
+[data-theme="dark"] .notice-item:hover .notice-title {
+  color: var(--penguin-skyblue);
+}
+
+[data-theme="dark"] .notice-header-card,
+[data-theme="dark"] .notice-header-card .section-header {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .notice-header-card .section-description {
+  color: #a0a5b0;
+}
+
+/* ===== 햄버거 메뉴 버튼 ===== */
+[data-theme="dark"] .linear-header__mobile-toggle-line {
+  background-color: #e0e4ea;
+}
+
+/* ===== 사용자 이름 ===== */
+[data-theme="dark"] .linear-header__user-name {
+  color: #e0e4ea;
+}
+
 /* ===== 모바일 메뉴 내 토글 ===== */
 [data-theme="dark"] .theme-toggle-btn {
   color: #c0c5d0;
