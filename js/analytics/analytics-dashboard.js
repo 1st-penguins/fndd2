@@ -2,6 +2,7 @@
 // Last updated: 2025-01-21 - Fixed totalQuestions duplicate declaration
 
 import { getUserAttempts, getUserMockExamResults } from "../data/quiz-data-service.js?v=2026031016";
+import { buildDayMap, calcCurrentStreak, calcLongestStreak, getTodayCount, getRecentActivity } from "./streak-utils.js";
 import { getUserProgress } from "../data/quiz-repository.js";
 import { db, ADMIN_EMAILS, ensureAuthReady, ensureFirebase } from "../core/firebase-core.js";
 import { getCurrentCertificateType, getCertificateName, getCertificateEmoji } from "../utils/certificate-utils.js";
@@ -483,10 +484,71 @@ function handleTabChange(e) {
 }
 
 /**
+ * 스트릭 위젯 렌더링 (학습분석 탭 최상단)
+ */
+function renderStreakWidget() {
+  const widget = document.getElementById('streak-widget');
+  if (!widget) return;
+
+  const attempts = state.attempts || [];
+  if (attempts.length === 0) {
+    widget.style.display = 'none';
+    return;
+  }
+
+  const dayMap = buildDayMap(attempts);
+  const streak = calcCurrentStreak(dayMap);
+  const longest = calcLongestStreak(dayMap);
+  const todayCount = getTodayCount(dayMap);
+  const recent = getRecentActivity(dayMap, 7); // [오늘, 어제, ...]
+
+  // 요일 라벨 (오늘부터 역순)
+  const dayLabels = [];
+  const d = new Date();
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  for (let i = 6; i >= 0; i--) {
+    const tmp = new Date(d);
+    tmp.setDate(tmp.getDate() - i);
+    dayLabels.push(dayNames[tmp.getDay()]);
+  }
+
+  // 도트 HTML (역순 → 순서대로: 6일전 ~ 오늘)
+  const dotsHtml = recent.slice().reverse().map((active, i) =>
+    `<div class="streak-dot-wrap">
+      <div class="streak-dot ${active ? 'active' : ''}"></div>
+      <span class="streak-dot-label">${dayLabels[i]}</span>
+    </div>`
+  ).join('');
+
+  widget.style.display = '';
+  widget.innerHTML = `
+    <div class="streak-main">
+      <div class="streak-fire">${streak > 0 ? '&#128293;' : '&#128164;'}</div>
+      <div class="streak-info">
+        <div class="streak-count">
+          ${streak > 0
+            ? `연속 <strong>${streak}일째</strong> 학습 중`
+            : '오늘 아직 학습 기록이 없어요'}
+        </div>
+        <div class="streak-sub">
+          ${todayCount > 0 ? `오늘 ${todayCount}문제` : ''}
+          ${todayCount > 0 && longest > 0 ? ' · ' : ''}
+          ${longest > 0 ? `최장 ${longest}일` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="streak-dots">${dotsHtml}</div>
+  `;
+}
+
+/**
  * 대시보드 전체 렌더링 함수
  */
 function renderDashboard() {
   // console.log('대시보드 렌더링 시작');
+
+  // 스트릭 위젯 렌더링 (서브탭 위, 항상 표시)
+  renderStreakWidget();
 
   // 각 탭 렌더링
   renderOverviewTab();
@@ -3496,7 +3558,7 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
  * 약점 영역 탭 렌더링
  */
 function renderWeakAreasTab() {
-  const container = document.getElementById('weak-areas-tab');
+  const container = document.getElementById('weak-areas');
   if (!container) return;
 
   // 데이터가 없는 경우
@@ -3511,6 +3573,7 @@ function renderWeakAreasTab() {
         </div>
       </div>
     `;
+    renderSubjectTrendChart(); // 트렌드 차트도 업데이트
     return;
   }
 
@@ -3612,6 +3675,169 @@ function renderWeakAreasTab() {
   `;
 
   container.innerHTML = html;
+
+  // 과목별 정답률 추이 차트 렌더링
+  renderSubjectTrendChart();
+}
+
+/**
+ * 과목별 정답률 추이 차트
+ */
+let subjectTrendChartInstance = null;
+
+function renderSubjectTrendChart() {
+  const section = document.getElementById('subject-trend-chart-section');
+  const canvas = document.getElementById('subject-trend-canvas');
+  if (!section || !canvas) return;
+
+  const attempts = state.attempts || [];
+  if (attempts.length < 10) {
+    section.style.display = 'none';
+    return;
+  }
+
+  const periodSelect = document.getElementById('trend-period-select');
+  const period = periodSelect?.value || 'month';
+
+  // attempts → 과목+기간별 정답률 집계
+  const buckets = {}; // { subject: { periodKey: { correct, total } } }
+  const allPeriods = new Set();
+
+  // 과목명 디코딩 헬퍼
+  const decodeSubject = (v) => {
+    try {
+      let s = String(v || '');
+      for (let i = 0; i < 3; i++) { const t = decodeURIComponent(s); if (t === s) break; s = t; }
+      return s;
+    } catch (e) { return String(v || ''); }
+  };
+
+  attempts.forEach(a => {
+    const ts = a.timestamp?.toDate ? a.timestamp.toDate() :
+      (a.timestamp instanceof Date ? a.timestamp : new Date(a.timestamp));
+    if (!ts || isNaN(ts)) return;
+
+    const subj = decodeSubject(a.questionData?.subject || a.subject || '');
+    if (!subj) return;
+
+    let periodKey;
+    if (period === 'week') {
+      // ISO 주차 기반
+      const d = new Date(ts);
+      const dayOfWeek = d.getDay();
+      d.setDate(d.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)); // 월요일로
+      periodKey = d.toISOString().slice(0, 10);
+    } else {
+      periodKey = `${ts.getFullYear()}-${String(ts.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    allPeriods.add(periodKey);
+
+    if (!buckets[subj]) buckets[subj] = {};
+    if (!buckets[subj][periodKey]) buckets[subj][periodKey] = { correct: 0, total: 0 };
+    buckets[subj][periodKey].total++;
+    if (a.isCorrect) buckets[subj][periodKey].correct++;
+  });
+
+  const sortedPeriods = [...allPeriods].sort();
+  // 최근 6개 기간만 표시
+  const displayPeriods = sortedPeriods.slice(-6);
+
+  if (displayPeriods.length < 2) {
+    section.style.display = 'none';
+    return;
+  }
+
+  // 라벨 생성
+  const labels = displayPeriods.map(p => {
+    if (period === 'week') {
+      const d = new Date(p);
+      return `${d.getMonth() + 1}/${d.getDate()}~`;
+    }
+    const [y, m] = p.split('-');
+    return `${Number(m)}월`;
+  });
+
+  // 과목 색상 팔레트
+  const COLORS = [
+    '#5FB2C9', '#1D2F4E', '#F59E0B', '#EF4444', '#10B981',
+    '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316'
+  ];
+
+  // 데이터가 2개 이상 기간에 존재하는 과목만 표시
+  const subjects = Object.keys(buckets).filter(subj => {
+    const periodsWithData = displayPeriods.filter(p => buckets[subj][p]?.total >= 1);
+    return periodsWithData.length >= 2;
+  });
+
+  if (subjects.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  const datasets = subjects.map((subj, i) => ({
+    label: subj,
+    data: displayPeriods.map(p => {
+      const b = buckets[subj]?.[p];
+      if (!b || b.total === 0) return null;
+      return Math.round((b.correct / b.total) * 100);
+    }),
+    borderColor: COLORS[i % COLORS.length],
+    backgroundColor: COLORS[i % COLORS.length] + '20',
+    tension: 0.3,
+    borderWidth: 2,
+    pointRadius: 4,
+    pointHoverRadius: 6,
+    spanGaps: true
+  }));
+
+  section.style.display = '';
+
+  // 기존 차트 제거
+  if (subjectTrendChartInstance) {
+    subjectTrendChartInstance.destroy();
+    subjectTrendChartInstance = null;
+  }
+
+  const ctx = canvas.getContext('2d');
+  subjectTrendChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, padding: 12, font: { size: 11 } }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}%`
+          }
+        }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+          ticks: { callback: v => v + '%', font: { size: 11 } },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        },
+        x: {
+          ticks: { font: { size: 11 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // 기간 변경 이벤트 (최초 1회만 바인딩)
+  if (periodSelect && !periodSelect.dataset.trendBound) {
+    periodSelect.addEventListener('change', () => renderSubjectTrendChart());
+    periodSelect.dataset.trendBound = 'true';
+  }
 }
 
 /**

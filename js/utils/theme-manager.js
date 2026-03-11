@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 모듈로 내보내기 (ES6 모듈 환경에서 사용)
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { ThemeManager, initThemeManager, getThemeManager, toggleTheme };
-}
+// 전역 접근용
+window.ThemeManager = ThemeManager;
+window.toggleTheme = toggleTheme;
+window.getThemeManager = getThemeManager;

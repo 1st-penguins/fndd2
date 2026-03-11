@@ -2568,3 +2568,132 @@
   .qp-body { padding: 12px 16px; }
   .qp-footer { padding: 10px 16px; }
 }
+
+/* ===== 과목별 트렌드 차트 ===== */
+.subject-trend-section {
+  margin-top: 20px;
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.subject-trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.subject-trend-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--penguin-navy);
+  margin: 0;
+}
+
+.subject-trend-canvas-wrap {
+  position: relative;
+  height: 260px;
+}
+
+@media (max-width: 480px) {
+  .subject-trend-section {
+    padding: 14px;
+  }
+  .subject-trend-canvas-wrap {
+    height: 220px;
+  }
+}
+
+/* ===== 스트릭 위젯 ===== */
+.streak-widget {
+  background: linear-gradient(135deg, #1D2F4E 0%, #2a4570 100%);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.streak-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.streak-fire {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.streak-info {
+  flex: 1;
+}
+
+.streak-count {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.streak-count strong {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.streak-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 2px;
+}
+
+.streak-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.streak-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.streak-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 0.2s;
+}
+
+.streak-dot.active {
+  background: var(--penguin-skyblue, #5FB2C9);
+}
+
+.streak-dot-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .streak-widget {
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .streak-fire {
+    font-size: 28px;
+  }
+  .streak-count {
+    font-size: 14px;
+  }
+  .streak-count strong {
+    font-size: 16px;
+  }
+  .streak-dot {
+    width: 24px;
+    height: 24px;
+  }
+}

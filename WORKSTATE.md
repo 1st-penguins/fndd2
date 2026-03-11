@@ -92,11 +92,38 @@
 
 ---
 
-### Phase 5: 새 기능 (별도 판단)
-1. 틀린 문제 다시 풀기
-2. 학습 스트릭 (dailyVisitors 활용)
-3. 과목별 트렌드 차트
-4. 다크모드 수동 토글
+### Phase 5: 새 기능
+
+#### Step 5.1: 오답노트 리노베이션 + 오답 복습 퀴즈 [v]
+- [v] wrong-note.html → 컴팩트 리스트 UI (과목별 그룹, 체크박스)
+- [v] wrong-note-ui.js → 선택 모드 + "다시 풀기" 버튼 (sessionStorage 전달)
+- [v] quiz-core.js → `wrong-review` 모드 추가 (initializeWrongReviewMode)
+- [v] session-manager.js → `wrong-review` 타입 검증 추가
+- [v] exam/quiz.html → `wrong-review` 모드 타이틀/뒤로가기 처리
+- 변경 파일: wrong-note.html, js/quiz/wrong-note-ui.js, js/quiz/quiz-core.js, js/data/session-manager.js, exam/quiz.html
+
+#### Step 5.2: 학습 스트릭 위젯 [v]
+- [v] streak-utils.js 신규 생성 (buildDayMap, calcCurrentStreak, calcLongestStreak, getTodayCount, getRecentActivity)
+- [v] index.html → 학습분석 탭 상단에 streak-widget div 추가
+- [v] analytics-dashboard.js → renderStreakWidget() 함수 + renderDashboard()에서 호출
+- [v] css/analytics-dashboard.css → 스트릭 위젯 스타일 (남색 그라데이션, 7일 도트)
+- 변경 파일: js/analytics/streak-utils.js (신규), index.html, js/analytics/analytics-dashboard.js, css/analytics-dashboard.css
+
+#### Step 5.3: 과목별 정답률 추이 차트 [v]
+- [v] index.html → 약점분석 탭 하단에 트렌드 차트 섹션 (canvas + 주간/월간 select)
+- [v] analytics-dashboard.js → renderSubjectTrendChart() 함수 (Chart.js 라인 차트)
+- [v] analytics-dashboard.js → renderWeakAreasTab() 타겟을 weak-areas div로 변경 (차트 보존)
+- [v] css/analytics-dashboard.css → 트렌드 차트 스타일
+- 변경 파일: index.html, js/analytics/analytics-dashboard.js, css/analytics-dashboard.css
+
+#### Step 5.4: 다크모드 수동 토글 [v]
+- [v] index.html → linear-themes.css + dark-mode.css 로드, theme-manager.js 로드
+- [v] index.html → 헤더에 #theme-switcher 버튼 추가 (달/해 아이콘)
+- [v] css/dark-mode.css (신규) — 기존 색상 시스템을 다크모드로 오버라이드 (헤더, 탭, 카드, 모달, 캘린더, 필터 등)
+- [v] css/linear-themes.css → 전체 * transition 비활성화 (성능), dark-mode.css에서 선택적 적용
+- [v] js/utils/theme-manager.js → module.exports → window 전역 노출로 변경
+- 변경 파일: index.html, css/dark-mode.css (신규), css/linear-themes.css, js/utils/theme-manager.js
+- 참고: 서브페이지(wrong-note, exam/quiz 등)는 점진적 적용 예정
 
 ---
 

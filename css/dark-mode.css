@@ -1,0 +1,304 @@
+/* dark-mode.css — 기존 색상 시스템을 linear-themes와 연결하는 브릿지 */
+
+/* linear-themes.css의 * { transition } 을 비활성화 (성능 문제 방지) */
+/* 대신 핵심 요소만 트랜지션 적용 */
+* {
+  transition: none !important;
+}
+
+body,
+.linear-header,
+.linear-footer,
+.tab-content,
+.stats-card,
+.modal-content {
+  transition: background-color 0.25s ease, color 0.25s ease !important;
+}
+
+/* ===== 테마 토글 버튼 ===== */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-secondary, #4a4a4a);
+  cursor: pointer;
+  transition: background 0.2s !important;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--color-bg-level-2, #f1f3f4);
+}
+
+.theme-toggle-btn svg {
+  transition: transform 0.3s ease !important;
+}
+
+.theme-toggle-btn:active svg {
+  transform: rotate(30deg);
+}
+
+/* ===== 다크모드 기본 오버라이드 ===== */
+[data-theme="dark"] {
+  /* 기존 base.css 변수를 다크 색상으로 재정의 */
+  --primary-color: #5FB2C9;
+  --secondary-color: #5FB2C9;
+  --light-gray: #1a1a1e;
+  --dark-gray: #a0a0a0;
+  --white: #0f1011;
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  --shadow-premium: 0 10px 40px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.4);
+
+  --glass-bg: rgba(30, 30, 35, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --border-color: #2a2a30;
+  --text-primary: #f0f0f0;
+  --text-secondary: #a0a5b0;
+
+  color-scheme: dark;
+}
+
+/* body 배경 + 텍스트 */
+[data-theme="dark"] body {
+  background-color: #0f1012;
+  color: #e8e8ec;
+}
+
+/* ===== 헤더 ===== */
+[data-theme="dark"] .linear-header {
+  background: rgba(15, 16, 18, 0.92);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .linear-header__brand-text {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .linear-header__nav-link {
+  color: #c0c5d0;
+}
+
+[data-theme="dark"] .linear-header__nav-link:hover {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .linear-header__mobile-menu {
+  background: #141518;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ===== 탭 ===== */
+[data-theme="dark"] .tab-button {
+  color: #8a8f9a;
+  background: transparent;
+}
+
+[data-theme="dark"] .tab-button.active {
+  color: #ffffff;
+  border-bottom-color: var(--penguin-skyblue);
+}
+
+[data-theme="dark"] .sub-tab-button {
+  color: #8a8f9a;
+  background: #1a1a1e;
+  border-color: #2a2a30;
+}
+
+[data-theme="dark"] .sub-tab-button.active {
+  color: #ffffff;
+  background: var(--penguin-navy);
+}
+
+/* ===== 카드 / 박스 ===== */
+[data-theme="dark"] .stats-card,
+[data-theme="dark"] .controls-bar,
+[data-theme="dark"] .filter-controls {
+  background: #181a1e;
+  border-color: #2a2a30;
+  color: #e0e0e4;
+}
+
+[data-theme="dark"] .stats-header {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .stats-section {
+  border-color: #2a2a30;
+}
+
+/* ===== 약점 분석 ===== */
+[data-theme="dark"] .weak-area-item {
+  background: #181a1e;
+  border-color: #2a2a30;
+}
+
+[data-theme="dark"] .weak-area-subject {
+  color: #e8e8ec;
+}
+
+/* ===== 스트릭 위젯 (이미 남색 배경이므로 미세 조정만) ===== */
+[data-theme="dark"] .streak-widget {
+  background: linear-gradient(135deg, #121825 0%, #1a2540 100%);
+}
+
+/* ===== 세션 카드 ===== */
+[data-theme="dark"] .session-card {
+  background: #181a1e;
+  border-color: #2a2a30;
+}
+
+[data-theme="dark"] .session-card:hover {
+  background: #1e2024;
+}
+
+/* ===== 히어로 섹션 ===== */
+[data-theme="dark"] .linear-hero {
+  background: linear-gradient(180deg, #0f1012 0%, #141820 100%);
+}
+
+/* ===== 과목 트렌드 차트 ===== */
+[data-theme="dark"] .subject-trend-section {
+  background: #181a1e;
+}
+
+[data-theme="dark"] .subject-trend-title {
+  color: #e0e0e4;
+}
+
+/* ===== 필터/셀렉트 ===== */
+[data-theme="dark"] .filter-select,
+[data-theme="dark"] select {
+  background: #1a1a1e;
+  color: #d0d0d4;
+  border-color: #2a2a30;
+}
+
+[data-theme="dark"] .filter-btn {
+  background: #1a1a1e;
+  color: #a0a5b0;
+  border-color: #2a2a30;
+}
+
+[data-theme="dark"] .filter-btn.active {
+  background: var(--penguin-navy);
+  color: white;
+}
+
+/* ===== 푸터 ===== */
+[data-theme="dark"] .linear-footer {
+  background: #0a0b0c;
+  color: #8a8f9a;
+}
+
+/* ===== 로그인 모달 ===== */
+[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="dark"] .login-modal,
+[data-theme="dark"] .modal-content {
+  background: #1a1c20;
+  color: #e0e0e4;
+  border-color: #2a2a30;
+}
+
+[data-theme="dark"] .login-input,
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"] {
+  background: #0f1012;
+  color: #e0e0e4;
+  border-color: #2a2a30;
+}
+
+/* ===== 캘린더 ===== */
+[data-theme="dark"] .cal-cell {
+  background: #1a1a1e;
+  color: #c0c5d0;
+}
+
+[data-theme="dark"] .cal-cell.today {
+  border-color: var(--penguin-skyblue);
+}
+
+[data-theme="dark"] .cal-header,
+[data-theme="dark"] .cal-month-title {
+  color: #e0e0e4;
+}
+
+[data-theme="dark"] .cal-nav {
+  color: #a0a5b0;
+  background: #1a1a1e;
+  border-color: #2a2a30;
+}
+
+/* ===== 진행률 바 ===== */
+[data-theme="dark"] .progress-bar-bg,
+[data-theme="dark"] .weak-area-progress-container {
+  background: #222228;
+}
+
+/* ===== 빈 상태 ===== */
+[data-theme="dark"] .no-data-message,
+[data-theme="dark"] .empty-state {
+  color: #8a8f9a;
+}
+
+/* ===== 플로팅 버튼 ===== */
+[data-theme="dark"] .floating-buttons .fab-button {
+  background: #1a1c20;
+  border-color: #2a2a30;
+  color: #d0d0d4;
+}
+
+/* ===== 자격증 선택 모달 ===== */
+[data-theme="dark"] .cert-modal {
+  background: #1a1c20;
+}
+
+[data-theme="dark"] .cert-option {
+  background: #0f1012;
+  border-color: #2a2a30;
+  color: #e0e0e4;
+}
+
+[data-theme="dark"] .cert-option:hover {
+  background: #181a1e;
+}
+
+/* ===== 공지사항 ===== */
+[data-theme="dark"] .notice-item {
+  background: #181a1e;
+  border-color: #2a2a30;
+}
+
+[data-theme="dark"] .notice-item:hover {
+  background: #1e2024;
+}
+
+/* ===== 모바일 메뉴 내 토글 ===== */
+[data-theme="dark"] .theme-toggle-btn {
+  color: #c0c5d0;
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ===== 테마 토글 아이콘 (라이트모드 = 달, 다크모드 = 해) ===== */
+.linear-theme-switcher--toggling .linear-theme-switcher__icon svg {
+  animation: theme-icon-spin 0.3s ease;
+}
+
+@keyframes theme-icon-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(0.8); }
+  100% { transform: rotate(360deg) scale(1); }
+}

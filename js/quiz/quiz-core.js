@@ -2605,6 +2605,134 @@ async function initializeIncorrectMode(sessionData) {
 }
 
 /**
+ * 오답 복습 퀴즈 모드 초기화
+ * wrong-note.html에서 체크한 문제들을 sessionStorage에서 읽어 퀴즈로 구성
+ */
+async function initializeWrongReviewMode() {
+  try {
+    const raw = sessionStorage.getItem('wrongReviewQuestions');
+    if (!raw) {
+      throw new Error('복습할 문제 데이터가 없습니다. 오답노트에서 문제를 선택해주세요.');
+    }
+
+    const items = JSON.parse(raw);
+    if (!Array.isArray(items) || items.length === 0) {
+      throw new Error('선택된 문제가 없습니다.');
+    }
+
+    console.log(`오답 복습 퀴즈: ${items.length}문제 로드`);
+
+    // 헤더 타이틀 변경
+    const titleElement = document.querySelector('.quiz-title h1');
+    if (titleElement) {
+      titleElement.textContent = '오답 복습 퀴즈';
+    }
+    const subtitleElement = document.querySelector('.quiz-subtitle');
+    if (subtitleElement) {
+      subtitleElement.textContent = `총 ${items.length}문항 | 오답 복습`;
+    }
+
+    // 뒤로가기 링크 → 오답노트로
+    const backLink = document.querySelector('.back-link');
+    if (backLink) {
+      backLink.href = '../wrong-note.html';
+    }
+
+    // questionData에서 퀴즈용 배열 구성
+    const loadedQuestions = items.map((item, idx) => {
+      const qData = item.questionData || {};
+      return {
+        ...qData,
+        // 메타 정보 보강
+        year: qData.year || extractYearFromExamName(item.examName),
+        subject: item.section || qData.subject || '',
+        number: qData.id || qData.number || (idx + 1),
+        isFromWrongReview: true,
+        wrongNoteDocId: item.docId,
+        wrongNoteQuestionId: item.questionId
+      };
+    });
+
+    // 전역 변수 초기화
+    questions = loadedQuestions;
+    userAnswers = new Array(questions.length).fill(null);
+    perQuestionChecked = new Array(questions.length).fill(false);
+    currentQuestionIndex = 0;
+    firstAttemptTracking = new Array(questions.length).fill(true);
+    reviewMode = false; // 복습이지만 실제로 풀어야 하므로 false
+
+    // 세션 생성 (wrong-review 타입)
+    try {
+      const manager = window.sessionManager || sessionManager;
+      if (manager && typeof manager.startNewSession === 'function') {
+        await manager.startNewSession({
+          type: 'wrong-review',
+          title: `오답 복습 (${items.length}문제)`,
+          totalQuestions: items.length,
+          subject: 'mixed',
+          year: 'mixed'
+        });
+      }
+    } catch (e) {
+      console.warn('오답 복습 세션 생성 실패 (무시):', e);
+    }
+
+    // window 동기화
+    window.questions = questions;
+    window.userAnswers = userAnswers;
+    window.currentQuestionIndex = currentQuestionIndex;
+    window.firstAttemptTracking = firstAttemptTracking;
+    window.reviewMode = reviewMode;
+
+    // UI 초기화
+    addIncorrectModeUI(); // 배너 스타일 재사용
+
+    // 첫 문제 로드
+    loadQuestion(currentQuestionIndex);
+    initQuestionIndicators();
+
+    // 타이머 중지 (오답 복습은 시간 제한 없음)
+    if (window.timerInterval) {
+      clearInterval(window.timerInterval);
+    }
+    const timerElement = document.getElementById('timer');
+    if (timerElement) {
+      timerElement.parentElement.innerHTML = `
+        <span class="timer-icon">&#128221;</span>
+        <span id="timer" class="incorrect-mode-timer">오답 복습</span>
+      `;
+    }
+
+    // sessionStorage 정리 (재진입 방지)
+    sessionStorage.removeItem('wrongReviewQuestions');
+
+    return true;
+  } catch (error) {
+    console.error('오답 복습 퀴즈 초기화 오류:', error);
+    const quizContainer = document.getElementById('quiz-container');
+    if (quizContainer) {
+      quizContainer.innerHTML = `
+        <div class="error-message">
+          <h3>오답 복습 문제를 불러올 수 없습니다</h3>
+          <p>${error.message}</p>
+          <a href="../wrong-note.html" style="display:inline-block; margin-top:12px; padding:10px 20px; background:var(--penguin-navy); color:white; border-radius:8px; text-decoration:none;">오답 노트로 돌아가기</a>
+        </div>
+      `;
+    }
+    return false;
+  }
+}
+
+/**
+ * examName에서 년도 추출 (예: "2024년 기능해부학" → "2024")
+ */
+function extractYearFromExamName(examName) {
+  if (!examName) return '';
+  const match = examName.match(/(\d{4})/);
+  return match ? match[1] : '';
+}
+
+/**
  * 오답노트 모드 UI 추가
  */
 function addIncorrectModeUI() {
@@ -2749,10 +2877,16 @@ export async function extendedInitializeQuiz() {
         window.Logger?.error('오답노트 데이터 파싱 오류:', error);
         throw new Error('오답노트 데이터 형식이 올바르지 않습니다: ' + error.message);
       }
-    } else {
-      // 기존 초기화 함수 호출 (일반 모드)
-      return await originalInitializeQuiz();
     }
+
+    // 오답 복습 퀴즈 모드 (wrong-note.html에서 체크한 문제들)
+    if (mode === 'wrong-review') {
+      window.Logger?.debug('오답 복습 퀴즈 모드 감지됨');
+      return await initializeWrongReviewMode();
+    }
+
+    // 기존 초기화 함수 호출 (일반 모드)
+    return await originalInitializeQuiz();
   } catch (error) {
     window.Logger?.error('퀴즈 초기화 오류:', error);
 

@@ -79,6 +79,8 @@
   <link rel="stylesheet" href="css/analytics-tab.css?v=2026031119" />
   <link rel="stylesheet" href="css/analytics-dashboard.css?v=2026031119" />
   <link rel="stylesheet" href="css/floating-buttons.css?v=2026031119" />
+  <link rel="stylesheet" href="css/linear-themes.css?v=2026031119" />
+  <link rel="stylesheet" href="css/dark-mode.css?v=2026031119" />
 
 
 
@@ -296,6 +298,15 @@
       </div>
 
       <div class="linear-header__actions">
+        <!-- 다크모드 토글 -->
+        <button id="theme-switcher" class="theme-toggle-btn" aria-label="테마 전환" title="다크/라이트 모드 전환">
+          <span class="linear-theme-switcher__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </span>
+        </button>
+
         <!-- 개발 모드 토글 (개발 환경에서만 표시) -->
         <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
           <button id="dev-mode-btn" class="dev-mode-btn">
@@ -414,6 +425,9 @@
       <div id="analytics-tab" class="tab-content">
         <!-- 학습 분석 대시보드 컨테이너 -->
         <div class="analytics-dashboard-container">
+          <!-- 스트릭 위젯 -->
+          <div id="streak-widget" class="streak-widget" style="display:none"></div>
+
           <!-- 서브탭 메뉴 -->
           <div class="sub-tabs">
             <button class="sub-tab-button active" data-tab="progress-tab">학습 진행률</button>
@@ -488,6 +502,18 @@
           <div id="weak-areas-tab" class="sub-tab-content">
             <div id="weak-areas">
               <!-- 약점 분석 데이터가 여기에 렌더링됨 -->
+            </div>
+            <div id="subject-trend-chart-section" class="subject-trend-section" style="display:none">
+              <div class="subject-trend-header">
+                <h3 class="subject-trend-title">과목별 정답률 추이</h3>
+                <select id="trend-period-select" class="filter-select" style="width:auto; font-size:13px;">
+                  <option value="week">주간</option>
+                  <option value="month" selected>월간</option>
+                </select>
+              </div>
+              <div class="subject-trend-canvas-wrap">
+                <canvas id="subject-trend-canvas"></canvas>
+              </div>
             </div>
           </div>
 
@@ -1612,6 +1638,7 @@
   <!-- Linear Header -->
 
   <script src="js/linear-header.js?v=2026031119"></script>
+  <script src="js/utils/theme-manager.js?v=2026031119"></script>
   <script type="module" src="js/dev-mode-toggle.js?v=2026031119-devfix"></script>
 
   <!-- Deploy timestamp: 2025-10-21 12:30 -->

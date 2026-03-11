@@ -226,8 +226,15 @@ class SessionManager {
                              providedTitle.includes('오후') || providedTitle.includes('오전') || 
                              (providedTitle.length > 0 && providedTitle.length < 3);
       
+      // 오답 복습 퀴즈인 경우: title만 있으면 유효
+      if (finalType === 'wrong-review') {
+        if (!providedTitle) {
+          console.warn('세션 저장 거부: 오답 복습 타이틀이 없습니다.', cleanedMetadata);
+          return null;
+        }
+      }
       // 모의고사인 경우: 년도와 교시 정보가 있어야 함
-      if (finalType === 'mockexam') {
+      else if (finalType === 'mockexam') {
         const hasMockExamInfo = (finalYear && (cleanedMetadata.hour || cleanedMetadata.mockExamHour));
         if (!hasMockExamInfo && (hasInvalidTitle || !providedTitle)) {
           console.warn('세션 저장 거부: 모의고사 정보가 부족하거나 유효하지 않은 타이틀입니다.', cleanedMetadata);

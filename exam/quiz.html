@@ -315,6 +315,9 @@
       if (mode === 'incorrect') {
         titleElement.textContent = `${subject} 오답 학습`;
         subtitleElement.textContent = '오답노트 학습 모드';
+      } else if (mode === 'wrong-review') {
+        titleElement.textContent = '오답 복습 퀴즈';
+        subtitleElement.textContent = '문제 로딩 중...';
       } else {
         titleElement.textContent = `${year} ${subject} 기출문제`;
         subtitleElement.textContent = '총 문제 수량 로딩 중...';
@@ -326,6 +329,8 @@
         if (mode === 'incorrect') {
           // 오답노트 모드일 때는 분석 페이지로 이동
           backLink.href = '../index.html#analytics-tab';
+        } else if (mode === 'wrong-review') {
+          backLink.href = '../wrong-note.html';
         } else {
           // 일반 모드일 때는 과목 페이지로 이동
           backLink.href = `../subjects/subject_${encodeURIComponent(subject)}.html`;
@@ -377,7 +382,7 @@
           // 문제 수량 업데이트
           if (window.questions) {
             const subtitleElement = document.getElementById('quiz-subtitle');
-            if (mode === 'incorrect') {
+            if (mode === 'incorrect' || mode === 'wrong-review') {
               subtitleElement.textContent = `총 ${window.questions.length}문항 | 오답 복습`;
             } else {
               subtitleElement.textContent = `총 ${window.questions.length}문항 | 제한시간 20분`;
