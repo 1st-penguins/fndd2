@@ -643,52 +643,65 @@
                  accuracy, topWrong: tw.idx, topWrongPct: tw.pct, total: stat.total };
       });
 
-      const showType = document.getElementById('typeFilter').value === '';
-      const tableRows = sortedStats.map(([, stat]) => {
-        const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
-        const accColor = accuracy < 50 ? '#f44336' : accuracy >= 80 ? '#4caf50' : '#ff9800';
-        const tw = getTopWrongAnswer(stat.answers, stat.correctAnswer, stat.total);
-        const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
-        const typeBadge = stat.isFromMockExam
-          ? '<span style="background:#9c27b0;color:#fff;padding:2px 6px;border-radius:8px;font-size:11px;">모의</span>'
-          : '<span style="background:#2196f3;color:#fff;padding:2px 6px;border-radius:8px;font-size:11px;">일반</span>';
-        return `<tr>
-          <td style="text-align:center;">${stat.number}</td>
-          <td>${stat.subject}</td>
-          <td style="text-align:center;">${stat.year}</td>
-          ${showType ? `<td style="text-align:center;">${typeBadge}</td>` : ''}
-          <td style="text-align:center; font-weight:700; color:${accColor};">${accuracy}%</td>
-          <td style="text-align:center;">${twLabel}</td>
-          <td style="text-align:center;">${stat.total}명</td>
-        </tr>`;
-      }).join('');
+      const isAllTypes = document.getElementById('typeFilter').value === '';
 
-      const tableHtml = `
-        <div style="overflow-x:auto; margin-bottom:32px;">
-          <table style="width:100%; border-collapse:collapse; font-size:14px;">
-            <thead>
-              <tr style="background:#1d2f4e; color:#fff;">
-                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">문제번호</th>
-                <th style="padding:10px 8px; text-align:left; white-space:nowrap;">과목</th>
-                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">연도</th>
-                ${showType ? '<th style="padding:10px 8px; text-align:center; white-space:nowrap;">유형</th>' : ''}
-                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답률</th>
-                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답 1위</th>
-                <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시 수</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tableRows.replace(/<tr>/g, '<tr style="border-bottom:1px solid #eee;">')}
-            </tbody>
-          </table>
-        </div>
+      function buildTableHTML(stats, title) {
+        const rows = stats.map(([, stat]) => {
+          const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
+          const accColor = accuracy < 50 ? '#f44336' : accuracy >= 80 ? '#4caf50' : '#ff9800';
+          const tw = getTopWrongAnswer(stat.answers, stat.correctAnswer, stat.total);
+          const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
+          return `<tr style="border-bottom:1px solid #eee;">
+            <td style="text-align:center;">${stat.number}</td>
+            <td>${stat.subject}</td>
+            <td style="text-align:center;">${stat.year}</td>
+            <td style="text-align:center; font-weight:700; color:${accColor};">${accuracy}%</td>
+            <td style="text-align:center;">${twLabel}</td>
+            <td style="text-align:center;">${stat.total}명</td>
+          </tr>`;
+        }).join('');
+        const titleHtml = title ? `<h3 style="margin:24px 0 12px; color:#1d2f4e; font-size:16px;">${title}</h3>` : '';
+        return `${titleHtml}
+          <div style="overflow-x:auto; margin-bottom:16px;">
+            <table style="width:100%; border-collapse:collapse; font-size:14px;">
+              <thead>
+                <tr style="background:#1d2f4e; color:#fff;">
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">문제번호</th>
+                  <th style="padding:10px 8px; text-align:left; white-space:nowrap;">과목</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">연도</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답률</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답 1위</th>
+                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시 수</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+      }
+
+      let tableHtml;
+      if (isAllTypes) {
+        const regularStats = sortedStats.filter(([, s]) => !s.isFromMockExam);
+        const mockStats = sortedStats.filter(([, s]) => s.isFromMockExam);
+        tableHtml = '';
+        if (regularStats.length > 0) {
+          tableHtml += buildTableHTML(regularStats, `📝 일반 문제 (${regularStats.length}개)`);
+        }
+        if (mockStats.length > 0) {
+          tableHtml += buildTableHTML(mockStats, `📋 모의고사 (${mockStats.length}개)`);
+        }
+      } else {
+        tableHtml = buildTableHTML(sortedStats, null);
+      }
+
+      tableHtml += `
         <details style="margin-bottom:16px;">
           <summary style="cursor:pointer; font-weight:600; color:#1d2f4e; padding:8px 0;">
             ▶ 상세 분포 보기 (클릭하여 펼치기)
           </summary>
           <div id="detailCardsContainer"></div>
-        </details>
-      `;
+        </details>`;
+
       container.innerHTML = tableHtml;
       document.getElementById('downloadXlsxBtn').style.display = 'inline-flex';
 
