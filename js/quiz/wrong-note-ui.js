@@ -133,6 +133,14 @@ function getFilteredItems() {
   return currentWrongAnswers.filter(item => item.section === activeFilter);
 }
 
+function getDisplayNumber(item) {
+  const qData = item.questionData || {};
+  if (typeof qData.id === 'string' && qData.id.startsWith('mock_')) {
+    return qData.id.split('_').pop();
+  }
+  return qData.number || '0';
+}
+
 function renderList() {
   const filtered = getFilteredItems();
 
@@ -166,8 +174,13 @@ function renderList() {
     grouped[section].push(item);
   });
 
-  // 과목별 섹션 렌더링
+  // 과목별 섹션 렌더링 (과목 내 문제 번호 오름차순)
   Object.entries(grouped).forEach(([section, items]) => {
+    items.sort((a, b) => {
+      const numA = parseInt(getDisplayNumber(a), 10) || 0;
+      const numB = parseInt(getDisplayNumber(b), 10) || 0;
+      return numA - numB;
+    });
     const sectionEl = document.createElement("div");
     sectionEl.className = "wn-subject-section";
 
