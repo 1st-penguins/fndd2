@@ -814,38 +814,59 @@
     // 요약 통계
     function renderSummary(attempts, questionStats) {
       const container = document.getElementById('summaryContent');
-      
+
       const totalQuestions = Object.keys(questionStats).length;
       const totalAttempts = attempts.length;
       const totalUsers = new Set(attempts.map(a => a.userId)).size;
-      
-      const avgAccuracy = Object.values(questionStats).reduce((sum, stat) => {
-        return sum + (stat.correct / stat.total * 100);
-      }, 0) / totalQuestions || 0;
-      
+
+      // 문제별 정답률 평균 = 응시자 평균 총점 비율
+      const avgAccuracy = totalQuestions > 0
+        ? Object.values(questionStats).reduce((sum, stat) => sum + (stat.correct / stat.total * 100), 0) / totalQuestions
+        : 0;
+
+      // 평균 점수 환산 (문제 수 기준)
+      const avgScore = (avgAccuracy / 100 * totalQuestions).toFixed(1);
+
       const hardQuestions = Object.values(questionStats).filter(s => (s.correct / s.total * 100) < 50).length;
-      
+
+      // 난이도 등급
+      let diffLabel, diffColor, diffBg;
+      if (avgAccuracy >= 70) { diffLabel = '쉬움'; diffColor = '#4caf50'; diffBg = '#e8f5e9'; }
+      else if (avgAccuracy >= 55) { diffLabel = '보통'; diffColor = '#ff9800'; diffBg = '#fff3e0'; }
+      else { diffLabel = '어려움'; diffColor = '#f44336'; diffBg = '#ffebee'; }
+
+      const yearVal = document.getElementById('yearFilter').value || '전체';
+      const subVal = document.getElementById('subjectFilter').value || '전과목';
+
       container.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-          <div style="text-align: center; padding: 20px; background: #f0f9ff; border-radius: 8px;">
-            <div style="font-size: 32px; font-weight: bold; color: var(--penguin-skyblue);">${totalQuestions}</div>
-            <div style="color: #666; margin-top: 8px;">분석된 문제 수</div>
+        <div style="margin-bottom:20px; padding:20px; background:${diffBg}; border-radius:12px; border-left:5px solid ${diffColor};">
+          <div style="font-size:18px; font-weight:700; color:#1d2f4e; margin-bottom:8px;">
+            ${yearVal}년 ${subVal} 종합
           </div>
-          <div style="text-align: center; padding: 20px; background: #f0f9ff; border-radius: 8px;">
-            <div style="font-size: 32px; font-weight: bold; color: var(--penguin-skyblue);">${totalUsers}</div>
-            <div style="color: #666; margin-top: 8px;">참여 사용자 수</div>
+          <div style="font-size:28px; font-weight:800; color:${diffColor};">
+            평균 ${avgAccuracy.toFixed(1)}% (${avgScore}/${totalQuestions}문제)
+            <span style="font-size:16px; padding:4px 12px; border-radius:20px; background:${diffColor}; color:#fff; margin-left:8px; vertical-align:middle;">${diffLabel}</span>
           </div>
-          <div style="text-align: center; padding: 20px; background: #f0f9ff; border-radius: 8px;">
-            <div style="font-size: 32px; font-weight: bold; color: var(--penguin-skyblue);">${totalAttempts}</div>
-            <div style="color: #666; margin-top: 8px;">총 풀이 횟수</div>
+          <div style="color:#666; margin-top:8px; font-size:14px;">
+            응시자 ${totalUsers}명 평균 총점 기준
           </div>
-          <div style="text-align: center; padding: 20px; background: #f0f9ff; border-radius: 8px;">
-            <div style="font-size: 32px; font-weight: bold; color: var(--penguin-skyblue);">${avgAccuracy.toFixed(1)}%</div>
-            <div style="color: #666; margin-top: 8px;">평균 정답률</div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+          <div style="text-align: center; padding: 16px; background: #f0f9ff; border-radius: 8px;">
+            <div style="font-size: 28px; font-weight: bold; color: var(--penguin-skyblue);">${totalQuestions}</div>
+            <div style="color: #666; margin-top: 6px; font-size:13px;">분석 문제 수</div>
           </div>
-          <div style="text-align: center; padding: 20px; background: #ffebee; border-radius: 8px;">
-            <div style="font-size: 32px; font-weight: bold; color: #f44336;">${hardQuestions}</div>
-            <div style="color: #666; margin-top: 8px;">고난도 문제 (50% 미만)</div>
+          <div style="text-align: center; padding: 16px; background: #f0f9ff; border-radius: 8px;">
+            <div style="font-size: 28px; font-weight: bold; color: var(--penguin-skyblue);">${totalUsers}</div>
+            <div style="color: #666; margin-top: 6px; font-size:13px;">참여 사용자</div>
+          </div>
+          <div style="text-align: center; padding: 16px; background: #f0f9ff; border-radius: 8px;">
+            <div style="font-size: 28px; font-weight: bold; color: var(--penguin-skyblue);">${totalAttempts.toLocaleString()}</div>
+            <div style="color: #666; margin-top: 6px; font-size:13px;">총 풀이 횟수</div>
+          </div>
+          <div style="text-align: center; padding: 16px; background: #ffebee; border-radius: 8px;">
+            <div style="font-size: 28px; font-weight: bold; color: #f44336;">${hardQuestions}</div>
+            <div style="color: #666; margin-top: 6px; font-size:13px;">고난도 (50%↓)</div>
           </div>
         </div>
       `;
