@@ -680,7 +680,12 @@ function showTab(tabId) {
   // 탭 선택 상태 저장 + URL 해시 업데이트 (뒤로가기 지원)
   localStorage.setItem('lastActiveTab', tabId);
   if (window.location.hash !== `#${tabId}`) {
-    history.pushState({ tab: tabId }, '', `#${tabId}`);
+    // 초기 로드(hash 없음)에서 기본 탭은 replaceState (URL에 #notice-tab 불필요)
+    if (!window.location.hash && tabId === 'notice-tab') {
+      history.replaceState({ tab: tabId }, '', window.location.pathname);
+    } else {
+      history.pushState({ tab: tabId }, '', `#${tabId}`);
+    }
   }
 }
 
