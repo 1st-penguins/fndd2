@@ -2671,7 +2671,7 @@ async function deleteSession(sessionId, typeFilter = 'all', subjectFilter = 'all
 
     console.log(`삭제 요청: sessionId=${sessionId}`);
 
-    // 1. 세션에 속한 시도 기록 삭제 (배치 처리로 여러 번 나누어 삭제)
+    // 1. 세션에 속한 시도 기록 조회 (오답노트 연동 삭제용)
     const attemptsRef = collection(db, "attempts");
     const attemptsQuery = query(
       attemptsRef,
@@ -2679,6 +2679,37 @@ async function deleteSession(sessionId, typeFilter = 'all', subjectFilter = 'all
       where("sessionId", "==", sessionId)
     );
 
+    // 오답노트 연동 삭제: 세션의 오답 문제에 해당하는 wrong_answers 삭제
+    try {
+      const attemptsSnap = await getDocs(attemptsQuery);
+      const wrongDocIds = [];
+      attemptsSnap.forEach(d => {
+        const data = d.data();
+        if (!data.isCorrect) {
+          const qd = data.questionData || {};
+          // 일반 퀴즈: year_subject_number, 모의고사: mock_year_subject_number
+          const isMock = qd.isFromMockExam;
+          const prefix = isMock ? 'mock_' : '';
+          const qId = qd.id || `${prefix}${qd.year || ''}_${qd.subject || ''}_${qd.number || ''}`;
+          if (qId) wrongDocIds.push(`${user.uid}_${qId}`);
+        }
+      });
+      if (wrongDocIds.length > 0) {
+        const wrongRef = collection(db, "wrong_answers");
+        let wrongDeleted = 0;
+        for (const wDocId of wrongDocIds) {
+          try {
+            await deleteDoc(doc(db, "wrong_answers", wDocId));
+            wrongDeleted++;
+          } catch (_) { /* 문서 없으면 무시 */ }
+        }
+        console.log(`오답노트 ${wrongDeleted}/${wrongDocIds.length}개 삭제 완료`);
+      }
+    } catch (e) {
+      console.warn('오답노트 연동 삭제 실패 (무시됨):', e);
+    }
+
+    // 시도 기록 삭제 (배치 처리)
     const attemptsDeleted = await deleteQueryBatch(db, attemptsQuery, 500, (deleted) => {
       console.log(`시도 기록 ${deleted}개 삭제 중...`);
     });
