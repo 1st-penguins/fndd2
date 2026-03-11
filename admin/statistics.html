@@ -739,9 +739,13 @@
                   ${[0, 1, 2, 3].map(i => {
                     const count = stat.answers[i] || 0;
                     const pct = stat.total > 0 ? (count / stat.total * 100).toFixed(1) : 0;
+                    const isCorrect = stat.correctAnswer !== undefined && stat.correctAnswer !== null && i === stat.correctAnswer;
+                    const barColor = isCorrect ? '#4caf50' : '#5fb2c9';
+                    const label = isCorrect ? `${i + 1}번 ✓` : `${i + 1}번`;
+                    const labelStyle = isCorrect ? 'font-weight:700;color:#4caf50;' : '';
                     return `<div class="answer-bar">
-                      <div class="answer-label"><span>${i + 1}번</span><span>${count}명 (${pct}%)</span></div>
-                      <div class="bar-container"><div class="bar-fill" style="width:${pct}%"></div></div>
+                      <div class="answer-label"><span style="${labelStyle}">${label}</span><span>${count}명 (${pct}%)</span></div>
+                      <div class="bar-container"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
                     </div>`;
                   }).join('')}
                 </div>
