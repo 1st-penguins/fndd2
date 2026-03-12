@@ -153,4 +153,16 @@
   <url><loc>https://the1stpeng.com/exam-sports/2025_%EC%9C%A0%EC%95%84%EC%B2%B4%EC%9C%A1%EB%A1%A0.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://the1stpeng.com/exam-sports/2025_%ED%8A%B9%EC%88%98%EC%B2%B4%EC%9C%A1%EB%A1%A0.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://the1stpeng.com/exam-sports/2025_%ED%95%9C%EA%B5%AD%EC%B2%B4%EC%9C%A1%EC%82%AC.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://the1stpeng.com/login.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://the1stpeng.com/privacy-policy.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://the1stpeng.com/terms.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://the1stpeng.com/search-by-tags.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://the1stpeng.com/wrong-note.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://the1stpeng.com/pdf-download.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://the1stpeng.com/notices/detail.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://the1stpeng.com/exam/quiz.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://the1stpeng.com/lecture-play.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://the1stpeng.com/lecture-purchase.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://the1stpeng.com/lecture-fail.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://the1stpeng.com/lecture-success.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>

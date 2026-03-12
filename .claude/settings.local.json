@@ -42,7 +42,16 @@
       "Bash(npx playwright:*)",
       "Bash(npm install:*)",
       "Bash(do:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "WebSearch",
+      "Bash(claude mcp:*)",
+      "Bash(bash:*)",
+      "Bash(for f:*)",
+      "Read(//c/Users/sapsk/Desktop/fndd2/**)",
+      "Bash(find /c/Users/sapsk/Desktop/fndd2 -maxdepth 1 -name '*.html' -type f | while read f; do basename \"$f\"; done | sort)",
+      "Bash(find /c/Users/sapsk/Desktop/fndd2 -name \"*.html\" -type f 2>/dev/null | head -20)",
+      "Bash(firebase --version)",
+      "Bash(firebase login:*)"
     ]
   }
 }

@@ -2,8 +2,9 @@
 User-agent: *
 Allow: /
 
-# 관리자·내부 도구는 색인 제외 (필요 시 경로 추가)
-# Disallow: /admin-notices.html
-# Disallow: /파이어베이스 임포트.html
+# 관리자·내부 도구는 색인 제외
+Disallow: /admin/
+Disallow: /admin-notices.html
+Disallow: /admin-tags.html
 
 Sitemap: https://the1stpeng.com/sitemap.xml
