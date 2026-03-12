@@ -1266,13 +1266,16 @@
     // ✅ Firebase에 답변 선택 기록 저장 (이어서 풀기 기능을 위해)
     // 정답 확인 전이므로 isCorrect는 false로 저장 (나중에 checkAnswer에서 업데이트)
     if (typeof window.recordAttempt === 'function') {
+      const questionsPerSubject = 20;
+      const questionNumberInSubject = (globalIndex % questionsPerSubject) + 1;
       const questionData = {
         year: year,
         hour: hour,
         type: 'mockexam',
-        number: globalIndex + 1, // 1-based
+        number: questionNumberInSubject, // 과목 내 번호 (1~20)
         globalIndex: globalIndex,
         subject: currentQuestion.subject || '모의고사',
+        certificateType: getActiveCertificateType(),
         questionText: currentQuestion.question || '',
         options: currentQuestion.options || []
       };
@@ -1281,7 +1284,7 @@
       window.recordAttempt(questionData, optionIndex, false)
         .then(result => {
           if (result && result.success) {
-            log(`답변 선택 저장 완료: 문제 ${globalIndex + 1}`, 'debug');
+            log(`답변 선택 저장 완료: ${currentQuestion.subject} ${questionNumberInSubject}번`, 'debug');
           }
         })
         .catch(error => {
@@ -1362,13 +1365,16 @@
 
     // ✅ Firebase에 정답 여부 업데이트 (이어서 풀기 기능을 위해)
     if (typeof window.recordAttempt === 'function') {
+      const questionsPerSubject = 20;
+      const questionNumberInSubject = (currentQuestion.globalIndex % questionsPerSubject) + 1;
       const questionData = {
         year: year,
         hour: hour,
         type: 'mockexam',
-        number: currentQuestion.globalIndex + 1, // 1-based
+        number: questionNumberInSubject, // 과목 내 번호 (1~20)
         globalIndex: currentQuestion.globalIndex,
         subject: currentQuestion.subject || '모의고사',
+        certificateType: getActiveCertificateType(),
         questionText: currentQuestion.question || '',
         options: currentQuestion.options || []
       };
@@ -1377,7 +1383,7 @@
       window.recordAttempt(questionData, selectedAnswer, isCorrect)
         .then(result => {
           if (result && result.success) {
-            log(`정답 확인 저장 완료: 문제 ${currentQuestion.globalIndex + 1} (${isCorrect ? '정답' : '오답'})`, 'debug');
+            log(`정답 확인 저장 완료: ${currentQuestion.subject} ${questionNumberInSubject}번 (${isCorrect ? '정답' : '오답'})`, 'debug');
           }
         })
         .catch(error => {

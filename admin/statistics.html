@@ -226,6 +226,15 @@
     <div class="filter-section">
       <div class="filter-grid">
         <div class="filter-group">
+          <label>자격증</label>
+          <select id="certFilter">
+            <option value="">전체</option>
+            <option value="health-manager" selected>건강운동관리사</option>
+            <option value="sports-instructor">생활스포츠지도사</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
           <label>연도</label>
           <select id="yearFilter">
             <option value="">전체</option>
@@ -238,19 +247,11 @@
             <option value="2019">2019년</option>
           </select>
         </div>
-        
+
         <div class="filter-group">
           <label>과목</label>
           <select id="subjectFilter">
             <option value="">전체</option>
-            <option value="운동생리학">운동생리학</option>
-            <option value="건강체력평가">건강체력평가</option>
-            <option value="운동처방론">운동처방론</option>
-            <option value="운동부하검사">운동부하검사</option>
-            <option value="운동상해">운동상해</option>
-            <option value="기능해부학">기능해부학</option>
-            <option value="병태생리학">병태생리학</option>
-            <option value="스포츠심리학">스포츠심리학</option>
           </select>
         </div>
         
@@ -353,6 +354,45 @@
       alert('관리자만 접근할 수 있습니다.');
       window.location.href = '../index.html';
     }
+
+    // ─── 자격증별 과목 목록 ──────────────────────────────────────────────
+    const SUBJECTS_BY_CERT = {
+      'health-manager': [
+        '운동생리학', '건강체력평가', '운동처방론', '운동부하검사',
+        '운동상해', '기능해부학', '병태생리학', '스포츠심리학'
+      ],
+      'sports-instructor': [
+        '스포츠교육학', '스포츠사회학', '스포츠심리학', '스포츠윤리',
+        '운동생리학', '운동역학', '한국체육사',
+        '노인체육론', '유아체육론', '특수체육론'
+      ]
+    };
+
+    function updateSubjectOptions() {
+      const certFilter = document.getElementById('certFilter').value;
+      const subjectSelect = document.getElementById('subjectFilter');
+      const currentVal = subjectSelect.value;
+      subjectSelect.innerHTML = '<option value="">전체</option>';
+
+      let subjects = [];
+      if (certFilter && SUBJECTS_BY_CERT[certFilter]) {
+        subjects = SUBJECTS_BY_CERT[certFilter];
+      } else {
+        // 전체: 두 자격증 과목 합치기 (중복 제거)
+        const all = new Set([...SUBJECTS_BY_CERT['health-manager'], ...SUBJECTS_BY_CERT['sports-instructor']]);
+        subjects = [...all].sort();
+      }
+      subjects.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        if (s === currentVal) opt.selected = true;
+        subjectSelect.appendChild(opt);
+      });
+    }
+
+    document.getElementById('certFilter').addEventListener('change', updateSubjectOptions);
+    updateSubjectOptions();
     
     // ─── V4-A1: 완주 세션 필터 ────────────────────────────────────────────
     // 일반문제: 세션당 attempts 수 >= 20, 모의고사: >= 80
@@ -446,6 +486,7 @@
       const btn = document.getElementById('loadStatsBtn');
       const originalText = btn.textContent;
       try {
+        const certFilter = document.getElementById('certFilter').value;
         const yearFilter = document.getElementById('yearFilter').value;
         const subjectFilter = document.getElementById('subjectFilter').value;
         const difficultyFilter = document.getElementById('difficultyFilter').value;
@@ -463,6 +504,7 @@
         btn.style.opacity = '0.7';
 
         // Firestore 서버 측 필터링 (읽기 비용 대폭 절감)
+        // certificateType은 복합 인덱스 없이 클라이언트 필터링
         let q = collection(db, 'attempts');
         const constraints = [];
         if (yearFilter) {
@@ -480,6 +522,16 @@
         snapshot.forEach(doc => {
           attempts.push({ id: doc.id, ...doc.data() });
         });
+
+        // 자격증 유형 클라이언트 필터링
+        if (certFilter) {
+          attempts = attempts.filter(a => {
+            const ct = a.questionData?.certificateType;
+            // certificateType 없는 레거시 데이터는 건강운동관리사로 간주
+            return ct ? ct === certFilter : certFilter === 'health-manager';
+          });
+          console.log(`✅ 자격증 필터 (${certFilter}): ${attempts.length}개`);
+        }
 
         // V4-A1: 완주 세션 필터 (토글 ON 시)
         if (document.getElementById('completedOnlyToggle').checked) {
