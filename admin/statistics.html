@@ -8,9 +8,11 @@
   <link rel="canonical" href="https://the1stpeng.com/admin/statistics.html" />
   
   <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/linear-header.css" />
+  <link rel="stylesheet" href="../css/linear-footer.css" />
   <link rel="stylesheet" href="../css/layout.css" />
   <link rel="stylesheet" href="../css/components.css" />
-  
+
   <script src="../js/logger.js"></script>
   
   <!-- Firebase -->
@@ -28,13 +30,6 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   
   <style>
-    /* 헤더 로고 크기 */
-    header .logo img {
-      max-width: 50px;
-      max-height: 50px;
-      object-fit: contain;
-    }
-    
     .admin-container {
       max-width: 1400px;
       margin: 40px auto;
@@ -198,21 +193,61 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <div class="logo-container">
-        <div class="logo">
-          <a href="../index.html">
-            <img src="../images/firstpenguin-logo2.png" alt="퍼스트펭귄 로고" />
-          </a>
+  <script src="../js/linear-header.js"></script>
+
+  <header class="linear-header" id="linear-header">
+    <div class="linear-header__container">
+      <a href="../index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="../images/firstpenguin-logo2.png" alt="퍼스트펭귄 로고" />
         </div>
-        <div class="site-title">
-          <a href="../index.html" style="text-decoration: none; color: inherit;">
-            <div class="title-brand">퍼스트펭귄</div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+      </a>
+
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="../index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="statistics.html" class="linear-header__nav-link linear-header__nav-link--active">관리자 통계</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="linear-header__auth">
+        <div id="logged-in-area" style="display:none;">
+          <div class="linear-header__user-profile">
+            <div class="linear-header__user-avatar" id="user-avatar">U</div>
+            <span class="linear-header__user-name" id="user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout">
+            로그아웃
           </a>
-          <h1>관리자 - 문제별 통계</h1>
         </div>
       </div>
+
+      <div class="linear-header__actions">
+        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
+          aria-expanded="false">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <a href="../index.html" class="linear-header__nav-link">홈</a>
+      <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="../index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="statistics.html" class="linear-header__nav-link">관리자 통계</a>
     </div>
   </header>
 
@@ -319,21 +354,7 @@
     </div>
   </main>
 
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-logo">
-          <a href="../index.html" style="color: white;">
-            <img src="../images/firstpenguin-logo.png" alt="퍼스트펭귄 로고" />
-            <span>퍼스트펭귄</span>
-          </a>
-        </div>
-        <div class="copyright">
-          &copy; 2025 퍼스트펭귄. All rights reserved.
-        </div>
-      </div>
-    </div>
-  </footer>
+  <footer class="linear-footer"></footer>
 
   <script type="module">
     import { ensureFirebase, ensureAuthReady } from '../js/core/firebase-core.js';
