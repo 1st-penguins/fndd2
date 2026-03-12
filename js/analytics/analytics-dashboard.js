@@ -2600,6 +2600,33 @@ async function deleteAllQuestionSets(certType = null) {
       console.warn('userProgress 삭제 중 오류 (무시):', e);
     }
 
+    // 5. wrong_answers 삭제 (오답노트)
+    try {
+      if (!certType) {
+        // 전체 삭제
+        const wrongQ = query(collection(db, 'wrong_answers'), where('userId', '==', user.uid));
+        totalDeleted += await deleteQueryBatch(db, wrongQ, BATCH_SIZE);
+      } else {
+        // certType별 삭제
+        const wrongCertType = certType === 'health' ? 'health-manager' : 'sports-instructor';
+        const wrongQ = query(collection(db, 'wrong_answers'), where('userId', '==', user.uid), where('certType', '==', wrongCertType));
+        totalDeleted += await deleteQueryBatch(db, wrongQ, BATCH_SIZE);
+        // certType 필드 없는 레거시 오답 데이터도 삭제 (health인 경우)
+        if (certType === 'health') {
+          const allWrongSnap = await getDocs(query(collection(db, 'wrong_answers'), where('userId', '==', user.uid)));
+          const legacyWrong = allWrongSnap.docs.filter(d => !d.data().certType);
+          for (let i = 0; i < legacyWrong.length; i += BATCH_SIZE) {
+            const batch = writeBatch(db);
+            legacyWrong.slice(i, i + BATCH_SIZE).forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            totalDeleted += Math.min(BATCH_SIZE, legacyWrong.length - i);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('wrong_answers 삭제 중 오류 (무시):', e);
+    }
+
     // 성공 메시지 표시
     hideLoading();
     showToast(`${label} 문제풀이기록이 삭제되었습니다. (총 ${totalDeleted}개 항목)`, 'success');
