@@ -2188,24 +2188,32 @@
       console.warn('배치 저장 함수를 찾을 수 없거나 저장할 데이터가 없습니다.');
     }
 
-    // 오답노트 자동 저장 (틀린 문제)
+    // 오답노트 자동 저장 (틀린 문제) + 정답 자동 해결
     try {
       const userId = window.auth?.currentUser?.uid;
       if (userId) {
-        const { saveWrongAnswer } = await import('./wrong-note-service.js');
-        const wrongItems = attemptsToSave.filter(a => !a.isCorrect);
+        const { saveWrongAnswer, markAsResolved } = await import('./wrong-note-service.js');
         const examNameVal = `${year}년 모의고사`;
         const certType = getActiveCertificateType();
-        for (const item of wrongItems) {
+        for (const item of attemptsToSave) {
           const qData = item.questionData;
           const fullQData = questions[qData.globalIndex] || qData;
-          const saveData = { ...fullQData, ...qData, id: `mock_${year}_${qData.subject}_${qData.number}` };
-          saveWrongAnswer(userId, saveData, examNameVal, qData.subject, certType)
-            .catch(err => console.error('오답 자동 저장 실패:', err));
+          const mockId = `mock_${year}_${qData.subject}_${qData.number}`;
+          if (!item.isCorrect) {
+            // ❌ 오답 → 오답노트에 저장
+            const saveData = { ...fullQData, ...qData, id: mockId };
+            saveWrongAnswer(userId, saveData, examNameVal, qData.subject, certType)
+              .catch(err => console.error('오답 자동 저장 실패:', err));
+          } else {
+            // ✅ 정답 → 오답노트에서 자동 해결
+            markAsResolved(userId, mockId)
+              .catch(err => console.error('오답 해결 처리 실패:', err));
+          }
         }
-        if (wrongItems.length > 0) {
-          console.log(`오답노트: ${wrongItems.length}개 틀린 문제 저장`);
-        }
+        const wrongCount = attemptsToSave.filter(a => !a.isCorrect).length;
+        const resolvedCount = attemptsToSave.filter(a => a.isCorrect).length;
+        if (wrongCount > 0) console.log(`오답노트: ${wrongCount}개 틀린 문제 저장`);
+        if (resolvedCount > 0) console.log(`오답노트: ${resolvedCount}개 맞은 문제 해결 처리`);
       }
     } catch (e) {
       console.error('오답노트 저장 중 오류:', e);

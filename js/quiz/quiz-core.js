@@ -1622,11 +1622,21 @@ export async function submitQuiz() {
               isCorrect
             });
 
-            // ❌ 오답 노트 자동 저장 (Fire and Forget)
+            // 오답노트: 고유 ID 부여 (연도_과목_번호)
+            const wrongNoteId = `${year}_${subject}_${i + 1}`;
+            const questionWithId = { ...question, id: wrongNoteId };
+
             if (!isCorrect && auth.currentUser) {
+              // ❌ 오답 → 오답노트에 저장
               const examNameVal = `${year}년 ${subject}`;
-              saveWrongAnswer(auth.currentUser.uid, question, examNameVal, subject, certificateType)
+              saveWrongAnswer(auth.currentUser.uid, questionWithId, examNameVal, subject, certificateType)
                 .catch(err => console.error("오답 자동 저장 실패:", err));
+            } else if (isCorrect && auth.currentUser) {
+              // ✅ 정답 → 오답노트에서 자동 해결 처리
+              import("./wrong-note-service.js").then(({ markAsResolved }) => {
+                markAsResolved(auth.currentUser.uid, wrongNoteId)
+                  .catch(err => console.error("오답 해결 처리 실패:", err));
+              });
             }
           }
         }
