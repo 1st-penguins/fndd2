@@ -409,6 +409,13 @@
     font-weight: 600;
 }
 
+.wrong-modal__option.user-wrong {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #991b1b;
+    font-weight: 600;
+}
+
 .wrong-modal__explanation {
     background: #f8fafc;
     padding: 14px;
@@ -579,6 +586,12 @@
 [data-theme="dark"] .wrong-modal__option.correct {
     background: rgba(34, 197, 94, 0.1);
     border-color: #22c55e;
+}
+
+[data-theme="dark"] .wrong-modal__option.user-wrong {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #ef4444;
+    color: #fca5a5;
 }
 
 [data-theme="dark"] .wrong-modal__explanation {

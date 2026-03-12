@@ -1624,10 +1624,10 @@ export async function submitQuiz() {
 
             // 오답노트: 고유 ID 부여 (연도_과목_번호)
             const wrongNoteId = `${year}_${subject}_${i + 1}`;
-            const questionWithId = { ...question, id: wrongNoteId };
+            const questionWithId = { ...question, id: wrongNoteId, userAnswer: userAnswers[i] };
 
             if (!isCorrect && auth.currentUser) {
-              // ❌ 오답 → 오답노트에 저장
+              // ❌ 오답 → 오답노트에 저장 (사용자 선택 답 포함)
               const examNameVal = `${year}년 ${subject}`;
               saveWrongAnswer(auth.currentUser.uid, questionWithId, examNameVal, subject, certificateType)
                 .catch(err => console.error("오답 자동 저장 실패:", err));

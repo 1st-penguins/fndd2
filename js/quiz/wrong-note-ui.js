@@ -171,10 +171,14 @@ function getFilteredItems() {
 
 function getDisplayNumber(item) {
   const qData = item.questionData || {};
-  if (typeof qData.id === 'string' && qData.id.startsWith('mock_')) {
-    return qData.id.split('_').pop();
+  // ID에서 번호 추출: "2025_운동생리학_3" → 3, "mock_2020_과목_3" → 3
+  if (typeof qData.id === 'string') {
+    const parts = qData.id.split('_');
+    const lastPart = parts[parts.length - 1];
+    const num = parseInt(lastPart, 10);
+    if (!isNaN(num)) return num;
   }
-  return qData.number || '0';
+  return qData.number || 0;
 }
 
 function renderList() {
@@ -240,14 +244,9 @@ function renderList() {
       const qData = item.questionData || {};
       const examName = item.examName || '';
       const count = item.incorrectCount || 1;
-      const qNumber = qData.number || (idx + 1);
 
-      // 문제 번호: mock_2020_과목_3 → 3
-      let displayNumber = qNumber;
-      if (typeof qData.id === 'string' && qData.id.startsWith('mock_')) {
-        const parts = qData.id.split('_');
-        displayNumber = parts[parts.length - 1];
-      }
+      // ID에서 실제 문제 번호 추출
+      const displayNumber = getDisplayNumber(item);
 
       itemEl.innerHTML = `
         <input type="checkbox" class="wrong-item__checkbox" data-id="${item.id}" ${selectedIds.has(item.id) ? 'checked' : ''}>
@@ -390,14 +389,24 @@ function openDetailModal(item) {
 
   // 선택지
   const correctAnswer = Number(data.correctAnswer ?? data.answer ?? -1);
+  const userAnswer = data.userAnswer != null ? Number(data.userAnswer) : null;
   if (data.options && data.options.length > 0) {
     modalOptions.innerHTML = data.options.map((opt, idx) => {
       const isCorrect = idx === correctAnswer || (idx + 1) === correctAnswer;
-      return `<div class="wrong-modal__option ${isCorrect ? 'correct' : ''}">${idx + 1}. ${escapeHtml(opt)} ${isCorrect ? ' (정답)' : ''}</div>`;
+      const isUserWrong = userAnswer !== null && !isCorrect && (idx === userAnswer || (idx + 1) === userAnswer);
+      let cls = '';
+      let label = '';
+      if (isCorrect) { cls = 'correct'; label = ' (정답)'; }
+      else if (isUserWrong) { cls = 'user-wrong'; label = ' (내 선택)'; }
+      return `<div class="wrong-modal__option ${cls}">${idx + 1}. ${escapeHtml(opt)}${label}</div>`;
     }).join('');
   } else {
-    // 선택지 텍스트가 없으면 번호만 표시
-    modalOptions.innerHTML = `<div class="wrong-modal__option correct">정답: ${correctAnswer + 1}번</div>`;
+    let html = `<div class="wrong-modal__option correct">정답: ${correctAnswer + 1}번</div>`;
+    if (userAnswer !== null) {
+      const ua = userAnswer < 5 ? userAnswer + 1 : userAnswer;
+      html += `<div class="wrong-modal__option user-wrong">내 선택: ${ua}번</div>`;
+    }
+    modalOptions.innerHTML = html;
   }
 
   // 해설

@@ -2200,8 +2200,8 @@
           const fullQData = questions[qData.globalIndex] || qData;
           const mockId = `mock_${year}_${qData.subject}_${qData.number}`;
           if (!item.isCorrect) {
-            // ❌ 오답 → 오답노트에 저장
-            const saveData = { ...fullQData, ...qData, id: mockId };
+            // ❌ 오답 → 오답노트에 저장 (사용자 선택 답 포함)
+            const saveData = { ...fullQData, ...qData, id: mockId, userAnswer: item.userAnswer };
             saveWrongAnswer(userId, saveData, examNameVal, qData.subject, certType)
               .catch(err => console.error('오답 자동 저장 실패:', err));
           } else {
