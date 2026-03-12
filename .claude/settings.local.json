@@ -51,7 +51,8 @@
       "Bash(find /c/Users/sapsk/Desktop/fndd2 -maxdepth 1 -name '*.html' -type f | while read f; do basename \"$f\"; done | sort)",
       "Bash(find /c/Users/sapsk/Desktop/fndd2 -name \"*.html\" -type f 2>/dev/null | head -20)",
       "Bash(firebase --version)",
-      "Bash(firebase login:*)"
+      "Bash(firebase login:*)",
+      "WebFetch(domain:the1stpeng.com)"
     ]
   }
 }
