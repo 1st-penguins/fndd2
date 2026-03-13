@@ -2,7 +2,6 @@ import {
     collection,
     doc,
     setDoc,
-    getDoc,
     getDocs,
     query,
     where,
@@ -66,10 +65,6 @@ export async function saveWrongAnswer(userId, questionData, examName, section, c
     const docRef = doc(fireDb, COLLECTION_NAME, docId);
 
     try {
-        // 기존 문서 존재 여부 확인 → 새 문서면 1, 기존 문서면 increment
-        const existingDoc = await getDoc(docRef);
-        const isNew = !existingDoc.exists();
-
         const payload = {
             userId,
             questionId,
@@ -79,7 +74,7 @@ export async function saveWrongAnswer(userId, questionData, examName, section, c
             questionData: removeUndefined(questionData),
             lastIncorrectAt: serverTimestamp(),
             isResolved: false,
-            incorrectCount: isNew ? 1 : increment(1)
+            incorrectCount: increment(1)
         };
 
         await setDoc(docRef, payload, { merge: true });
