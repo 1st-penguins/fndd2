@@ -3,6 +3,7 @@
 
 import { db, auth, ensureFirebase } from '../core/firebase-core.js';
 import { collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { saveBookmark, removeBookmark, isBookmarked } from './bookmark-service.js';
 
 // 전역 변수에서 sessionManager 가져오기
 const sessionManager = window.sessionManager;
@@ -49,6 +50,70 @@ let subjectColors = {};
 let perQuestionChecked = null;
 const __mockViewedExplanation = {};   // 해설 조회 여부 (checkAnswer 호출 시 true)
 let __timerPausedAt = null;           // visibilitychange 타이머 일시정지 시각
+
+// 북마크 상태 캐시 (페이지 세션 내)
+const _mockBookmarkCache = new Map();
+
+function _getMockQuestionId(question, displayNumber) {
+  if (question.id) return question.id;
+  const subject = question.subject || '';
+  const questionsPerSubject = 20;
+  const qNum = ((question.globalIndex || 0) % questionsPerSubject) + 1;
+  return `mock_${year}_${subject}_${qNum}`;
+}
+
+function _renderMockBookmarkButton(question, displayNumber) {
+  const qNumEl = document.querySelector('.question-number');
+  if (!qNumEl) return;
+
+  const existing = qNumEl.parentElement?.querySelector('.bookmark-btn');
+  if (existing) existing.remove();
+
+  const userId = auth?.currentUser?.uid || localStorage.getItem('userId');
+  if (!userId) return;
+
+  const questionId = _getMockQuestionId(question, displayNumber);
+  const btn = document.createElement('button');
+  btn.className = 'bookmark-btn';
+  btn.title = '북마크';
+  btn.setAttribute('aria-label', '북마크');
+  btn.textContent = '☆';
+
+  if (_mockBookmarkCache.has(questionId)) {
+    btn.textContent = _mockBookmarkCache.get(questionId) ? '★' : '☆';
+    btn.classList.toggle('active', _mockBookmarkCache.get(questionId));
+  } else {
+    isBookmarked(userId, questionId).then(marked => {
+      _mockBookmarkCache.set(questionId, marked);
+      btn.textContent = marked ? '★' : '☆';
+      btn.classList.toggle('active', marked);
+    }).catch(() => {});
+  }
+
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const marked = _mockBookmarkCache.get(questionId) || false;
+    try {
+      if (marked) {
+        await removeBookmark(userId, questionId);
+        _mockBookmarkCache.set(questionId, false);
+        btn.textContent = '☆';
+        btn.classList.remove('active');
+      } else {
+        const certType = getActiveCertificateType();
+        const examName = `${year}년 모의고사 ${hour}교시`;
+        await saveBookmark(userId, { ...question, id: questionId }, examName, question.subject, certType);
+        _mockBookmarkCache.set(questionId, true);
+        btn.textContent = '★';
+        btn.classList.add('active');
+      }
+    } catch (err) {
+      console.error('북마크 처리 실패:', err);
+    }
+  });
+
+  qNumEl.parentElement.insertBefore(btn, qNumEl.nextSibling);
+}
 
 // 개발 모드 확인
 const isDevMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -1040,6 +1105,9 @@ function loadQuestion(index) {
 
   document.querySelector('.question-number').textContent = `문제 ${displayNumber}`;
   document.getElementById('subject-badge').textContent = question.subject;
+
+  // 북마크 버튼 렌더링
+  _renderMockBookmarkButton(question, displayNumber);
 
   const questionContainer = document.getElementById('question-container');
   questionContainer.innerHTML = '';

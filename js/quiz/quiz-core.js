@@ -6,6 +6,7 @@ import { isUserLoggedIn } from "../auth/auth-utils.js";
 import { sessionManager } from '../data/session-manager.js';
 import { auth } from "../core/firebase-core.js";
 import { saveWrongAnswer } from "./wrong-note-service.js";
+import { saveBookmark, removeBookmark, isBookmarked } from "./bookmark-service.js";
 
 /* ===== 전역 변수 설정 ===== */
 let questions = [];
@@ -29,6 +30,69 @@ window.totalTime = totalTime;
 window.timeRemaining = timeRemaining;
 window.reviewMode = reviewMode;
 window.firstAttemptTracking = firstAttemptTracking;
+
+// 북마크 상태 캐시 (페이지 세션 내)
+const _bookmarkCache = new Map();
+
+function _getQuestionId(question, displayNum) {
+  if (question.id) return question.id;
+  const subject = question.subject || currentSubject || '';
+  return `${currentYear}_${subject}_${displayNum}`;
+}
+
+function _renderBookmarkButton(question, displayNum) {
+  const qNumEl = document.querySelector('.question-number');
+  if (!qNumEl) return;
+
+  // 기존 북마크 버튼 제거
+  const existing = qNumEl.parentElement?.querySelector('.bookmark-btn');
+  if (existing) existing.remove();
+
+  const userId = auth?.currentUser?.uid || localStorage.getItem('userId');
+  if (!userId) return;
+
+  const questionId = _getQuestionId(question, displayNum);
+  const btn = document.createElement('button');
+  btn.className = 'bookmark-btn';
+  btn.title = '북마크';
+  btn.setAttribute('aria-label', '북마크');
+  btn.textContent = '☆';
+
+  // 캐시에서 상태 확인 후, 없으면 비동기 조회
+  if (_bookmarkCache.has(questionId)) {
+    btn.textContent = _bookmarkCache.get(questionId) ? '★' : '☆';
+    btn.classList.toggle('active', _bookmarkCache.get(questionId));
+  } else {
+    isBookmarked(userId, questionId).then(marked => {
+      _bookmarkCache.set(questionId, marked);
+      btn.textContent = marked ? '★' : '☆';
+      btn.classList.toggle('active', marked);
+    }).catch(() => {});
+  }
+
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const marked = _bookmarkCache.get(questionId) || false;
+    try {
+      if (marked) {
+        await removeBookmark(userId, questionId);
+        _bookmarkCache.set(questionId, false);
+        btn.textContent = '☆';
+        btn.classList.remove('active');
+      } else {
+        const certType = localStorage.getItem('currentCertificateType') || 'health-manager';
+        await saveBookmark(userId, question, `${currentYear}년 ${currentSubject}`, currentSubject, certType);
+        _bookmarkCache.set(questionId, true);
+        btn.textContent = '★';
+        btn.classList.add('active');
+      }
+    } catch (err) {
+      console.error('북마크 처리 실패:', err);
+    }
+  });
+
+  qNumEl.parentElement.insertBefore(btn, qNumEl.nextSibling);
+}
 
 function getActiveSessionId() {
   return localStorage.getItem('currentSessionId')
@@ -626,6 +690,9 @@ export function loadQuestion(index) {
   if (qNumEl) {
     qNumEl.textContent = `${displayNum}번`;
   }
+
+  // 북마크 버튼 렌더링
+  _renderBookmarkButton(question, displayNum);
 
   // 태그 표시
   displayQuestionTags(question);

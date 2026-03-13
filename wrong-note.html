@@ -138,11 +138,20 @@
 
     <main class="wrong-note-container">
         <div class="page-header">
-            <h1 class="page-title">오답 노트</h1>
-            <p class="page-subtitle">틀렸던 문제를 다시 확인하고 완벽하게 내 것으로 만드세요.</p>
+            <h1 class="page-title" id="page-title-text">오답 노트</h1>
+            <p class="page-subtitle" id="page-subtitle-text">틀렸던 문제를 다시 확인하고 완벽하게 내 것으로 만드세요.</p>
+        </div>
+
+        <!-- 오답 / 북마크 뷰 토글 -->
+        <div class="wn-view-toggle" id="view-toggle">
+          <button class="wn-view-toggle__btn active" data-view="wrong">오답</button>
+          <button class="wn-view-toggle__btn" data-view="bookmark">북마크</button>
         </div>
 
         <div id="wrong-note-root">
+          <!-- 자격증 구분 탭 -->
+          <div class="wrong-note-cert-tabs" id="cert-type-tabs"></div>
+
           <div class="wrong-note-controls-bar">
             <div class="wrong-note-filter-group" id="subject-filters">
               <button class="wrong-note-filter-btn active" data-subject="all">전체</button>

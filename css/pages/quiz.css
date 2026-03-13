@@ -473,6 +473,28 @@ header::before {
     z-index: 10;
 }
 
+/* 북마크 버튼 */
+.bookmark-btn {
+    position: absolute;
+    top: 10px;
+    left: 110px;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: #94a3b8;
+    z-index: 10;
+    padding: 4px 6px;
+    line-height: 1;
+    transition: color 0.2s, transform 0.15s;
+}
+.bookmark-btn.active {
+    color: #f59e0b;
+}
+.bookmark-btn:hover {
+    transform: scale(1.2);
+}
+
 /* 문제 태그 스타일 */
 .question-tags-container {
     display: none;

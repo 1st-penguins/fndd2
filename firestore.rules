@@ -150,6 +150,16 @@ service cloud.firestore {
     }
 
     // ============================================
+    // 🔖 북마크 (Bookmarks)
+    // ============================================
+    match /bookmarks/{docId} {
+      allow read: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isLoggedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // ============================================
     // 📢 커뮤니티 (Notices, Comments, Likes)
     // ============================================
     match /notices/{noticeId} {
