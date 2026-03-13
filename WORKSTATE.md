@@ -1,13 +1,13 @@
 # 현재 작업 상태 (WORKSTATE)
 
-> 마지막 업데이트: 2026-03-11
+> 마지막 업데이트: 2026-03-13
 > 이 파일은 클로드 세션이 바뀌어도 작업을 이어받을 수 있도록 항상 최신 상태로 유지한다.
 
 ---
 
 ## 지금 하고 있는 것
 
-프로젝트 정비 플랜 실행 (심층 분석 기반)
+mock-exam.js ESM 전환 완료
 
 ---
 
@@ -37,93 +37,52 @@
 
 ---
 
-### Phase 2: isAdmin() 통합 (의존성 검증 완료)
-
-#### 현재 상태 (검증 결과)
-| 위치 | 사용처 | toLowerCase | devMode |
-|------|--------|------------|---------|
-| auth-utils.js ★ | 12곳+ (auth-core, admin pages, notices 등) | X | O |
-| admin-utils.js | pdf-download.html, lectures.html (2곳만) | O | X |
-| app.js (로컬) | app.js 내부 3곳 | X | X |
-
-#### Step 2.1: auth-utils.js에 toLowerCase() 추가 [v]
-- [v] isAdmin() 내부에 `.toLowerCase()` 추가
-
-#### Step 2.2: pdf-download.html import 경로 변경 [v]
-- [v] `pdf-download.html` → `./js/auth/auth-utils.js`로 변경
-- (lectures.html은 Phase 1에서 삭제됨)
-
-#### Step 2.3: app.js 로컬 isAdmin() → import 교체 [v]
-- [v] import 추가, 로컬 함수+ADMIN_EMAILS 삭제. 호출부 3곳 호환 확인.
-
-#### Step 2.4: admin-utils.js 삭제 [v]
-- [v] 참조 0건 확인 후 삭제
-
-#### Step 2.5: ADMIN_EMAILS 중복 제거 [v]
-- [v] mock-exam.js → `window.ADMIN_EMAILS` 사용
-- [v] search-by-tags.html → `isAdmin(user)` import로 교체
-- [v] 최종 확인: firebase-core.js 1곳만 남음
+### Phase 2: isAdmin() 통합 (의존성 검증 완료) [v]
 
 ---
 
-### Phase 3: certType 정규화 (방어적)
-
-#### 현재 불일치 (검증 결과)
-- sessions: `certType = 'health'/'sports'`
-- attempts: `certificateType = 'health-manager'/'sports-instructor'` + `certType = 'health'/'sports'`
-- UI 필터: `'health'/'sports'` (sessions 기준)
-- certificate-utils: `'health-manager'/'sports-instructor'` (attempts 기준)
-- **현재 각 맥락에서 정상 작동 중** — 급히 변경 불필요
-
-#### Step 3.1: session-manager.js에 certificateType 필드 추가 저장 [v]
-- [v] 세션 생성 시 `certificateType` 필드도 함께 저장
-  - 기존 `certType` 유지 (하위 호환) + `certificateType` 추가 (정규화)
+### Phase 3: certType 정규화 (방어적) [v]
 
 ---
 
-### Phase 4: 안정성 개선
-
-#### Step 4.1: StatsCache 즉시 무효화 [v]
-- [v] session-manager.js endSession()에서 window.StatsCache.clear() 호출 추가
-
-#### Step 4.2: 즉시 필터 (UX 개선) [v]
-- [v] 4개 select에 change 이벤트 → debounce 300ms → applyCurrentFilters()
-- [v] "적용" 버튼도 그대로 유지 (접근성)
+### Phase 4: 안정성 개선 [v]
 
 ---
 
-### Phase 5: 새 기능
+### Phase 5: 새 기능 [v]
 
-#### Step 5.1: 오답노트 리노베이션 + 오답 복습 퀴즈 [v]
-- [v] wrong-note.html → 컴팩트 리스트 UI (과목별 그룹, 체크박스)
-- [v] wrong-note-ui.js → 선택 모드 + "다시 풀기" 버튼 (sessionStorage 전달)
-- [v] quiz-core.js → `wrong-review` 모드 추가 (initializeWrongReviewMode)
-- [v] session-manager.js → `wrong-review` 타입 검증 추가
-- [v] exam/quiz.html → `wrong-review` 모드 타이틀/뒤로가기 처리
-- 변경 파일: wrong-note.html, js/quiz/wrong-note-ui.js, js/quiz/quiz-core.js, js/data/session-manager.js, exam/quiz.html
+---
 
-#### Step 5.2: 학습 스트릭 위젯 [v]
-- [v] streak-utils.js 신규 생성 (buildDayMap, calcCurrentStreak, calcLongestStreak, getTodayCount, getRecentActivity)
-- [v] index.html → 학습분석 탭 상단에 streak-widget div 추가
-- [v] analytics-dashboard.js → renderStreakWidget() 함수 + renderDashboard()에서 호출
-- [v] css/analytics-dashboard.css → 스트릭 위젯 스타일 (남색 그라데이션, 7일 도트)
-- 변경 파일: js/analytics/streak-utils.js (신규), index.html, js/analytics/analytics-dashboard.js, css/analytics-dashboard.css
+### Phase 6: mock-exam.js ESM 전환 [v]
 
-#### Step 5.3: 과목별 정답률 추이 차트 [v]
-- [v] index.html → 약점분석 탭 하단에 트렌드 차트 섹션 (canvas + 주간/월간 select)
-- [v] analytics-dashboard.js → renderSubjectTrendChart() 함수 (Chart.js 라인 차트)
-- [v] analytics-dashboard.js → renderWeakAreasTab() 타겟을 weak-areas div로 변경 (차트 보존)
-- [v] css/analytics-dashboard.css → 트렌드 차트 스타일
-- 변경 파일: index.html, js/analytics/analytics-dashboard.js, css/analytics-dashboard.css
+#### Step 6.1: IIFE → ESM 변환 [v]
+- [v] IIFE 래퍼 제거 + 전체 코드 unindent
+- [v] static import 추가 (firebase-core.js, firebase-firestore.js)
+- [v] dynamic import 3곳 제거 (static import로 대체)
+- [v] deprecated `restorePreviousAnswersForMockExam()` 삭제
+- [v] `window._testKeyQ/W` → 로컬 변수
+- [v] legacy `firebase.auth()` 폴백 → modular `auth?.currentUser` 교체
+- [v] devMode `window.*` 디버깅 노출 6개 삭제
 
-#### Step 5.4: 다크모드 수동 토글 [v]
-- [v] index.html → linear-themes.css + dark-mode.css 로드, theme-manager.js 로드
-- [v] index.html → 헤더에 #theme-switcher 버튼 추가 (달/해 아이콘)
-- [v] css/dark-mode.css (신규) — 기존 색상 시스템을 다크모드로 오버라이드 (헤더, 탭, 카드, 모달, 캘린더, 필터 등)
-- [v] css/linear-themes.css → 전체 * transition 비활성화 (성능), dark-mode.css에서 선택적 적용
-- [v] js/utils/theme-manager.js → module.exports → window 전역 노출로 변경
-- 변경 파일: index.html, css/dark-mode.css (신규), css/linear-themes.css, js/utils/theme-manager.js
-- 참고: 서브페이지(wrong-note, exam/quiz 등)는 점진적 적용 예정
+#### Step 6.2: HTML onclick → data-option + 이벤트 위임 [v]
+- [v] 14개 모의고사 HTML: `onclick="selectOption(N)"` → `data-option="N"`
+- [v] 14개 HTML: selectOption 폴백 함수 제거
+- [v] mock-exam.js: option-buttons 이벤트 위임 추가
+- [v] mock-exam.js: results-summary 이벤트 위임 추가 (reviewQuiz, goHomeAfterSave, reviewSubjectIncorrect)
+
+#### Step 6.3: window.* 전역 노출 전부 제거 [v]
+- [v] window.selectOption 등 10개 함수 노출 삭제
+- [v] window.incorrectIndices/incorrectGlobalIndices/currentIncorrectIndex → 모듈 변수
+- [v] window.originalNextFunction/originalPrevFunction → 모듈 변수
+- [v] window.subjectColors → 모듈 변수
+- [v] window.perQuestionChecked → 모듈 변수
+- [v] innerHTML onclick → data-action 속성으로 전환
+
+#### Step 6.4: 고아 파일 삭제 + 배포 준비 [v]
+- [v] `js/exam/mock-exam-page.js` 삭제
+- [v] `sw.js` CACHE_VERSION 증가 (2026031304 → 2026031305)
+- [v] HTML script 태그 캐시 버스팅 업데이트 (v=2026031305)
+- [v] `bash scripts/check-syntax.sh` 통과
 
 ---
 
@@ -138,7 +97,7 @@
 
 ## 주요 파일 주의사항
 
-- mock-exam.js (IIFE 3518줄): window.* 200개+ 노출. ESM 전환은 장기 과제. 건드리지 말 것.
-- analytics-dashboard.js (2500줄+): 단일 책임 위반이지만 현재 안정적. 분리는 Phase 5 이후.
+- mock-exam.js (ESM 3546줄): IIFE→ESM 전환 완료 (2026-03-13). window.* 200개+ → 48개(외부 모듈 읽기만)
+- analytics-dashboard.js (2500줄+): 단일 책임 위반이지만 현재 안정적. 분리는 향후 과제.
 - filterCompletedAttempts: admin/statistics.html과 analytics-dashboard.js 독립 선언 (의도적)
 - getUserAttempts: quiz-data-service.js — MAX_FETCH=3000 (홈은 1000)

@@ -56,7 +56,7 @@
   <script type="module" src="../js/quiz/quiz-ui.js"></script>
 
   <!-- 마지막으로 모의고사 스크립트 -->
-  <script type="module" src="../js/quiz/mock-exam.js?v=2026031101"></script>
+  <script type="module" src="../js/quiz/mock-exam.js?v=2026031305"></script>
   
   <!-- 인라인 이벤트 핸들러 확인 및 폴백 스크립트 -->
   <script>
@@ -85,15 +85,6 @@
         }, 500);
       }
       
-      // selectOption 폴백 함수
-      if (typeof selectOption !== 'function') {
-        window.selectOption = function(optionIndex) {
-          console.warn('selectOption 함수가 로드되지 않아 임시 함수를 사용합니다.');
-          const optionButtons = document.querySelectorAll('.option-button');
-          optionButtons.forEach(button => button.classList.remove('selected'));
-          optionButtons[optionIndex].classList.add('selected');
-        };
-      }
       
       // 기타 공통 폴백 함수들
       if (typeof closeLoginModal !== 'function') {
@@ -280,10 +271,10 @@
             <!-- 문제 이미지가 동적으로 로드됨 -->
           </div>
           <div class="option-buttons" id="option-buttons">
-            <button class="option-button" onclick="selectOption(0)">1</button>
-            <button class="option-button" onclick="selectOption(1)">2</button>
-            <button class="option-button" onclick="selectOption(2)">3</button>
-            <button class="option-button" onclick="selectOption(3)">4</button>
+            <button class="option-button" data-option="0">1</button>
+            <button class="option-button" data-option="1">2</button>
+            <button class="option-button" data-option="2">3</button>
+            <button class="option-button" data-option="3">4</button>
           </div>
           <div id="feedback" class="answer-feedback"></div>
         </div>
