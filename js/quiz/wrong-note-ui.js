@@ -339,7 +339,7 @@ function renderBookmarkList() {
 }
 
 function getBookmarkDisplayNumber(item) {
-  const qId = item.questionId || '';
+  const qId = String(item.questionId || '');
   if (qId) {
     const parts = qId.split('_');
     const lastPart = parts[parts.length - 1];

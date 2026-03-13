@@ -281,7 +281,7 @@
 }
 
 .wn-subject-section.collapsed .wn-subject-section__header {
-    border-bottom: none;
+    border-bottom-color: transparent;
     border-radius: 10px;
 }
 
