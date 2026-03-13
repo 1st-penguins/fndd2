@@ -2,6 +2,7 @@ import {
     collection,
     doc,
     setDoc,
+    updateDoc,
     getDocs,
     query,
     where,
@@ -174,11 +175,13 @@ export async function markAsResolved(userId, questionId) {
     const docRef = doc(fireDb, COLLECTION_NAME, docId);
 
     try {
-        await setDoc(docRef, {
+        await updateDoc(docRef, {
             isResolved: true,
             resolvedAt: serverTimestamp()
-        }, { merge: true });
+        });
     } catch (error) {
+        // 문서가 없으면 (오답 기록이 없는 문제) 무시
+        if (error.code === 'not-found') return;
         console.error("오답 해결 처리 실패:", error);
     }
 }

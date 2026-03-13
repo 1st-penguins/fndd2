@@ -1,5 +1,5 @@
 // 배포할 때마다 이 버전을 올려야 이전 캐시가 모두 삭제됩니다
-const CACHE_VERSION = '2026031317';
+const CACHE_VERSION = '2026031318';
 const CACHE_NAME = `fp-cache-v${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
