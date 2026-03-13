@@ -4,17 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오답 노트 | 퍼스트펭귄</title>
-  <link rel="canonical" href="https://the1stpeng.com/wrong-note.html" />
-    <meta name="description" content="틀린 문제를 모아보고 반복 학습으로 약점을 극복하세요.">
+    <title>북마크 | 퍼스트펭귄</title>
+    <link rel="canonical" href="https://the1stpeng.com/bookmark.html" />
+    <meta name="description" content="중요한 문제를 저장하고 반복 학습하세요.">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="오답 노트 | 퍼스트펭귄">
-    <meta property="og:description" content="틀린 문제를 모아보고 반복 학습으로 약점을 극복하세요.">
-    <meta property="og:url" content="https://the1stpeng.com/wrong-note.html">
+    <meta property="og:title" content="북마크 | 퍼스트펭귄">
+    <meta property="og:description" content="중요한 문제를 저장하고 반복 학습하세요.">
+    <meta property="og:url" content="https://the1stpeng.com/bookmark.html">
     <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="오답 노트 | 퍼스트펭귄">
-    <meta name="twitter:description" content="틀린 문제를 모아보고 반복 학습으로 약점을 극복하세요.">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1D2F4E">
@@ -37,7 +34,7 @@
     <link rel="stylesheet" href="css/linear-themes.css">
     <link rel="stylesheet" href="css/dark-mode.css">
     <style>
-        .wrong-note-container {
+        .bookmark-container {
             max-width: 900px;
             margin: 0 auto;
             padding: 80px 16px 32px;
@@ -61,7 +58,7 @@
         }
 
         @media (max-width: 480px) {
-            .wrong-note-container {
+            .bookmark-container {
                 padding: 70px 12px 32px;
             }
 
@@ -136,14 +133,13 @@
         </div>
     </header>
 
-    <main class="wrong-note-container">
+    <main class="bookmark-container">
         <div class="page-header">
-            <h1 class="page-title">오답 노트</h1>
-            <p class="page-subtitle">틀렸던 문제를 다시 확인하고 완벽하게 내 것으로 만드세요.</p>
+            <h1 class="page-title">북마크</h1>
+            <p class="page-subtitle">중요한 문제를 저장하고 반복 학습하세요.</p>
         </div>
 
-        <div id="wrong-note-root">
-          <!-- 자격증 구분 탭 -->
+        <div id="bookmark-root">
           <div class="wrong-note-cert-tabs" id="cert-type-tabs"></div>
 
           <div class="wrong-note-controls-bar">
@@ -151,7 +147,7 @@
               <button class="wrong-note-filter-btn active" data-subject="all">전체</button>
             </div>
             <div class="wrong-note-controls-right">
-              <span class="wrong-note-stats-summary">총 <strong id="total-wrong-count">0</strong>문제</span>
+              <span class="wrong-note-stats-summary">총 <strong id="total-count">0</strong>문제</span>
               <button class="wrong-note-select-mode-btn" id="select-mode-btn">선택</button>
             </div>
           </div>
@@ -162,19 +158,19 @@
               <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--cancel" id="cancel-select-btn">취소</button>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--resolve" id="resolve-selected-btn">이해 완료</button>
+              <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--resolve" id="remove-selected-btn">북마크 해제</button>
               <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--quiz" id="quiz-selected-btn" disabled>다시 풀기</button>
             </div>
           </div>
 
-          <div id="wrong-list-container">
+          <div id="bookmark-list-container">
             <div style="text-align:center; padding:40px; color:var(--text-secondary);">로딩 중...</div>
           </div>
         </div>
     </main>
 
     <!-- 상세 모달 -->
-    <div class="wrong-modal-overlay" id="wrong-detail-modal">
+    <div class="wrong-modal-overlay" id="detail-modal">
         <div class="wrong-modal">
             <div class="wrong-modal__header">
                 <span class="wrong-modal__title" id="modal-title">문제 확인</span>
@@ -185,7 +181,7 @@
             <div class="wrong-modal__explanation" id="modal-explanation"></div>
             <div class="wrong-modal__actions">
                 <button class="wrong-modal__btn wrong-modal__btn--close" id="modal-dismiss-btn">닫기</button>
-                <button class="wrong-modal__btn wrong-modal__btn--resolve" id="modal-resolve-btn">이해 완료 (목록에서 제거)</button>
+                <button class="wrong-modal__btn wrong-modal__btn--resolve" id="modal-remove-btn">북마크 해제</button>
             </div>
         </div>
     </div>
@@ -198,7 +194,7 @@
     <script type="module" src="js/auth/auth-core.js"></script>
     <script src="js/linear-header.js"></script>
     <script src="js/utils/theme-manager.js"></script>
-    <script type="module" src="js/quiz/wrong-note-ui.js"></script>
+    <script type="module" src="js/quiz/bookmark-ui.js"></script>
 </body>
 
 </html>
