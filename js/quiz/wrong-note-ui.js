@@ -283,9 +283,9 @@ function renderBookmarkList() {
 
   Object.entries(grouped).forEach(([section, items]) => {
     items.sort((a, b) => {
-      const ta = a.bookmarkedAt?.seconds || 0;
-      const tb = b.bookmarkedAt?.seconds || 0;
-      return tb - ta; // 최신순
+      const numA = getBookmarkDisplayNumber(a) || 0;
+      const numB = getBookmarkDisplayNumber(b) || 0;
+      return numA - numB; // 문제 번호순
     });
 
     const isCollapsed = collapsedSections.has(section);
@@ -308,12 +308,15 @@ function renderBookmarkList() {
     listWrapper.className = "wn-subject-section__list";
 
     items.forEach((item, idx) => {
-      const date = item.bookmarkedAt
-        ? new Date(item.bookmarkedAt.seconds * 1000).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
-        : '';
+      let date = '';
+      const ts = item.bookmarkedAt;
+      if (ts) {
+        const ms = ts.seconds ? ts.seconds * 1000 : (ts.toDate ? ts.toDate().getTime() : new Date(ts).getTime());
+        if (!isNaN(ms)) date = new Date(ms).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+      }
       const examName = item.examName || '';
-      const qData = item.questionData || {};
       const displayNumber = getBookmarkDisplayNumber(item);
+      const seqIndex = idx + 1;
 
       const itemEl = document.createElement("div");
       itemEl.className = "wrong-item";
@@ -321,11 +324,11 @@ function renderBookmarkList() {
 
       itemEl.innerHTML = `
         <input type="checkbox" class="wrong-item__checkbox" data-id="${item.id}" ${selectedIds.has(item.id) ? 'checked' : ''}>
-        <div class="wrong-item__number" style="background:#fef3c7; color:#d97706;">&#9733;</div>
+        <div class="wrong-item__number" style="background:#fef3c7; color:#d97706;">${seqIndex}</div>
         <div class="wrong-item__info">
           <div class="wrong-item__title">${examName} ${displayNumber}번</div>
           <div class="wrong-item__meta">
-            ${date ? `<span>${date}</span>` : ''}
+            ${date ? `<span>${date} 저장</span>` : ''}
           </div>
         </div>
         <span class="wrong-item__arrow">&#8250;</span>
