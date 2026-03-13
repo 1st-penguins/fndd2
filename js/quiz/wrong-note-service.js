@@ -52,7 +52,11 @@ export async function saveWrongAnswer(userId, questionData, examName, section, c
     const fireDb = await getDb();
     const cert = certType || 'health-manager';
 
-    const questionId = questionData.id || `temp_${Date.now()}`;
+    const questionId = questionData.id;
+    if (!questionId) {
+        console.warn('오답노트 저장 실패: questionData.id 누락', questionData);
+        return;
+    }
     const docId = `${userId}_${questionId}`;
 
     // 같은 페이지 세션 내 동일 문제 중복 저장 방지

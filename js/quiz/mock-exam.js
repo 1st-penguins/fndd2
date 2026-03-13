@@ -900,35 +900,11 @@ function changeSubject(subject) {
 
   loadQuestion(currentQuestionIndex);
 
-  // 인디케이터 초기화 후, 리뷰 모드면 현재 상태에 맞게 복구
-  initQuestionIndicators();
-  if (wasInReviewMode && incorrectGlobalIndices && incorrectGlobalIndices.length >= 0) {
-    // 현재 과목의 인디케이터들에 대해 사용자 답 기준으로 correct/incorrect 반영
-    const indicators = document.querySelectorAll('.indicator');
-    indicators.forEach((indicator, idx) => {
-      const question = questions[idx];
-      const globalIndex = question.globalIndex;
-      const answer = userAnswers[globalIndex];
-      if (answer !== null) {
-        const correctAnswer = question.correctAnswer !== undefined ? question.correctAnswer : question.correct;
-        let isCorrect = false;
-        if (Array.isArray(correctAnswer)) {
-          if (correctAnswer.length === 4) {
-            isCorrect = answer !== null;
-          } else {
-            isCorrect = correctAnswer.includes(answer);
-          }
-        } else {
-          isCorrect = answer === correctAnswer;
-        }
-        indicator.classList.add(isCorrect ? 'correct' : 'incorrect');
-      }
-    });
-  }
-
-  // 결과 화면이 표시된 이후라면 정답/오답 표시 복구
-  if (isResultsShown) {
-    updateResultIndicators();
+  // 인디케이터 초기화 — 결과 화면 또는 리뷰 모드면 정답/오답 표시 포함
+  if (isResultsShown || wasInReviewMode) {
+    updateResultIndicators(); // 내부에서 initQuestionIndicators() + correct/incorrect 클래스 적용
+  } else {
+    initQuestionIndicators();
   }
 
   // 리뷰 모드 UI 업데이트 (과목 변경 시에도 유지)
