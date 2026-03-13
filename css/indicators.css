@@ -184,12 +184,14 @@ body:not([data-current-subject]) .indicator {
     grid-template-columns: repeat(10, minmax(0, 1fr));
     gap: 6px;
     max-width: 100%;
+    justify-items: center;
   }
 
   /* 모의고사(80문항): 10열 x 8행으로 스크롤 없이 */
   body:not([data-current-subject]) .question-indicators {
     grid-template-columns: repeat(10, minmax(0, 1fr));
     gap: 5px;
+    justify-items: center;
   }
 
   .indicator {
@@ -199,7 +201,6 @@ body:not([data-current-subject]) .indicator {
     aspect-ratio: 1;
     min-height: 28px;
     font-size: 0.8rem;
-    margin: 0 auto;
   }
 
   body:not([data-current-subject]) .indicator {
@@ -230,6 +231,7 @@ body:not([data-current-subject]) .indicator {
     width: 100%;
     gap: 5px;
     padding: 0;
+    justify-items: center;
   }
 
   body[data-current-subject] .question-indicators {
@@ -249,7 +251,6 @@ body:not([data-current-subject]) .indicator {
     min-height: 26px;
     font-size: 0.75rem;
     flex-shrink: 0;
-    margin: 0 auto;
   }
 
   body:not([data-current-subject]) .indicator {
