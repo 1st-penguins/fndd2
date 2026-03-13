@@ -5,7 +5,7 @@ import { formatTimeFromSeconds } from "../utils/date-utils.js";
 import { isUserLoggedIn } from "../auth/auth-utils.js";
 import { sessionManager } from '../data/session-manager.js';
 import { auth } from "../core/firebase-core.js";
-import { saveWrongAnswer } from "./wrong-note-service.js";
+import { saveWrongAnswer, markAsResolved } from "./wrong-note-service.js";
 import { saveBookmark, removeBookmark, isBookmarked } from "./bookmark-service.js";
 
 /* ===== 전역 변수 설정 ===== */
@@ -1637,6 +1637,7 @@ export async function submitQuiz() {
       }
 
       // 각 문제별로 저장할 데이터 준비
+      const resolveIds = []; // 정답 문제 ID 모아서 일괄 처리
       for (let i = 0; i < questions.length; i++) {
         if (userAnswers[i] !== null) {
           const question = questions[i];
@@ -1707,14 +1708,18 @@ export async function submitQuiz() {
               saveWrongAnswer(auth.currentUser.uid, questionWithId, examNameVal, subject, certificateType)
                 .catch(err => console.error("오답 자동 저장 실패:", err));
             } else if (isCorrect && auth.currentUser) {
-              // ✅ 정답 → 오답노트에서 자동 해결 처리
-              import("./wrong-note-service.js").then(({ markAsResolved }) => {
-                markAsResolved(auth.currentUser.uid, wrongNoteId)
-                  .catch(err => console.error("오답 해결 처리 실패:", err));
-              });
+              // ✅ 정답 → 오답노트 해결 대상으로 수집 (루프 후 일괄 처리)
+              resolveIds.push(wrongNoteId);
             }
           }
         }
+      }
+
+      // 정답 문제 오답노트 해결 처리 (fire-and-forget, 결과 표시 차단 안 함)
+      if (resolveIds.length > 0 && auth.currentUser) {
+        const uid = auth.currentUser.uid;
+        Promise.allSettled(resolveIds.map(id => markAsResolved(uid, id)))
+          .catch(() => {});
       }
 
       console.log(`${attemptsToSave.length}개 문제 결과를 한 번에 저장합니다.`);
