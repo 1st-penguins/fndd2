@@ -7,6 +7,13 @@ const SPORTS_CATEGORIES = {
 };
 const SPORTS_SUBJECTS_ALL = [...SPORTS_CATEGORIES['기본'], ...SPORTS_CATEGORIES['전문']];
 
+const HEALTH_YEARS = ['2025', '2024', '2023', '2022', '2021', '2020', '2019'];
+const HEALTH_CATEGORIES = {
+  '1교시': ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사'],
+  '2교시': ['운동상해', '기능해부학', '병태생리학', '스포츠심리학'],
+};
+const HEALTH_SUBJECTS_ALL = [...HEALTH_CATEGORIES['1교시'], ...HEALTH_CATEGORIES['2교시']];
+
 function renderSportsInstructorProgress(container, attempts) {
   const normalizeYear = (v) => { const m = String(v ?? '').match(/(20\d{2})/); return m ? m[1] : null; };
   const normalizeSubject = (v) => {
@@ -106,6 +113,89 @@ function renderSportsInstructorProgress(container, attempts) {
   </style>`;
 
   container.innerHTML = html;
+}
+
+function renderHealthRegularProgress(attempts) {
+  const normalizeYear = (v) => { const m = String(v ?? '').match(/(20\d{2})/); return m ? m[1] : null; };
+  const normalizeSubject = (v) => {
+    if (!v) return null;
+    try {
+      let s = String(v);
+      for (let i = 0; i < 3; i++) { const t = decodeURIComponent(s); if (t === s) break; s = t; }
+      return s;
+    } catch (e) { return String(v); }
+  };
+
+  // 일반문제만 필터링 (모의고사 제외)
+  const done = {};
+  attempts.forEach(a => {
+    const q = a?.questionData || {};
+    const isMock = q.isFromMockExam === true || q.type === 'mockexam' || q.mockExamHour != null || q.mockExamPart != null || q.hour != null;
+    if (isMock) return;
+
+    const year = normalizeYear(q.year || a.year);
+    const subject = normalizeSubject(q.subject || a.subject);
+    if (!year || !subject || !HEALTH_YEARS.includes(year)) return;
+    if (!HEALTH_SUBJECTS_ALL.includes(subject)) return;
+    if (!done[year]) done[year] = {};
+    if (!done[year][subject]) done[year][subject] = { count: 0, correct: 0 };
+    done[year][subject].count++;
+    if (a.isCorrect) done[year][subject].correct++;
+  });
+
+  let html = `
+    <div class="progress-container" style="margin-top: 32px;">
+      <div class="progress-header-section">
+        <h3>연도별 일반문제 학습 진행률</h3>
+        <p>각 연도별 과목 풀이 현황을 확인할 수 있습니다.</p>
+      </div>`;
+
+  HEALTH_YEARS.forEach(year => {
+    const yearData = done[year] || {};
+    const completedCount = HEALTH_SUBJECTS_ALL.filter(s => (yearData[s]?.count ?? 0) > 0).length;
+    const totalCount = HEALTH_SUBJECTS_ALL.length;
+    const pct = Math.round((completedCount / totalCount) * 100);
+    const color = pct === 100 ? '#1D2F4E' : pct >= 50 ? '#5FB2C9' : '#94a3b8';
+
+    let categoriesHtml = '';
+    Object.entries(HEALTH_CATEGORIES).forEach(([categoryName, subjects]) => {
+      const catDone = subjects.filter(s => (yearData[s]?.count ?? 0) > 0).length;
+      const subjectsHtml = subjects.map(subject => {
+        const s = yearData[subject];
+        const isDone = (s?.count ?? 0) > 0;
+        const acc = isDone ? Math.round((s.correct / s.count) * 100) : null;
+        const url = `exam/${year}_${subject}.html`;
+        return `
+          <div class="health-subject-item ${isDone ? 'done' : 'not-done'}">
+            <span class="subject-name">${subject}</span>
+            ${isDone
+              ? `<span class="subject-acc">${acc}%</span>`
+              : `<a href="${url}" class="subject-start-btn">풀기</a>`}
+          </div>`;
+      }).join('');
+
+      categoriesHtml += `
+        <div class="health-category-section">
+          <div class="health-category-label">${categoryName} <span class="cat-count">${catDone}/${subjects.length}</span></div>
+          <div class="health-subjects-grid">${subjectsHtml}</div>
+        </div>`;
+    });
+
+    html += `
+      <div class="health-year-card">
+        <div class="health-year-header">
+          <span class="health-year-title">${year}년</span>
+          <span class="health-year-badge" style="background:${color}">${completedCount}/${totalCount} 과목</span>
+        </div>
+        <div class="health-year-progress-bar">
+          <div class="health-year-progress-fill" style="width:${pct}%; background:${color}"></div>
+        </div>
+        ${categoriesHtml}
+      </div>`;
+  });
+
+  html += `</div>`;
+  return html;
 }
 
 /**
@@ -325,6 +415,9 @@ export function renderProgressTabStandalone(data) {
       </div>`;
   });
 
+  // 일반문제 진행률 HTML 생성
+  const regularProgressHtml = renderHealthRegularProgress(attempts);
+
   container.innerHTML = `
     <div class="progress-container">
       <div class="progress-header-section">
@@ -333,6 +426,7 @@ export function renderProgressTabStandalone(data) {
       </div>
       ${yearsHtml}
     </div>
+    ${regularProgressHtml}
     <style>
       .progress-year-group { background: var(--color-bg-level-0, #fff); border: 1px solid var(--color-border-primary, #e2e8f0); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
       .progress-year-group.all-done { border-color: rgba(29,47,78,0.3); }
@@ -382,6 +476,20 @@ export function renderProgressTabStandalone(data) {
         .subj-bar-bg { height: 8px; }
         .subj-score { font-size: 0.6rem; min-width: 34px; }
       }
+      /* 건강운동관리사 일반문제 진행률 */
+      .health-year-card { background: var(--color-bg-level-0, #fff); border: 1px solid var(--color-border-primary, #e2e8f0); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+      .health-year-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+      .health-year-title { font-size: 1.2rem; font-weight: 700; color: var(--color-text-primary); }
+      .health-year-badge { color: #fff; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+      .health-year-progress-bar { height: 8px; background: rgba(0,0,0,0.06); border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
+      .health-year-progress-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+      .health-category-section { margin-bottom: 16px; }
+      .health-category-label { font-size: 0.8rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+      .health-subjects-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      @media (max-width: 480px) { .health-subjects-grid { grid-template-columns: repeat(2, 1fr); } }
+      .health-subject-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-radius: 10px; font-size: 0.875rem; }
+      .health-subject-item.done { background: rgba(29,47,78,0.08); color: #1D2F4E; font-weight: 600; }
+      .health-subject-item.not-done { background: var(--color-bg-level-1, #f8fafc); color: var(--color-text-secondary); }
     </style>
   `;
 }
