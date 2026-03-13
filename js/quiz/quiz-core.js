@@ -1406,7 +1406,15 @@ function updateTimerDisplay() {
 /**
  * 퀴즈 제출
  */
+let _submitInProgress = false;
 export async function submitQuiz() {
+  // 중복 제출 방지
+  if (_submitInProgress) {
+    console.warn('이미 제출 처리 중입니다.');
+    return;
+  }
+  _submitInProgress = true;
+
   // 타이머 중지
   clearInterval(timerInterval);
 
@@ -1739,6 +1747,8 @@ function generateSessionId() {
  * 퀴즈 재시작
  */
 export function resetQuiz() {
+  // 제출 상태 초기화 (재도전 가능)
+  _submitInProgress = false;
   // 재도전 시 새로운 일반문제 세션 시작
   try {
     const manager = window.sessionManager || sessionManager;

@@ -2,6 +2,7 @@ import {
     collection,
     doc,
     setDoc,
+    getDoc,
     getDocs,
     query,
     where,
@@ -43,6 +44,9 @@ function removeUndefined(obj) {
  * @param {string} section - 과목 (예: 운동생리학)
  * @param {string} certType - 자격증 타입 ('health-manager' | 'sports-instructor')
  */
+// 같은 세션 내 중복 저장 방지용 Set
+const _savedInSession = new Set();
+
 export async function saveWrongAnswer(userId, questionData, examName, section, certType) {
     if (!userId || !questionData) return;
 
@@ -51,24 +55,38 @@ export async function saveWrongAnswer(userId, questionData, examName, section, c
 
     const questionId = questionData.id || `temp_${Date.now()}`;
     const docId = `${userId}_${questionId}`;
+
+    // 같은 페이지 세션 내 동일 문제 중복 저장 방지
+    if (_savedInSession.has(docId)) {
+        console.warn(`오답노트 중복 저장 방지: ${questionId}`);
+        return;
+    }
+    _savedInSession.add(docId);
+
     const docRef = doc(fireDb, COLLECTION_NAME, docId);
 
-    const payload = {
-        userId,
-        questionId,
-        examName,
-        section,
-        certType: cert,
-        questionData: removeUndefined(questionData),
-        lastIncorrectAt: serverTimestamp(),
-        isResolved: false,
-        incorrectCount: increment(1)
-    };
-
     try {
+        // 기존 문서 존재 여부 확인 → 새 문서면 1, 기존 문서면 increment
+        const existingDoc = await getDoc(docRef);
+        const isNew = !existingDoc.exists();
+
+        const payload = {
+            userId,
+            questionId,
+            examName,
+            section,
+            certType: cert,
+            questionData: removeUndefined(questionData),
+            lastIncorrectAt: serverTimestamp(),
+            isResolved: false,
+            incorrectCount: isNew ? 1 : increment(1)
+        };
+
         await setDoc(docRef, payload, { merge: true });
     } catch (error) {
         console.error("오답노트 저장 실패:", error);
+        // 실패 시 재시도 가능하도록 Set에서 제거
+        _savedInSession.delete(docId);
     }
 }
 

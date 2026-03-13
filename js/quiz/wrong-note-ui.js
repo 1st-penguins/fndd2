@@ -247,10 +247,11 @@ function renderList() {
 
       // ID에서 실제 문제 번호 추출
       const displayNumber = getDisplayNumber(item);
+      const seqIndex = idx + 1; // 순서 인덱스 (1부터)
 
       itemEl.innerHTML = `
         <input type="checkbox" class="wrong-item__checkbox" data-id="${item.id}" ${selectedIds.has(item.id) ? 'checked' : ''}>
-        <div class="wrong-item__number">${displayNumber}</div>
+        <div class="wrong-item__number">${seqIndex}</div>
         <div class="wrong-item__info">
           <div class="wrong-item__title">${examName} ${displayNumber}번</div>
           <div class="wrong-item__meta">
@@ -328,21 +329,42 @@ async function handleResolveSelected() {
   const user = firebaseAuth?.currentUser;
   if (!user) return;
 
-  const promises = [];
+  const tasks = [];
   selectedIds.forEach(docId => {
     const item = currentWrongAnswers.find(x => x.id === docId);
     if (item) {
-      promises.push(markAsResolved(user.uid, item.questionId));
+      tasks.push({ docId, promise: markAsResolved(user.uid, item.questionId) });
     }
   });
 
-  await Promise.all(promises);
+  const results = await Promise.allSettled(tasks.map(t => t.promise));
 
-  // 로컬 데이터 업데이트
-  currentWrongAnswers = currentWrongAnswers.filter(x => !selectedIds.has(x.id));
+  // 성공한 ID만 수집
+  const resolvedIds = new Set();
+  let failCount = 0;
+  results.forEach((result, idx) => {
+    if (result.status === 'fulfilled') {
+      resolvedIds.add(tasks[idx].docId);
+    } else {
+      failCount++;
+      console.error('이해 완료 처리 실패:', result.reason);
+    }
+  });
+
+  // 성공한 것만 로컬 제거 (allWrongAnswers도 동기화)
+  if (resolvedIds.size > 0) {
+    currentWrongAnswers = currentWrongAnswers.filter(x => !resolvedIds.has(x.id));
+    allWrongAnswers = allWrongAnswers.filter(x => !resolvedIds.has(x.id));
+  }
+
+  if (failCount > 0) {
+    alert(`${failCount}개 문제의 처리에 실패했습니다. 다시 시도해주세요.`);
+  }
+
   selectedIds.clear();
   selectMode = false;
   updateSelectMode();
+  updateCertTabs();
   updateFilterButtons();
   renderList();
 }
@@ -375,7 +397,8 @@ function openDetailModal(item) {
   currentModalItem = item;
   const data = item.questionData || {};
 
-  modalTitle.textContent = `${item.section || '기타'} - ${item.examName || '문제'}`;
+  const modalDisplayNum = getDisplayNumber(item);
+  modalTitle.textContent = `${item.section || '기타'} - ${item.examName || '문제'} ${modalDisplayNum}번`;
 
   // 문제 내용
   let questionHtml = '';
@@ -387,13 +410,13 @@ function openDetailModal(item) {
   }
   modalQuestion.innerHTML = questionHtml || '<p>(이미지 문제)</p>';
 
-  // 선택지
+  // 선택지 — correctAnswer, userAnswer 모두 0-based
   const correctAnswer = Number(data.correctAnswer ?? data.answer ?? -1);
   const userAnswer = data.userAnswer != null ? Number(data.userAnswer) : null;
   if (data.options && data.options.length > 0) {
     modalOptions.innerHTML = data.options.map((opt, idx) => {
-      const isCorrect = idx === correctAnswer || (idx + 1) === correctAnswer;
-      const isUserWrong = userAnswer !== null && !isCorrect && (idx === userAnswer || (idx + 1) === userAnswer);
+      const isCorrect = idx === correctAnswer;
+      const isUserWrong = userAnswer !== null && !isCorrect && idx === userAnswer;
       let cls = '';
       let label = '';
       if (isCorrect) { cls = 'correct'; label = ' (정답)'; }
@@ -403,14 +426,13 @@ function openDetailModal(item) {
   } else {
     let html = `<div class="wrong-modal__option correct">정답: ${correctAnswer + 1}번</div>`;
     if (userAnswer !== null) {
-      const ua = userAnswer < 5 ? userAnswer + 1 : userAnswer;
-      html += `<div class="wrong-modal__option user-wrong">내 선택: ${ua}번</div>`;
+      html += `<div class="wrong-modal__option user-wrong">내 선택: ${userAnswer + 1}번</div>`;
     }
     modalOptions.innerHTML = html;
   }
 
   // 해설
-  modalExplanation.innerHTML = `<strong>해설</strong>${data.explanation || '해설이 없습니다.'}`;
+  modalExplanation.innerHTML = `<strong>해설</strong><br>${data.explanation || '해설이 없습니다.'}`;
 
   modalOverlay.classList.add("open");
 }
@@ -427,11 +449,19 @@ async function handleModalResolve() {
   const user = firebaseAuth?.currentUser;
   if (!user) return;
 
-  await markAsResolved(user.uid, currentModalItem.questionId);
-
-  currentWrongAnswers = currentWrongAnswers.filter(x => x.id !== currentModalItem.id);
-  renderList();
-  closeModal();
+  try {
+    await markAsResolved(user.uid, currentModalItem.questionId);
+    const itemId = currentModalItem.id;
+    currentWrongAnswers = currentWrongAnswers.filter(x => x.id !== itemId);
+    allWrongAnswers = allWrongAnswers.filter(x => x.id !== itemId);
+    updateCertTabs();
+    updateFilterButtons();
+    renderList();
+    closeModal();
+  } catch (error) {
+    console.error('이해 완료 처리 실패:', error);
+    alert('처리에 실패했습니다. 다시 시도해주세요.');
+  }
 }
 
 function escapeHtml(text) {
