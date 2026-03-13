@@ -1523,9 +1523,8 @@ export async function submitQuiz() {
   // 로그인 상태 확인
   if (isUserLoggedIn()) {
     try {
-      // ✅ 저장 전 인증 상태 확실히 보장
-      const { ensureAuthReady } = await import('../core/firebase-core.js');
-      await ensureAuthReady();
+      // 인증 상태 보장 (백그라운드, isUserLoggedIn() 통과했으므로 이미 준비됨)
+      import('../core/firebase-core.js').then(({ ensureAuthReady }) => ensureAuthReady()).catch(() => {});
 
       // 각 문제별로 풀이 결과 준비
       const attemptsToSave = [];
@@ -1724,7 +1723,7 @@ export async function submitQuiz() {
 
       console.log(`${attemptsToSave.length}개 문제 결과를 한 번에 저장합니다.`);
 
-      // 배치 저장 함수 호출
+      // 배치 저장 (fire-and-forget — 결과 화면 표시를 차단하지 않음)
       const _batchFn = typeof window.batchRecordAttempts === 'function'
         ? window.batchRecordAttempts
         : typeof batchRecordAttempts === 'function'
@@ -1732,56 +1731,27 @@ export async function submitQuiz() {
           : null;
 
       if (_batchFn) {
-        const result = await _batchFn(attemptsToSave);
-        if (result?.success) {
-          console.log('배치 저장 완료:', result);
-        } else {
-          console.warn('배치 저장 실패:', result?.error);
-          if (typeof window.showToast === 'function') {
-            window.showToast('풀이 기록 일부가 저장되지 않았습니다. 잠시 후 다시 시도해 주세요.', 'error');
+        _batchFn(attemptsToSave).then(result => {
+          if (result?.success) {
+            console.log('배치 저장 완료:', result);
+          } else {
+            console.warn('배치 저장 실패:', result?.error);
+            if (typeof window.showToast === 'function') {
+              window.showToast('풀이 기록 일부가 저장되지 않았습니다. 잠시 후 다시 시도해 주세요.', 'error');
+            }
           }
-        }
+        }).catch(err => console.error('배치 저장 오류:', err));
       } else {
-        // 배치 함수가 없으면 기존 방식대로 개별 저장
         console.warn('배치 저장 함수를 찾을 수 없어 개별 저장으로 진행합니다.');
-
-        for (const attempt of attemptsToSave) {
-          try {
-            await recordAttempt(attempt.questionData, attempt.userAnswer, attempt.isCorrect);
-          } catch (error) {
-            console.error('개별 저장 오류:', error);
-          }
-        }
+        Promise.allSettled(
+          attemptsToSave.map(a => recordAttempt(a.questionData, a.userAnswer, a.isCorrect))
+        ).catch(err => console.error('개별 저장 오류:', err));
       }
     } catch (error) {
       console.error("퀴즈 결과 저장 중 오류 발생:", error);
     }
   } else {
     console.warn("사용자가 로그인하지 않아 결과가 저장되지 않습니다.");
-  }
-
-  // 일반문제 제출 완료 시 세션 종료 (다음 풀이와 세션 분리)
-  try {
-    const manager = window.sessionManager || sessionManager;
-    if (manager && typeof manager.endSession === 'function') {
-      const correctAnswers = calculateScore();
-      const totalQuestions = questions.length;
-      const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-
-      await manager.endSession({
-        totalQuestions,
-        attemptedQuestions: userAnswers.filter(answer => answer !== null).length,
-        correctAnswers,
-        accuracy: score,
-        title: `${currentYear}년 ${currentSubject} 기출문제`,
-        year: currentYear,
-        subject: currentSubject,
-        type: 'regular',
-        completedAt: new Date()
-      });
-    }
-  } catch (error) {
-    console.warn('일반문제 세션 종료 오류 (무시됨):', error);
   }
 
   // 제출 완료 후 로컬 진행 데이터 정리 (다음 진입 시 새로 시작하도록)
@@ -1792,8 +1762,32 @@ export async function submitQuiz() {
     if (baseKey) localStorage.removeItem(baseKey);
   } catch (_) {}
 
-  // 결과 화면 표시
+  // 결과 화면 즉시 표시
   showResults();
+
+  // 세션 종료는 결과 표시 후 백그라운드로
+  try {
+    const manager = window.sessionManager || sessionManager;
+    if (manager && typeof manager.endSession === 'function') {
+      const correctAnswers = calculateScore();
+      const totalQuestions = questions.length;
+      const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+
+      manager.endSession({
+        totalQuestions,
+        attemptedQuestions: userAnswers.filter(answer => answer !== null).length,
+        correctAnswers,
+        accuracy: score,
+        title: `${currentYear}년 ${currentSubject} 기출문제`,
+        year: currentYear,
+        subject: currentSubject,
+        type: 'regular',
+        completedAt: new Date()
+      }).catch(err => console.warn('세션 종료 오류 (무시됨):', err));
+    }
+  } catch (error) {
+    console.warn('세션 종료 오류 (무시됨):', error);
+  }
 }
 
 /**
