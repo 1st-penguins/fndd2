@@ -30,20 +30,24 @@ let activeCertType = localStorage.getItem('currentCertificateType') || 'health-m
 let activeFilter = 'all';
 let selectMode = false;
 let selectedIds = new Set();
+let collapsedSections = new Set(); // 접힌 과목 섹션 추적
 let currentModalItem = null;
 let firebaseAuth = null;
+let currentUserId = null;
 
 // Initialize
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!container) return; // DOM 요소 없으면 무시
+  if (!container) return;
 
   const { auth } = await ensureFirebase();
   firebaseAuth = auth;
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
+      currentUserId = user.uid;
       loadData(user.uid);
     } else {
+      currentUserId = null;
       container.innerHTML = `
         <div class="wrong-note-empty-state">
           <span class="wrong-note-empty-icon">&#128274;</span>
@@ -53,15 +57,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // 과목 필터
+  // 과목 필터 (이벤트 위임)
   if (filterGroup) {
     filterGroup.addEventListener("click", (e) => {
-      if (e.target.classList.contains("wrong-note-filter-btn")) {
-        filterGroup.querySelectorAll(".wrong-note-filter-btn").forEach(btn => btn.classList.remove("active"));
-        e.target.classList.add("active");
-        activeFilter = e.target.dataset.subject;
-        renderList();
-      }
+      const btn = e.target.closest(".wrong-note-filter-btn");
+      if (!btn) return;
+      filterGroup.querySelectorAll(".wrong-note-filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeFilter = btn.dataset.subject;
+      renderList();
     });
   }
 
@@ -87,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     resolveSelectedBtn.addEventListener("click", handleResolveSelected);
   }
 
-  // 다시 풀기 (선택된 문제들로 퀴즈 시작)
+  // 다시 풀기
   if (quizSelectedBtn) {
     quizSelectedBtn.addEventListener("click", handleStartQuiz);
   }
@@ -101,10 +105,63 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
   if (modalResolveBtn) modalResolveBtn.addEventListener("click", handleModalResolve);
+
+  // 컨테이너 이벤트 위임 (아이템 클릭 + 체크박스 + 헤더 접기/펼치기)
+  if (container) {
+    container.addEventListener("click", handleContainerClick);
+  }
 });
 
+// ── 이벤트 위임 핸들러 ──
+function handleContainerClick(e) {
+  // 1. 과목 섹션 헤더 클릭 → 접기/펼치기
+  const header = e.target.closest(".wn-subject-section__header");
+  if (header) {
+    const sectionEl = header.closest(".wn-subject-section");
+    const sectionName = header.dataset.section;
+    if (sectionName) {
+      if (collapsedSections.has(sectionName)) {
+        collapsedSections.delete(sectionName);
+        sectionEl.classList.remove("collapsed");
+      } else {
+        collapsedSections.add(sectionName);
+        sectionEl.classList.add("collapsed");
+      }
+    }
+    return;
+  }
+
+  // 2. 체크박스 클릭
+  const checkbox = e.target.closest(".wrong-item__checkbox");
+  if (checkbox) {
+    e.stopPropagation();
+    const itemId = checkbox.dataset.id;
+    toggleSelection(itemId, checkbox.checked);
+    return;
+  }
+
+  // 3. 아이템 클릭
+  const itemEl = e.target.closest(".wrong-item");
+  if (!itemEl) return;
+  const itemId = itemEl.dataset.id;
+  const item = currentWrongAnswers.find(x => x.id === itemId);
+  if (!item) return;
+
+  if (selectMode) {
+    const cb = itemEl.querySelector('.wrong-item__checkbox');
+    if (cb) {
+      cb.checked = !cb.checked;
+      toggleSelection(itemId, cb.checked);
+    }
+  } else {
+    openDetailModal(item);
+  }
+}
+
+// ── 데이터 로드 ──
 async function loadData(userId) {
   try {
+    // certType별 쿼리 시도 (인덱스 있으면 최적화, 없으면 폴백)
     allWrongAnswers = await getWrongAnswers(userId);
     filterByCertType();
   } catch (error) {
@@ -127,7 +184,6 @@ function updateCertTabs() {
   const certTabGroup = document.getElementById('cert-type-tabs');
   if (!certTabGroup) return;
 
-  // 각 자격증의 오답 수 계산
   const healthCount = allWrongAnswers.filter(i => (i.certType || 'health-manager') === 'health-manager').length;
   const sportsCount = allWrongAnswers.filter(i => i.certType === 'sports-instructor').length;
 
@@ -143,6 +199,7 @@ function updateCertTabs() {
   certTabGroup.querySelectorAll('.wrong-note-cert-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       activeCertType = btn.dataset.cert;
+      collapsedSections.clear(); // 자격증 전환 시 접기 상태 초기화
       filterByCertType();
     });
   });
@@ -153,7 +210,6 @@ function updateFilterButtons() {
 
   const sections = [...new Set(currentWrongAnswers.map(item => item.section).filter(Boolean))];
 
-  // 전체 버튼 + 과목 버튼 새로 생성
   filterGroup.innerHTML = '<button class="wrong-note-filter-btn active" data-subject="all">전체</button>';
   sections.forEach(section => {
     const btn = document.createElement("button");
@@ -171,7 +227,6 @@ function getFilteredItems() {
 
 function getDisplayNumber(item) {
   const qData = item.questionData || {};
-  // ID에서 번호 추출: "2025_운동생리학_3" → 3, "mock_2020_과목_3" → 3
   if (typeof qData.id === 'string') {
     const parts = qData.id.split('_');
     const lastPart = parts[parts.length - 1];
@@ -181,6 +236,7 @@ function getDisplayNumber(item) {
   return qData.number || 0;
 }
 
+// ── 렌더링 (이벤트 위임 방식 — 리스너 0개) ──
 function renderList() {
   const filtered = getFilteredItems();
 
@@ -214,40 +270,48 @@ function renderList() {
     grouped[section].push(item);
   });
 
-  // 과목별 섹션 렌더링 (과목 내 문제 번호 오름차순)
+  // 과목별 섹션 렌더링
   Object.entries(grouped).forEach(([section, items]) => {
     items.sort((a, b) => {
       const numA = parseInt(getDisplayNumber(a), 10) || 0;
       const numB = parseInt(getDisplayNumber(b), 10) || 0;
       return numA - numB;
     });
-    const sectionEl = document.createElement("div");
-    sectionEl.className = "wn-subject-section";
 
+    const isCollapsed = collapsedSections.has(section);
+    const sectionEl = document.createElement("div");
+    sectionEl.className = `wn-subject-section${isCollapsed ? ' collapsed' : ''}`;
+
+    // 헤더 (클릭으로 접기/펼치기 — 이벤트 위임)
     const headerEl = document.createElement("div");
     headerEl.className = "wn-subject-section__header";
+    headerEl.dataset.section = section;
     headerEl.innerHTML = `
-      <span class="wn-subject-section__title">${section}</span>
+      <div class="wn-subject-section__left">
+        <span class="wn-subject-section__toggle">&#9662;</span>
+        <span class="wn-subject-section__title">${section}</span>
+      </div>
       <span class="wn-subject-section__count">${items.length}문제</span>
     `;
     sectionEl.appendChild(headerEl);
 
-    items.forEach((item, idx) => {
-      const itemEl = document.createElement("div");
-      itemEl.className = "wrong-item";
-      itemEl.dataset.id = item.id;
+    // 아이템 목록 래퍼 (접기 애니메이션용)
+    const listWrapper = document.createElement("div");
+    listWrapper.className = "wn-subject-section__list";
 
+    items.forEach((item, idx) => {
       const date = item.lastIncorrectAt
         ? new Date(item.lastIncorrectAt.seconds * 1000).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
         : '';
 
-      const qData = item.questionData || {};
       const examName = item.examName || '';
       const count = item.incorrectCount || 1;
-
-      // ID에서 실제 문제 번호 추출
       const displayNumber = getDisplayNumber(item);
-      const seqIndex = idx + 1; // 순서 인덱스 (1부터)
+      const seqIndex = idx + 1;
+
+      const itemEl = document.createElement("div");
+      itemEl.className = "wrong-item";
+      itemEl.dataset.id = item.id;
 
       itemEl.innerHTML = `
         <input type="checkbox" class="wrong-item__checkbox" data-id="${item.id}" ${selectedIds.has(item.id) ? 'checked' : ''}>
@@ -262,32 +326,15 @@ function renderList() {
         <span class="wrong-item__arrow">&#8250;</span>
       `;
 
-      // 체크박스 이벤트
-      const checkbox = itemEl.querySelector('.wrong-item__checkbox');
-      checkbox.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleSelection(item.id, checkbox.checked);
-      });
-
-      // 아이템 클릭 → 선택 모드면 체크, 아니면 상세 모달
-      itemEl.addEventListener("click", (e) => {
-        if (e.target.classList.contains('wrong-item__checkbox')) return;
-
-        if (selectMode) {
-          checkbox.checked = !checkbox.checked;
-          toggleSelection(item.id, checkbox.checked);
-        } else {
-          openDetailModal(item);
-        }
-      });
-
-      sectionEl.appendChild(itemEl);
+      listWrapper.appendChild(itemEl);
     });
 
+    sectionEl.appendChild(listWrapper);
     container.appendChild(sectionEl);
   });
 }
 
+// ── 선택 모드 ──
 function toggleSelection(id, checked) {
   if (checked) {
     selectedIds.add(id);
@@ -307,7 +354,6 @@ function updateSelectMode() {
     actionBar.classList.remove("visible");
     selectModeBtn.textContent = "선택";
     selectedIds.clear();
-    // 체크박스 해제
     container.querySelectorAll('.wrong-item__checkbox').forEach(cb => { cb.checked = false; });
   }
   updateSelectedCount();
@@ -319,7 +365,7 @@ function updateSelectedCount() {
   if (quizSelectedBtn) quizSelectedBtn.disabled = count === 0;
 }
 
-// 선택된 문제들 이해 완료 처리
+// ── 이해 완료 처리 ──
 async function handleResolveSelected() {
   if (selectedIds.size === 0) return;
 
@@ -339,7 +385,6 @@ async function handleResolveSelected() {
 
   const results = await Promise.allSettled(tasks.map(t => t.promise));
 
-  // 성공한 ID만 수집
   const resolvedIds = new Set();
   let failCount = 0;
   results.forEach((result, idx) => {
@@ -351,7 +396,6 @@ async function handleResolveSelected() {
     }
   });
 
-  // 성공한 것만 로컬 제거 (allWrongAnswers도 동기화)
   if (resolvedIds.size > 0) {
     currentWrongAnswers = currentWrongAnswers.filter(x => !resolvedIds.has(x.id));
     allWrongAnswers = allWrongAnswers.filter(x => !resolvedIds.has(x.id));
@@ -369,15 +413,13 @@ async function handleResolveSelected() {
   renderList();
 }
 
-// 선택된 문제들로 퀴즈 시작
+// ── 다시 풀기 ──
 function handleStartQuiz() {
   if (selectedIds.size === 0) return;
 
   const selectedItems = currentWrongAnswers.filter(x => selectedIds.has(x.id));
-
   if (selectedItems.length === 0) return;
 
-  // sessionStorage에 문제 데이터 저장
   const quizData = selectedItems.map(item => ({
     questionData: item.questionData,
     section: item.section,
@@ -387,12 +429,10 @@ function handleStartQuiz() {
   }));
 
   sessionStorage.setItem('wrongReviewQuestions', JSON.stringify(quizData));
-
-  // exam/quiz.html?mode=wrong-review 로 이동
   window.location.href = `exam/quiz.html?mode=wrong-review&count=${quizData.length}`;
 }
 
-// 상세 모달
+// ── 상세 모달 ──
 function openDetailModal(item) {
   currentModalItem = item;
   const data = item.questionData || {};
@@ -400,7 +440,6 @@ function openDetailModal(item) {
   const modalDisplayNum = getDisplayNumber(item);
   modalTitle.textContent = `${item.section || '기타'} - ${item.examName || '문제'} ${modalDisplayNum}번`;
 
-  // 문제 내용
   let questionHtml = '';
   if (data.questionImage) {
     questionHtml += `<img src="${data.questionImage}" alt="문제 이미지" style="max-width:100%; border-radius:8px; margin-bottom:8px;">`;
@@ -431,7 +470,6 @@ function openDetailModal(item) {
     modalOptions.innerHTML = html;
   }
 
-  // 해설
   modalExplanation.innerHTML = `<strong>해설</strong><br>${data.explanation || '해설이 없습니다.'}`;
 
   modalOverlay.classList.add("open");

@@ -92,14 +92,48 @@ export async function saveWrongAnswer(userId, questionData, examName, section, c
 
 /**
  * 사용자의 오답 노트 목록 가져오기
- * @param {string} userId 
- * @param {boolean} includeResolved - 해결된 문제도 포함할지 여부
+ * @param {string} userId
+ * @param {object} options - { certType, includeResolved }
  */
-export async function getWrongAnswers(userId, includeResolved = false) {
+export async function getWrongAnswers(userId, optionsOrResolved = false) {
+    // 하위호환: 기존 (userId, boolean) 호출 지원
+    let certType = null;
+    let includeResolved = false;
+    if (typeof optionsOrResolved === 'object' && optionsOrResolved !== null) {
+        certType = optionsOrResolved.certType || null;
+        includeResolved = optionsOrResolved.includeResolved || false;
+    } else {
+        includeResolved = !!optionsOrResolved;
+    }
+
     const fireDb = await getDb();
     const collectionRef = collection(fireDb, COLLECTION_NAME);
-    let q;
 
+    // certType 필터 포함 쿼리 시도 (복합 인덱스 필요)
+    if (certType) {
+        try {
+            const conditions = [
+                where("userId", "==", userId),
+                where("certType", "==", certType)
+            ];
+            if (!includeResolved) {
+                conditions.push(where("isResolved", "==", false));
+            }
+            conditions.push(orderBy("lastIncorrectAt", "desc"));
+
+            const q = query(collectionRef, ...conditions);
+            const snapshot = await getDocs(q);
+            const results = [];
+            snapshot.forEach(d => { results.push({ id: d.id, ...d.data() }); });
+            return results;
+        } catch (indexError) {
+            // 복합 인덱스 미생성 시 → 전체 로드 후 클라이언트 필터로 폴백
+            console.warn("certType 인덱스 없음, 전체 로드 후 필터:", indexError.message);
+        }
+    }
+
+    // 기본 쿼리 (전체 로드)
+    let q;
     if (includeResolved) {
         q = query(
             collectionRef,
@@ -118,9 +152,11 @@ export async function getWrongAnswers(userId, includeResolved = false) {
     try {
         const snapshot = await getDocs(q);
         const results = [];
-        snapshot.forEach(doc => {
-            results.push({ id: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(d => { results.push({ id: d.id, ...d.data() }); });
+        // certType이 지정됐으면 클라이언트 필터
+        if (certType) {
+            return results.filter(item => (item.certType || 'health-manager') === certType);
+        }
         return results;
     } catch (error) {
         console.error("오답노트 로드 실패:", error);
