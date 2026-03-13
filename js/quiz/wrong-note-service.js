@@ -180,8 +180,8 @@ export async function markAsResolved(userId, questionId) {
             resolvedAt: serverTimestamp()
         });
     } catch (error) {
-        // 문서가 없으면 (오답 기록이 없는 문제) 무시
-        if (error.code === 'not-found') return;
+        // 문서가 없으면 무시 (not-found 또는 규칙에 의한 permission-denied)
+        if (error.code === 'not-found' || error.code === 'permission-denied') return;
         console.error("오답 해결 처리 실패:", error);
     }
 }
