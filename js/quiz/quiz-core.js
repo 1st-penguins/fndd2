@@ -1503,8 +1503,19 @@ export async function submitQuiz() {
   // 인디케이터 업데이트하여 정답/오답 표시
   updateAllAnswerIndicators();
 
-  // 결과 저장 시도
-  console.log("퀴즈 결과 저장 시도");
+  // 제출 완료 후 로컬 진행 데이터 정리 (다음 진입 시 새로 시작하도록)
+  try {
+    const storageKey = getProgressStorageKey();
+    if (storageKey) localStorage.removeItem(storageKey);
+    const baseKey = getProgressBaseKey();
+    if (baseKey) localStorage.removeItem(baseKey);
+  } catch (_) {}
+
+  // 결과 화면 즉시 표시 (저장보다 먼저)
+  showResults();
+
+  // 이하 모든 저장/세션 처리는 백그라운드 (결과 화면 차단 안 함)
+  console.log("퀴즈 결과 저장 시도 (백그라운드)");
 
   // M3-D: 오프라인 상태 확인 → localStorage에 임시 저장
   if (!navigator.onLine) {
@@ -1517,7 +1528,6 @@ export async function submitQuiz() {
         savedAt: Date.now()
       }));
     } catch (e) { /* 무시 */ }
-    // 결과 화면은 그대로 표시 (오프라인이어도 UI 동작)
   }
 
   // 로그인 상태 확인
@@ -1754,18 +1764,7 @@ export async function submitQuiz() {
     console.warn("사용자가 로그인하지 않아 결과가 저장되지 않습니다.");
   }
 
-  // 제출 완료 후 로컬 진행 데이터 정리 (다음 진입 시 새로 시작하도록)
-  try {
-    const storageKey = getProgressStorageKey();
-    if (storageKey) localStorage.removeItem(storageKey);
-    const baseKey = getProgressBaseKey();
-    if (baseKey) localStorage.removeItem(baseKey);
-  } catch (_) {}
-
-  // 결과 화면 즉시 표시
-  showResults();
-
-  // 세션 종료는 결과 표시 후 백그라운드로
+  // 세션 종료 (백그라운드)
   try {
     const manager = window.sessionManager || sessionManager;
     if (manager && typeof manager.endSession === 'function') {
