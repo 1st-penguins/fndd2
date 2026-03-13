@@ -544,9 +544,33 @@
 
           <!-- 북마크 탭 -->
           <div id="bookmark-tab" class="sub-tab-content">
-            <div style="text-align:center; padding:40px;">
-              <p style="color:var(--text-secondary); margin-bottom:16px;">북마크한 문제를 확인하고 관리하세요.</p>
-              <a href="bookmark.html" style="display:inline-block; padding:12px 24px; background:var(--penguin-navy); color:white; border-radius:10px; text-decoration:none; font-weight:600;">북마크 페이지로 이동</a>
+            <div id="bookmark-root">
+              <div class="wrong-note-cert-tabs" id="bookmark-cert-tabs"></div>
+
+              <div class="wrong-note-controls-bar">
+                <div class="wrong-note-filter-group" id="bookmark-subject-filters">
+                  <button class="wrong-note-filter-btn active" data-subject="all">전체</button>
+                </div>
+                <div class="wrong-note-controls-right">
+                  <span class="wrong-note-stats-summary">총 <strong id="bookmark-total-count">0</strong>문제</span>
+                  <button class="wrong-note-select-mode-btn" id="bookmark-select-mode-btn">선택</button>
+                </div>
+              </div>
+
+              <div class="wrong-note-action-bar" id="bookmark-action-bar">
+                <div class="wrong-note-action-bar__left">
+                  <span id="bookmark-selected-count">0개 선택됨</span>
+                  <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--cancel" id="bookmark-cancel-btn">취소</button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--resolve" id="bookmark-remove-btn">북마크 해제</button>
+                  <button class="wrong-note-action-bar__btn wrong-note-action-bar__btn--quiz" id="bookmark-quiz-btn" disabled>다시 풀기</button>
+                </div>
+              </div>
+
+              <div id="bookmark-list-container">
+                <div style="text-align:center; padding:40px; color:var(--text-secondary);">로그인 후 북마크가 표시됩니다.</div>
+              </div>
             </div>
           </div>
 
@@ -1197,6 +1221,23 @@
     </div>
   </div>
 
+  <!-- 북마크 상세 모달 -->
+  <div class="wrong-modal-overlay" id="bm-detail-modal">
+    <div class="wrong-modal">
+      <div class="wrong-modal__header">
+        <span class="wrong-modal__title" id="bm-modal-title">문제 확인</span>
+        <button class="wrong-modal__close" id="bm-modal-close-btn">&times;</button>
+      </div>
+      <div class="wrong-modal__question" id="bm-modal-question"></div>
+      <div id="bm-modal-options"></div>
+      <div class="wrong-modal__explanation" id="bm-modal-explanation"></div>
+      <div class="wrong-modal__actions">
+        <button class="wrong-modal__btn wrong-modal__btn--close" id="bm-modal-dismiss-btn">닫기</button>
+        <button class="wrong-modal__btn wrong-modal__btn--resolve" id="bm-modal-remove-btn">북마크 해제</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Linear Footer -->
   <footer class="linear-footer"></footer>
 
@@ -1205,6 +1246,8 @@
 
   <!-- 오답노트 -->
   <script type="module" src="js/quiz/wrong-note-ui.js"></script>
+  <!-- 북마크 -->
+  <script type="module" src="js/quiz/bookmark-ui.js"></script>
 
   <!-- 자격증 전환 핸들러 -->
   <script type="module">

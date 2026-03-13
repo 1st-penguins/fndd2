@@ -4,25 +4,25 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/fi
 
 // DOM Elements
 const container = document.getElementById("bookmark-list-container");
-const filterGroup = document.getElementById("subject-filters");
-const totalCountEl = document.getElementById("total-count");
-const selectModeBtn = document.getElementById("select-mode-btn");
-const actionBar = document.getElementById("action-bar");
-const selectedCountEl = document.getElementById("selected-count");
-const cancelSelectBtn = document.getElementById("cancel-select-btn");
-const removeSelectedBtn = document.getElementById("remove-selected-btn");
-const quizSelectedBtn = document.getElementById("quiz-selected-btn");
+const filterGroup = document.getElementById("bookmark-subject-filters");
+const totalCountEl = document.getElementById("bookmark-total-count");
+const selectModeBtn = document.getElementById("bookmark-select-mode-btn");
+const actionBar = document.getElementById("bookmark-action-bar");
+const selectedCountEl = document.getElementById("bookmark-selected-count");
+const cancelSelectBtn = document.getElementById("bookmark-cancel-btn");
+const removeSelectedBtn = document.getElementById("bookmark-remove-btn");
+const quizSelectedBtn = document.getElementById("bookmark-quiz-btn");
 const root = document.getElementById("bookmark-root");
 
 // 모달 Elements
-const modalOverlay = document.getElementById("detail-modal");
-const modalTitle = document.getElementById("modal-title");
-const modalQuestion = document.getElementById("modal-question");
-const modalOptions = document.getElementById("modal-options");
-const modalExplanation = document.getElementById("modal-explanation");
-const modalCloseBtn = document.getElementById("modal-close-btn");
-const modalDismissBtn = document.getElementById("modal-dismiss-btn");
-const modalRemoveBtn = document.getElementById("modal-remove-btn");
+const modalOverlay = document.getElementById("bm-detail-modal");
+const modalTitle = document.getElementById("bm-modal-title");
+const modalQuestion = document.getElementById("bm-modal-question");
+const modalOptions = document.getElementById("bm-modal-options");
+const modalExplanation = document.getElementById("bm-modal-explanation");
+const modalCloseBtn = document.getElementById("bm-modal-close-btn");
+const modalDismissBtn = document.getElementById("bm-modal-dismiss-btn");
+const modalRemoveBtn = document.getElementById("bm-modal-remove-btn");
 
 let allBookmarks = [];
 let currentBookmarks = [];
@@ -169,7 +169,7 @@ function filterByCertType() {
 }
 
 function updateCertTabs() {
-  const certTabGroup = document.getElementById('cert-type-tabs');
+  const certTabGroup = document.getElementById('bookmark-cert-tabs');
   if (!certTabGroup) return;
 
   const healthCount = allBookmarks.filter(i => (i.certType || 'health-manager') === 'health-manager').length;
