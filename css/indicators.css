@@ -189,14 +189,12 @@ body:not([data-current-subject]) .indicator {
 
   /* 모의고사(80문항): 10열 x 8행으로 스크롤 없이 */
   body:not([data-current-subject]) .question-indicators {
-    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-columns: repeat(10, 1fr);
     gap: 5px;
-    justify-items: center;
   }
 
   .indicator {
     width: 100%;
-    max-width: 36px;
     height: auto;
     aspect-ratio: 1;
     min-height: 28px;
@@ -204,7 +202,6 @@ body:not([data-current-subject]) .indicator {
   }
 
   body:not([data-current-subject]) .indicator {
-    max-width: 28px;
     min-height: 24px;
     font-size: 0.7rem;
   }
@@ -229,33 +226,30 @@ body:not([data-current-subject]) .indicator {
   body:not([data-current-subject]) .question-indicators {
     display: grid;
     width: 100%;
-    gap: 5px;
+    gap: 4px;
     padding: 0;
-    justify-items: center;
   }
 
   body[data-current-subject] .question-indicators {
-    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-columns: repeat(10, 1fr);
   }
 
   body:not([data-current-subject]) .question-indicators {
-    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-columns: repeat(10, 1fr);
   }
 
   /* 작은 화면에서 버튼 크기만 축소, 터치 영역 확보 */
   .indicator {
     width: 100%;
-    max-width: 32px;
     height: auto;
     aspect-ratio: 1;
-    min-height: 26px;
-    font-size: 0.75rem;
+    min-height: 24px;
+    font-size: 0.7rem;
     flex-shrink: 0;
   }
 
   body:not([data-current-subject]) .indicator {
-    max-width: 26px;
-    min-height: 22px;
-    font-size: 0.65rem;
+    min-height: 20px;
+    font-size: 0.6rem;
   }
 }
