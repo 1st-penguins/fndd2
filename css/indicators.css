@@ -179,31 +179,32 @@ body:not([data-current-subject]) .indicator {
     max-width: 100%;
   }
 
-  /* 과목별(20문항): 10열 x 2행 유지, 작은 버튼으로 스크롤 없이 표시 */
+  /* 과목별(20문항): 10열 */
   body[data-current-subject] .question-indicators {
-    grid-template-columns: repeat(10, minmax(0, 1fr));
-    gap: 6px;
-    max-width: 100%;
-    justify-items: center;
-  }
-
-  /* 모의고사(80문항): 10열 x 8행으로 스크롤 없이 */
-  body:not([data-current-subject]) .question-indicators {
     grid-template-columns: repeat(10, 1fr);
     gap: 5px;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  /* 모의고사(80문항): 10열 */
+  body:not([data-current-subject]) .question-indicators {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+    max-width: 340px;
+    margin: 0 auto;
   }
 
   .indicator {
     width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    min-height: 28px;
-    font-size: 0.8rem;
+    height: 30px;
+    font-size: 0.75rem;
+    box-sizing: border-box;
   }
 
   body:not([data-current-subject]) .indicator {
-    min-height: 24px;
-    font-size: 0.7rem;
+    height: 26px;
+    font-size: 0.65rem;
   }
 }
 
@@ -212,44 +213,32 @@ body:not([data-current-subject]) .indicator {
     padding: 8px 10px;
     margin: 10px auto 16px;
     overflow: visible;
-    scrollbar-width: unset;
-    -ms-overflow-style: unset;
-    white-space: normal;
   }
 
-  .question-indicators-container::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* 스크롤 제거: 그리드 유지, 한 화면에 맞춤 */
-  body[data-current-subject] .question-indicators,
-  body:not([data-current-subject]) .question-indicators {
-    display: grid;
-    width: 100%;
-    gap: 4px;
-    padding: 0;
-  }
-
+  /* 과목별(20문항) */
   body[data-current-subject] .question-indicators {
     grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+    max-width: 320px;
+    margin: 0 auto;
   }
 
+  /* 모의고사(80문항) */
   body:not([data-current-subject]) .question-indicators {
     grid-template-columns: repeat(10, 1fr);
+    gap: 3px;
+    max-width: 290px;
+    margin: 0 auto;
   }
 
-  /* 작은 화면에서 버튼 크기만 축소, 터치 영역 확보 */
   .indicator {
     width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    min-height: 24px;
-    font-size: 0.7rem;
-    flex-shrink: 0;
+    height: 26px;
+    font-size: 0.65rem;
   }
 
   body:not([data-current-subject]) .indicator {
-    min-height: 20px;
+    height: 22px;
     font-size: 0.6rem;
   }
 }
