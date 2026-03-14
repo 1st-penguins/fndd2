@@ -625,7 +625,8 @@
     }
 
     .quiz-container .subject-badge {
-        right: 16px;
+        right: auto;
+        left: 90px;
         top: 10px;
         font-size: 0.65rem;
         padding: 3px 8px;
@@ -724,7 +725,8 @@
     }
 
     .quiz-container .subject-badge {
-        right: 12px;
+        right: auto;
+        left: 80px;
         top: 8px;
         font-size: 0.6rem;
         padding: 2px 7px;
