@@ -109,7 +109,7 @@ body:not([data-current-subject]) .indicator {
 /* 과목별 구분 spacer — 그리드 전체 폭 차지 */
 .indicator-subject-spacer {
   grid-column: 1 / -1;
-  height: 6px;
+  height: 4px;
 }
 
 /* Hover State */
@@ -179,8 +179,8 @@ body:not([data-current-subject]) .indicator {
 /* Tablet & Mobile - 그리드 유지, 스크롤 없이 한 화면에 */
 @media (max-width: 768px) {
   .question-indicators-container {
-    padding: 10px 4%;
-    margin: 8px auto 12px;
+    padding: 6px 4%;
+    margin: 4px auto 6px;
     overflow: visible;
     box-sizing: border-box;
   }
@@ -200,21 +200,21 @@ body:not([data-current-subject]) .indicator {
 
   /* 인디케이터: 정사각형, 축소 — specificity 높여서 고정 width 덮어쓰기 */
   body .question-indicators .indicator {
-    width: 64%;
+    width: 56%;
     height: auto;
     aspect-ratio: 1;
     min-width: 0;
     min-height: 0;
-    font-size: 0.55rem;
-    border-radius: 5px;
+    font-size: 0.5rem;
+    border-radius: 4px;
     box-sizing: border-box;
   }
 }
 
 @media (max-width: 480px) {
   .question-indicators-container {
-    padding: 8px 4%;
-    margin: 10px auto 16px;
+    padding: 4px 4%;
+    margin: 2px auto 4px;
   }
 
   body[data-current-subject] .question-indicators,
@@ -224,8 +224,8 @@ body:not([data-current-subject]) .indicator {
   }
 
   body .question-indicators .indicator {
-    width: 60%;
-    font-size: 0.5rem;
-    border-radius: 4px;
+    width: 52%;
+    font-size: 0.45rem;
+    border-radius: 3px;
   }
 }
