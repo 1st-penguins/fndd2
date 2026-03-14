@@ -403,6 +403,16 @@ export function initAnalyticsSubTabs() {
         console.error(`탭 렌더링 오류 (${tabId}):`, error);
       }
 
+      // 서브탭 영역이 헤더에 가리지 않도록 스크롤 보정
+      const subTabsEl = analyticsTab.querySelector('.sub-tabs');
+      if (subTabsEl) {
+        const headerHeight = document.querySelector('.linear-header')?.offsetHeight || 60;
+        const rect = subTabsEl.getBoundingClientRect();
+        if (rect.top < headerHeight) {
+          window.scrollBy({ top: rect.top - headerHeight - 12, behavior: 'smooth' });
+        }
+      }
+
       // 기존 이벤트 시스템과의 호환성을 위해 이벤트 발생
       document.dispatchEvent(new CustomEvent('tabChanged', {
         detail: { tab: tabId }
