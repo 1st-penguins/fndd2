@@ -175,8 +175,9 @@ body:not([data-current-subject]) .indicator {
   .question-indicators-container {
     padding: 10px 12px;
     margin: 12px auto 20px;
-    overflow: visible;
+    overflow: hidden;
     max-width: 100%;
+    box-sizing: border-box;
   }
 
   /* 과목별(20문항): 10열 */
@@ -195,14 +196,16 @@ body:not([data-current-subject]) .indicator {
     margin: 0 auto;
   }
 
-  .indicator {
-    width: 100%;
+  /* specificity 높여서 데스크톱 고정 width 확실히 덮기 */
+  .question-indicators .indicator {
+    width: auto;
+    min-width: 0;
     height: 30px;
     font-size: 0.75rem;
     box-sizing: border-box;
   }
 
-  body:not([data-current-subject]) .indicator {
+  body:not([data-current-subject]) .question-indicators .indicator {
     height: 26px;
     font-size: 0.65rem;
   }
@@ -212,7 +215,7 @@ body:not([data-current-subject]) .indicator {
   .question-indicators-container {
     padding: 8px 10px;
     margin: 10px auto 16px;
-    overflow: visible;
+    overflow: hidden;
   }
 
   /* 과목별(20문항) */
@@ -231,13 +234,14 @@ body:not([data-current-subject]) .indicator {
     margin: 0 auto;
   }
 
-  .indicator {
-    width: 100%;
+  .question-indicators .indicator {
+    width: auto;
+    min-width: 0;
     height: 26px;
     font-size: 0.65rem;
   }
 
-  body:not([data-current-subject]) .indicator {
+  body:not([data-current-subject]) .question-indicators .indicator {
     height: 22px;
     font-size: 0.6rem;
   }
