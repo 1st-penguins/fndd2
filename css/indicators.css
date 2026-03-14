@@ -173,76 +173,47 @@ body:not([data-current-subject]) .indicator {
 /* Tablet & Mobile - 그리드 유지, 스크롤 없이 한 화면에 */
 @media (max-width: 768px) {
   .question-indicators-container {
-    padding: 10px 12px;
+    padding: 10px 20px;
     margin: 12px auto 20px;
-    overflow: hidden;
-    max-width: 100%;
+    overflow: visible;
     box-sizing: border-box;
   }
 
-  /* 과목별(20문항): 10열 */
-  body[data-current-subject] .question-indicators {
-    grid-template-columns: repeat(10, 1fr);
-    gap: 5px;
-    max-width: 380px;
-    margin: 0 auto;
-  }
-
-  /* 모의고사(80문항): 10열 */
+  /* 공통: 10열 그리드, 컨테이너 전체 폭 사용 */
+  body[data-current-subject] .question-indicators,
   body:not([data-current-subject]) .question-indicators {
+    display: grid;
     grid-template-columns: repeat(10, 1fr);
     gap: 4px;
-    max-width: 340px;
-    margin: 0 auto;
-  }
-
-  /* specificity 높여서 데스크톱 고정 width 확실히 덮기 */
-  .question-indicators .indicator {
-    width: auto;
-    min-width: 0;
-    height: 30px;
-    font-size: 0.75rem;
+    width: 100%;
     box-sizing: border-box;
   }
 
-  body:not([data-current-subject]) .question-indicators .indicator {
-    height: 26px;
-    font-size: 0.65rem;
+  /* 인디케이터: 정사각형, 셀에 맞춤 */
+  .question-indicators .indicator {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    min-width: 0;
+    min-height: 0;
+    font-size: 0.7rem;
+    box-sizing: border-box;
   }
 }
 
 @media (max-width: 480px) {
   .question-indicators-container {
-    padding: 8px 10px;
+    padding: 8px 16px;
     margin: 10px auto 16px;
-    overflow: hidden;
   }
 
-  /* 과목별(20문항) */
-  body[data-current-subject] .question-indicators {
-    grid-template-columns: repeat(10, 1fr);
-    gap: 4px;
-    max-width: 320px;
-    margin: 0 auto;
-  }
-
-  /* 모의고사(80문항) */
+  body[data-current-subject] .question-indicators,
   body:not([data-current-subject]) .question-indicators {
-    grid-template-columns: repeat(10, 1fr);
     gap: 3px;
-    max-width: 290px;
-    margin: 0 auto;
   }
 
   .question-indicators .indicator {
-    width: auto;
-    min-width: 0;
-    height: 26px;
-    font-size: 0.65rem;
-  }
-
-  body:not([data-current-subject]) .question-indicators .indicator {
-    height: 22px;
     font-size: 0.6rem;
+    border-radius: 5px;
   }
 }
