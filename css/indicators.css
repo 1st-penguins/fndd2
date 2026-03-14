@@ -32,9 +32,8 @@
 .question-indicators-container {
   width: 100%;
   max-width: 900px;
-  margin: 20px auto 30px;
-  padding: 20px;
-  /* Consistent padding */
+  margin: 6px auto 10px;
+  padding: 6px 20px;
   background: transparent;
   box-sizing: border-box;
 }
@@ -61,8 +60,8 @@ body:not([data-current-subject]) .question-indicators-container {
 body[data-current-subject] .question-indicators {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
-  gap: 10px;
-  max-width: 480px;
+  gap: 6px;
+  max-width: 420px;
   justify-items: center;
 }
 
@@ -70,7 +69,8 @@ body[data-current-subject] .question-indicators {
 body:not([data-current-subject]) .question-indicators {
   display: grid;
   grid-template-columns: repeat(20, 1fr);
-  gap: 6px;
+  column-gap: 3px;
+  row-gap: 3px;
   width: 100%;
   justify-items: center;
 }
@@ -82,11 +82,9 @@ body:not([data-current-subject]) .question-indicators {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  /* Standard size */
-  height: 36px;
-  border-radius: 8px;
-  /* Soft square (Linear style) */
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
   background-color: var(--ind-bg);
   border: 1.5px solid var(--ind-border);
   color: var(--ind-text);
@@ -100,10 +98,10 @@ body:not([data-current-subject]) .question-indicators {
 
 /* Mock exam indicators slightly smaller to fit 20 cols */
 body:not([data-current-subject]) .indicator {
-  width: 32px;
-  height: 32px;
-  font-size: 0.75rem;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  font-size: 0.7rem;
+  border-radius: 5px;
 }
 
 /* 과목별 구분 spacer — 그리드 전체 폭 차지 */
