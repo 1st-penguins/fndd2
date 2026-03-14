@@ -179,8 +179,8 @@ body:not([data-current-subject]) .indicator {
 /* Tablet & Mobile - 그리드 유지, 스크롤 없이 한 화면에 */
 @media (max-width: 768px) {
   .question-indicators-container {
-    padding: 6px 4%;
-    margin: 4px auto 6px;
+    padding: 3px 4%;
+    margin: 2px auto 3px;
     overflow: visible;
     box-sizing: border-box;
   }
@@ -213,8 +213,8 @@ body:not([data-current-subject]) .indicator {
 
 @media (max-width: 480px) {
   .question-indicators-container {
-    padding: 4px 4%;
-    margin: 2px auto 4px;
+    padding: 2px 4%;
+    margin: 1px auto 2px;
   }
 
   body[data-current-subject] .question-indicators,
