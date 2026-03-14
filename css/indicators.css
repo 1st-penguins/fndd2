@@ -70,7 +70,7 @@ body:not([data-current-subject]) .question-indicators {
   display: grid;
   grid-template-columns: repeat(20, 1fr);
   column-gap: 3px;
-  row-gap: 3px;
+  row-gap: 1px;
   width: 100%;
   justify-items: center;
 }
@@ -189,7 +189,7 @@ body:not([data-current-subject]) .indicator {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     column-gap: 2px;
-    row-gap: 2px;
+    row-gap: 1px;
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -218,7 +218,7 @@ body:not([data-current-subject]) .indicator {
   body[data-current-subject] .question-indicators,
   body:not([data-current-subject]) .question-indicators {
     column-gap: 1px;
-    row-gap: 2px;
+    row-gap: 1px;
   }
 
   body .question-indicators .indicator {
