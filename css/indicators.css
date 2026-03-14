@@ -68,10 +68,10 @@ body[data-current-subject] .question-indicators {
 /* Mock Exam (80 questions): 20 columns layout */
 body:not([data-current-subject]) .question-indicators {
   display: grid;
-  grid-template-columns: repeat(20, 1fr);
+  grid-template-columns: repeat(20, 26px);
   column-gap: 3px;
   row-gap: 1px;
-  width: 100%;
+  justify-content: center;
   justify-items: center;
 }
 
