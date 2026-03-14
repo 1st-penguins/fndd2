@@ -419,15 +419,30 @@ export function renderProgressTabStandalone(data) {
   const regularProgressHtml = renderHealthRegularProgress(attempts);
 
   container.innerHTML = `
-    <div class="progress-container">
-      <div class="progress-header-section">
-        <h3>연도별 모의고사 학습 진행률</h3>
-        <p>각 연도별 1교시·2교시 모의고사 응시 현황과 최고 점수를 확인할 수 있습니다.</p>
-      </div>
-      ${yearsHtml}
+    <div class="progress-sub-tabs">
+      <button class="progress-sub-tab active" data-target="progress-mock">모의고사</button>
+      <button class="progress-sub-tab" data-target="progress-regular">일반문제</button>
     </div>
-    ${regularProgressHtml}
+    <div id="progress-mock" class="progress-sub-content active">
+      <div class="progress-container">
+        <div class="progress-header-section">
+          <h3>연도별 모의고사 학습 진행률</h3>
+          <p>각 연도별 1교시·2교시 모의고사 응시 현황과 최고 점수를 확인할 수 있습니다.</p>
+        </div>
+        ${yearsHtml}
+      </div>
+    </div>
+    <div id="progress-regular" class="progress-sub-content">
+      ${regularProgressHtml}
+    </div>
     <style>
+      .progress-sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; }
+      .progress-sub-tab { padding: 9px 24px; border: 1px solid rgba(29,47,78,0.12); background: #fff; color: var(--color-text-secondary, #64748b); border-radius: 9999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+      .progress-sub-tab:hover { background: #f8f9fa; border-color: rgba(95,178,201,0.5); color: var(--color-text-primary, #1D2F4E); }
+      .progress-sub-tab.active { background: var(--penguin-navy, #1D2F4E); color: #fff; border-color: var(--penguin-navy, #1D2F4E); }
+      .progress-sub-content { display: none; }
+      .progress-sub-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       .progress-year-group { background: var(--color-bg-level-0, #fff); border: 1px solid var(--color-border-primary, #e2e8f0); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
       .progress-year-group.all-done { border-color: rgba(29,47,78,0.3); }
       .year-group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -492,6 +507,17 @@ export function renderProgressTabStandalone(data) {
       .health-subject-item.not-done { background: var(--color-bg-level-1, #f8fafc); color: var(--color-text-secondary); }
     </style>
   `;
+
+  // 서브탭 전환 이벤트
+  container.querySelectorAll('.progress-sub-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.progress-sub-tab').forEach(b => b.classList.remove('active'));
+      container.querySelectorAll('.progress-sub-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const target = document.getElementById(btn.dataset.target);
+      if (target) target.classList.add('active');
+    });
+  });
 }
 
 // data-management-standalone.js 등 전역 호출 호환용
