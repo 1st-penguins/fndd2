@@ -415,7 +415,8 @@ function openDetailModal(item) {
     modalOptions.innerHTML = `<div class="wrong-modal__option correct">정답: ${correctAnswer + 1}번</div>`;
   }
 
-  modalExplanation.innerHTML = `<strong>해설</strong><br>${data.explanation || '해설이 없습니다.'}`;
+  const explanationHtml = (data.explanation || '해설이 없습니다.').replace(/\n/g, '<br>');
+  modalExplanation.innerHTML = `<strong>해설</strong><br>${explanationHtml}`;
   modalOverlay.classList.add("open");
 }
 
