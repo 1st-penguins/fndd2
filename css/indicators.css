@@ -63,7 +63,7 @@ body[data-current-subject] .question-indicators {
   grid-template-columns: repeat(10, 1fr);
   gap: 10px;
   max-width: 480px;
-  /* Optimal width for 10 items */
+  justify-items: center;
 }
 
 /* Mock Exam (80 questions): 20 columns layout */
@@ -71,8 +71,8 @@ body:not([data-current-subject]) .question-indicators {
   display: grid;
   grid-template-columns: repeat(20, 1fr);
   gap: 6px;
-  /* Tighter gap for density */
   width: 100%;
+  justify-items: center;
 }
 
 /* ============================================
@@ -173,19 +173,21 @@ body:not([data-current-subject]) .indicator {
 /* Tablet & Mobile - 그리드 유지, 스크롤 없이 한 화면에 */
 @media (max-width: 768px) {
   .question-indicators-container {
-    padding: 10px 20px;
-    margin: 12px auto 20px;
+    padding: 10px 4%;
+    margin: 8px auto 12px;
     overflow: visible;
     box-sizing: border-box;
   }
 
-  /* 공통: 10열 그리드, 컨테이너 전체 폭 사용 */
+  /* 공통: 10열 그리드, 중앙 정렬 */
   body[data-current-subject] .question-indicators,
   body:not([data-current-subject]) .question-indicators {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     gap: 4px;
     width: 100%;
+    max-width: 100%;
+    margin: 0;
     box-sizing: border-box;
   }
 
@@ -203,7 +205,7 @@ body:not([data-current-subject]) .indicator {
 
 @media (max-width: 480px) {
   .question-indicators-container {
-    padding: 8px 16px;
+    padding: 8px 4%;
     margin: 10px auto 16px;
   }
 

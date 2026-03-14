@@ -1437,11 +1437,11 @@ function updateProgressDisplay() {
   const progressCount = document.getElementById('progress-count');
   const progressBar = document.getElementById('progress-bar');
 
-  const currentNumber = currentQuestionIndex + 1;
+  const answeredCount = userAnswers.filter(a => a !== null).length;
   const totalQuestions = questions.length;
-  const progress = (currentNumber / totalQuestions) * 100;
+  const progress = (answeredCount / totalQuestions) * 100;
 
-  progressCount.textContent = `${currentNumber} / ${totalQuestions}`;
+  progressCount.textContent = `${answeredCount} / ${totalQuestions}`;
   progressBar.style.width = `${progress}%`;
 }
 

@@ -706,7 +706,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       // 인디케이터 확인 및 표시
       const indicatorsContainer = document.querySelector('.question-indicators-container');
       if (indicatorsContainer && indicatorsContainer.style.display === 'none') {
-        indicatorsContainer.style.display = 'block';
+        indicatorsContainer.style.display = '';
       }
 
       updateProgressDisplay();
@@ -1053,18 +1053,13 @@ function loadQuestion(index) {
   const subjectBadge = document.getElementById('subject-badge');
   subjectBadge.textContent = question.subject;
 
-  // 배지 기본 스타일 설정 - 절대 위치로 변경하여 잘림 방지 (우측 상단)
-  subjectBadge.style.position = "absolute";
-  subjectBadge.style.top = "16px";
-  subjectBadge.style.right = "24px";
-  subjectBadge.style.display = "inline-flex"; // 내용을 감싸도록 변경
-  subjectBadge.style.alignItems = "center";
-  subjectBadge.style.justifyContent = "center";
-  subjectBadge.style.fontWeight = "600";
-  subjectBadge.style.padding = "5px 12px";
-  subjectBadge.style.borderRadius = "20px";
-  subjectBadge.style.fontSize = "0.8rem";
-  subjectBadge.style.zIndex = "5"; // 다른 요소 위에 표시
+  // 배지 스타일 — 위치/크기는 CSS에서 관리 (float left/right 헤더 행)
+  // 인라인 position 제거하여 CSS가 제어하도록 함
+  subjectBadge.style.position = "";
+  subjectBadge.style.top = "";
+  subjectBadge.style.right = "";
+  subjectBadge.style.left = "";
+  subjectBadge.style.zIndex = "";
 
   // 과목별 배지 색상 - 투명도 적용 (0.85)
   if (question.subject === "운동생리학" || question.subject === "운동상해") {
@@ -1502,12 +1497,7 @@ function initQuestionIndicators() {
     numColumns = 10;
   }
 
-  // 인디케이터 그리드 컨테이너 생성
-  const gridContainer = document.createElement('div');
-  gridContainer.className = 'question-indicators';
-  // CSS에서 스타일 관리하므로 인라인 스타일 제거
-
-  // 스크롤 제거
+  // 스크롤 제거 — #question-indicators 자체가 그리드 컨테이너 역할
   container.style.overflowX = 'visible';
   container.style.overflowY = 'visible';
 
@@ -1594,10 +1584,8 @@ function initQuestionIndicators() {
       checkAllAnswered();
     });
 
-    gridContainer.appendChild(indicator);
+    container.appendChild(indicator);
   }
-
-  container.appendChild(gridContainer);
 
   if (reviewMode) {
     addReviewModeStyles();
