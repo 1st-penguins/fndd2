@@ -1514,10 +1514,19 @@ function initQuestionIndicators() {
   };
 
   // 모든 인디케이터를 순서대로 추가
+  let prevSubject = null;
   for (let i = 0; i < questions.length; i++) {
     const indicator = document.createElement('div');
     indicator.className = 'indicator';
     const subject = questions[i].subject;
+
+    // 과목이 바뀌면 구분 spacer 삽입 (첫 과목 제외)
+    if (prevSubject && subject !== prevSubject) {
+      const spacer = document.createElement('div');
+      spacer.className = 'indicator-subject-spacer';
+      container.appendChild(spacer);
+    }
+    prevSubject = subject;
     const globalIndex = questions[i].globalIndex;
     const isAnswered = userAnswers[globalIndex] !== null;
     const isCurrent = i === currentQuestionIndex;

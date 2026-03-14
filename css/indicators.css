@@ -106,6 +106,12 @@ body:not([data-current-subject]) .indicator {
   border-radius: 6px;
 }
 
+/* 과목별 구분 spacer — 그리드 전체 폭 차지 */
+.indicator-subject-spacer {
+  grid-column: 1 / -1;
+  height: 6px;
+}
+
 /* Hover State */
 .indicator:hover:not(.current) {
   border-color: var(--penguin-skyblue);
@@ -184,7 +190,8 @@ body:not([data-current-subject]) .indicator {
   body:not([data-current-subject]) .question-indicators {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
-    gap: 4px;
+    column-gap: 2px;
+    row-gap: 2px;
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -212,7 +219,8 @@ body:not([data-current-subject]) .indicator {
 
   body[data-current-subject] .question-indicators,
   body:not([data-current-subject]) .question-indicators {
-    gap: 3px;
+    column-gap: 1px;
+    row-gap: 2px;
   }
 
   body .question-indicators .indicator {
