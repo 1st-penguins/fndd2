@@ -570,15 +570,15 @@ header::before {
 
 @media (max-width: 576px) {
     .quiz-container {
-        padding: 44px 20px 30px;
+        padding: 38px 20px 30px;
         border-radius: 16px;
     }
 
     .question-number {
-        left: 20px;
-        top: 12px;
-        font-size: 0.75rem;
-        padding: 4px 10px;
+        left: 16px;
+        top: 10px;
+        font-size: 0.65rem;
+        padding: 3px 8px;
     }
 }
 

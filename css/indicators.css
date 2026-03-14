@@ -191,14 +191,14 @@ body:not([data-current-subject]) .indicator {
     box-sizing: border-box;
   }
 
-  /* 인디케이터: 정사각형, 셀에 맞춤 */
+  /* 인디케이터: 정사각형, 20% 축소 */
   .question-indicators .indicator {
-    width: 100%;
+    width: 80%;
     height: auto;
     aspect-ratio: 1;
     min-width: 0;
     min-height: 0;
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     box-sizing: border-box;
   }
 }
@@ -215,7 +215,8 @@ body:not([data-current-subject]) .indicator {
   }
 
   .question-indicators .indicator {
-    font-size: 0.6rem;
-    border-radius: 5px;
+    width: 78%;
+    font-size: 0.55rem;
+    border-radius: 4px;
   }
 }
