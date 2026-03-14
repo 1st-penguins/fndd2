@@ -420,10 +420,13 @@ export function renderProgressTabStandalone(data) {
 
   container.innerHTML = `
     <div class="progress-sub-tabs">
-      <button class="progress-sub-tab active" data-target="progress-mock">모의고사</button>
-      <button class="progress-sub-tab" data-target="progress-regular">일반문제</button>
+      <button class="progress-sub-tab active" data-target="progress-regular">일반문제</button>
+      <button class="progress-sub-tab" data-target="progress-mock">모의고사</button>
     </div>
-    <div id="progress-mock" class="progress-sub-content active">
+    <div id="progress-regular" class="progress-sub-content active">
+      ${regularProgressHtml}
+    </div>
+    <div id="progress-mock" class="progress-sub-content">
       <div class="progress-container">
         <div class="progress-header-section">
           <h3>연도별 모의고사 학습 진행률</h3>
@@ -431,9 +434,6 @@ export function renderProgressTabStandalone(data) {
         </div>
         ${yearsHtml}
       </div>
-    </div>
-    <div id="progress-regular" class="progress-sub-content">
-      ${regularProgressHtml}
     </div>
     <style>
       .progress-sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; }
