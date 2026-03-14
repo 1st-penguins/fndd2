@@ -1497,11 +1497,11 @@ function initQuestionIndicators() {
     numColumns = 10;
   }
 
-  // 스크롤 제거 — #question-indicators 자체가 그리드 컨테이너 역할
+  // 스크롤 제거
   container.style.overflowX = 'visible';
   container.style.overflowY = 'visible';
 
-  // 과목별 색상 매핑 객체 - 전역 변수로 설정
+  // 과목별 색상 매핑 객체
   subjectColors = {
     "운동생리학": { bg: "#3681AB", border: "#3681AB" },
     "운동상해": { bg: "#3681AB", border: "#3681AB" },
@@ -1513,88 +1513,94 @@ function initQuestionIndicators() {
     "스포츠심리학": { bg: "#9B92BB", border: "#9B92BB" }
   };
 
-  // 모든 인디케이터를 순서대로 추가
-  let prevSubject = null;
+  // 과목별로 그룹화
+  const subjectGroups = [];
+  let currentGroup = null;
   for (let i = 0; i < questions.length; i++) {
-    const indicator = document.createElement('div');
-    indicator.className = 'indicator';
     const subject = questions[i].subject;
-
-    // 과목이 바뀌면 구분 spacer 삽입 (첫 과목 제외)
-    if (prevSubject && subject !== prevSubject) {
-      const spacer = document.createElement('div');
-      spacer.className = 'indicator-subject-spacer';
-      container.appendChild(spacer);
+    if (!currentGroup || currentGroup.subject !== subject) {
+      currentGroup = { subject, startIndex: i, questions: [] };
+      subjectGroups.push(currentGroup);
     }
-    prevSubject = subject;
-    const globalIndex = questions[i].globalIndex;
-    const isAnswered = userAnswers[globalIndex] !== null;
-    const isCurrent = i === currentQuestionIndex;
+    currentGroup.questions.push({ question: questions[i], index: i });
+  }
 
-    // data 속성 추가
-    indicator.setAttribute('data-subject', subject);
-    indicator.setAttribute('data-index', i);
-    indicator.setAttribute('data-answered', isAnswered);
-    indicator.setAttribute('data-current', isCurrent);
-    indicator.setAttribute('role', 'button');
-    indicator.setAttribute('aria-label', `문제 ${i + 1}로 이동`);
+  // 과목별 카드 생성
+  subjectGroups.forEach(group => {
+    const card = document.createElement('div');
+    card.className = 'indicator-subject-card';
 
-    // CSS에서 모든 스타일 관리 (inline 스타일 제거)
+    // 과목명 라벨
+    const label = document.createElement('div');
+    label.className = 'indicator-subject-label';
+    label.textContent = group.subject;
+    const color = subjectColors[group.subject];
+    if (color) {
+      label.style.color = color.bg;
+      label.style.borderLeftColor = color.bg;
+    }
+    card.appendChild(label);
 
-    // 과목별 번호 표시
-    let displayNumber;
-    if (currentSubject === "all") {
-      const subjectIndex = subjectNames.indexOf(subject);
-      if (subjectIndex !== -1) {
-        const subjectQuestions = questions.filter(q => q.subject === subject);
-        const subjectQuestionIndex = subjectQuestions.findIndex(q => q.globalIndex === questions[i].globalIndex);
+    // 인디케이터 그리드
+    const grid = document.createElement('div');
+    grid.className = 'indicator-subject-grid';
+
+    group.questions.forEach(({ question, index: i }) => {
+      const indicator = document.createElement('div');
+      indicator.className = 'indicator';
+      const globalIndex = question.globalIndex;
+      const isAnswered = userAnswers[globalIndex] !== null;
+      const isCurrent = i === currentQuestionIndex;
+
+      indicator.setAttribute('data-subject', group.subject);
+      indicator.setAttribute('data-index', i);
+      indicator.setAttribute('data-answered', isAnswered);
+      indicator.setAttribute('data-current', isCurrent);
+      indicator.setAttribute('role', 'button');
+      indicator.setAttribute('aria-label', `문제 ${i + 1}로 이동`);
+
+      // 과목별 번호 표시
+      let displayNumber;
+      if (currentSubject === "all") {
+        const subjectQuestions = questions.filter(q => q.subject === group.subject);
+        const subjectQuestionIndex = subjectQuestions.findIndex(q => q.globalIndex === question.globalIndex);
         displayNumber = subjectQuestionIndex >= 0 ? subjectQuestionIndex + 1 : i + 1;
       } else {
         displayNumber = i + 1;
       }
-    } else {
-      displayNumber = i + 1;
-    }
+      indicator.textContent = displayNumber;
 
-    indicator.textContent = displayNumber;
+      if (isAnswered) indicator.classList.add('answered');
+      if (isCurrent) indicator.classList.add('current');
 
-    // CSS 클래스만 추가 (모든 스타일은 CSS에서 처리)
-    if (isAnswered) indicator.classList.add('answered');
-    if (isCurrent) indicator.classList.add('current');
+      indicator.addEventListener('click', function () {
+        currentQuestionIndex = i;
 
-    // 클릭 이벤트
-    indicator.addEventListener('click', function () {
-      currentQuestionIndex = i;
-
-      if (reviewMode && incorrectIndices) {
-        const clickedGlobalIndex = questions[i].globalIndex;
-        const newIndex = incorrectGlobalIndices?.indexOf(clickedGlobalIndex);
-
-        if (newIndex !== -1) {
-          currentIncorrectIndex = newIndex;
-
-          const prevButton = document.getElementById('prev-button');
-          const nextButton = document.getElementById('next-button');
-
-          prevButton.disabled = currentIncorrectIndex === 0;
-          nextButton.disabled = currentIncorrectIndex >= incorrectIndices.length - 1;
-
-          updateIncorrectCounter();
+        if (reviewMode && incorrectIndices) {
+          const clickedGlobalIndex = questions[i].globalIndex;
+          const newIndex = incorrectGlobalIndices?.indexOf(clickedGlobalIndex);
+          if (newIndex !== -1) {
+            currentIncorrectIndex = newIndex;
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            prevButton.disabled = currentIncorrectIndex === 0;
+            nextButton.disabled = currentIncorrectIndex >= incorrectIndices.length - 1;
+            updateIncorrectCounter();
+          }
         }
-      }
 
-      loadQuestion(currentQuestionIndex);
-      updateQuestionIndicators();
+        loadQuestion(currentQuestionIndex);
+        updateQuestionIndicators();
+        if (reviewMode) showCurrentAnswer(questions[i]);
+        checkAllAnswered();
+      });
 
-      if (reviewMode) {
-        showCurrentAnswer(questions[i]);
-      }
-
-      checkAllAnswered();
+      grid.appendChild(indicator);
     });
 
-    container.appendChild(indicator);
-  }
+    card.appendChild(grid);
+    container.appendChild(card);
+  });
 
   if (reviewMode) {
     addReviewModeStyles();

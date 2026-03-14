@@ -67,12 +67,9 @@ body[data-current-subject] .question-indicators {
 
 /* Mock Exam (80 questions): 20 columns layout */
 body:not([data-current-subject]) .question-indicators {
-  display: grid;
-  grid-template-columns: repeat(20, 26px);
-  column-gap: 3px;
-  row-gap: 1px;
-  justify-content: center;
-  justify-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 /* ============================================
@@ -104,7 +101,32 @@ body:not([data-current-subject]) .indicator {
   border-radius: 5px;
 }
 
-/* 과목별 구분 spacer — 그리드 전체 폭 차지 */
+/* 과목별 카드 레이아웃 */
+.indicator-subject-card {
+  background: #f8fafc;
+  border: 1px solid #e8ecf1;
+  border-radius: 8px;
+  padding: 6px 10px 8px;
+  margin-bottom: 4px;
+}
+
+.indicator-subject-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding-left: 6px;
+  border-left: 2px solid #ccc;
+  line-height: 1;
+}
+
+.indicator-subject-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+  justify-items: center;
+}
+
+/* 레거시 spacer — 더 이상 사용하지 않지만 안전하게 유지 */
 .indicator-subject-spacer {
   grid-column: 1 / -1;
   height: 4px;
@@ -196,9 +218,27 @@ body:not([data-current-subject]) .indicator {
     box-sizing: border-box;
   }
 
-  /* 인디케이터: 정사각형, 축소 — specificity 높여서 고정 width 덮어쓰기 */
-  body .question-indicators .indicator {
-    width: 56%;
+  /* 과목별 카드 모바일 */
+  .indicator-subject-card {
+    padding: 4px 6px 6px;
+    margin-bottom: 3px;
+    border-radius: 6px;
+  }
+
+  .indicator-subject-label {
+    font-size: 0.6rem;
+    margin-bottom: 3px;
+  }
+
+  .indicator-subject-grid {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 2px;
+  }
+
+  /* 인디케이터: 정사각형, 축소 */
+  body .question-indicators .indicator,
+  .indicator-subject-grid .indicator {
+    width: 100%;
     height: auto;
     aspect-ratio: 1;
     min-width: 0;
@@ -221,8 +261,22 @@ body:not([data-current-subject]) .indicator {
     row-gap: 1px;
   }
 
-  body .question-indicators .indicator {
-    width: 52%;
+  .indicator-subject-card {
+    padding: 3px 5px 5px;
+    margin-bottom: 2px;
+  }
+
+  .indicator-subject-label {
+    font-size: 0.55rem;
+    margin-bottom: 2px;
+  }
+
+  .indicator-subject-grid {
+    gap: 1px;
+  }
+
+  body .question-indicators .indicator,
+  .indicator-subject-grid .indicator {
     font-size: 0.45rem;
     border-radius: 3px;
   }
