@@ -114,19 +114,10 @@
     background-color: var(--penguin-navy);
 }
 
-/* 뱃지 헤더 영역 확보 — 문제 콘텐츠 위에 별도 공간 */
-.quiz-container {
-    padding-top: 60px;
-}
+/* 뱃지/북마크 위치는 quiz.css에서 통합 관리 */
+/* 문제번호(.question-number), 북마크(.bookmark-btn) → quiz.css */
 
-/* 문제번호(왼) */
-.quiz-container .question-number {
-    position: absolute;
-    top: 14px;
-    left: 50px;
-}
-
-/* 과목뱃지(오) */
+/* 과목뱃지 — 모의고사 전용 (일반문제에는 없음) */
 .quiz-container .subject-badge {
     position: absolute;
     top: 14px;
@@ -611,22 +602,14 @@
 
     /* 인디케이터 스타일은 css/indicators.css에서 관리 */
 
-    .quiz-container {
-        padding-top: 38px;
-    }
+    /* padding-top은 quiz.css에서 통합 관리 */
 
     /* 모바일에서도 문제번호 표시 (과목뱃지와 한 쌍) */
-    .quiz-container .question-number {
-        display: block;
-        left: 16px;
-        top: 10px;
-        font-size: 0.65rem;
-        padding: 3px 8px;
-    }
+    /* 문제번호(.question-number) → quiz.css에서 통합 관리 */
 
     .quiz-container .subject-badge {
-        right: auto;
-        left: 90px;
+        right: 46px;
+        left: auto;
         top: 10px;
         font-size: 0.65rem;
         padding: 3px 8px;
@@ -713,20 +696,11 @@
 
     /* 인디케이터 스타일은 css/indicators.css에서 관리 */
 
-    .quiz-container {
-        padding-top: 34px;
-    }
-
-    .quiz-container .question-number {
-        left: 12px;
-        top: 8px;
-        font-size: 0.6rem;
-        padding: 2px 7px;
-    }
+    /* padding-top, 문제번호 → quiz.css에서 통합 관리 */
 
     .quiz-container .subject-badge {
-        right: auto;
-        left: 80px;
+        right: 40px;
+        left: auto;
         top: 8px;
         font-size: 0.6rem;
         padding: 2px 7px;

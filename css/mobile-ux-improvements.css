@@ -6,7 +6,7 @@
    ============================================ */
 
 /* 모든 클릭 가능한 요소에 최소 터치 타겟 크기 보장 */
-button:not(.admin-only),
+button:not(.admin-only):not(.bookmark-btn),
 a:not(.admin-only),
 input[type="button"],
 input[type="submit"],
@@ -28,7 +28,7 @@ input[type="submit"],
 /* 작은 버튼도 터치 타겟 확보 */
 @media (max-width: 768px) {
   /* 버튼 내부 패딩으로 터치 영역 확보 */
-  button,
+  button:not(.bookmark-btn),
   .btn {
     padding: 12px 20px;
     min-height: 44px;
