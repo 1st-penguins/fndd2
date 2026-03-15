@@ -7098,7 +7098,8 @@ function showMockExamScorecard(sessionId) {
               showQuestionPreview({
                 year, subject: subj, number: num,
                 userAnswer, correctAnswer,
-                isCorrect: attempt.isCorrect
+                isCorrect: attempt.isCorrect,
+                certificateType: attempt.certificateType || attempt.questionData?.certificateType || getCurrentCertificateType()
               });
             } catch (previewError) {
               console.warn('문제 미리보기 실패:', previewError);
@@ -7667,7 +7668,7 @@ window.loadMockExamAttemptsForSession = loadMockExamAttemptsForSession;
 /**
  * 문제 미리보기 모달 (페이지 이동 없이 문제 확인)
  */
-async function showQuestionPreview({ year, subject, number, userAnswer, correctAnswer, isCorrect }) {
+async function showQuestionPreview({ year, subject, number, userAnswer, correctAnswer, isCorrect, certificateType }) {
   // 기존 모달 제거
   document.getElementById('question-preview-modal')?.remove();
 
@@ -7704,7 +7705,10 @@ async function showQuestionPreview({ year, subject, number, userAnswer, correctA
   // JSON 데이터에서 문제 로드
   const bodyEl = modal.querySelector('.qp-body');
   try {
-    const resp = await fetch(`data/${year}_${subject}.json`);
+    const certType = certificateType || getCurrentCertificateType();
+    const suffix = CERT_REGISTRY[certType]?.folderSuffix || '';
+    const dataSubFolder = suffix ? suffix.replace('-', '') + '/' : '';
+    const resp = await fetch(`data/${dataSubFolder}${year}_${subject}.json`);
     if (!resp.ok) throw new Error('데이터 없음');
     const questions = await resp.json();
     const q = questions.find(item => item.id === number) || questions[number - 1];
@@ -7719,7 +7723,8 @@ async function showQuestionPreview({ year, subject, number, userAnswer, correctA
     }
     bodyEl.innerHTML = html || '<p>문제 데이터를 표시할 수 없습니다.</p>';
   } catch (e) {
-    bodyEl.innerHTML = `<p class="qp-error">문제를 불러올 수 없습니다.<br/><a href="exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${number}" class="qp-link">문제 페이지로 이동</a></p>`;
+    const examFolderName = 'exam' + (CERT_REGISTRY[certType]?.folderSuffix || '');
+    bodyEl.innerHTML = `<p class="qp-error">문제를 불러올 수 없습니다.<br/><a href="${examFolderName}/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${number}" class="qp-link">문제 페이지로 이동</a></p>`;
   }
 }
 
