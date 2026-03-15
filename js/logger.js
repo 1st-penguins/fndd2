@@ -47,9 +47,11 @@ const Logger = {
 // 전역으로 등록
 window.Logger = Logger;
 
-  // 개발 환경에서만 로거 초기화 메시지 출력
-if (Logger.isDev() && Logger.level >= 3) {
-  console.log('로깅 시스템이 초기화되었습니다. 로그 레벨: ' + Logger.level);
+// 🔇 프로덕션 콘솔 정리: 개발 환경이 아니면 console.log/debug/info 무음 처리
+// console.error, console.warn은 유지 (실제 에러/경고는 항상 보여야 함)
+if (!Logger.isDev()) {
+  const noop = () => {};
+  console.log = noop;
+  console.debug = noop;
+  console.info = noop;
 }
-
-// export default 제거
