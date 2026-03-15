@@ -61,8 +61,8 @@
     white-space: nowrap;
   }
 
-  /* 3번째 버튼은 전체 폭 */
-  .cert-button:nth-child(3) {
+  /* 1번째 버튼(건강운동관리사)은 전체 폭 */
+  .cert-button:nth-child(1) {
     flex: 1 1 100%;
   }
 }

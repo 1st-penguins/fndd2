@@ -1934,12 +1934,17 @@ export function reviewQuiz() {
     navButtons.style.display = 'flex';
   }
 
-  // 네비게이션 버튼 이벤트 리스너 설정 (과목 변경 시에도 오답 이동 유지)
-  const prevButton = document.getElementById('prev-button');
-  const nextButton = document.getElementById('next-button');
+  // 네비게이션 버튼 — 기존 리스너 완전 교체 (cloneNode로 확실히 제거)
+  const oldPrev = document.getElementById('prev-button');
+  const oldNext = document.getElementById('next-button');
+  const prevButton = oldPrev.cloneNode(true);
+  const nextButton = oldNext.cloneNode(true);
+  oldPrev.parentNode.replaceChild(prevButton, oldPrev);
+  oldNext.parentNode.replaceChild(nextButton, oldNext);
 
-  prevButton.removeEventListener('click', goToPreviousQuestion);
-  nextButton.removeEventListener('click', goToNextQuestion);
+  // disabled 클래스 제거 (pointer-events: none 방지) — disabled 속성으로만 제어
+  prevButton.classList.remove('disabled');
+  nextButton.classList.remove('disabled');
 
   prevButton.addEventListener('click', goToPreviousIncorrect);
   nextButton.addEventListener('click', goToNextIncorrect);
@@ -1962,6 +1967,12 @@ export function reviewQuiz() {
 
   // 정답 표시
   showCurrentAnswer();
+
+  // 인디케이터 영역으로 스크롤 (리뷰 메시지에 의해 밀려 잘리는 문제 방지)
+  const indicatorContainer = document.querySelector('.question-indicators-container');
+  if (indicatorContainer) {
+    setTimeout(() => indicatorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  }
 }
 
 /**
@@ -2104,15 +2115,16 @@ export function exitReviewMode() {
     navButtons.style.display = 'none';
   }
 
-  // 네비게이션 버튼 원래 기능으로 복원
-  const prevButton = document.getElementById('prev-button');
-  const nextButton = document.getElementById('next-button');
+  // 네비게이션 버튼 원래 기능으로 복원 (cloneNode로 리뷰 리스너 제거)
+  const oldPrev = document.getElementById('prev-button');
+  const oldNext = document.getElementById('next-button');
+  const prevButton = oldPrev.cloneNode(true);
+  const nextButton = oldNext.cloneNode(true);
+  oldPrev.parentNode.replaceChild(prevButton, oldPrev);
+  oldNext.parentNode.replaceChild(nextButton, oldNext);
 
-  prevButton.removeEventListener('click', goToPreviousIncorrect);
-  nextButton.removeEventListener('click', goToNextIncorrect);
-
-  prevButton.addEventListener('click', window.originalPrevFunction || goToPreviousQuestion);
-  nextButton.addEventListener('click', window.originalNextFunction || goToNextQuestion);
+  prevButton.addEventListener('click', goToPreviousQuestion);
+  nextButton.addEventListener('click', goToNextQuestion);
 
   // 리뷰 모드 메시지 제거
   const reviewMessage = document.querySelector('.review-mode-message');
