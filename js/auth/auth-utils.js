@@ -83,7 +83,7 @@ export function isAdmin(user) {
   }
   
   // 인자로 받은 사용자 객체가 있으면 사용, 없으면 현재 로그인된 사용자 확인
-  const currentUser = user || auth.currentUser;
+  const currentUser = user || (auth && auth.currentUser);
   
   if (!currentUser || !currentUser.email) {
     return false;

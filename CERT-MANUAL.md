@@ -232,6 +232,8 @@ images-{suffix}/
 - [ ] `index.html` 학습분석 자격증 필터 드롭다운(`set-cert-filter`)에 option 추가
 - [ ] `analytics-dashboard.js` CERT_SHORT_MAP, CERT_LABEL_MAP, 삭제 버튼 배열 추가
 - [ ] `analytics-dashboard.js` 과목 상수 추가 + `updateSubjectOptions()` 조건 추가
+- [ ] `analytics-dashboard.js` 관리자 통계 자격증 필터(`admin-cert-filter`)가 CERT_REGISTRY 기반 동적 생성인지 확인
+- [ ] `index.html` 문제풀이기록 삭제 버튼 추가 (`delete-{short}-question-sets`)
 - [ ] `render-progress-tab-function.js` 연도/카테고리/과목 상수 + 분기 추가
 - [ ] `bookmark-ui.js` 탭 버튼 추가
 - [ ] `wrong-note-ui.js` 탭 버튼 추가

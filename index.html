@@ -502,7 +502,8 @@
                   <div class="filter-buttons-group">
                     <button id="apply-set-filters" class="filter-button">적용</button>
                     <button id="delete-health-question-sets" class="filter-button delete-all">건강운동관리사 삭제</button>
-                    <button id="delete-sports-question-sets" class="filter-button delete-all">생활스포츠 삭제</button>
+                    <button id="delete-sports-question-sets" class="filter-button delete-all">2급 스포츠 삭제</button>
+                    <button id="delete-sports1-question-sets" class="filter-button delete-all">1급 스포츠 삭제</button>
                   </div>
                 </div>
 
@@ -1353,6 +1354,7 @@
   <script type="module">
     // 🎯 certificate-utils import
     import { setCertificateType, getCurrentCertificateType } from './js/utils/certificate-utils.js';
+    import { loadAnalyticsData } from './js/analytics/analytics-dashboard.js';
 
     // 자격증 전환 기능
     document.addEventListener('DOMContentLoaded', () => {
@@ -1616,6 +1618,17 @@
 
           // 서브탭 핸들러 재초기화
           initSubTabs();
+
+          // 🔄 학습분석 데이터 리로드 (자격증 전환 시 즉시 반영)
+          (async () => {
+            try {
+              const { ensureFirebase } = await import('./js/core/firebase-core.js');
+              const { auth } = await ensureFirebase();
+              if (auth?.currentUser) {
+                loadAnalyticsData(auth.currentUser);
+              }
+            } catch (e) { /* 비로그인 시 무시 */ }
+          })();
         });
       });
 

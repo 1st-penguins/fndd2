@@ -23,7 +23,7 @@ export async function loadNotices(containerId = 'notice-container', options = {}
     showBadges: true,
     showDates: true,
     showPinned: true,
-    showViewCount: isAdmin(auth.currentUser),
+    showViewCount: isAdmin(auth && auth.currentUser),
     dateFn: formatSimpleDate
   };
 
@@ -123,7 +123,7 @@ export async function loadNoticesWithPagination(containerId = 'notice-container'
     showBadges: true,
     showDates: true,
     showPinned: true,
-    showViewCount: isAdmin(auth.currentUser),
+    showViewCount: isAdmin(auth && auth.currentUser),
     dateFn: formatSimpleDate,
     paginationId: 'notice-pagination' // 페이지네이션 컨테이너 ID
   };

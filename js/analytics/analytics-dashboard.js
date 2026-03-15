@@ -83,6 +83,10 @@ const state = {
   lastRefreshTime: null
 };
 
+// 자격증별 데이터 캐시 (전환 시 Firestore 재쿼리 방지)
+const _certDataCache = {};
+const CERT_CACHE_TTL = 5 * 60 * 1000; // 5분
+
 // ─── V4-A2: 완주 세션 필터 ──────────────────────────────────────────────
 // 일반문제: 세션당 attempts 수 >= 20, 모의고사: >= 80
 // sessionId 없는 레거시 attempts는 필터 통과 (유지)
@@ -724,16 +728,34 @@ function generateMockExamResults(certificateType = 'health-manager') {
  * 분석 데이터 로드
  * @param {Object} user - 현재 사용자 정보
  */
-export async function loadAnalyticsData(user) {
+export async function loadAnalyticsData(user, options = {}) {
   // console.log('분석 데이터 로드 시작:', user);
 
   try {
-    showLoading('학습 데이터를 불러오는 중...');
     state.isLoading = true;
 
     // 🎯 현재 선택된 자격증 가져오기
     const currentCertType = getCurrentCertificateType();
     const certName = getCertificateName(currentCertType);
+
+    // 🚀 캐시 히트: 5분 이내 동일 자격증 데이터는 즉시 렌더링
+    const cached = _certDataCache[currentCertType];
+    if (!options.force && cached && (Date.now() - cached.time < CERT_CACHE_TTL)) {
+      state.attempts = cached.attempts;
+      state.mockExamResults = cached.mockExamResults;
+      state.userProgress = cached.userProgress;
+      window.userAttempts = state.attempts;
+      if (!window.state) window.state = {};
+      window.state.userProgress = state.userProgress;
+      window.state.mockExamResults = state.mockExamResults;
+      state.lastRefreshTime = cached.time;
+      state.error = null;
+      renderDashboard();
+      state.isLoading = false;
+      return;
+    }
+
+    showLoading('학습 데이터를 불러오는 중...');
     
     // 🔧 개발자 모드 확인
     const devMode = typeof isDevMode === 'function' && isDevMode();
@@ -819,8 +841,13 @@ export async function loadAnalyticsData(user) {
     // 오류 상태 초기화
     state.error = null;
 
-    // 내 노트 컴포넌트 기능 비활성화
-    // console.log('내 노트 기능이 비활성화되었습니다.');
+    // 🚀 캐시 저장
+    _certDataCache[currentCertType] = {
+      attempts: state.attempts,
+      mockExamResults: state.mockExamResults,
+      userProgress: state.userProgress,
+      time: state.lastRefreshTime
+    };
 
     // 대시보드 렌더링
     renderDashboard();
@@ -864,8 +891,8 @@ async function refreshDataIfNeeded(force = false) {
     return;
   }
 
-  // 데이터 로드 시작
-  await loadAnalyticsData(user);
+  // 데이터 로드 시작 (강제: 캐시 무시)
+  await loadAnalyticsData(user, { force: true });
   showToast('데이터가 성공적으로 새로고침되었습니다.');
 }
 
@@ -4191,9 +4218,20 @@ function renderAdminTab() {
   const adminControls = document.createElement('div');
   adminControls.className = 'admin-controls';
 
+  // 자격증별 과목/연도 옵션 생성
+  const certOptions = Object.entries(CERT_REGISTRY).map(([key, cfg]) =>
+    `<option value="${key}">${cfg.emoji} ${cfg.name}</option>`
+  ).join('');
+
   // 필터 추가
   adminControls.innerHTML = `
     <div class="admin-filters">
+      <div class="filter-group">
+        <label for="admin-cert-filter">자격증:</label>
+        <select id="admin-cert-filter" class="filter-select">
+          ${certOptions}
+        </select>
+      </div>
       <div class="filter-group">
         <label for="admin-set-filter">문제풀이기록:</label>
         <select id="admin-set-filter" class="filter-select" disabled>
@@ -4205,27 +4243,12 @@ function renderAdminTab() {
         <select id="year-filter" class="filter-select">
           <option value="" selected disabled>선택</option>
           <option value="all">전체</option>
-          <option value="2025">2025</option>
-          <option value="2024">2024</option>
-          <option value="2023">2023</option>
-          <option value="2022">2022</option>
-          <option value="2021">2021</option>
-          <option value="2020">2020</option>
-          <option value="2019">2019</option>
         </select>
       </div>
       <div class="filter-group">
         <label for="subject-filter">과목:</label>
         <select id="subject-filter" class="filter-select">
           <option value="all" selected>전체</option>
-          <option value="운동생리학">운동생리학</option>
-          <option value="건강체력평가">건강체력평가</option>
-          <option value="운동처방론">운동처방론</option>
-          <option value="운동부하검사">운동부하검사</option>
-          <option value="운동상해">운동상해</option>
-          <option value="기능해부학">기능해부학</option>
-          <option value="병태생리학">병태생리학</option>
-          <option value="스포츠심리학">스포츠심리학</option>
         </select>
       </div>
       <div class="filter-group" style="flex: 0 0 auto; display: flex; align-items: center; gap: 8px; min-width: auto;">
@@ -4237,6 +4260,40 @@ function renderAdminTab() {
       <button id="load-admin-stats" class="admin-button">📊 통계 불러오기</button>
     </div>
   `;
+
+  // 자격증 선택 시 연도/과목 필터 동적 업데이트
+  function updateAdminFilters() {
+    const certType = document.getElementById('admin-cert-filter')?.value || 'health-manager';
+    const config = CERT_REGISTRY[certType];
+    if (!config) return;
+
+    // 연도 업데이트
+    const yearSelect = document.getElementById('year-filter');
+    if (yearSelect) {
+      yearSelect.innerHTML = '<option value="" selected disabled>선택</option><option value="all">전체</option>';
+      config.years.slice().sort((a, b) => b - a).forEach(y => {
+        yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+      });
+    }
+
+    // 과목 업데이트
+    const subjectSelect = document.getElementById('subject-filter');
+    if (subjectSelect) {
+      subjectSelect.innerHTML = '<option value="all" selected>전체</option>';
+      getAllSubjects(certType).forEach(s => {
+        subjectSelect.innerHTML += `<option value="${s}">${s}</option>`;
+      });
+    }
+  }
+
+  // 초기 로드 시 필터 세팅
+  setTimeout(() => {
+    const certSelect = document.getElementById('admin-cert-filter');
+    if (certSelect) {
+      certSelect.addEventListener('change', updateAdminFilters);
+      updateAdminFilters();
+    }
+  }, 0);
 
   statsCard.appendChild(adminControls);
 
@@ -4871,7 +4928,8 @@ async function loadAdminStats(options = {}) {
       return;
     }
 
-    console.log(`관리자 통계 로드: setId=${setId}, year=${yearValue}, subject=${subjectValue}`);
+    const adminCertType = document.getElementById('admin-cert-filter')?.value || 'health-manager';
+    console.log(`관리자 통계 로드: cert=${adminCertType}, year=${yearValue}, subject=${subjectValue}`);
 
     // 관리자 통계 컨테이너 선택
     const container = document.getElementById('admin-stats-content');
@@ -4883,7 +4941,7 @@ async function loadAdminStats(options = {}) {
     }
 
     // 실제 문제별 통계 로드
-    await loadQuestionStatistics(yearValue, subjectValue, setId, container);
+    await loadQuestionStatistics(yearValue, subjectValue, setId, container, adminCertType);
 
     // 로딩 상태 해제
     if (loader) loader.style.display = 'none';
@@ -4903,7 +4961,7 @@ async function loadAdminStats(options = {}) {
  * @param {string} setType - 문제풀이기록 타입 (all/regular/mockexam)
  * @param {HTMLElement} container - 통계를 표시할 컨테이너
  */
-async function loadQuestionStatistics(year, subject, setType, container) {
+async function loadQuestionStatistics(year, subject, setType, container, certType = 'health-manager') {
   try {
     const currentUser = auth?.currentUser || null;
     const projectId = db?.app?.options?.projectId
@@ -4914,7 +4972,7 @@ async function loadQuestionStatistics(year, subject, setType, container) {
     const includeAdmin = document.getElementById('include-admin-data')?.checked || false;
 
     // 캐시 키 생성 (completedOnly: true 포함 — 미필터 캐시와 분리)
-    const cacheKey = StatsCache.generateKey('question-stats', { year, subject, setType, includeAdmin, completedOnly: true });
+    const cacheKey = StatsCache.generateKey('question-stats', { year, subject, setType, includeAdmin, completedOnly: true, certType });
 
     // 캐시 확인
     const cached = StatsCache.get(cacheKey);
@@ -4953,6 +5011,17 @@ async function loadQuestionStatistics(year, subject, setType, container) {
     let attempts = [];
     snapshot.forEach(doc => {
       attempts.push({ id: doc.id, ...doc.data() });
+    });
+
+    // 자격증 타입 필터링
+    const certTypeFullKey = certType || 'health-manager';
+    const certSubjects = new Set(getAllSubjects(certTypeFullKey));
+    attempts = attempts.filter(a => {
+      // certificateType 필드가 있으면 직접 비교
+      if (a.certificateType) return a.certificateType === certTypeFullKey;
+      // 없으면 과목명으로 판별
+      const subj = a.questionData?.subject || a.subject || '';
+      return certSubjects.has(subj);
     });
 
     // 클라이언트 사이드 필터링 (Firestore 복합 인덱스 없이)
