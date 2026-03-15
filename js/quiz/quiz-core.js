@@ -360,13 +360,16 @@ export async function initializeQuiz() {
     currentSubject = subject;
 
     // 일반문제 세션을 페이지 단위로 분리해 누적 혼합(예: 160/160) 방지
-    await ensureRegularSessionForPage({
-      year,
-      subject,
-      isResume,
-      resumeSessionId,
-      totalQuestions: 20
-    });
+    // 모의고사 페이지는 mock-exam.js에서 mockexam 세션을 생성하므로 건너뜀
+    if (!filename.includes('모의고사')) {
+      await ensureRegularSessionForPage({
+        year,
+        subject,
+        isResume,
+        resumeSessionId,
+        totalQuestions: 20
+      });
+    }
 
     // ✅ 일반 과목 시험인 경우 body에 data-current-subject 속성 추가
     // (CSS 스타일링을 위해 필요: indicators.css 등에서 사용)

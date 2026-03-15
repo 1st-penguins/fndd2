@@ -531,8 +531,19 @@ document.addEventListener('DOMContentLoaded', async function () {
               console.log('이어풀기 모드: 복구할 세션이 없음');
             }
           } else {
-            // 일반 모드: 세션 생성하지 않음 (첫 문제 풀이 시 자동 생성됨)
-            console.log('일반 모드: 세션 생성하지 않음 (첫 문제 풀이 시 자동 생성)');
+            // 일반 모드에서도 모의고사 세션을 mockexam 타입으로 생성
+            const sessionMetadata = {
+              year: year,
+              hour: hour,
+              type: 'mockexam',
+              title: `${year}년 ${hour}교시 모의고사`,
+              subjects: subjectNames,
+              totalQuestions: 80,
+              examType: '모의고사',
+              isActive: true
+            };
+            await window.sessionManager.startNewSession(sessionMetadata, false);
+            console.log('일반 모드: 모의고사 세션 생성 완료');
           }
         }
         return true;
