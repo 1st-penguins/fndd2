@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>스포츠영양학 기출문제 | 1급 스포츠지도사 | 퍼스트펭귄</title>
+  <link rel="canonical" href="https://the1stpeng.com/subjects-sports1/subject_스포츠영양학.html" />
+  <meta name="description" content="1급 전문스포츠지도사 스포츠영양학 전체 기출문제를 연도별로 풀어보세요. 스포츠 영양과 식이요법을 학습합니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="스포츠영양학 기출문제 모음 | 1급 스포츠지도사 | 퍼스트펭귄">
+  <meta property="og:description" content="1급 전문스포츠지도사 스포츠영양학 전체 기출문제를 연도별로 풀어보세요. 스포츠 영양과 식이요법을 학습합니다.">
+  <meta property="og:url" content="https://the1stpeng.com/subjects-sports1/subject_스포츠영양학.html">
+  <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="스포츠영양학 기출문제 모음 | 1급 스포츠지도사 | 퍼스트펭귄">
+  <meta name="twitter:description" content="1급 전문스포츠지도사 스포츠영양학 전체 기출문제를 연도별로 풀어보세요. 스포츠 영양과 식이요법을 학습합니다.">
+  
+  <!-- 외부 CSS 파일 연결 -->
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/linear-header.css" />
+  <link rel="stylesheet" href="../css/linear-footer.css" />
+  <link rel="stylesheet" href="../css/layout.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/indicators.css" />
+  <link rel="stylesheet" href="../css/pages/subject.css" />
+  <link rel="stylesheet" href="../css/pages/page-header.css" />
+  <link rel="stylesheet" href="../css/login.css" />
+  <link rel="stylesheet" href="../css/mobile-ux-improvements.css" />
+  
+    <!-- PWA 및 테마 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4E3278">
+  
+  <!-- Firebase 리소스 힌트 -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+
+    <!-- 로거 스크립트: 모든 JS 파일보다 먼저 로드 -->
+    <script src="../js/logger.js"></script>
+  <script>localStorage.setItem("currentCertificateType", "sports-instructor-1");</script>
+
+  <!-- Firebase 및 로그인 관리 스크립트 (모듈 방식) -->
+  <script type="module" src="../js/config/dev-config.js"></script>
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+  <script type="module" src="../js/auth/auth-ui.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  <script type="module" src="../js/utils/ui-utils.js"></script>
+  
+  <!-- 페이지 전용 스크립트 -->
+  <script type="module" src="../js/subjects/subject-page.js"></script>
+  
+  <!-- Linear Header -->
+  <script src="../js/linear-header.js"></script>
+  <script type="module" src="../js/dev-mode-toggle.js"></script>
+  <script src="../js/mobile-viewport-fix.js"></script>
+</head>
+<body>
+  <!-- 로그인 필요 알림 모달 -->
+  <div id="login-required-modal" class="login-modal">
+    <div class="login-modal-content">
+      <span class="login-modal-close" data-action="close-modal">&times;</span>
+      <div class="login-modal-icon">🔒</div>
+      <h3>로그인이 필요합니다</h3>
+      <p>기출문제를 풀려면 로그인이 필요합니다.</p>
+      <button class="login-now-button" data-action="show-login">지금 로그인하기</button>
+    </div>
+  </div>
+
+    <!-- Linear Header -->
+  <header class="linear-header">
+    <div class="linear-header__container">
+      <a href="../index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" />
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+        <span class="cert-badge" id="header-cert-badge">1급 스포츠지도사</span>
+      </a>
+      
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="../index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="https://litt.ly/the1stpeng" target="_blank" rel="noopener noreferrer" class="linear-header__nav-link">강의</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="linear-header__auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login">로그인</a>
+        <div id="user-profile-container" class="linear-header__user-profile" style="display: none;">
+          <span id="user-name" class="linear-header__user-name"></span>
+          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
+        </div>
+      </div>
+      
+      <div class="linear-header__actions">
+        <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
+          <button id="dev-mode-btn" class="dev-mode-btn">
+            <span class="dev-mode-indicator"></span>
+            DEV
+          </button>
+        </div>
+        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+    
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <div class="mobile-cert-badge" id="mobile-cert-badge">
+        <span class="mobile-cert-badge__label">현재 선택</span>
+        <span class="mobile-cert-badge__name">1급 스포츠지도사</span>
+      </div>
+      <a href="../index.html" class="linear-header__nav-link">홈</a>
+      <a href="https://litt.ly/the1stpeng" target="_blank" rel="noopener noreferrer" class="linear-header__nav-link">강의</a>
+      <a href="../notices.html" class="linear-header__nav-link">공지사항</a>    </div>
+  </header>
+
+  <!-- 페이지 제목 섹션 -->
+  <section class="page-header">
+    <div class="container">
+      <a href="../index.html" class="back-link">
+        <span class="back-arrow">←</span>
+        <span>목록으로</span>
+      </a>
+      <div class="page-title">
+        <h1>스포츠영양학 기출문제</h1>
+        <div class="page-subtitle">기출문제 모음</div>
+      </div>
+    </div>
+  </section>
+  
+  <main class="main-content restricted-content">
+    <div class="container">
+      <ul class="years-list">
+        <li class="year-item restricted-link" data-href="../exam-sports1/2025_스포츠영양학.html?prev=subject&subject=스포츠영양학" onclick="window.location.href='../exam-sports1/2025_스포츠영양학.html?prev=subject&subject=스포츠영양학'">
+          <div class="year-header">2025년 스포츠영양학</div>
+          <div class="year-content">
+            <div class="question-count">문제 수: 20문항</div>
+            <a href="javascript:void(0)" class="start-button" onclick="window.location.href='../exam-sports1/2025_스포츠영양학.html?prev=subject&subject=스포츠영양학'; return false;">풀어보기</a>
+          </div>
+        </li>
+
+        <li class="year-item restricted-link" data-href="../exam-sports1/2024_스포츠영양학.html?prev=subject&subject=스포츠영양학" onclick="window.location.href='../exam-sports1/2024_스포츠영양학.html?prev=subject&subject=스포츠영양학'">
+          <div class="year-header">2024년 스포츠영양학</div>
+          <div class="year-content">
+            <div class="question-count">문제 수: 20문항</div>
+            <a href="javascript:void(0)" class="start-button" onclick="window.location.href='../exam-sports1/2024_스포츠영양학.html?prev=subject&subject=스포츠영양학'; return false;">풀어보기</a>
+          </div>
+        </li>
+
+        <li class="year-item restricted-link" data-href="../exam-sports1/2023_스포츠영양학.html?prev=subject&subject=스포츠영양학" onclick="window.location.href='../exam-sports1/2023_스포츠영양학.html?prev=subject&subject=스포츠영양학'">
+          <div class="year-header">2023년 스포츠영양학</div>
+          <div class="year-content">
+            <div class="question-count">문제 수: 20문항</div>
+            <a href="javascript:void(0)" class="start-button" onclick="window.location.href='../exam-sports1/2023_스포츠영양학.html?prev=subject&subject=스포츠영양학'; return false;">풀어보기</a>
+          </div>
+        </li>
+
+        <li class="year-item restricted-link" data-href="../exam-sports1/2022_스포츠영양학.html?prev=subject&subject=스포츠영양학" onclick="window.location.href='../exam-sports1/2022_스포츠영양학.html?prev=subject&subject=스포츠영양학'">
+          <div class="year-header">2022년 스포츠영양학</div>
+          <div class="year-content">
+            <div class="question-count">문제 수: 20문항</div>
+            <a href="javascript:void(0)" class="start-button" onclick="window.location.href='../exam-sports1/2022_스포츠영양학.html?prev=subject&subject=스포츠영양학'; return false;">풀어보기</a>
+          </div>
+        </li>
+
+        <li class="year-item restricted-link" data-href="../exam-sports1/2021_스포츠영양학.html?prev=subject&subject=스포츠영양학" onclick="window.location.href='../exam-sports1/2021_스포츠영양학.html?prev=subject&subject=스포츠영양학'">
+          <div class="year-header">2021년 스포츠영양학</div>
+          <div class="year-content">
+            <div class="question-count">문제 수: 20문항</div>
+            <a href="javascript:void(0)" class="start-button" onclick="window.location.href='../exam-sports1/2021_스포츠영양학.html?prev=subject&subject=스포츠영양학'; return false;">풀어보기</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </main>
+
+    <!-- Linear Footer -->
+  <footer class="linear-footer"></footer>
+</body>
+</html>
+

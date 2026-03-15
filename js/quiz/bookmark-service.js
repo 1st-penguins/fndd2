@@ -38,7 +38,10 @@ export async function saveBookmark(userId, questionData, examName, section, cert
   }
 
   const db = await getDb();
-  const questionId = questionData.id;
+  // 연도+과목+번호로 고유 ID (자격증/과목 간 충돌 방지)
+  const section_ = section || questionData.subject || '';
+  const year_ = questionData.year || examName?.match(/\d{4}/)?.[0] || '';
+  const questionId = `${year_}_${section_}_${questionData.id}`;
   const docId = `${userId}_${questionId}`;
 
   const data = removeUndefined({
@@ -76,12 +79,18 @@ export async function removeBookmark(userId, questionId) {
 /**
  * 북마크 여부 확인
  */
-export async function isBookmarked(userId, questionId) {
+export async function isBookmarked(userId, questionId, certType) {
   if (!userId || !questionId) return false;
   const db = await getDb();
   const docId = `${userId}_${questionId}`;
   const snap = await getDoc(doc(db, 'bookmarks', docId));
-  return snap.exists();
+  if (!snap.exists()) return false;
+  // certType이 전달되면 일치 여부 확인 (다른 자격증 북마크 필터링)
+  if (certType) {
+    const data = snap.data();
+    if (data.certType && data.certType !== certType) return false;
+  }
+  return true;
 }
 
 /**

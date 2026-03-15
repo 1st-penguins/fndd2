@@ -4,6 +4,7 @@
   "description": "퍼스트펭귄 - 건강운동관리사 자격증 학습 플랫폼",
   "private": true,
   "dependencies": {
+    "firebase": "^12.10.0",
     "firebase-admin": "^13.5.0"
   },
   "devDependencies": {

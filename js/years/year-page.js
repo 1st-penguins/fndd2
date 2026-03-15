@@ -19,8 +19,10 @@ function initYearPage() {
 
   if (yearMatch) {
     const year = yearMatch[1];
-    const isSports = window.location.pathname.includes('years-sports');
-    document.title = `${year}년 기출문제 - 퍼스트펭귄 ${isSports ? '2급 생활체육지도사' : '건강운동관리사'}`;
+    const pathname = window.location.pathname;
+    const certLabel = pathname.includes('years-sports1') ? '1급 스포츠지도사'
+      : pathname.includes('years-sports') ? '2급 생활체육지도사' : '건강운동관리사';
+    document.title = `${year}년 기출문제 - 퍼스트펭귄 ${certLabel}`;
   }
 
   // 로그인 상태에 따른 제한된 콘텐츠 처리

@@ -53,8 +53,11 @@ export async function recordQuizData(result) {
       number: window.currentQuestionIndex + 1,
       isFromMockExam: subject.includes('모의고사'),
       mockExamPart: subject.includes('1교시') ? 1 : (subject.includes('2교시') ? 2 : null),
-      certType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports' : 'health',
-      certificateType: window.location.pathname.includes('/exam-sports/')
+      certType: window.location.pathname.includes('-sports1/') ? 'sports1'
+        : window.location.pathname.includes('-sports/') ? 'sports' : 'health',
+      certificateType: window.location.pathname.includes('-sports1/')
+        ? 'sports-instructor-1'
+        : window.location.pathname.includes('-sports/')
         ? 'sports-instructor' : 'health-manager',
       correctAnswer: correctAnswer,
       timeSpent: window.__questionTimeSpent || 0,

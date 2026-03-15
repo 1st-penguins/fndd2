@@ -17,7 +17,7 @@
   --accent-color: #A8D8E6;
 
   /* Functional Colors */
-  --success-color: #059669;
+  --success-color: #047D5A;
   /* Emerald 600 */
   --success-bg: #ECFDF5;
   --warning-color: #D97706;
@@ -66,7 +66,7 @@
   --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
 
   /* Exam Types */
-  --color-mock: #8B5CF6;
+  --color-mock: #6B4D96;
   /* Plus Violet */
   --color-regular: #0EA5E9;
   /* Plus Sky */
@@ -560,9 +560,9 @@
 }
 
 .session-badge.regular  { background: #EFF6FF; color: #1D4ED8; }
-.session-badge.mockexam { background: #F5F3FF; color: #6D28D9; }
+.session-badge.mockexam { background: #F5F3FF; color: #3F2662; }
 .session-badge.cert-health { background: #FEF2F2; color: #1D2F4E; }
-.session-badge.cert-sports { background: #ECFDF5; color: #059669; }
+.session-badge.cert-sports { background: #ECFDF5; color: #047D5A; }
 
 .session-badge-resume {
   padding: 3px 10px;
@@ -612,7 +612,7 @@
   transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.session-progress-fill.score-high { background: #059669; }
+.session-progress-fill.score-high { background: #047D5A; }
 .session-progress-fill.score-good { background: var(--penguin-skyblue, #5FB2C9); }
 .session-progress-fill.score-mid  { background: #F59E0B; }
 .session-progress-fill.score-low  { background: #EF4444; }
@@ -631,7 +631,7 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.session-progress-pct.score-high { color: #059669; }
+.session-progress-pct.score-high { color: #047D5A; }
 .session-progress-pct.score-good { color: var(--penguin-skyblue, #5FB2C9); }
 .session-progress-pct.score-mid  { color: #F59E0B; }
 .session-progress-pct.score-low  { color: #EF4444; }
@@ -661,7 +661,7 @@
   color: var(--penguin-navy, #1D2F4E);
   line-height: 1.2;
 }
-.session-info-value.score-high { color: #059669; }
+.session-info-value.score-high { color: #047D5A; }
 .session-info-value.score-good { color: var(--penguin-skyblue, #5FB2C9); }
 .session-info-value.score-mid  { color: #F59E0B; }
 .session-info-value.score-low  { color: #EF4444; }
@@ -687,7 +687,7 @@
   line-height: 1;
 }
 
-.session-score-value.score-high { color: #059669; }
+.session-score-value.score-high { color: #047D5A; }
 .session-score-value.score-good { color: var(--penguin-skyblue, #5FB2C9); }
 .session-score-value.score-mid  { color: #F59E0B; }
 .session-score-value.score-low  { color: #EF4444; }
@@ -730,7 +730,7 @@
 
 .session-btn-retry {
   background: #f0fdf4;
-  color: #059669;
+  color: #047D5A;
   border: 1px solid #a7f3d0;
 }
 .session-btn-retry:hover { background: #d1fae5; }
@@ -911,7 +911,7 @@
   color: #1D2F4E;
 }
 
-.sc-stat-value.green { color: #059669; }
+.sc-stat-value.green { color: #047D5A; }
 .sc-stat-value.red   { color: #DC2626; }
 
 .sc-progress-bar-wrap {
@@ -924,7 +924,7 @@
 
 .sc-progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+  background: linear-gradient(90deg, #047D5A 0%, #0A9E72 100%);
   border-radius: 999px;
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1002,7 +1002,7 @@
 
 .sc-status-badge.correct {
   background: #ecfdf3;
-  color: #047857;
+  color: #036348;
 }
 
 .sc-status-badge.incorrect {
@@ -1668,7 +1668,7 @@
 }
 
 .mark-o {
-    color: #10b981;
+    color: #0A9E72;
     /* Green */
 }
 
@@ -1692,7 +1692,7 @@
 
 .cor-ans {
     display: block;
-    color: #10b981;
+    color: #0A9E72;
     font-weight: bold;
 }
 
@@ -1734,7 +1734,7 @@
 
 .correct-icon {
     background: #ecfdf5;
-    color: #059669;
+    color: #047D5A;
 }
 
 .incorrect-icon {
@@ -1777,7 +1777,7 @@
 }
 
 .correct-card {
-    border-color: #10b981;
+    border-color: #0A9E72;
     background: linear-gradient(to bottom, #ecfdf5 0%, #ffffff 20%);
 }
 
@@ -1809,7 +1809,7 @@
 }
 
 .correct-badge {
-    background: #10b981;
+    background: #0A9E72;
     color: white;
 }
 
@@ -1844,7 +1844,7 @@
 }
 
 .correct-answer {
-    color: #10b981;
+    color: #0A9E72;
 }
 
 .incorrect-user-answer {
@@ -1858,7 +1858,7 @@
 }
 
 .correct-answer-highlight {
-    color: #10b981;
+    color: #0A9E72;
     font-size: 1rem;
     font-weight: 800;
     background: #ecfdf5;

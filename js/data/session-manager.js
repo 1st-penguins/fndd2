@@ -303,8 +303,12 @@ class SessionManager {
           return `문제풀이 ${new Date().toLocaleDateString()}`;
         })(),
         type: finalType,
-        certType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports' : 'health',
-        certificateType: (window.QUIZ_DATA_FOLDER === 'sports') ? 'sports-instructor' : 'health-manager',
+        certType: window.location.pathname.includes('-sports1/') ? 'sports1'
+          : window.location.pathname.includes('-sports/') ? 'sports' : 'health',
+        certificateType: window.location.pathname.includes('-sports1/')
+          ? 'sports-instructor-1'
+          : window.location.pathname.includes('-sports/')
+          ? 'sports-instructor' : 'health-manager',
         ...cleanedMetadata
       };
 

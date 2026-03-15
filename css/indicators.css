@@ -59,10 +59,9 @@ body:not([data-current-subject]) .question-indicators-container {
 /* Regular Exam (20 questions): 10 columns x 2 rows */
 body[data-current-subject] .question-indicators {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(10, 35px);
   gap: 12px;
-  max-width: 460px;
-  justify-items: center;
+  justify-content: center;
 }
 
 /* Mock Exam (80 questions): 20 columns layout */
@@ -79,8 +78,8 @@ body:not([data-current-subject]) .question-indicators {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   border-radius: 3px;
   background-color: var(--ind-bg);
   border: 1.5px solid var(--ind-border);
@@ -95,8 +94,8 @@ body:not([data-current-subject]) .question-indicators {
 
 /* Mock exam indicators slightly smaller to fit 20 cols */
 body:not([data-current-subject]) .indicator {
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   font-size: 0.75rem;
   border-radius: 3px;
 }
@@ -121,7 +120,7 @@ body:not([data-current-subject]) .indicator {
 
 .indicator-subject-grid {
   display: grid;
-  grid-template-columns: repeat(10, 30px);
+  grid-template-columns: repeat(10, 35px);
   gap: 12px;
   justify-content: center;
 }
@@ -208,9 +207,10 @@ body:not([data-current-subject]) .indicator {
   /* 일반 시험: 10열 그리드 */
   body[data-current-subject] .question-indicators {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    column-gap: 6px;
-    row-gap: 6px;
+    grid-template-columns: repeat(10, 22px);
+    column-gap: 5px;
+    row-gap: 5px;
+    justify-content: center;
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -240,19 +240,17 @@ body:not([data-current-subject]) .indicator {
   }
 
   .indicator-subject-grid {
-    grid-template-columns: repeat(10, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(10, 22px);
+    gap: 5px;
+    justify-content: center;
   }
 
   /* 인디케이터: 축소 */
   body .question-indicators .indicator,
   .indicator-subject-grid .indicator {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    min-width: 20px;
-    min-height: 20px;
-    font-size: 0.55rem;
+    width: 22px;
+    height: 22px;
+    font-size: 0.5rem;
     border-radius: 3px;
     box-sizing: border-box;
   }
@@ -264,10 +262,15 @@ body:not([data-current-subject]) .indicator {
     margin: 1px auto 2px;
   }
 
-  body[data-current-subject] .question-indicators,
+  body[data-current-subject] .question-indicators {
+    grid-template-columns: repeat(10, 15px);
+    column-gap: 5px;
+    row-gap: 5px;
+  }
+
   body:not([data-current-subject]) .question-indicators {
-    column-gap: 4px;
-    row-gap: 4px;
+    column-gap: 5px;
+    row-gap: 5px;
   }
 
   .indicator-subject-card {
@@ -281,15 +284,16 @@ body:not([data-current-subject]) .indicator {
   }
 
   .indicator-subject-grid {
-    grid-template-columns: repeat(10, 1fr);
-    gap: 4px;
+    grid-template-columns: repeat(10, 15px);
+    gap: 5px;
+    justify-content: center;
   }
 
   body .question-indicators .indicator,
   .indicator-subject-grid .indicator {
-    font-size: 0.5rem;
-    border-radius: 2px;
-    min-width: 18px;
-    min-height: 18px;
+    width: 15px;
+    height: 15px;
+    font-size: 0.4rem;
+    border-radius: 3px;
   }
 }

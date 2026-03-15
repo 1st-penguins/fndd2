@@ -35,9 +35,11 @@ window.firstAttemptTracking = firstAttemptTracking;
 const _bookmarkCache = new Map();
 
 function _getQuestionId(question, displayNum) {
-  if (question.id) return question.id;
+  // 항상 연도+과목+번호로 고유 ID 생성 (자격증/과목 간 충돌 방지)
   const subject = question.subject || currentSubject || '';
-  return `${currentYear}_${subject}_${displayNum}`;
+  const year = question.year || currentYear || '';
+  const num = question.id || displayNum;
+  return `${year}_${subject}_${num}`;
 }
 
 function _renderBookmarkButton(question, displayNum) {
@@ -63,7 +65,8 @@ function _renderBookmarkButton(question, displayNum) {
     btn.textContent = _bookmarkCache.get(questionId) ? '★' : '☆';
     btn.classList.toggle('active', _bookmarkCache.get(questionId));
   } else {
-    isBookmarked(userId, questionId).then(marked => {
+    const _certType = localStorage.getItem('currentCertificateType') || 'health-manager';
+    isBookmarked(userId, questionId, _certType).then(marked => {
       _bookmarkCache.set(questionId, marked);
       btn.textContent = marked ? '★' : '☆';
       btn.classList.toggle('active', marked);
@@ -391,8 +394,13 @@ export async function initializeQuiz() {
     // 데이터 로드 시도 (스포츠: window.QUIZ_DATA_FOLDER 또는 URL 경로로 감지)
     let data;
     let dataFolder = window.QUIZ_DATA_FOLDER ? `${window.QUIZ_DATA_FOLDER}/` : '';
-    if (!dataFolder && (window.location.pathname.includes('exam-sports') || window.location.pathname.includes('subjects-sports'))) {
-      dataFolder = 'sports/';
+    if (!dataFolder) {
+      const pathname = window.location.pathname;
+      if (pathname.includes('-sports1/')) {
+        dataFolder = 'sports1/';
+      } else if (pathname.includes('exam-sports') || pathname.includes('subjects-sports')) {
+        dataFolder = 'sports/';
+      }
     }
     const dataUrl = `../data/${dataFolder}${year}_${subject}.json`;
     window.Logger?.debug('데이터 URL:', dataUrl);

@@ -8,7 +8,7 @@
 ## 1. 프로젝트 개요
 
 - **사이트**: the1stpeng.com
-- **용도**: 건강운동관리사 / 2급 생활스포츠지도사 자격증 시험 대비 문제풀이
+- **용도**: 건강운동관리사 / 2급 스포츠지도사 자격증 시험 대비 문제풀이
 - **스택**: Vanilla JS (ES Modules), Firebase Auth + Firestore, Cloudflare Pages, PWA
 - **빌드 없음**: `npm build` 없이 브라우저에서 직접 ES Module로 실행
 
@@ -216,7 +216,7 @@ dailyVisitors/{date}_{userId}
 
 ## 5. 자격증 유형 이중 구조
 
-| 항목 | 건강운동관리사 | 2급 생활스포츠지도사 |
+| 항목 | 건강운동관리사 | 2급 스포츠지도사 |
 |------|--------------|-------------------|
 | 식별값 | `'health-manager'` | `'sports-instructor'` |
 | 데이터 폴더 | `data/` | `data/sports/` |

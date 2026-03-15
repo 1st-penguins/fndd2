@@ -94,30 +94,23 @@ function hasTestParam() {
  * - 로컬 + localStorage dev-mode-key 4578 + 토글 ON → 개발 모드
  */
 export function isDevMode() {
-  // 프로덕션 환경에서는 항상 false
-  if (typeof window === 'undefined') {
-    return false;
-  }
-  
-  // 로컬 환경이 아니면 false
-  const isLocalhost = window.location.hostname === 'localhost' || 
-                      window.location.hostname === '127.0.0.1' || 
+  if (typeof window === 'undefined') return false;
+
+  // 사용자가 명시적으로 끈 상태
+  if (localStorage.getItem('devModeOff') === 'true') return false;
+
+  const isLocalhost = window.location.hostname === 'localhost' ||
+                      window.location.hostname === '127.0.0.1' ||
                       window.location.hostname === '0.0.0.0' ||
                       window.location.hostname === '::1';
-  
-  if (!isLocalhost) {
-    return false;
-  }
-  
-  // 로컬 테스트: URL에 ?test=1 또는 ?dev=1 있으면 키 없이 개발 모드
-  if (hasTestParam()) {
-    return true;
-  }
-  
-  // 추가 보안: localStorage에 저장된 해시와 비교 (평문 키는 소스에 없음)
+
+  if (!isLocalhost) return false;
+
+  if (hasTestParam()) return true;
+
   const devKey = (localStorage.getItem('dev-mode-key') || '').trim();
   const hasValidDevKey = devKey === DEV_KEY_HASH;
-  
+
   return DEV_CONFIG.isDevMode && hasValidDevKey;
 }
 
@@ -139,9 +132,19 @@ export function getMockData(type) {
  * 개발 모드 토글 (런타임에서 변경 가능)
  */
 export function toggleDevMode() {
-  DEV_CONFIG.isDevMode = !DEV_CONFIG.isDevMode;
-  console.log(`개발 모드가 ${DEV_CONFIG.isDevMode ? '활성화' : '비활성화'}되었습니다.`);
-  return DEV_CONFIG.isDevMode;
+  const currentlyOn = isDevMode();
+  if (currentlyOn) {
+    // 끄기: localStorage에 off 저장
+    localStorage.setItem('devModeOff', 'true');
+    DEV_CONFIG.isDevMode = false;
+  } else {
+    // 켜기: off 플래그 제거
+    localStorage.removeItem('devModeOff');
+    DEV_CONFIG.isDevMode = true;
+  }
+  const nowOn = !currentlyOn;
+  console.log(`개발 모드가 ${nowOn ? '활성화' : '비활성화'}되었습니다.`);
+  return nowOn;
 }
 
 // 전역 객체에 개발 모드 설정 노출

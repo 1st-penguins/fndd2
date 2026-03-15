@@ -55,7 +55,6 @@ let __timerPausedAt = null;           // visibilitychange 타이머 일시정지
 const _mockBookmarkCache = new Map();
 
 function _getMockQuestionId(question, displayNumber) {
-  if (question.id) return question.id;
   const subject = question.subject || '';
   const questionsPerSubject = 20;
   const qNum = ((question.globalIndex || 0) % questionsPerSubject) + 1;
@@ -119,32 +118,32 @@ function _renderMockBookmarkButton(question, displayNumber) {
 const isDevMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
 // 현재 선택된 자격증 타입 추정 (분석 페이지 필터와 동일하게 맞추기 위함)
+// CERT_REGISTRY 기반 — 경로 감지 시 접미사 길이 내림차순 매칭
 function getActiveCertificateType() {
-  // URL/경로 우선 판별
+  // URL 파라미터 우선
   const params = new URLSearchParams(window.location.search);
   const urlCert = params.get('cert');
-  if (urlCert === 'sports-instructor' || urlCert === 'health-manager') {
+  if (urlCert) {
     return urlCert;
   }
 
+  // 경로 기반 감지 (긴 접미사 먼저: -sports1 → -sports)
   const path = window.location.pathname || '';
-  if (
-    path.includes('exam-sports/') ||
-    path.includes('subjects-sports/') ||
-    path.includes('years-sports/')
-  ) {
+  if (path.includes('-sports1/')) {
+    return 'sports-instructor-1';
+  }
+  if (path.includes('-sports/') || path.includes('exam-sports/') ||
+      path.includes('subjects-sports/') || path.includes('years-sports/')) {
     return 'sports-instructor';
   }
 
-  // certificate-utils와 동일 키 우선순위로 동기화
+  // localStorage
   const stored =
     localStorage.getItem('currentCertificateType') ||
     localStorage.getItem('selectedCertificate') ||
-    localStorage.getItem('selectedCertificateType') ||
-    localStorage.getItem('certificateType') ||
     'health-manager';
 
-  return stored === 'sports-instructor' ? 'sports-instructor' : 'health-manager';
+  return stored;
 }
 
 // 개발 모드에서만 로그 출력하는 유틸리티 함수
@@ -1063,32 +1062,32 @@ function loadQuestion(index) {
 
   // 과목별 배지 색상 - 투명도 적용 (0.85)
   if (question.subject === "운동생리학" || question.subject === "운동상해") {
-    // 1번 과목 - 진한 파란색
-    subjectBadge.style.backgroundColor = "rgba(54, 129, 171, 0.85)"; // #3681AB
+    // 1번 과목 - 블루
+    subjectBadge.style.backgroundColor = "rgba(100, 181, 246, 0.85)"; // #64B5F6
     subjectBadge.style.color = "white";
-    subjectBadge.style.boxShadow = "0 2px 8px rgba(54, 129, 171, 0.3)";
-    subjectBadge.style.border = "1px solid rgba(43, 111, 150, 0.5)";
+    subjectBadge.style.boxShadow = "0 2px 8px rgba(100, 181, 246, 0.3)";
+    subjectBadge.style.border = "1px solid rgba(80, 161, 226, 0.5)";
   }
   else if (question.subject === "건강체력평가" || question.subject === "기능해부학") {
-    // 2번 과목 - 하늘색
-    subjectBadge.style.backgroundColor = "rgba(107, 174, 205, 0.85)"; // #6BAECD
+    // 2번 과목 - 틸
+    subjectBadge.style.backgroundColor = "rgba(77, 182, 172, 0.85)"; // #4DB6AC
     subjectBadge.style.color = "white";
-    subjectBadge.style.boxShadow = "0 2px 8px rgba(107, 174, 205, 0.3)";
-    subjectBadge.style.border = "1px solid rgba(86, 151, 182, 0.5)";
+    subjectBadge.style.boxShadow = "0 2px 8px rgba(77, 182, 172, 0.3)";
+    subjectBadge.style.border = "1px solid rgba(57, 162, 152, 0.5)";
   }
   else if (question.subject === "운동처방론" || question.subject === "병태생리학") {
-    // 3번 과목 - 보라색
-    subjectBadge.style.backgroundColor = "rgba(123, 126, 171, 0.85)"; // #7B7EAB
+    // 3번 과목 - 퍼플
+    subjectBadge.style.backgroundColor = "rgba(149, 117, 205, 0.85)"; // #9575CD
     subjectBadge.style.color = "white";
-    subjectBadge.style.boxShadow = "0 2px 8px rgba(123, 126, 171, 0.3)";
-    subjectBadge.style.border = "1px solid rgba(106, 109, 151, 0.5)";
+    subjectBadge.style.boxShadow = "0 2px 8px rgba(149, 117, 205, 0.3)";
+    subjectBadge.style.border = "1px solid rgba(129, 97, 185, 0.5)";
   }
   else if (question.subject === "운동부하검사" || question.subject === "스포츠심리학") {
-    // 4번 과목 - 라벤더색
-    subjectBadge.style.backgroundColor = "rgba(155, 146, 187, 0.85)"; // #9B92BB
+    // 4번 과목 - 그린
+    subjectBadge.style.backgroundColor = "rgba(129, 199, 132, 0.85)"; // #81C784
     subjectBadge.style.color = "white";
-    subjectBadge.style.boxShadow = "0 2px 8px rgba(155, 146, 187, 0.3)";
-    subjectBadge.style.border = "1px solid rgba(135, 128, 167, 0.5)";
+    subjectBadge.style.boxShadow = "0 2px 8px rgba(129, 199, 132, 0.3)";
+    subjectBadge.style.border = "1px solid rgba(109, 179, 112, 0.5)";
   }
   else {
     // 기본 색상
@@ -1503,14 +1502,14 @@ function initQuestionIndicators() {
 
   // 과목별 색상 매핑 객체
   subjectColors = {
-    "운동생리학": { bg: "#3681AB", border: "#3681AB" },
-    "운동상해": { bg: "#3681AB", border: "#3681AB" },
-    "건강체력평가": { bg: "#6BAECD", border: "#6BAECD" },
-    "기능해부학": { bg: "#6BAECD", border: "#6BAECD" },
-    "운동처방론": { bg: "#7B7EAB", border: "#7B7EAB" },
-    "병태생리학": { bg: "#7B7EAB", border: "#7B7EAB" },
-    "운동부하검사": { bg: "#9B92BB", border: "#9B92BB" },
-    "스포츠심리학": { bg: "#9B92BB", border: "#9B92BB" }
+    "운동생리학": { bg: "#64B5F6", border: "#64B5F6" },
+    "운동상해": { bg: "#64B5F6", border: "#64B5F6" },
+    "건강체력평가": { bg: "#4DB6AC", border: "#4DB6AC" },
+    "기능해부학": { bg: "#4DB6AC", border: "#4DB6AC" },
+    "운동처방론": { bg: "#9575CD", border: "#9575CD" },
+    "병태생리학": { bg: "#9575CD", border: "#9575CD" },
+    "운동부하검사": { bg: "#81C784", border: "#81C784" },
+    "스포츠심리학": { bg: "#81C784", border: "#81C784" }
   };
 
   // 과목별로 그룹화

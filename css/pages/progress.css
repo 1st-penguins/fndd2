@@ -49,7 +49,7 @@
 }
 
 .progress-card.completed {
-  border-top: 4px solid var(--success-color, #059669);
+  border-top: 4px solid var(--success-color, #047D5A);
 }
 
 .progress-card.not-taken {
@@ -71,7 +71,7 @@
 
 .badge-done {
   background: var(--success-bg, #ecfdf5);
-  color: var(--success-color, #059669);
+  color: var(--success-color, #047D5A);
 }
 
 .badge-yet {

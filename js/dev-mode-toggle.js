@@ -153,9 +153,16 @@ export function initDevModeToggle() {
       return;
     }
 
-    toggleDevMode();
+    const nowEnabled = toggleDevMode();
     updateDevModeUI();
     notifyDevModeChanged();
+
+    // 개발 모드 끌 때: mock 로그인 상태 정리 + 페이지 새로고침
+    if (!nowEnabled) {
+      localStorage.removeItem('userLoggedIn');
+      localStorage.removeItem('userName');
+      window.location.reload();
+    }
   });
 }
 

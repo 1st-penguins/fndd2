@@ -7,6 +7,13 @@ const SPORTS_CATEGORIES = {
 };
 const SPORTS_SUBJECTS_ALL = [...SPORTS_CATEGORIES['기본'], ...SPORTS_CATEGORIES['전문']];
 
+const SPORTS1_YEARS = ['2025', '2024', '2023', '2022', '2021'];
+const SPORTS1_CATEGORIES = {
+  '공통 필수': ['운동상해', '체육측정평가론', '트레이닝론'],
+  '유형별 고유': ['스포츠영양학', '건강교육론', '장애인스포츠론'],
+};
+const SPORTS1_SUBJECTS_ALL = [...SPORTS1_CATEGORIES['공통 필수'], ...SPORTS1_CATEGORIES['유형별 고유']];
+
 const HEALTH_YEARS = ['2025', '2024', '2023', '2022', '2021', '2020', '2019'];
 const HEALTH_CATEGORIES = {
   '1교시': ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사'],
@@ -14,7 +21,7 @@ const HEALTH_CATEGORIES = {
 };
 const HEALTH_SUBJECTS_ALL = [...HEALTH_CATEGORIES['1교시'], ...HEALTH_CATEGORIES['2교시']];
 
-function renderSportsInstructorProgress(container, attempts) {
+function renderSportsInstructorProgress(container, attempts, years, categories, subjectsAll, examFolder) {
   const normalizeYear = (v) => { const m = String(v ?? '').match(/(20\d{2})/); return m ? m[1] : null; };
   const normalizeSubject = (v) => {
     if (!v) return null;
@@ -31,7 +38,7 @@ function renderSportsInstructorProgress(container, attempts) {
     const q = a?.questionData || {};
     const year = normalizeYear(q.year || a.year);
     const subject = normalizeSubject(q.subject || a.subject);
-    if (!year || !subject || !SPORTS_YEARS.includes(year)) return;
+    if (!year || !subject || !years.includes(year)) return;
     if (!done[year]) done[year] = {};
     if (!done[year][subject]) done[year][subject] = { count: 0, correct: 0 };
     done[year][subject].count++;
@@ -45,21 +52,21 @@ function renderSportsInstructorProgress(container, attempts) {
         <p>각 연도별 기초·특화 과목 풀이 현황을 확인할 수 있습니다.</p>
       </div>`;
 
-  SPORTS_YEARS.forEach(year => {
+  years.forEach(year => {
     const yearData = done[year] || {};
-    const completedCount = SPORTS_SUBJECTS_ALL.filter(s => (yearData[s]?.count ?? 0) > 0).length;
-    const totalCount = SPORTS_SUBJECTS_ALL.length;
+    const completedCount = subjectsAll.filter(s => (yearData[s]?.count ?? 0) > 0).length;
+    const totalCount = subjectsAll.length;
     const pct = Math.round((completedCount / totalCount) * 100);
-    const color = pct === 100 ? '#059669' : pct >= 50 ? '#5FB2C9' : '#1D2F4E';
+    const color = pct === 100 ? '#047D5A' : pct >= 50 ? '#5FB2C9' : '#1D2F4E';
 
     let categoriesHtml = '';
-    Object.entries(SPORTS_CATEGORIES).forEach(([categoryName, subjects]) => {
+    Object.entries(categories).forEach(([categoryName, subjects]) => {
       const catDone = subjects.filter(s => (yearData[s]?.count ?? 0) > 0).length;
       const subjectsHtml = subjects.map(subject => {
         const s = yearData[subject];
         const isDone = (s?.count ?? 0) > 0;
         const acc = isDone ? Math.round((s.correct / s.count) * 100) : null;
-        const url = `exam-sports/${year}_${subject}.html`;
+        const url = `${examFolder}/${year}_${subject}.html`;
         return `
           <div class="sports-subject-item ${isDone ? 'done' : 'not-done'}">
             <span class="subject-name">${subject}</span>
@@ -104,10 +111,10 @@ function renderSportsInstructorProgress(container, attempts) {
     .sports-subjects-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     @media (max-width: 480px) { .sports-subjects-grid { grid-template-columns: repeat(2, 1fr); } }
     .sports-subject-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-radius: 10px; font-size: 0.875rem; }
-    .sports-subject-item.done { background: rgba(5,150,105,0.08); color: #059669; font-weight: 600; }
+    .sports-subject-item.done { background: rgba(5,150,105,0.08); color: #047D5A; font-weight: 600; }
     .sports-subject-item.not-done { background: var(--color-bg-level-1, #f8fafc); color: var(--color-text-secondary); }
     .subject-name { flex: 1; }
-    .subject-acc { font-size: 0.8rem; font-weight: 700; color: #059669; }
+    .subject-acc { font-size: 0.8rem; font-weight: 700; color: #047D5A; }
     .subject-start-btn { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; background: #1D2F4E; color: #fff; text-decoration: none; white-space: nowrap; }
     .subject-start-btn:hover { background: #2a4570; }
   </style>`;
@@ -213,9 +220,13 @@ export function renderProgressTabStandalone(data) {
   const attempts        = data?.attempts        ?? window.userAttempts           ?? window.state?.attempts ?? [];
   const certType        = data?.certType        ?? localStorage.getItem('currentCertificateType') ?? 'health-manager';
 
-  // 생활스포츠지도사: 연도별 과목 완료율 뷰
+  // 생활스포츠지도사: 2급 과목/연도 사용
   if (certType === 'sports-instructor') {
-    return renderSportsInstructorProgress(container, attempts);
+    return renderSportsInstructorProgress(container, attempts, SPORTS_YEARS, SPORTS_CATEGORIES, SPORTS_SUBJECTS_ALL, 'exam-sports');
+  }
+  // 1급 스포츠지도사: 1급 과목/연도 사용
+  if (certType === 'sports-instructor-1') {
+    return renderSportsInstructorProgress(container, attempts, SPORTS1_YEARS, SPORTS1_CATEGORIES, SPORTS1_SUBJECTS_ALL, 'exam-sports1');
   }
 
   // ── 레거시 포맷 정규화 헬퍼 ──────────────────────────────────────

@@ -2,7 +2,7 @@
 
 ## 🚨 문제 상황
 
-건강운동관리사와 2급 생활스포츠지도사에 **같은 이름의 과목**이 존재:
+건강운동관리사와 2급 스포츠지도사에 **같은 이름의 과목**이 존재:
 
 ### 중복 과목
 - **운동생리학** (건강운동관리사 과목코드 70, 생활스포츠지도사 과목코드 04)
@@ -315,7 +315,7 @@ function renderCertificateFilter() {
       </button>
       <button class="cert-filter-btn ${currentCert === 'sports-instructor' ? 'active' : ''}"
               data-cert="sports-instructor">
-        ⚽ 2급 생활스포츠지도사
+        ⚽ 2급 스포츠지도사
       </button>
     </div>
   `;

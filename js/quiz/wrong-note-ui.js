@@ -171,6 +171,7 @@ function updateCertTabs() {
 
   const healthCount = allWrongAnswers.filter(i => (i.certType || 'health-manager') === 'health-manager').length;
   const sportsCount = allWrongAnswers.filter(i => i.certType === 'sports-instructor').length;
+  const sports1Count = allWrongAnswers.filter(i => i.certType === 'sports-instructor-1').length;
 
   certTabGroup.innerHTML = `
     <button class="wrong-note-cert-btn ${activeCertType === 'health-manager' ? 'active' : ''}" data-cert="health-manager">
@@ -178,6 +179,9 @@ function updateCertTabs() {
     </button>
     <button class="wrong-note-cert-btn ${activeCertType === 'sports-instructor' ? 'active' : ''}" data-cert="sports-instructor">
       생활스포츠지도사 <span class="wrong-note-cert-count">${sportsCount}</span>
+    </button>
+    <button class="wrong-note-cert-btn ${activeCertType === 'sports-instructor-1' ? 'active' : ''}" data-cert="sports-instructor-1">
+      1급 스포츠지도사 <span class="wrong-note-cert-count">${sports1Count}</span>
     </button>
   `;
 

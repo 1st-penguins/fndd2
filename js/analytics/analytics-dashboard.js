@@ -5,7 +5,7 @@ import { getUserAttempts, getUserMockExamResults } from "../data/quiz-data-servi
 import { buildDayMap, calcCurrentStreak, calcLongestStreak, getTodayCount, getRecentActivity } from "./streak-utils.js";
 import { getUserProgress } from "../data/quiz-repository.js";
 import { db, ADMIN_EMAILS, ensureAuthReady, ensureFirebase } from "../core/firebase-core.js";
-import { getCurrentCertificateType, getCertificateName, getCertificateEmoji } from "../utils/certificate-utils.js";
+import { getCurrentCertificateType, getCertificateName, getCertificateEmoji, CERT_REGISTRY, getFolder, getAllSubjects } from "../utils/certificate-utils.js";
 import {
   collection,
   query,
@@ -28,6 +28,24 @@ import { sessionManager } from '../data/session-manager.js';
 import { showLoading, hideLoading, showError, showToast } from "../utils/ui-utils.js";
 import { getScoreColor, getWeaknessColor } from './chart-utils.js';
 import { isDevMode } from "../config/dev-config.js";
+
+// 단축 certType → 풀 키 변환 (analytics UI에서 'health', 'sports', 'sports1' 등 사용)
+const CERT_SHORT_MAP = {
+  'health': 'health-manager',
+  'sports': 'sports-instructor',
+  'sports1': 'sports-instructor-1'
+};
+const CERT_LABEL_MAP = {
+  'health': '건강운동관리사',
+  'sports': '2급 스포츠지도사',
+  'sports1': '1급 스포츠지도사'
+};
+function certShortToFull(shortKey) {
+  return CERT_SHORT_MAP[shortKey] || shortKey || 'health-manager';
+}
+function certShortToLabel(shortKey) {
+  return CERT_LABEL_MAP[shortKey] || '전체';
+}
 
 // URL 인코딩된 한글 안전 디코딩 (%EC%9A%B4... → 운동생리학)
 function safeDecodeText(text) {
@@ -758,9 +776,11 @@ export async function loadAnalyticsData(user) {
       state.attempts = filterCompletedAttempts(state.attempts);
       console.log('[DEBUG D] filterCompleted 후:', state.attempts.length);
 
-      // 🔧 스포츠 자격증 fallback: certificateType이 잘못 저장된 경우 과목명 기반으로 재조회
+      // 🔧 스포츠 자격증 fallback: certificateType이 잘못 저장된 레거시 데이터 복구
+      // 주의: 1급은 레거시 데이터가 없으므로 fallback 불필요 (신규 자격증)
       if (currentCertType === 'sports-instructor' && state.attempts.length === 0) {
-        const _SPORTS_SUBJECTS = new Set(['스포츠사회학','스포츠교육학','스포츠심리학','한국체육사','운동생리학','운동역학','스포츠윤리','특수체육론','유아체육론','노인체육론']);
+        const _SPORTS2_SUBJECTS = ['스포츠사회학','스포츠교육학','스포츠심리학','한국체육사','운동생리학','운동역학','스포츠윤리','특수체육론','유아체육론','노인체육론'];
+        const _SPORTS_SUBJECTS = new Set(_SPORTS2_SUBJECTS);
         const _decodeSubject = (v) => { try { let s = String(v||''); for (let i=0;i<3;i++){const t=decodeURIComponent(s);if(t===s)break;s=t;} return s; } catch{return String(v||'');} };
         const _all = await getUserAttempts(3000, null);
         const _sportsOnly = _all.filter(a => _SPORTS_SUBJECTS.has(_decodeSubject(a.subject || a.questionData?.subject)));
@@ -937,7 +957,7 @@ function renderOverviewStats() {
     if (ts && !isNaN(ts)) studyDays.add(ts.toISOString().slice(0, 10));
   });
 
-  const pctColor = correctPct >= 60 ? '#059669' : (correctPct >= 40 ? '#D97706' : '#DC2626');
+  const pctColor = correctPct >= 60 ? '#047D5A' : (correctPct >= 40 ? '#D97706' : '#DC2626');
 
   container.innerHTML = `
     <div class="ov-summary-row">
@@ -1554,9 +1574,7 @@ function renderSubjectProgress() {
   }
 
   const certType = getCurrentCertificateType();
-  const allSubjects = certType === 'sports-instructor'
-    ? ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론']
-    : ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사', '운동상해', '기능해부학', '병태생리학', '스포츠심리학'];
+  const allSubjects = getAllSubjects(certType);
 
   const subjectStats = {};
   allSubjects.forEach(s => { subjectStats[s] = { attempts: 0, correct: 0 }; });
@@ -1637,6 +1655,7 @@ function renderQuestionSetsTab() {
   if (certSelect && subjectSelect && certSelect.dataset.subjectLinked !== 'true') {
     const HEALTH_SUBJECTS = ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사', '운동상해', '기능해부학', '병태생리학', '스포츠심리학'];
     const SPORTS_SUBJECTS = ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론'];
+    const SPORTS1_SUBJECTS = ['운동상해', '체육측정평가론', '트레이닝론', '스포츠영양학', '건강교육론', '장애인스포츠론'];
 
     function updateSubjectOptions() {
       const cert = certSelect.value;
@@ -1650,8 +1669,14 @@ function renderQuestionSetsTab() {
       }
       if (cert === 'all' || cert === 'sports') {
         const grp = document.createElement('optgroup');
-        grp.label = '생활스포츠지도사';
+        grp.label = '2급 스포츠지도사';
         SPORTS_SUBJECTS.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; grp.appendChild(o); });
+        subjectSelect.appendChild(grp);
+      }
+      if (cert === 'all' || cert === 'sports1') {
+        const grp = document.createElement('optgroup');
+        grp.label = '1급 스포츠지도사';
+        SPORTS1_SUBJECTS.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; grp.appendChild(o); });
         subjectSelect.appendChild(grp);
       }
     }
@@ -1694,11 +1719,11 @@ function renderQuestionSetsTab() {
   });
 
   // 자격증별 삭제 버튼
-  ['health', 'sports'].forEach(certType => {
+  ['health', 'sports', 'sports1'].forEach(certType => {
     const btn = document.getElementById(`delete-${certType}-question-sets`);
     if (btn && btn.dataset.listenerAttached !== 'true') {
       btn.addEventListener('click', async function () {
-        const label = certType === 'health' ? '건강운동관리사' : '생활스포츠지도사';
+        const label = certShortToLabel(certType);
         const confirmed = confirm(`⚠️ ${label} 문제풀이기록을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`);
         if (!confirmed) return;
         const success = await deleteAllQuestionSets(certType);
@@ -2466,7 +2491,7 @@ async function deleteAllQuestionSets(certType = null) {
       return false;
     }
 
-    const label = certType === 'sports' ? '생활스포츠지도사' : certType === 'health' ? '건강운동관리사' : '전체';
+    const label = certShortToLabel(certType);
     showLoading(`${label} 문제풀이기록 삭제 중...`);
 
     let totalDeleted = 0;
@@ -2509,12 +2534,12 @@ async function deleteAllQuestionSets(certType = null) {
         totalDeleted += await deleteQueryBatch(db, q, BATCH_SIZE);
       }
       // 세션ID 없는 고아 attempts도 삭제 (certType 필드 기반)
-      const certTypeValue = certType === 'health' ? 'health-manager' : 'sports-instructor';
+      const certTypeValue = certShortToFull(certType);
       const orphanQ = query(collection(db, 'attempts'), where('userId', '==', user.uid), where('certificateType', '==', certTypeValue));
       totalDeleted += await deleteQueryBatch(db, orphanQ, BATCH_SIZE);
     } else if (certType) {
       // 세션이 이미 삭제된 경우: certType 기반으로 attempts 직접 삭제
-      const certTypeValue = certType === 'health' ? 'health-manager' : 'sports-instructor';
+      const certTypeValue = certShortToFull(certType);
       const certQ = query(collection(db, 'attempts'), where('userId', '==', user.uid), where('certificateType', '==', certTypeValue));
       totalDeleted += await deleteQueryBatch(db, certQ, BATCH_SIZE);
       // certificateType 필드가 없는 레거시 데이터도 삭제 (health인 경우)
@@ -2539,7 +2564,7 @@ async function deleteAllQuestionSets(certType = null) {
       totalDeleted += await deleteQueryBatch(db, mockQ, BATCH_SIZE);
     } else {
       // certType 기반 삭제: certificateType 필드로 직접 삭제
-      const certTypeValue = certType === 'health' ? 'health-manager' : 'sports-instructor';
+      const certTypeValue = certShortToFull(certType);
       const mockCertQ = query(collection(db, 'mockExamResults'), where('userId', '==', user.uid), where('certificateType', '==', certTypeValue));
       totalDeleted += await deleteQueryBatch(db, mockCertQ, BATCH_SIZE);
       // certificateType 필드 없는 레거시 모의고사 결과도 삭제 (health인 경우)
@@ -2618,7 +2643,7 @@ async function deleteAllQuestionSets(certType = null) {
         totalDeleted += await deleteQueryBatch(db, wrongQ, BATCH_SIZE);
       } else {
         // certType별 삭제
-        const wrongCertType = certType === 'health' ? 'health-manager' : 'sports-instructor';
+        const wrongCertType = certShortToFull(certType);
         const wrongQ = query(collection(db, 'wrong_answers'), where('userId', '==', user.uid), where('certType', '==', wrongCertType));
         totalDeleted += await deleteQueryBatch(db, wrongQ, BATCH_SIZE);
         // certType 필드 없는 레거시 오답 데이터도 삭제 (health인 경우)
@@ -2644,7 +2669,7 @@ async function deleteAllQuestionSets(certType = null) {
     // state에서 삭제된 데이터 제거 (약점분석/학습진행률 탭 반영)
     if (certType) {
       // 특정 자격증 삭제: 해당 certType 데이터 제거
-      const certTypeValue = certType === 'health' ? 'health-manager' : 'sports-instructor';
+      const certTypeValue = certShortToFull(certType);
       if (state.attempts) {
         state.attempts = state.attempts.filter(a => (a.certificateType || 'health-manager') !== certTypeValue);
         window.userAttempts = state.attempts;
@@ -3557,7 +3582,7 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
 
   // 번호는 항상 검은색으로 고정하고, 정답/오답은 상태 아이콘으로 구분
   const isWrong = !isCorrect;
-  const statusColor = isCorrect ? '#059669' : '#DC2626';
+  const statusColor = isCorrect ? '#047D5A' : '#DC2626';
   const statusIcon = isCorrect ? '✓' : '✗';
 
   card.style.cssText = `
@@ -3604,7 +3629,7 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
       <span style="color: ${statusColor}; margin: 0 2px; font-size: 10px; font-weight: 700;">${statusIcon}</span>
       <span style="color: #DC2626; margin: 0 1px; font-size: 11px;">${userAnswer}</span>
       <span style="color: #94a3b8; margin: 0 1px; font-size: 10px;">→</span>
-      <span style="color: #059669; font-size: 11px;">${correctAnswer}</span>
+      <span style="color: #047D5A; font-size: 11px;">${correctAnswer}</span>
     `;
   } else {
     // 정답: 번호 + 정답표시 + 내답
@@ -3825,7 +3850,7 @@ function renderSubjectTrendChart() {
   // 과목 색상 팔레트
   const COLORS = [
     '#5FB2C9', '#1D2F4E', '#F59E0B', '#EF4444', '#10B981',
-    '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316'
+    '#6B4D96', '#EC4899', '#06B6D4', '#84CC16', '#F97316'
   ];
 
   // 데이터가 2개 이상 기간에 존재하는 과목만 표시
@@ -3917,8 +3942,9 @@ function createProSessionCard(session) {
   const badgeText   = isMockExam ? '모의고사' : '기출문제';
 
   const certType = session.certType || 'health';
-  const certBadgeClass = certType === 'sports' ? 'cert-sports' : 'cert-health';
-  const certBadgeText  = certType === 'sports' ? '생활체육지도사' : '건강운동관리사';
+  const certBadgeClassMap = { 'health': 'cert-health', 'sports': 'cert-sports', 'sports1': 'cert-sports1' };
+  const certBadgeClass = certBadgeClassMap[certType] || 'cert-health';
+  const certBadgeText  = certShortToLabel(certType);
 
   // 실제 점수 계산 (문제당 5점)
   const correct = session.correctCount || Math.round((session.score || 0) * session.completed / 100);
@@ -4496,7 +4522,7 @@ function renderAdminTab() {
     
     .status-message.success {
       background: rgba(5, 150, 105, 0.08);
-      color: var(--success-color, #059669);
+      color: var(--success-color, #047D5A);
       border: 1px solid rgba(5, 150, 105, 0.25);
       display: block;
     }
@@ -6099,7 +6125,7 @@ function createCardElement(card) {
       flex-shrink: 0;
     ">
       ${card.canResume ? `
-        <button class="resume-btn" data-card-id="${card.id}" style="width: 100%; background: #10b981; color: white; border: none; padding: ${layout.buttonPadding}px; border-radius: 8px; font-size: ${layout.buttonFont}px; font-weight: 600; cursor: pointer; transition: all 0.3s; flex-shrink: 0; box-sizing: border-box;">
+        <button class="resume-btn" data-card-id="${card.id}" style="width: 100%; background: #0A9E72; color: white; border: none; padding: ${layout.buttonPadding}px; border-radius: 8px; font-size: ${layout.buttonFont}px; font-weight: 600; cursor: pointer; transition: all 0.3s; flex-shrink: 0; box-sizing: border-box;">
           ▶ 이어서 풀기
         </button>
       ` : `
@@ -6548,11 +6574,11 @@ function attachCardEventListeners(container, typeFilter, subjectFilter, yearFilt
 
     // Hover 효과
     btn.addEventListener('mouseenter', () => {
-      btn.style.background = '#059669';
+      btn.style.background = '#047D5A';
       btn.style.transform = 'scale(1.02)';
     });
     btn.addEventListener('mouseleave', () => {
-      btn.style.background = '#10b981';
+      btn.style.background = '#0A9E72';
       btn.style.transform = 'scale(1)';
     });
   });
@@ -6664,7 +6690,7 @@ function resumeSession(sessionId) {
     const lastQuestionNumber = sessionData.lastQuestionNumber || 1;
 
     // 스포츠지도사는 exam-sports/, 건강운동관리사는 exam/
-    const examFolder = certType === 'sports' ? 'exam-sports' : 'exam';
+    const examFolder = ({ 'health': 'exam', 'sports': 'exam-sports', 'sports1': 'exam-sports1' }[certType] || 'exam');
 
     if (!year) {
       console.error('세션에 년도 정보가 없습니다.');
@@ -6719,7 +6745,7 @@ function retrySession(sessionId) {
     }
 
     const { year, subject, certType, type, hour } = sessionData;
-    const examFolder = certType === 'sports' ? 'exam-sports' : 'exam';
+    const examFolder = ({ 'health': 'exam', 'sports': 'exam-sports', 'sports1': 'exam-sports1' }[certType] || 'exam');
 
     let url;
     if (type === 'mockexam') {
@@ -7141,6 +7167,8 @@ function createCompactSubjectGrid(subjectStats, pointsPerQuestion = 5) {
   const _certForGrid = getCurrentCertificateType();
   const subjectOrder = _certForGrid === 'sports-instructor'
     ? ['스포츠사회학', '스포츠교육학', '스포츠심리학', '한국체육사', '운동생리학', '운동역학', '스포츠윤리', '특수체육론', '유아체육론', '노인체육론']
+    : _certForGrid === 'sports-instructor-1'
+    ? ['운동상해', '체육측정평가론', '트레이닝론', '스포츠영양학', '건강교육론', '장애인스포츠론']
     : ['기능해부학', '운동상해', '스포츠심리학', '병태생리학', '운동생리학', '건강체력평가', '운동처방론', '운동부하검사'];
 
   // 필터링된 과목 목록 (실제 데이터에 있는 과목만)

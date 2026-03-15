@@ -55,7 +55,12 @@
       "WebFetch(domain:the1stpeng.com)",
       "Bash(find /c/Users/Pc/Desktop/fndd2/admin -type f -name \"*.js\" 2>/dev/null | head -20)",
       "Bash(find /c/Users/Pc/Desktop/fndd2/exam -name \"*2025*건강체력평가*\" -type f 2>/dev/null | head -5)",
-      "Bash(find /c/Users/Pc/Desktop/fndd2 -name \"*건강체력평가*\" -type f 2>/dev/null | grep -i \"json\\\\|js\\\\|data\" | head -10)"
+      "Bash(find /c/Users/Pc/Desktop/fndd2 -name \"*건강체력평가*\" -type f 2>/dev/null | grep -i \"json\\\\|js\\\\|data\" | head -10)",
+      "Bash(start chrome:*)",
+      "Bash(npm ls:*)",
+      "Bash(find:*)",
+      "Bash(start:*)",
+      "Bash(cd:*)"
     ]
   }
 }

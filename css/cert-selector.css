@@ -42,18 +42,27 @@
   opacity: 0.85;
 }
 
-/* 모바일 (480px 이하): 전체 너비 */
+/* 모바일 (480px 이하): 줄바꿈 대응 */
 @media (max-width: 480px) {
   .cert-selector {
     width: calc(100% - 32px);
     border-radius: 12px;
+    flex-wrap: wrap;
+    gap: 3px;
   }
 
   .cert-button {
-    flex: 1;
+    flex: 1 1 calc(50% - 4px);
     text-align: center;
-    font-size: 13px;
-    padding: 9px 10px;
-    min-height: 42px;
+    font-size: 12px;
+    padding: 8px 6px;
+    min-height: 38px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  /* 3번째 버튼은 전체 폭 */
+  .cert-button:nth-child(3) {
+    flex: 1 1 100%;
   }
 }

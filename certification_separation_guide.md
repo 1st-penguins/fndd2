@@ -2,7 +2,7 @@
 
 ## 개요
 
-**Exercise Specialist (건강운동관리사)**와 **2급 생활스포츠지도사** 두 자격증을 **완전히 분리**하여 운영합니다.
+**Exercise Specialist (건강운동관리사)**와 **2급 스포츠지도사** 두 자격증을 **완전히 분리**하여 운영합니다.
 - 데이터 저장/조회 시 자격증 구분 (Firestore)
 - 통계/분석 시 자격증 완전 분리
 - 같은 이름의 과목도 자격증별로 독립 처리
@@ -20,7 +20,7 @@
 - images/        # 이미지 파일
 ```
 
-### 2급 생활스포츠지도사 (신규)
+### 2급 스포츠지도사 (신규)
 ```
 - exam-sports/       # 문제 HTML 파일
 - subjects-sports/   # 과목별 페이지
@@ -203,7 +203,7 @@ const weaknesses = analyzeWeaknesses(attempts, 'health-manager');
 4. 퀴즈 제출 시 `certificateType: 'health-manager'` 포함하여 저장
 
 ### 시나리오 2: 생활스포츠지도사 문제 풀이
-1. 사용자가 index.html에서 **"⚽ 2급 생활스포츠지도사"** 버튼 클릭
+1. 사용자가 index.html에서 **"⚽ 2급 스포츠지도사"** 버튼 클릭
 2. `setCertificateType('sports-instructor')` 호출
 3. `exam-sports/2024_스포츠사회학.html` 접속
 4. 퀴즈 제출 시 `certificateType: 'sports-instructor'` 포함하여 저장
@@ -213,7 +213,7 @@ const weaknesses = analyzeWeaknesses(attempts, 'health-manager');
 2. `getCurrentCertificateType()` → 'health-manager' (마지막 선택)
 3. Firestore에서 `certificateType: 'health-manager'` 데이터만 조회
 4. **Exercise Specialist 전용 통계** 표시
-5. "⚽ 2급 생활스포츠지도사" 버튼 클릭 → 즉시 재로드 및 필터링
+5. "⚽ 2급 스포츠지도사" 버튼 클릭 → 즉시 재로드 및 필터링
 
 ---
 
@@ -264,7 +264,7 @@ const filtered = allAttempts.filter(a => {
    ```javascript
    const CERTIFICATE_TYPES = {
      'health-manager': { name: '건강운동관리사', emoji: '🏋️' },
-     'sports-instructor': { name: '2급 생활스포츠지도사', emoji: '⚽' },
+     'sports-instructor': { name: '2급 스포츠지도사', emoji: '⚽' },
      'new-cert': { name: '새 자격증', emoji: '🎓' }  // 추가
    };
    ```

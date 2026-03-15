@@ -73,7 +73,7 @@ styleSheet.textContent = `
 
 .scorecard-result-badge.correct {
     background: #ecfdf5;
-    color: #059669;
+    color: #047D5A;
 }
 
 .scorecard-result-badge.incorrect {
@@ -119,7 +119,7 @@ styleSheet.textContent = `
 
 .correct-icon {
     background: #ecfdf5;
-    color: #059669;
+    color: #047D5A;
 }
 
 .incorrect-icon {
@@ -162,7 +162,7 @@ styleSheet.textContent = `
 }
 
 .correct-card {
-    border-color: #10b981;
+    border-color: #0A9E72;
     background: linear-gradient(to bottom, #ecfdf5 0%, #ffffff 20%);
 }
 
@@ -194,7 +194,7 @@ styleSheet.textContent = `
 }
 
 .correct-badge {
-    background: #10b981;
+    background: #0A9E72;
     color: white;
 }
 
@@ -229,7 +229,7 @@ styleSheet.textContent = `
 }
 
 .correct-answer {
-    color: #10b981;
+    color: #0A9E72;
 }
 
 .incorrect-user-answer {
@@ -243,7 +243,7 @@ styleSheet.textContent = `
 }
 
 .correct-answer-highlight {
-    color: #10b981;
+    color: #0A9E72;
     font-size: 1rem;
     font-weight: 800;
     background: #ecfdf5;

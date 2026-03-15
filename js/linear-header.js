@@ -417,14 +417,24 @@ if (typeof window.LinearHeader === 'undefined') {
 
     // 자격증 배지 업데이트
     updateCertificateBadge() {
-      const certType = localStorage.getItem('currentCertificateType') || 'health-manager';
+      // 경로 기반 감지 우선 (긴 접미사 먼저)
+      let certType = localStorage.getItem('currentCertificateType') || 'health-manager';
+      const pathname = window.location.pathname;
+      if (pathname.includes('-sports1/')) certType = 'sports-instructor-1';
+      else if (pathname.includes('-sports/') || pathname.includes('exam-sports/') || pathname.includes('subjects-sports/') || pathname.includes('years-sports/')) certType = 'sports-instructor';
       const certNames = {
         'health-manager': '건강운동관리사',
-        'sports-instructor': '생활스포츠지도사'
+        'sports-instructor': '생활스포츠지도사',
+        'sports-instructor-1': '1급 스포츠지도사'
+      };
+      const certColors = {
+        'health-manager': '#1D2F4E',
+        'sports-instructor': '#047D5A',
+        'sports-instructor-1': '#4E3278'
       };
 
       const certName = certNames[certType] || '건강운동관리사';
-      const certColor = certType === 'sports-instructor' ? '#059669' : '#1D2F4E';
+      const certColor = certColors[certType] || '#1D2F4E';
 
       // CSS 변수 업데이트 (배지 색상)
       document.documentElement.style.setProperty('--cert-primary', certColor);
@@ -466,14 +476,23 @@ window.updateHeaderCertificateBadge = function () {
   }
 
   // 인스턴스가 없을 때만 직접 업데이트
-  const certType = localStorage.getItem('currentCertificateType') || 'health-manager';
+  let certType = localStorage.getItem('currentCertificateType') || 'health-manager';
+  const pathname = window.location.pathname;
+  if (pathname.includes('-sports1/')) certType = 'sports-instructor-1';
+  else if (pathname.includes('-sports/') || pathname.includes('exam-sports/') || pathname.includes('subjects-sports/') || pathname.includes('years-sports/')) certType = 'sports-instructor';
   const certNames = {
     'health-manager': '건강운동관리사',
-    'sports-instructor': '생활스포츠지도사'
+    'sports-instructor': '생활스포츠지도사',
+    'sports-instructor-1': '1급 스포츠지도사'
+  };
+  const certColors = {
+    'health-manager': '#1D2F4E',
+    'sports-instructor': '#047D5A',
+    'sports-instructor-1': '#4E3278'
   };
 
   const certName = certNames[certType] || '건강운동관리사';
-  const certColor = certType === 'sports-instructor' ? '#059669' : '#1D2F4E';
+  const certColor = certColors[certType] || '#1D2F4E';
 
   // CSS 변수 업데이트 (배지 색상)
   document.documentElement.style.setProperty('--cert-primary', certColor);

@@ -1,13 +1,13 @@
 # 데이터베이스 자격증 구분 필드 추가
 
 ## 📋 개요
-2급 생활스포츠지도사 자격증 추가로 인해 데이터베이스 스키마에 `certificateType` 필드가 추가되었습니다.
+2급 스포츠지도사 자격증 추가로 인해 데이터베이스 스키마에 `certificateType` 필드가 추가되었습니다.
 
 ## 🎓 certificateType 필드
 
 ### 값
 - `'health-manager'` - 건강운동관리사
-- `'sports-instructor'` - 2급 생활스포츠지도사
+- `'sports-instructor'` - 2급 스포츠지도사
 
 ### 적용 컬렉션
 1. **attempts** - 문제 풀이 기록
@@ -251,7 +251,7 @@ export function setCertificateType(type) {
 export function getCertificateName(type) {
   const names = {
     'health-manager': '건강운동관리사',
-    'sports-instructor': '2급 생활스포츠지도사'
+    'sports-instructor': '2급 스포츠지도사'
   };
   return names[type] || '알 수 없음';
 }
