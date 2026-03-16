@@ -13,14 +13,40 @@ let selectedTags = new Set(); // 선택된 태그들
 let isAdminMode = false; // 관리자(검토자) 모드 상태
 let localSubjectDictionary = SUBJECT_TAG_DICTIONARY; // 로컬 수정용 사전
 
-// 과목 목록 (건강운동관리사)
-const healthManagerSubjects = [
-  '건강체력평가', '기능해부학', '병태생리학', '운동생리학',
-  '운동처방론', '운동상해', '운동부하검사', '스포츠심리학'
-];
+// 자격증별 과목 & 데이터 경로 설정
+const CERT_CONFIG = {
+  'health-manager': {
+    label: '건강운동관리사',
+    dataDir: 'data',
+    years: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+    subjects: [
+      '건강체력평가', '기능해부학', '병태생리학', '운동생리학',
+      '운동처방론', '운동상해', '운동부하검사', '스포츠심리학'
+    ]
+  },
+  'sports-instructor': {
+    label: '생활스포츠지도사',
+    dataDir: 'data/sports',
+    years: ['2021', '2022', '2023', '2024', '2025'],
+    subjects: [
+      '노인체육론', '스포츠교육학', '스포츠사회학', '스포츠심리학',
+      '스포츠윤리', '운동생리학', '운동역학', '유아체육론',
+      '특수체육론', '한국체육사'
+    ]
+  },
+  'sports-instructor-1': {
+    label: '1급 스포츠지도사',
+    dataDir: 'data/sports1',
+    years: ['2021', '2022', '2023', '2024', '2025'],
+    subjects: [
+      '건강교육론', '스포츠영양학', '운동상해',
+      '장애인스포츠론', '체육측정평가론', '트레이닝론'
+    ]
+  }
+};
 
-// 년도 목록
-const years = ['2019', '2020', '2021', '2022', '2023', '2024', '2025'];
+// 하위 호환용
+const healthManagerSubjects = CERT_CONFIG['health-manager'].subjects;
 
 /**
  * 초기화
@@ -52,27 +78,61 @@ async function init() {
 function setupFilters() {
   const yearFilter = document.getElementById('year-filter');
   const subjectFilter = document.getElementById('subject-filter');
+  const certFilter = document.getElementById('certificate-filter');
 
-  // 년도 옵션 추가
-  years.forEach(year => {
+  // 자격증 변경 시 년도/과목 옵션 갱신
+  certFilter.addEventListener('change', () => {
+    updateSubjectAndYearOptions();
+    performSearch();
+  });
+
+  // 초기 옵션 설정
+  updateSubjectAndYearOptions();
+
+  // 필터 변경 이벤트
+  yearFilter.addEventListener('change', performSearch);
+  subjectFilter.addEventListener('change', performSearch);
+}
+
+/**
+ * 자격증 선택에 따라 년도/과목 옵션 갱신
+ */
+function updateSubjectAndYearOptions() {
+  const certFilter = document.getElementById('certificate-filter');
+  const yearFilter = document.getElementById('year-filter');
+  const subjectFilter = document.getElementById('subject-filter');
+  const selectedCert = certFilter.value;
+
+  // 현재 선택값 보존
+  const prevYear = yearFilter.value;
+  const prevSubject = subjectFilter.value;
+
+  // 대상 자격증 목록
+  const certs = selectedCert === 'all'
+    ? Object.values(CERT_CONFIG)
+    : [CERT_CONFIG[selectedCert]].filter(Boolean);
+
+  // 년도 수집 (중복 제거, 정렬)
+  const allYears = [...new Set(certs.flatMap(c => c.years))].sort();
+  yearFilter.innerHTML = '<option value="all">전체</option>';
+  allYears.forEach(year => {
     const option = document.createElement('option');
     option.value = year;
     option.textContent = `${year}년`;
     yearFilter.appendChild(option);
   });
+  if (allYears.includes(prevYear)) yearFilter.value = prevYear;
 
-  // 과목 옵션 추가
-  healthManagerSubjects.forEach(subject => {
+  // 과목 수집 (중복 제거, 정렬)
+  const allSubjects = [...new Set(certs.flatMap(c => c.subjects))].sort();
+  subjectFilter.innerHTML = '<option value="all">전체</option>';
+  allSubjects.forEach(subject => {
     const option = document.createElement('option');
     option.value = subject;
     option.textContent = subject;
     subjectFilter.appendChild(option);
   });
-
-  // 필터 변경 이벤트
-  yearFilter.addEventListener('change', performSearch);
-  subjectFilter.addEventListener('change', performSearch);
-  document.getElementById('certificate-filter').addEventListener('change', performSearch);
+  if (allSubjects.includes(prevSubject)) subjectFilter.value = prevSubject;
 }
 
 /**
@@ -85,15 +145,13 @@ function setupEventListeners() {
   // 검색 버튼 클릭
   searchButton.addEventListener('click', () => {
     handleSearchInput(searchInput.value);
-    searchInput.value = '';
   });
 
   // 엔터 키 입력
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       handleSearchInput(searchInput.value);
-      searchInput.value = '';
-      document.getElementById('tag-autocomplete').innerHTML = ''; // 자동완성 닫기
+      document.getElementById('tag-autocomplete').innerHTML = '';
     }
   });
 
@@ -137,52 +195,57 @@ function handleSearchInput(input) {
   if (matchedAlias) {
     const mappedTag = GLOBAL_ALIAS_DICTIONARY[matchedAlias];
     addTag(mappedTag);
-  } else {
-    // 매핑 없으면 입력값 그대로 태그로 추가
+    document.getElementById('tag-search-input').value = '';
+  } else if (tagIndex[trimmed]) {
+    // 정확히 일치하는 태그가 있으면 태그로 추가
     addTag(trimmed);
+    document.getElementById('tag-search-input').value = '';
   }
+  // 태그에 없는 입력은 텍스트 검색으로 처리 (입력값 유지)
 
   performSearch();
 }
 
 /**
- * 모든 문제 데이터 로드
+ * 모든 문제 데이터 로드 (전 자격증)
  */
 async function loadAllQuestions() {
   const loadingPromises = [];
 
-  for (const year of years) {
-    for (const subject of healthManagerSubjects) {
-      const dataPath = `data/${year}_${subject}.json`;
-      loadingPromises.push(
-        fetch(dataPath)
-          .then(response => {
-            if (response.ok) {
-              return response.json().then(data => {
-                // 각 문제에 메타데이터 추가
-                return data.map((q, index) => ({
-                  ...q,
-                  year,
-                  subject,
-                  number: index + 1,
-                  questionId: `${year}_${subject}_${index + 1}`
-                }));
-              });
-            }
-            return [];
-          })
-          .catch(error => {
-            console.warn(`데이터 로드 실패: ${dataPath}`, error);
-            return [];
-          })
-      );
+  for (const [certType, config] of Object.entries(CERT_CONFIG)) {
+    for (const year of config.years) {
+      for (const subject of config.subjects) {
+        const dataPath = `${config.dataDir}/${year}_${subject}.json`;
+        loadingPromises.push(
+          fetch(dataPath)
+            .then(response => {
+              if (response.ok) {
+                return response.json().then(data => {
+                  return data.map((q, index) => ({
+                    ...q,
+                    year,
+                    subject,
+                    certType,
+                    number: index + 1,
+                    questionId: `${certType}_${year}_${subject}_${index + 1}`
+                  }));
+                });
+              }
+              return [];
+            })
+            .catch(error => {
+              console.warn(`데이터 로드 실패: ${dataPath}`, error);
+              return [];
+            })
+        );
+      }
     }
   }
 
   const results = await Promise.all(loadingPromises);
   allQuestions = results.flat();
 
-  console.log(`총 ${allQuestions.length}개 문제 로드 완료`);
+  console.log(`총 ${allQuestions.length}개 문제 로드 완료 (${Object.keys(CERT_CONFIG).length}개 자격증)`);
 }
 
 /**
@@ -192,13 +255,14 @@ function buildTagIndex() {
   tagIndex = {};
 
   allQuestions.forEach((question, index) => {
-    const processedTags = extractTagsFromExplanation(question.explanation || '');
+    // question.tags 필드 직접 사용
+    const processedTags = (question.tags && Array.isArray(question.tags)) ? [...question.tags] : [];
+
     const content = (question.explanation || '') + ' ' + (question.subject || '');
 
-    // 💡 과목별 사전 로드 (교차 차단 핵심)
+    // 과목별 사전 키워드 매칭으로 보충
     const subjectDict = SUBJECT_TAG_DICTIONARY[question.subject] || {};
 
-    // 해당 과목의 사전 키워드만 본문에서 매칭
     Object.entries(subjectDict).forEach(([mainTag, keywords]) => {
       let matched = false;
       if (content.includes(mainTag)) matched = true;
@@ -216,11 +280,6 @@ function buildTagIndex() {
         processedTags.push(mainTag);
       }
     });
-
-    // 기존 수동 태그 병합
-    if (question.tags && Array.isArray(question.tags)) {
-      processedTags.push(...question.tags);
-    }
 
     const uniqueTags = [...new Set(processedTags)];
     question._generatedTags = uniqueTags;
@@ -362,8 +421,8 @@ function handleAutocomplete(e) {
       if (aStarts !== bStarts) return bStarts - aStarts;
 
       // 사전에 있는 태그 우선
-      const aInDict = TAG_DICTIONARY.hasOwnProperty(a);
-      const bInDict = TAG_DICTIONARY.hasOwnProperty(b);
+      const aInDict = Object.values(SUBJECT_TAG_DICTIONARY).some(d => d.hasOwnProperty(a));
+      const bInDict = Object.values(SUBJECT_TAG_DICTIONARY).some(d => d.hasOwnProperty(b));
       if (aInDict !== bInDict) return bInDict - aInDict;
 
       return tagIndex[b].length - tagIndex[a].length; // 인기도 순
@@ -407,16 +466,16 @@ function performSearch() {
 
   let results = [];
 
+  // 텍스트 검색어 가져오기
+  const searchInput = document.getElementById('tag-search-input');
+  const textQuery = searchInput ? searchInput.value.trim() : '';
+
   // 태그로 필터링
   if (selectedTags.size > 0) {
-    // 선택된 태그들에 해당하는 문제들의 교집합 찾기
     const sets = Array.from(selectedTags).map(tag => {
-      // 태그 인덱스에 있으면 가져오고, 없으면 빈 배열
       return new Set(tagIndex[tag] || []);
     });
 
-    // 교집합 계산 (모든 태그를 포함해야 함)
-    // 첫 번째 세트를 기준으로 나머지 세트들과 교집합 수행
     if (sets.length > 0) {
       let intersection = sets[0];
       for (let i = 1; i < sets.length; i++) {
@@ -427,8 +486,17 @@ function performSearch() {
     } else {
       results = [];
     }
+  } else if (textQuery.length >= 2) {
+    // 태그 미선택 + 텍스트 입력 시: questionText 전문 검색
+    const query = textQuery.toLowerCase();
+    results = allQuestions.filter(q => {
+      const text = (q.questionText || '').toLowerCase();
+      const explanation = (q.explanation || '').replace(/<[^>]*>/g, ' ').toLowerCase();
+      const tags = (q._generatedTags || []).join(' ').toLowerCase();
+      return text.includes(query) || explanation.includes(query) || tags.includes(query);
+    });
   } else {
-    // 태그가 없으면 전체 문제 (필터 적용 전)
+    // 태그도 없고 텍스트도 없으면 전체 문제
     results = [...allQuestions];
   }
 
@@ -444,9 +512,7 @@ function performSearch() {
 
   // 자격증 필터
   if (certFilter !== 'all') {
-    if (certFilter === 'health-manager') {
-      results = results.filter(q => healthManagerSubjects.includes(q.subject));
-    }
+    results = results.filter(q => q.certType === certFilter);
   }
 
   displayResults(results);
@@ -492,6 +558,8 @@ function displayResults(results) {
 
     const displayTags = sortedTags.slice(0, 5); // 최대 5개
 
+    const certLabel = CERT_CONFIG[question.certType]?.label || '';
+
     return `
       <div class="question-card" data-question-id="${question.questionId}">
         <div class="question-card-header">
@@ -500,21 +568,23 @@ function displayResults(results) {
               ${question.year}년 ${question.subject} ${question.number}번 문제
             </div>
             <div class="question-card-meta">
-              <span>년도: ${question.year}</span>
-              <span>과목: ${question.subject}</span>
-              <span>문제번호: ${question.number}</span>
+              <span>${certLabel}</span>
+              <span>${question.year}년</span>
+              <span>${question.subject}</span>
+              <span>${question.number}번</span>
             </div>
             ${displayTags.length > 0 ? `
               <div class="question-card-tags">
                 ${displayTags.map(tag => {
       const isSelected = selectedTags.has(tag);
-      return `<span class="question-card-tag ${isSelected ? 'active' : ''}">${tag}</span>`;
+      const removeBtn = isAdminMode ? `<button class="tag-remove-btn" onclick="event.stopPropagation(); removeQuestionTag('${question.questionId}', '${tag.replace(/'/g, "\\'")}')" title="태그 삭제">×</button>` : '';
+      return `<span class="question-card-tag ${isSelected ? 'active' : ''}">${tag}${removeBtn}</span>`;
     }).join('')}
               </div>
             ` : ''}
           </div>
           <div class="question-card-actions" style="display: flex; gap: 8px;">
-            <button class="question-card-action" onclick="openQuestion('${question.year}', '${question.subject}', ${question.number - 1})">
+            <button class="question-card-action" onclick="openQuestionModal('${question.questionId}')">
               문제 보기
             </button>
             ${isAdminMode ? `
@@ -665,16 +735,153 @@ function saveInlineTag() {
 }
 
 /**
- * 문제 열기
+ * 문제 열기 (퀴즈 페이지로 이동)
  */
 function openQuestion(year, subject, questionIndex) {
   const encodedSubject = encodeURIComponent(subject);
   window.location.href = `exam/quiz.html?year=${year}&subject=${encodedSubject}&q=${questionIndex + 1}`;
 }
 
+/**
+ * 문제 상세 모달 열기
+ */
+let currentModalQuestion = null;
+let answerRevealed = false;
+
+function openQuestionModal(questionId) {
+  const q = allQuestions.find(it => it.questionId === questionId);
+  if (!q) return;
+
+  currentModalQuestion = q;
+  answerRevealed = false;
+
+  const modal = document.getElementById('question-detail-modal');
+  const title = document.getElementById('qmodal-title');
+  const questionDiv = document.getElementById('qmodal-question');
+  const optionsDiv = document.getElementById('qmodal-options');
+  const explanationDiv = document.getElementById('qmodal-explanation');
+  const showAnswerBtn = document.getElementById('qmodal-show-answer');
+
+  const certLabel = CERT_CONFIG[q.certType]?.label || '';
+  title.textContent = `[${certLabel}] ${q.year}년 ${q.subject} ${q.number}번`;
+
+  // 문제 이미지 표시
+  if (q.questionImage) {
+    questionDiv.innerHTML = `<img src="${q.questionImage}" alt="문제 이미지" style="max-width:100%; border-radius:8px;">`;
+  } else {
+    questionDiv.innerHTML = '<p>(문제 이미지 없음)</p>';
+  }
+
+  // 선택지 및 해설 숨김
+  optionsDiv.innerHTML = '';
+  explanationDiv.style.display = 'none';
+  explanationDiv.innerHTML = '';
+  showAnswerBtn.style.display = 'inline-block';
+  showAnswerBtn.textContent = '정답 보기';
+
+  modal.classList.add('open');
+}
+
+function revealAnswer() {
+  if (!currentModalQuestion || answerRevealed) return;
+  answerRevealed = true;
+
+  const q = currentModalQuestion;
+  const optionsDiv = document.getElementById('qmodal-options');
+  const explanationDiv = document.getElementById('qmodal-explanation');
+  const showAnswerBtn = document.getElementById('qmodal-show-answer');
+
+  // 정답 표시
+  const correctIdx = Number(q.correctAnswer ?? -1);
+  optionsDiv.innerHTML = `<div class="wrong-modal__option correct">정답: ${correctIdx + 1}번</div>`;
+
+  // 해설 표시
+  const explanationHtml = (q.explanation || '해설이 없습니다.').replace(/\n/g, '<br>');
+  explanationDiv.innerHTML = `<strong>해설</strong><br>${explanationHtml}`;
+  explanationDiv.style.display = 'block';
+
+  // 태그 표시
+  if (q.tags && q.tags.length > 0) {
+    explanationDiv.innerHTML += `
+      <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px;" id="qmodal-tags">
+        ${q.tags.slice(0, 8).map(tag => {
+          const removeBtn = isAdminMode ? `<button onclick="event.stopPropagation(); removeQuestionTag('${q.questionId}', '${tag.replace(/'/g, "\\'")}', true)" style="background:none; border:none; color:#0369a1; cursor:pointer; font-size:14px; margin-left:2px; padding:0 2px;">×</button>` : '';
+          return `<span style="background:#e0f2fe; color:#0369a1; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:2px;">${tag}${removeBtn}</span>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  showAnswerBtn.style.display = 'none';
+}
+
+function closeQuestionModal() {
+  document.getElementById('question-detail-modal').classList.remove('open');
+  currentModalQuestion = null;
+}
+
+/**
+ * 문제에서 태그 삭제 (관리자 전용)
+ */
+function removeQuestionTag(questionId, tag, isModal = false) {
+  if (!isAdminMode) return;
+
+  const q = allQuestions.find(it => it.questionId === questionId);
+  if (!q) return;
+
+  // question.tags에서 제거
+  if (q.tags && Array.isArray(q.tags)) {
+    q.tags = q.tags.filter(t => t !== tag);
+  }
+
+  // 인덱스 재구성 + 검색 결과 갱신
+  buildTagIndex();
+  performSearch();
+
+  // 모달 내 태그도 갱신
+  if (isModal && currentModalQuestion && currentModalQuestion.questionId === questionId) {
+    const tagsDiv = document.getElementById('qmodal-tags');
+    if (tagsDiv) {
+      const remaining = q.tags || [];
+      if (remaining.length === 0) {
+        tagsDiv.remove();
+      } else {
+        tagsDiv.innerHTML = remaining.slice(0, 8).map(t => {
+          const removeBtn = `<button onclick="event.stopPropagation(); removeQuestionTag('${questionId}', '${t.replace(/'/g, "\\'")}', true)" style="background:none; border:none; color:#0369a1; cursor:pointer; font-size:14px; margin-left:2px; padding:0 2px;">×</button>`;
+          return `<span style="background:#e0f2fe; color:#0369a1; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:2px;">${t}${removeBtn}</span>`;
+        }).join('');
+      }
+    }
+  }
+}
+
+function escapeHtmlTag(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// 모달 이벤트 리스너
+document.addEventListener('DOMContentLoaded', () => {
+  const closeBtn = document.getElementById('qmodal-close-btn');
+  const dismissBtn = document.getElementById('qmodal-dismiss-btn');
+  const showAnswerBtn = document.getElementById('qmodal-show-answer');
+  const overlay = document.getElementById('question-detail-modal');
+
+  if (closeBtn) closeBtn.addEventListener('click', closeQuestionModal);
+  if (dismissBtn) dismissBtn.addEventListener('click', closeQuestionModal);
+  if (showAnswerBtn) showAnswerBtn.addEventListener('click', revealAnswer);
+  if (overlay) overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeQuestionModal();
+  });
+});
+
 // 전역 함수로 export
 window.removeTag = removeTag;
 window.openQuestion = openQuestion;
+window.openQuestionModal = openQuestionModal;
+window.removeQuestionTag = removeQuestionTag;
 window.openInlineEditModal = openInlineEditModal;
 window.saveInlineTag = saveInlineTag;
 

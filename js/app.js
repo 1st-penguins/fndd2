@@ -66,39 +66,29 @@ export function updateLectureTabVisibility() {
   }
 
   // 태그 검색 링크 표시 제어
-  updateTagSearchLinkVisibility(adminStatus);
+  updateTagSearchLinkVisibility();
 }
 
 /**
- * 태그 검색 링크 표시 제어 (관리자만)
+ * 태그 검색 링크 표시 제어 (모든 사용자)
  */
-export function updateTagSearchLinkVisibility(adminStatus) {
+export function updateTagSearchLinkVisibility() {
   let tagSearchLink = document.querySelector('.tag-search-link');
 
-  if (adminStatus) {
-    // 관리자: 링크 표시 (없으면 생성)
-    if (!tagSearchLink) {
-      const subTabs = document.querySelector('#quiz-tab .sub-tabs');
-      if (subTabs) {
-        tagSearchLink = document.createElement('a');
-        tagSearchLink.href = 'search-by-tags.html';
-        tagSearchLink.className = 'sub-tab-button tag-search-link';
-        // admin-only 클래스는 auth-init.js와 충돌 가능성 있으므로 제외하고 직접 제어
-        tagSearchLink.style.cssText = 'text-decoration: none; display: inline-flex; align-items: center; justify-content: center;';
-        tagSearchLink.innerHTML = '🏷️ 태그 검색';
-        subTabs.appendChild(tagSearchLink);
-        window.Logger?.debug('✅ 관리자: 태그 검색 링크 생성됨');
-      }
-    } else {
-      tagSearchLink.style.display = 'inline-flex';
-      window.Logger?.debug('✅ 관리자: 태그 검색 링크 표시');
+  // 링크가 없으면 생성
+  if (!tagSearchLink) {
+    const subTabs = document.querySelector('#quiz-tab .sub-tabs');
+    if (subTabs) {
+      tagSearchLink = document.createElement('a');
+      tagSearchLink.href = 'search-by-tags.html';
+      tagSearchLink.className = 'sub-tab-button tag-search-link';
+      tagSearchLink.style.cssText = 'text-decoration: none; display: inline-flex; align-items: center; justify-content: center;';
+      tagSearchLink.innerHTML = '🏷️ 태그 검색';
+      subTabs.appendChild(tagSearchLink);
+      window.Logger?.debug('✅ 태그 검색 링크 생성됨');
     }
   } else {
-    // 일반 사용자: 링크 제거 (DOM에서 완전 삭제)
-    if (tagSearchLink) {
-      tagSearchLink.remove();
-      window.Logger?.debug('👤 일반 사용자: 태그 검색 링크 제거됨');
-    }
+    tagSearchLink.style.display = 'inline-flex';
   }
 }
 
@@ -149,7 +139,7 @@ function initApp() {
   initTabs();
 
   // 초기 태그 검색 링크 표시 상태 설정
-  updateTagSearchLinkVisibility(isAdmin());
+  updateTagSearchLinkVisibility();
 
   // 전역 프리로더 숨기기 (약간의 지연으로 부드러운 전환)
   setTimeout(() => {

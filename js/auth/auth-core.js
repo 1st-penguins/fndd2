@@ -108,7 +108,7 @@ export async function initAuth() {
 
         // 태그 검색 링크 표시 업데이트
         if (typeof window.updateTagSearchLinkVisibility === 'function') {
-          window.updateTagSearchLinkVisibility(isAdmin(user));
+          window.updateTagSearchLinkVisibility();
         }
       } else {
         // 로그아웃 상태 처리
@@ -119,9 +119,9 @@ export async function initAuth() {
           window.updateLectureTabVisibility();
         }
 
-        // 태그 검색 링크 숨기기 (로그아웃 시)
+        // 태그 검색 링크 표시 (로그아웃 상태에서도 표시)
         if (typeof window.updateTagSearchLinkVisibility === 'function') {
-          window.updateTagSearchLinkVisibility(false);
+          window.updateTagSearchLinkVisibility();
         }
       }
 

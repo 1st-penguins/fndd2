@@ -959,22 +959,8 @@ function displayQuestionTags(question) {
   const tagsContainer = document.getElementById('question-tags');
   if (!tagsContainer) return;
 
-  // 태그 기능 비활성화: 항상 숨김 처리
-  tagsContainer.innerHTML = '';
-  tagsContainer.style.display = 'none';
-  return;
-
-  /* 태그 기능 활성화 시 아래 코드 사용
-  // explanation에서 태그 추출
-  const tags = extractTagsFromExplanation(question.explanation || '');
-
-  // 문제에 tags 필드가 있으면 추가
-  if (question.tags && Array.isArray(question.tags)) {
-    tags.push(...question.tags);
-  }
-
-  // 중복 제거
-  const uniqueTags = [...new Set(tags)];
+  // question.tags 필드 직접 사용
+  const uniqueTags = (question.tags && Array.isArray(question.tags)) ? [...new Set(question.tags)] : [];
 
   if (uniqueTags.length === 0) {
     tagsContainer.innerHTML = '';
@@ -987,13 +973,12 @@ function displayQuestionTags(question) {
     <div class="question-tags-label">태그:</div>
     <div class="question-tags-list">
       ${uniqueTags.slice(0, 8).map(tag => `
-        <a href="../search-by-tags.html" class="question-tag" onclick="event.preventDefault(); window.open('../search-by-tags.html', '_blank'); const input = document.querySelector('#tag-search-input'); if(input) { input.value = '${tag}'; input.dispatchEvent(new Event('input')); }">
+        <a href="../search-by-tags.html" class="question-tag" onclick="event.preventDefault(); window.open('search-by-tags.html', '_blank');">
           ${tag}
         </a>
       `).join('')}
     </div>
   `;
-  */
 }
 
 /**
