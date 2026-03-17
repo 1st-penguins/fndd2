@@ -60,7 +60,11 @@
       "Bash(npm ls:*)",
       "Bash(find:*)",
       "Bash(start:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(file *.png)",
+      "Bash(ekg)",
+      "Bash(심전도)",
+      "Bash(heart)"
     ]
   }
 }

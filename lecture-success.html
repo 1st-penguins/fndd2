@@ -9,118 +9,191 @@
   <link rel="canonical" href="https://the1stpeng.com/lecture-success.html" />
   <meta name="robots" content="noindex">
   <meta name="description" content="결제가 완료되었습니다. 강의를 바로 수강할 수 있습니다.">
-  
+
   <link rel="stylesheet" href="css/base.css" />
-  
+  <link rel="stylesheet" href="css/linear-header.css" />
+  <link rel="stylesheet" href="css/linear-footer.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+
   <script type="module" src="js/core/firebase-core.js"></script>
   <script type="module" src="js/auth/auth-core.js"></script>
-  
+  <script type="module" src="js/auth/auth-init.js"></script>
+
+  <!-- 헤더 스크립트 -->
+  <script src="js/linear-header.js"></script>
+
   <style>
-    body {
+    .success-container {
+      max-width: 520px;
+      margin: 100px auto 60px;
+      padding: 0 16px;
+    }
+
+    .success-card {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 36px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: #e8f5e9;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0 auto 24px;
+      font-size: 40px;
     }
-    
-    .success-container {
-      background: white;
-      border-radius: 20px;
-      padding: 60px;
-      text-align: center;
-      max-width: 500px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+
+    .success-card h1 {
+      color: var(--penguin-navy);
+      font-size: 22px;
+      margin-bottom: 12px;
     }
-    
-    .success-icon {
-      font-size: 80px;
-      margin-bottom: 20px;
-    }
-    
-    h1 {
-      color: #4caf50;
-      margin-bottom: 20px;
-    }
-    
-    .message {
+
+    .success-message {
       color: #666;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.8;
-      margin-bottom: 30px;
+      margin-bottom: 32px;
     }
-    
-    .btn {
-      padding: 15px 40px;
+
+    #loadingMessage {
+      color: #999;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    .success-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 24px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      margin: 10px;
       transition: all 0.3s;
+      text-decoration: none;
     }
-    
-    .btn-primary {
+
+    .btn-action--primary {
       background: var(--penguin-navy);
       color: white;
     }
-    
-    .btn-primary:hover {
+
+    .btn-action--primary:hover {
       background: var(--penguin-skyblue);
       transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(95, 178, 201, 0.3);
     }
-    
-    .btn-secondary {
-      background: #f0f0f0;
-      color: #333;
+
+    .btn-action--secondary {
+      background: #f5f5f5;
+      color: #555;
     }
-    
-    .btn-secondary:hover {
-      background: #e0e0e0;
+
+    .btn-action--secondary:hover {
+      background: #e8e8e8;
     }
-    
-    #loadingMessage {
-      color: #999;
-      margin-top: 20px;
+
+    @media (max-width: 480px) {
+      .success-container { margin: 80px auto 40px; }
+      .success-card { padding: 36px 20px; }
+      .success-card h1 { font-size: 19px; }
     }
   </style>
 </head>
 <body>
-  <div class="success-container">
-    <div class="success-icon">✅</div>
-    <h1>결제가 완료되었습니다!</h1>
-    <div class="message" id="successMessage">
-      구매가 완료되었습니다.
+  <!-- Linear Header -->
+  <header class="linear-header" id="linear-header">
+    <div class="linear-header__container">
+      <a href="index.html" class="linear-header__brand">
+        <div class="linear-header__logo"><img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고"></div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+      </a>
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item"><a href="index.html" class="linear-header__nav-link">홈</a></li>
+          <li class="linear-header__nav-item"><a href="notices.html" class="linear-header__nav-link">공지사항</a></li>
+          <li class="linear-header__nav-item"><a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a></li>
+          <li class="linear-header__nav-item"><a href="index.html#lecture-tab" class="linear-header__nav-link linear-header__nav-link--active">강의</a></li>
+        </ul>
+      </nav>
+      <div class="linear-header__auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
+        <div id="user-profile-container" style="display:none;">
+          <div class="linear-header__user-profile">
+            <div class="linear-header__user-avatar" id="user-avatar">U</div>
+            <span class="linear-header__user-name" id="user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
+        </div>
+      </div>
+      <div class="linear-header__actions">
+        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+          <span class="linear-header__mobile-toggle-line"></span><span class="linear-header__mobile-toggle-line"></span><span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
     </div>
-    
-    <div id="loadingMessage">결제 정보 저장 중...</div>
-    
-    <div id="actionButtons" style="display: none;">
-      <button class="btn btn-primary" id="mainActionButton" onclick="goToLecture()">
-        이용하기
-      </button>
-      <button class="btn btn-secondary" onclick="window.open('https://litt.ly/the1stpeng','_blank')">
-        📚 목록으로
-      </button>
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <a href="index.html" class="linear-header__nav-link">홈</a>
+      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
     </div>
-  </div>
+  </header>
+
+  <main class="success-container">
+    <div class="success-card">
+      <div class="success-icon">&#10003;</div>
+      <h1>결제가 완료되었습니다!</h1>
+      <div class="success-message" id="successMessage">
+        구매가 완료되었습니다.
+      </div>
+
+      <div id="loadingMessage">결제 정보 저장 중...</div>
+
+      <div id="actionButtons" class="success-actions" style="display: none;">
+        <button class="btn-action btn-action--primary" id="mainActionButton" onclick="goToLecture()">
+          이용하기
+        </button>
+        <button class="btn-action btn-action--secondary" onclick="window.location.href='index.html#lecture-tab'">
+          목록으로 돌아가기
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="linear-footer"></footer>
 
   <script type="module">
     import { auth, db } from './js/core/firebase-core.js';
     import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
     import { applyCoupon } from './js/payment/coupon-manager.js';
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('productId');
     const orderId = urlParams.get('orderId');
     const productType = urlParams.get('type') || 'pdf';
     const couponId = urlParams.get('couponId');
     const discountAmount = parseInt(urlParams.get('discount')) || 0;
-    
+
     let savedProductId = productId;
     let savedProductType = productType;
-    
+
     // 결제 정보 저장
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
@@ -128,7 +201,7 @@
         window.location.href = 'login.html';
         return;
       }
-      
+
       try {
         // Firebase에 구매 내역 저장
         await setDoc(doc(db, 'purchases', `${user.uid}_${productId}`), {
@@ -142,37 +215,37 @@
           purchasedAt: serverTimestamp(),
           status: 'completed'
         });
-        
-        console.log('✅ 구매 내역 저장 완료');
-        
+
+        console.log('구매 내역 저장 완료');
+
         // 쿠폰 사용 처리
         if (couponId) {
           await applyCoupon(couponId, user.uid, orderId, productId, discountAmount);
-          console.log('✅ 쿠폰 사용 처리 완료');
+          console.log('쿠폰 사용 처리 완료');
         }
-        
+
         // 버튼 표시
         document.getElementById('loadingMessage').style.display = 'none';
-        document.getElementById('actionButtons').style.display = 'block';
-        
+        document.getElementById('actionButtons').style.display = 'flex';
+
         // 상품 유형에 따라 메시지 및 버튼 변경
         const messageEl = document.getElementById('successMessage');
         const buttonEl = document.getElementById('mainActionButton');
-        
+
         if (productType === 'pdf') {
           messageEl.innerHTML = 'PDF 구매가 완료되었습니다.<br>이제 다운로드하실 수 있습니다.';
-          buttonEl.textContent = '📥 PDF 다운로드';
+          buttonEl.textContent = 'PDF 다운로드';
         } else {
           messageEl.innerHTML = '강의 구매가 완료되었습니다.<br>이제 강의를 수강하실 수 있습니다.';
-          buttonEl.textContent = '▶️ 강의 수강하기';
+          buttonEl.textContent = '강의 수강하기';
         }
-        
+
       } catch (error) {
         console.error('구매 내역 저장 오류:', error);
         document.getElementById('loadingMessage').textContent = '저장 중 오류가 발생했습니다.';
       }
     });
-    
+
     window.goToLecture = function() {
       if (savedProductType === 'pdf') {
         window.location.href = `pdf-download.html?id=${savedProductId}`;
@@ -183,4 +256,3 @@
   </script>
 </body>
 </html>
-

@@ -602,27 +602,37 @@ export function addScrollUpButton(showAfter = 300) {
 
 // 전역 이미지 지연 로딩 활성화
 export function enableGlobalLazyLoading() {
+  // 상점 카드 이미지는 제외 (크기 계산 문제 방지)
+  function shouldSkip(img) {
+    return img.closest('.shop-card') || img.closest('.shop-grid');
+  }
+
   // 기존 img에 loading/fetchpriority/decoding 적용
   document.querySelectorAll('img').forEach(img => {
+    if (shouldSkip(img)) return;
     if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
     if (!img.hasAttribute('fetchpriority')) img.setAttribute('fetchpriority', 'low');
     if (!img.hasAttribute('decoding')) img.setAttribute('decoding', 'async');
   });
-  
+
   // 동적 이미지도 감지하여 적용
   const observer = new MutationObserver((mutations) => {
     for (const m of mutations) {
       m.addedNodes.forEach((node) => {
         if (node.nodeType === 1) {
           if (node.tagName === 'IMG') {
-            if (!node.hasAttribute('loading')) node.setAttribute('loading', 'lazy');
-            if (!node.hasAttribute('fetchpriority')) node.setAttribute('fetchpriority', 'low');
-            if (!node.hasAttribute('decoding')) node.setAttribute('decoding', 'async');
+            if (!shouldSkip(node)) {
+              if (!node.hasAttribute('loading')) node.setAttribute('loading', 'lazy');
+              if (!node.hasAttribute('fetchpriority')) node.setAttribute('fetchpriority', 'low');
+              if (!node.hasAttribute('decoding')) node.setAttribute('decoding', 'async');
+            }
           } else {
             node.querySelectorAll?.('img').forEach(img => {
-              if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
-              if (!img.hasAttribute('fetchpriority')) img.setAttribute('fetchpriority', 'low');
-              if (!img.hasAttribute('decoding')) img.setAttribute('decoding', 'async');
+              if (!shouldSkip(img)) {
+                if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
+                if (!img.hasAttribute('fetchpriority')) img.setAttribute('fetchpriority', 'low');
+                if (!img.hasAttribute('decoding')) img.setAttribute('decoding', 'async');
+                }
             });
           }
         }

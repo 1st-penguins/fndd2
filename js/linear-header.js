@@ -693,9 +693,9 @@ function injectFooter() {
 
       <div class="linear-footer__divider"></div>
 
-      <div class="linear-footer__bottom">
-        <p class="linear-footer__copyright">© 2025 퍼스트펭귄. All rights reserved.</p>
-        <p class="linear-footer__legal-desc">체육지도자 자격증을 위한 KSPO 기출문제 학습 플랫폼</p>
+      <div class="linear-footer__business-info">
+        <p>퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호</p>
+        <p>주소: 서울특별시 강동구 양재대로 | E-mail: the1stpeng@gmail.com | © 2025 퍼스트펭귄. All rights reserved.</p>
       </div>
     </div>
   `;

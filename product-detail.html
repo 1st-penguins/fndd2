@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상품 상세 | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="canonical" href="https://the1stpeng.com/product-detail.html">
+  <meta name="description" content="퍼스트펭귄 자격증 시험 대비 학습 자료 상세 정보">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="상품 상세 | 퍼스트펭귄">
+  <meta property="og:description" content="퍼스트펭귄 자격증 시험 대비 학습 자료">
+  <meta property="og:url" content="https://the1stpeng.com/product-detail.html">
+  <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/linear-header.css">
+  <link rel="stylesheet" href="css/linear-footer.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/shop.css">
+
+  <!-- Firebase -->
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+
+  <!-- 헤더 스크립트 -->
+  <script src="js/linear-header.js"></script>
+</head>
+<body>
+  <!-- Linear Header -->
+  <header class="linear-header" id="linear-header">
+    <div class="linear-header__container">
+      <a href="index.html" class="linear-header__brand">
+        <div class="linear-header__logo">
+          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고">
+        </div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+      </a>
+
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item">
+            <a href="index.html" class="linear-header__nav-link">홈</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+          </li>
+          <li class="linear-header__nav-item">
+            <a href="index.html#lecture-tab" class="linear-header__nav-link linear-header__nav-link--active">강의</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="linear-header__auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
+        <div id="user-profile-container" style="display: none;">
+          <div class="linear-header__user-profile">
+            <div class="linear-header__user-avatar" id="user-avatar">U</div>
+            <span class="linear-header__user-name" id="user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
+        </div>
+      </div>
+
+      <div class="linear-header__actions">
+        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+          <span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <a href="index.html" class="linear-header__nav-link">홈</a>
+      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
+    </div>
+  </header>
+
+  <main class="detail-container">
+    <!-- 로딩 -->
+    <div id="detail-loading" style="text-align:center; padding:80px 20px;">
+      <div class="shop-loading__spinner" style="width:36px;height:36px;border:3px solid #e9ecef;border-top-color:var(--penguin-skyblue);border-radius:50%;animation:shopSpin .8s linear infinite;margin:0 auto 16px;"></div>
+      <div style="color:var(--deep-sea-gray);">상품 정보를 불러오는 중...</div>
+    </div>
+
+    <!-- 상세 내용 (JS로 렌더링) -->
+    <div id="detail-content" style="display:none;"></div>
+
+    <!-- 에러 -->
+    <div id="detail-error" style="display:none; text-align:center; padding:80px 20px;">
+      <div style="font-size:64px; margin-bottom:16px;">😵</div>
+      <h2 style="color:var(--penguin-navy); margin-bottom:12px;">상품을 찾을 수 없습니다</h2>
+      <p style="color:var(--deep-sea-gray); margin-bottom:24px;">요청하신 상품이 존재하지 않거나 판매가 종료되었습니다.</p>
+      <a href="index.html#lecture-tab" style="display:inline-block; padding:12px 28px; background:var(--penguin-navy); color:white; border-radius:var(--radius-sm); text-decoration:none; font-weight:600;">상점으로 돌아가기</a>
+    </div>
+  </main>
+
+  <footer class="linear-footer"></footer>
+
+  <script type="module">
+    import { ensureFirebase } from './js/core/firebase-core.js';
+    import { isAdmin } from './js/auth/auth-utils.js';
+    import {
+      doc, getDoc, collection, query, where, orderBy, getDocs
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (!productId) {
+      showError();
+    } else {
+      // Firebase 초기화 완료 후 로드
+      ensureFirebase().then(({ auth: a, db: d }) => {
+        window._auth = a;
+        window._db = d;
+        loadProductDetail();
+      });
+    }
+
+    async function loadProductDetail() {
+      const db = window._db;
+      const auth = window._auth;
+      try {
+        // 상품 정보
+        const productRef = doc(db, 'products', productId);
+        const productSnap = await getDoc(productRef);
+
+        if (!productSnap.exists() || !productSnap.data().isActive) {
+          showError();
+          return;
+        }
+
+        const product = { id: productSnap.id, ...productSnap.data() };
+
+        // 에피소드 (video 타입)
+        let episodes = [];
+        if (product.type === 'video') {
+          const epQuery = query(
+            collection(db, 'episodes'),
+            where('productId', '==', productId),
+            orderBy('sortOrder', 'asc')
+          );
+          const epSnap = await getDocs(epQuery);
+          episodes = epSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+
+        // 패키지 포함 상품
+        let bundleProducts = [];
+        if (product.type === 'bundle' && product.includedProducts) {
+          for (const pid of product.includedProducts) {
+            const pSnap = await getDoc(doc(db, 'products', pid));
+            if (pSnap.exists()) {
+              bundleProducts.push({ id: pSnap.id, ...pSnap.data() });
+            }
+          }
+        }
+
+        // 구매 여부 확인
+        let purchased = false;
+        const user = auth.currentUser;
+        if (user) {
+          // 직접 구매
+          const purchaseSnap = await getDoc(doc(db, 'purchases', `${user.uid}_${productId}`));
+          if (purchaseSnap.exists() && purchaseSnap.data().status === 'completed') {
+            purchased = true;
+          }
+          // 패키지로 구매
+          if (!purchased) {
+            const allProducts = await getDocs(query(
+              collection(db, 'products'),
+              where('type', '==', 'bundle'),
+              where('isActive', '==', true)
+            ));
+            for (const bd of allProducts.docs) {
+              const bData = bd.data();
+              if (bData.includedProducts && bData.includedProducts.includes(productId)) {
+                const bPurchase = await getDoc(doc(db, 'purchases', `${user.uid}_${bd.id}`));
+                if (bPurchase.exists() && bPurchase.data().status === 'completed') {
+                  purchased = true;
+                  break;
+                }
+              }
+            }
+          }
+          // 관리자
+          if (isAdmin(user)) purchased = true;
+        }
+
+        renderDetail(product, episodes, bundleProducts, purchased);
+
+      } catch (error) {
+        console.error('상품 상세 로드 오류:', error);
+        showError();
+      }
+    }
+
+    function renderDetail(product, episodes, bundleProducts, purchased) {
+      const TYPE_LABELS = { video: '인강', pdf: '자료', ppt: '자료', bundle: '패키지' };
+      const TYPE_ICONS = { video: '🎬', pdf: '📄', ppt: '📊', bundle: '📦' };
+
+      const typeLabel = TYPE_LABELS[product.type] || product.type;
+      const typeIcon = TYPE_ICONS[product.type] || '📦';
+      const badgeClass = `detail-badge--${product.type}`;
+
+      // 썸네일
+      let thumbHtml;
+      if (product.thumbnailUrl) {
+        thumbHtml = `<img src="${product.thumbnailUrl}" alt="${product.title}">`;
+      } else {
+        thumbHtml = `<div class="detail-thumb__placeholder">${typeIcon}</div>`;
+      }
+
+      // 메타
+      let metaHtml = '';
+      if (product.type === 'video') {
+        if (episodes.length) metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">📹</span> ${episodes.length}강</div>`;
+        if (product.totalDuration) metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">⏱</span> ${product.totalDuration}</div>`;
+      }
+      if (product.type === 'pdf' || product.type === 'ppt') {
+        if (product.pages) metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">📄</span> ${product.pages}쪽</div>`;
+        if (product.fileSize) metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">💾</span> ${product.fileSize}</div>`;
+      }
+      if (product.type === 'bundle' && bundleProducts.length) {
+        metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">📦</span> ${bundleProducts.length}개 상품 포함</div>`;
+      }
+
+      // 가격
+      const priceText = product.price === 0 ? '무료' : product.price.toLocaleString() + '원';
+      const priceClass = product.price === 0 ? 'detail-price detail-price--free' : 'detail-price';
+      let priceRowHtml = `<span class="${priceClass}">${priceText}</span>`;
+      if (product.originalPrice && product.originalPrice > product.price) {
+        const discount = Math.round((1 - product.price / product.originalPrice) * 100);
+        priceRowHtml = `
+          <span class="detail-discount">${discount}%</span>
+          <span class="${priceClass}">${priceText}</span>
+          <span class="detail-original-price">${product.originalPrice.toLocaleString()}원</span>
+        `;
+      }
+
+      // 구매 버튼
+      let actionBtn;
+      if (purchased) {
+        if (product.type === 'video') {
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='lecture-play.html?id=${product.id}'">▶ 강의 보기</button>`;
+        } else if (product.type === 'pdf' || product.type === 'ppt') {
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'">📥 다운로드</button>`;
+        } else {
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='index.html#lecture-tab'">구매완료 — 상점으로</button>`;
+        }
+      } else if (product.price === 0) {
+        if (product.type === 'video') {
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='lecture-play.html?id=${product.id}'">▶ 무료 시청하기</button>`;
+        } else {
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'">📥 무료 다운로드</button>`;
+        }
+      } else {
+        const purchaseUrl = `lecture-purchase.html?id=${product.id}&price=${product.price}&title=${encodeURIComponent(product.title)}&type=${product.type}`;
+        actionBtn = `<button class="detail-buy-btn" onclick="location.href='${purchaseUrl}'">${priceText} 구매하기</button>`;
+      }
+
+      // 에피소드 목록
+      let episodeSection = '';
+      if (product.type === 'video' && episodes.length) {
+        const episodeItems = episodes.map(ep => {
+          const freeTag = ep.isFree ? `<span class="episode-free">무료</span>` : `<span class="episode-lock">🔒</span>`;
+          return `
+            <li class="episode-item">
+              <div class="episode-num">${ep.episode}</div>
+              <div class="episode-info">
+                <div class="episode-title">${ep.title}</div>
+                <div class="episode-duration">${ep.duration || ''}</div>
+              </div>
+              ${purchased ? '' : freeTag}
+            </li>
+          `;
+        }).join('');
+
+        episodeSection = `
+          <div class="detail-section">
+            <h3 class="detail-section__title">커리큘럼 (${episodes.length}강)</h3>
+            <ul class="episode-list">${episodeItems}</ul>
+          </div>
+        `;
+      }
+
+      // 패키지 포함 상품
+      let bundleSection = '';
+      if (product.type === 'bundle' && bundleProducts.length) {
+        const bundleItems = bundleProducts.map(bp => {
+          const icon = TYPE_ICONS[bp.type] || '📦';
+          return `
+            <li class="bundle-item">
+              <span class="bundle-item__icon">${icon}</span>
+              <span class="bundle-item__title">${bp.title}</span>
+            </li>
+          `;
+        }).join('');
+
+        bundleSection = `
+          <div class="detail-section">
+            <h3 class="detail-section__title">포함 상품 (${bundleProducts.length}개)</h3>
+            <ul class="bundle-includes">${bundleItems}</ul>
+          </div>
+        `;
+      }
+
+      // 상세 설명
+      let descSection = '';
+      if (product.detailDescription) {
+        descSection = `
+          <div class="detail-section">
+            <h3 class="detail-section__title">상세 설명</h3>
+            <div class="detail-section__content">${product.detailDescription}</div>
+          </div>
+        `;
+      }
+
+      // 환불 안내
+      let refundHtml = '';
+      if (product.price > 0) {
+        let refundText = '';
+        if (product.type === 'video') {
+          refundText = '시청 30% 미만: 50% 환불 / 30% 이상: 환불 불가';
+        } else if (product.type === 'pdf' || product.type === 'ppt') {
+          refundText = '다운로드 전: 전액 환불 / 다운로드 후: 환불 불가';
+        } else if (product.type === 'bundle') {
+          refundText = '포함 상품 중 하나라도 이용 시 환불 불가';
+        }
+        if (refundText) {
+          refundHtml = `
+            <div class="detail-refund">
+              <div class="detail-refund__title">환불 안내</div>
+              <div class="detail-refund__text">${refundText}</div>
+            </div>
+          `;
+        }
+      }
+
+      // 렌더
+      const contentEl = document.getElementById('detail-content');
+      contentEl.innerHTML = `
+        <a href="index.html#lecture-tab" class="detail-back">← 상점으로</a>
+
+        <div class="detail-top">
+          <div class="detail-thumb">${thumbHtml}</div>
+          <div class="detail-info">
+            <span class="detail-badge ${badgeClass}">${typeLabel}</span>
+            <h1 class="detail-title">${product.title}</h1>
+            <p class="detail-desc">${product.description || ''}</p>
+            <div class="detail-meta">${metaHtml}</div>
+            <div class="detail-price-box">
+              <div class="detail-price-row">${priceRowHtml}</div>
+              ${product.type === 'video' ? '<div class="detail-price-note">구매 후 무기한 시청 가능</div>' : ''}
+            </div>
+            ${actionBtn}
+          </div>
+        </div>
+
+        ${episodeSection}
+        ${bundleSection}
+        ${descSection}
+        ${refundHtml}
+      `;
+
+      // 페이지 타이틀 업데이트
+      document.title = `${product.title} | 퍼스트펭귄`;
+
+      // 표시
+      document.getElementById('detail-loading').style.display = 'none';
+      contentEl.style.display = 'block';
+    }
+
+    function showError() {
+      document.getElementById('detail-loading').style.display = 'none';
+      document.getElementById('detail-error').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

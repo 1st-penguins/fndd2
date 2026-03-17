@@ -17,7 +17,6 @@
   <meta name="twitter:title" content="개인정보처리방침 | 퍼스트펭귄">
   <meta name="twitter:description" content="퍼스트펭귄 개인정보처리방침을 확인하세요.">
 
-  <!-- Linear Design System CSS -->
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/linear-themes.css">
   <link rel="stylesheet" href="css/linear-header.css">
@@ -25,29 +24,16 @@
   <link rel="stylesheet" href="css/components.css">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: "Inter Variable", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", sans-serif;
+      font-family: "Inter Variable", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--color-bg-primary);
       color: var(--color-text-primary);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
-
-    main {
-      flex: 1;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 64px 24px;
-    }
-
+    main { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 64px 24px; }
     .privacy-container {
       background: var(--color-bg-level-0);
       border: 1px solid var(--color-border-primary);
@@ -57,241 +43,68 @@
       width: 100%;
       box-shadow: 0 4px 16px var(--shadow-color);
     }
-
-    .privacy-header {
-      text-align: center;
-      margin-bottom: 48px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--color-border-primary);
-    }
-
-    .privacy-header h1 {
-      color: var(--color-text-primary);
-      margin-bottom: 12px;
-      font-size: 2.2rem;
-      font-weight: 700;
-    }
-
-    .privacy-header .meta {
-      color: var(--color-text-tertiary);
-      font-size: 0.9rem;
-    }
-
+    .privacy-header { text-align: center; margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--color-border-primary); }
+    .privacy-header h1 { color: var(--color-text-primary); margin-bottom: 12px; font-size: 2.2rem; font-weight: 700; }
+    .privacy-header .meta { color: var(--color-text-tertiary); font-size: 0.9rem; }
     .privacy-intro {
-      color: var(--color-text-secondary);
-      font-size: 1rem;
-      line-height: 1.7;
-      margin-bottom: 36px;
-      padding: 20px 24px;
-      background: var(--color-bg-level-1);
-      border-radius: 10px;
-      border: 1px solid var(--color-border-secondary);
+      color: var(--color-text-secondary); font-size: 1rem; line-height: 1.7; margin-bottom: 36px;
+      padding: 20px 24px; background: var(--color-bg-level-1); border-radius: 10px; border: 1px solid var(--color-border-secondary);
     }
-
-    .privacy-section {
-      margin-bottom: 36px;
-    }
-
-    .privacy-section h2 {
-      color: var(--color-text-primary);
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--color-border-secondary);
-    }
-
-    .privacy-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 12px;
-      font-size: 0.95rem;
-    }
-
-    .privacy-table th,
-    .privacy-table td {
-      padding: 12px 16px;
-      text-align: left;
-      border: 1px solid var(--color-border-secondary);
-    }
-
-    .privacy-table th {
-      background: var(--color-bg-level-1);
-      font-weight: 600;
-      color: var(--color-text-primary);
-      white-space: nowrap;
-    }
-
-    .privacy-table td {
-      color: var(--color-text-secondary);
-    }
-
-    .privacy-note {
-      color: var(--color-text-tertiary);
-      font-size: 0.88rem;
-      margin-top: 8px;
-      line-height: 1.5;
-    }
-
-    .privacy-section p {
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-      line-height: 1.7;
-      margin-bottom: 12px;
-    }
-
-    .privacy-section ul {
-      margin-left: 24px;
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-      line-height: 1.8;
-    }
-
-    .privacy-section ul li {
-      margin-bottom: 4px;
-    }
-
-    .privacy-contact-box {
-      background: var(--color-bg-level-1);
-      border: 1px solid var(--color-border-primary);
-      padding: 24px;
-      border-radius: 12px;
-    }
-
-    .privacy-contact-grid {
-      display: grid;
-      grid-template-columns: 120px 1fr;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .privacy-contact-label {
-      font-weight: 600;
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-    }
-
-    .privacy-contact-value {
-      color: var(--color-text-primary);
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-
-    .privacy-contact-value a {
-      color: var(--color-brand, #1D2F4E);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .back-button {
-      display: block;
-      text-align: center;
-      margin-top: 36px;
-      padding: 16px 32px;
-      background: var(--color-brand);
-      color: var(--color-text-on-brand);
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px var(--shadow-color);
-    }
-
-    .back-button:hover {
-      background: var(--color-accent-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px var(--shadow-color-hover);
-    }
-
+    .privacy-section { margin-bottom: 36px; }
+    .privacy-section h2 { color: var(--color-text-primary); font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--color-border-secondary); }
+    .privacy-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 0.95rem; }
+    .privacy-table th, .privacy-table td { padding: 12px 16px; text-align: left; border: 1px solid var(--color-border-secondary); }
+    .privacy-table th { background: var(--color-bg-level-1); font-weight: 600; color: var(--color-text-primary); white-space: nowrap; }
+    .privacy-table td { color: var(--color-text-secondary); }
+    .privacy-note { color: var(--color-text-tertiary); font-size: 0.88rem; margin-top: 8px; line-height: 1.5; }
+    .privacy-section p { color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 12px; }
+    .privacy-section ul { margin-left: 24px; color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.8; }
+    .privacy-section ul li { margin-bottom: 4px; }
+    .privacy-contact-box { background: var(--color-bg-level-1); border: 1px solid var(--color-border-primary); padding: 24px; border-radius: 12px; }
+    .privacy-contact-grid { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; }
+    .privacy-contact-label { font-weight: 600; color: var(--color-text-secondary); font-size: 0.95rem; }
+    .privacy-contact-value { color: var(--color-text-primary); font-size: 0.95rem; font-weight: 500; }
+    .privacy-contact-value a { color: var(--color-brand, #1D2F4E); text-decoration: underline; text-underline-offset: 3px; }
+    .back-button { display: block; text-align: center; margin-top: 36px; padding: 16px 32px; background: var(--color-brand); color: var(--color-text-on-brand); text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem; transition: all 0.3s ease; box-shadow: 0 2px 8px var(--shadow-color); }
+    .back-button:hover { background: var(--color-accent-hover); transform: translateY(-2px); box-shadow: 0 4px 16px var(--shadow-color-hover); }
     @media (max-width: 768px) {
-      .privacy-container {
-        padding: 32px 20px;
-      }
-
-      .privacy-header h1 {
-        font-size: 1.8rem;
-      }
-
-      .privacy-table {
-        font-size: 0.85rem;
-      }
-
-      .privacy-table th,
-      .privacy-table td {
-        padding: 10px 12px;
-      }
-
-      .privacy-contact-grid {
-        grid-template-columns: 1fr;
-        gap: 6px;
-      }
-
-      .privacy-contact-label {
-        font-weight: 700;
-      }
-
-      .privacy-contact-value {
-        margin-bottom: 10px;
-      }
+      .privacy-container { padding: 32px 20px; }
+      .privacy-header h1 { font-size: 1.8rem; }
+      .privacy-table { font-size: 0.85rem; }
+      .privacy-table th, .privacy-table td { padding: 10px 12px; }
+      .privacy-contact-grid { grid-template-columns: 1fr; gap: 6px; }
+      .privacy-contact-label { font-weight: 700; }
+      .privacy-contact-value { margin-bottom: 10px; }
     }
-
-    @media (max-width: 480px) {
-      .privacy-table {
-        font-size: 0.8rem;
-      }
-
-      .privacy-table th,
-      .privacy-table td {
-        padding: 8px 10px;
-      }
-    }
+    @media (max-width: 480px) { .privacy-table { font-size: 0.8rem; } .privacy-table th, .privacy-table td { padding: 8px 10px; } }
   </style>
 </head>
 <body>
-  <!-- Linear Header -->
   <header class="linear-header" id="linear-header">
     <div class="linear-header__container">
       <a href="index.html" class="linear-header__brand">
-        <div class="linear-header__logo">
-          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
-        </div>
+        <div class="linear-header__logo"><img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" /></div>
         <span class="linear-header__brand-text">퍼스트펭귄</span>
       </a>
-
       <nav class="linear-header__nav">
         <ul class="linear-header__nav-list">
-          <li class="linear-header__nav-item">
-            <a href="index.html" class="linear-header__nav-link">홈</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
-          </li>
+          <li class="linear-header__nav-item"><a href="index.html" class="linear-header__nav-link">홈</a></li>
+          <li class="linear-header__nav-item"><a href="notices.html" class="linear-header__nav-link">공지사항</a></li>
+          <li class="linear-header__nav-item"><a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a></li>
+          <li class="linear-header__nav-item"><a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a></li>
         </ul>
       </nav>
-
       <div class="linear-header__actions">
-        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
-          aria-expanded="false">
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
+        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu" aria-expanded="false">
+          <span class="linear-header__mobile-toggle-line"></span><span class="linear-header__mobile-toggle-line"></span><span class="linear-header__mobile-toggle-line"></span>
         </button>
       </div>
     </div>
-
-    <!-- 모바일 메뉴 -->
     <div class="linear-header__mobile-menu" id="mobile-menu">
       <a href="index.html" class="linear-header__nav-link">홈</a>
       <a href="notices.html" class="linear-header__nav-link">공지사항</a>
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
     </div>
   </header>
 
@@ -299,39 +112,50 @@
     <div class="privacy-container">
       <div class="privacy-header">
         <h1>개인정보처리방침</h1>
-        <p class="meta">시행일: 2025년 4월 12일 · 최종 수정일: 2026년 3월 11일</p>
+        <p class="meta">시행일: 2025년 4월 12일 · 최종 수정일: 2026년 3월 17일</p>
       </div>
 
       <div class="privacy-intro">
-        퍼스트펭귄(이하 "서비스")은 이용자의 개인정보를 소중히 여기며, 「개인정보 보호법」을 준수합니다.
-        수집하는 정보는 최소한으로 유지하며, 목적 외 용도로 사용하지 않습니다.
+        퍼스트펭귄(이하 "회사")은 이용자의 개인정보를 소중히 여기며, 「개인정보 보호법」 및 관계 법령을 준수합니다. 본 방침은 회사가 수집하는 개인정보의 항목, 목적, 보유 기간, 처리 위탁, 이용자의 권리 등을 안내합니다.
       </div>
 
       <!-- 1. 수집하는 개인정보 -->
       <div class="privacy-section">
         <h2>1. 수집하는 개인정보</h2>
+        <p><strong>① 회원가입 시</strong></p>
         <table class="privacy-table">
           <thead>
-            <tr>
-              <th>로그인 방식</th>
-              <th>수집 항목</th>
-              <th>수집 시점</th>
-            </tr>
+            <tr><th>로그인 방식</th><th>수집 항목</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td>이메일</td>
-              <td>이메일 주소, 비밀번호(암호화 저장)</td>
-              <td>회원가입 시</td>
-            </tr>
-            <tr>
-              <td>Google</td>
-              <td>이메일 주소, Google 계정 이름</td>
-              <td>소셜 로그인 시</td>
-            </tr>
+            <tr><td>이메일 가입</td><td>이메일 주소, 비밀번호(암호화 저장)</td></tr>
+            <tr><td>Google 로그인</td><td>이메일 주소, Google 계정 이름, 프로필 사진</td></tr>
           </tbody>
         </table>
-        <p class="privacy-note">※ 비밀번호는 Firebase Authentication에 의해 암호화되어 저장되며, 운영자는 확인할 수 없습니다.</p>
+
+        <p><strong>② 유료 콘텐츠 구매 시</strong></p>
+        <table class="privacy-table">
+          <thead>
+            <tr><th>수집 항목</th><th>수집 목적</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>결제자 이름, 이메일</td><td>구매 확인, 영수증 발행</td></tr>
+            <tr><td>주문 내역 (상품명, 금액, 일시)</td><td>구매 기록 관리, 환불 처리</td></tr>
+          </tbody>
+        </table>
+        <p class="privacy-note">※ 카드번호, 계좌번호 등 결제 정보는 회사가 직접 수집·저장하지 않으며, 결제 대행사(토스페이먼츠)가 안전하게 처리합니다.</p>
+
+        <p><strong>③ 서비스 이용 중 자동 수집</strong></p>
+        <table class="privacy-table">
+          <thead>
+            <tr><th>수집 항목</th><th>수집 목적</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>접속 IP, 브라우저 정보, 접속 일시</td><td>부정 이용 방지, 서비스 안정성 확보</td></tr>
+            <tr><td>학습 기록 (풀이 기록, 오답, 진도율 등)</td><td>학습 분석 서비스 제공</td></tr>
+            <tr><td>강의 시청 기록, 다운로드 기록</td><td>콘텐츠 이용 확인, 환불 기준 판단</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- 2. 수집 목적 및 보유 기간 -->
@@ -339,18 +163,33 @@
         <h2>2. 수집 목적 및 보유 기간</h2>
         <table class="privacy-table">
           <thead>
-            <tr>
-              <th>수집 목적</th>
-              <th>보유 기간</th>
-            </tr>
+            <tr><th>수집 목적</th><th>보유 기간</th><th>근거</th></tr>
           </thead>
           <tbody>
             <tr>
               <td>회원 식별 및 로그인 유지</td>
-              <td rowspan="2">회원 탈퇴 시 즉시 삭제</td>
+              <td>회원 탈퇴 시 즉시 삭제</td>
+              <td>정보주체 동의</td>
             </tr>
             <tr>
-              <td>학습 기록 저장</td>
+              <td>학습 기록 저장 및 분석</td>
+              <td>회원 탈퇴 시 즉시 삭제</td>
+              <td>정보주체 동의</td>
+            </tr>
+            <tr>
+              <td>대금 결제 및 재화 공급 기록</td>
+              <td><strong>5년</strong></td>
+              <td>전자상거래법 제6조</td>
+            </tr>
+            <tr>
+              <td>소비자 불만 또는 분쟁 처리 기록</td>
+              <td><strong>3년</strong></td>
+              <td>전자상거래법 제6조</td>
+            </tr>
+            <tr>
+              <td>접속 로그 기록</td>
+              <td><strong>3개월</strong></td>
+              <td>통신비밀보호법 제15조의2</td>
             </tr>
           </tbody>
         </table>
@@ -359,64 +198,139 @@
       <!-- 3. 개인정보 처리 위탁 -->
       <div class="privacy-section">
         <h2>3. 개인정보 처리 위탁</h2>
+        <p>회사는 원활한 서비스 제공을 위해 다음과 같이 개인정보 처리를 위탁하고 있습니다.</p>
         <table class="privacy-table">
           <thead>
-            <tr>
-              <th>수탁업체</th>
-              <th>위탁 업무</th>
-              <th>보유 기간</th>
-            </tr>
+            <tr><th>수탁업체</th><th>위탁 업무</th><th>보유 기간</th></tr>
           </thead>
           <tbody>
             <tr>
               <td>Google LLC (Firebase)</td>
-              <td>회원 인증 및 데이터 저장 인프라 운영</td>
+              <td>회원 인증, 데이터 저장, 파일 호스팅</td>
+              <td>위탁 계약 종료 시까지</td>
+            </tr>
+            <tr>
+              <td>토스페이먼츠 주식회사</td>
+              <td>결제 처리 및 정산</td>
+              <td>관계 법령에 따른 기간</td>
+            </tr>
+            <tr>
+              <td>Cloudflare, Inc.</td>
+              <td>웹사이트 호스팅 및 CDN</td>
+              <td>위탁 계약 종료 시까지</td>
+            </tr>
+            <tr>
+              <td>Vimeo, Inc.</td>
+              <td>영상 스트리밍 호스팅</td>
               <td>위탁 계약 종료 시까지</td>
             </tr>
           </tbody>
         </table>
-        <p class="privacy-note">※ Firebase는 Google의 클라우드 서비스로, Google LLC의 개인정보처리방침이 함께 적용됩니다.</p>
+        <p class="privacy-note">※ 위탁 시 개인정보가 안전하게 관리될 수 있도록 관련 사항을 계약서에 명시하고, 수탁자가 이를 준수하는지 관리·감독합니다.</p>
       </div>
 
       <!-- 4. 제3자 제공 -->
       <div class="privacy-section">
         <h2>4. 제3자 제공</h2>
-        <p>수집한 개인정보는 제3자에게 제공하지 않습니다. 법령에 의한 요구가 있는 경우는 예외입니다.</p>
+        <p>회사는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음 경우에는 예외로 합니다.</p>
+        <ul>
+          <li>이용자가 사전에 동의한 경우</li>
+          <li>법령에 의하여 제공이 요구되는 경우</li>
+          <li>수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우</li>
+        </ul>
       </div>
 
-      <!-- 5. 이용자의 권리 -->
+      <!-- 5. 개인정보의 파기 -->
       <div class="privacy-section">
-        <h2>5. 이용자의 권리</h2>
-        <p>이용자는 언제든지 아래 권리를 행사할 수 있습니다. 요청은 이메일로 접수하며, 확인 가능한 범위 내에서 처리합니다.</p>
+        <h2>5. 개인정보의 파기</h2>
+        <p>① 회사는 개인정보의 보유 기간이 경과하거나 처리 목적이 달성된 경우 지체 없이 해당 개인정보를 파기합니다.</p>
+        <p>② 파기 방법:</p>
         <ul>
-          <li>수집된 이메일 주소 확인 요청</li>
+          <li>전자적 파일: 복구할 수 없는 기술적 방법으로 삭제</li>
+          <li>종이 문서: 분쇄기로 파쇄 또는 소각</li>
+        </ul>
+        <p>③ 법령에 따라 보관이 필요한 정보는 해당 기간 동안 별도 분리하여 보관한 후 기간 만료 시 파기합니다.</p>
+      </div>
+
+      <!-- 6. 이용자의 권리 및 행사 방법 -->
+      <div class="privacy-section">
+        <h2>6. 이용자의 권리 및 행사 방법</h2>
+        <p>이용자는 언제든지 다음 권리를 행사할 수 있습니다.</p>
+        <ul>
+          <li>개인정보 열람 요구</li>
+          <li>오류 등이 있을 경우 정정 요구</li>
+          <li>삭제 요구</li>
+          <li>처리 정지 요구</li>
           <li>계정 삭제(탈퇴) 요청</li>
         </ul>
-        <p class="privacy-note">※ 요청 이메일: <a href="mailto:the1stpeng@gmail.com">the1stpeng@gmail.com</a></p>
+        <p>위 요청은 이메일(<a href="mailto:the1stpeng@gmail.com" style="color:var(--color-brand,#1D2F4E);">the1stpeng@gmail.com</a>)로 접수하며, 확인 후 지체 없이 처리합니다.</p>
+        <p class="privacy-note">※ 정정 또는 삭제를 요구한 경우, 처리 완료 시까지 해당 개인정보를 이용하거나 제공하지 않습니다.</p>
       </div>
 
-      <!-- 6. 개인정보 보호책임자 -->
+      <!-- 7. 개인정보의 안전성 확보 조치 -->
       <div class="privacy-section">
-        <h2>6. 개인정보 보호책임자</h2>
+        <h2>7. 개인정보의 안전성 확보 조치</h2>
+        <p>회사는 「개인정보 보호법」 제29조에 따라 다음과 같이 안전성 확보에 필요한 조치를 하고 있습니다.</p>
+        <ul>
+          <li><strong>비밀번호 암호화:</strong> Firebase Authentication에 의해 암호화되어 저장되며, 운영자도 확인할 수 없습니다.</li>
+          <li><strong>접근 권한 관리:</strong> 개인정보에 대한 접근 권한을 최소한의 인원에게만 부여합니다.</li>
+          <li><strong>보안 전송:</strong> 모든 데이터는 HTTPS(SSL/TLS) 프로토콜을 통해 암호화 전송됩니다.</li>
+          <li><strong>해킹 방지:</strong> 침입 차단 시스템 및 보안 프로그램을 운용하고 있습니다.</li>
+        </ul>
+      </div>
+
+      <!-- 8. 쿠키의 사용 -->
+      <div class="privacy-section">
+        <h2>8. 쿠키(Cookie)의 사용</h2>
+        <p>① 회사는 서비스 이용 편의를 위해 쿠키를 사용할 수 있습니다.</p>
+        <p>② 쿠키는 로그인 유지, 이용자 설정 저장 등의 목적으로 사용됩니다.</p>
+        <p>③ 이용자는 브라우저 설정을 통해 쿠키 저장을 거부할 수 있으며, 이 경우 일부 서비스 이용에 제한이 있을 수 있습니다.</p>
+      </div>
+
+      <!-- 9. 개인정보 보호책임자 -->
+      <div class="privacy-section">
+        <h2>9. 개인정보 보호책임자</h2>
+        <p>회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 이용자의 불만 처리 및 피해 구제 등을 위해 다음과 같이 개인정보 보호책임자를 지정합니다.</p>
         <div class="privacy-contact-box">
           <div class="privacy-contact-grid">
-            <div class="privacy-contact-label">서비스명</div>
-            <div class="privacy-contact-value">퍼스트펭귄</div>
+            <div class="privacy-contact-label">성명</div>
+            <div class="privacy-contact-value">강민지</div>
           </div>
           <div class="privacy-contact-grid">
-            <div class="privacy-contact-label">문의 이메일</div>
+            <div class="privacy-contact-label">직위</div>
+            <div class="privacy-contact-value">대표</div>
+          </div>
+          <div class="privacy-contact-grid">
+            <div class="privacy-contact-label">이메일</div>
             <div class="privacy-contact-value"><a href="mailto:the1stpeng@gmail.com">the1stpeng@gmail.com</a></div>
           </div>
         </div>
+      </div>
+
+      <!-- 10. 권익 침해 구제 방법 -->
+      <div class="privacy-section">
+        <h2>10. 권익 침해 구제 방법</h2>
+        <p>개인정보 침해에 대한 신고·상담이 필요한 경우 아래 기관에 문의하실 수 있습니다.</p>
+        <ul>
+          <li>개인정보 침해신고센터 (한국인터넷진흥원): 118</li>
+          <li>개인정보 분쟁조정위원회: 1833-6972</li>
+          <li>대검찰청 사이버수사과: 1301</li>
+          <li>경찰청 사이버수사국: 182</li>
+        </ul>
+      </div>
+
+      <!-- 11. 방침 변경 -->
+      <div class="privacy-section">
+        <h2>11. 개인정보처리방침의 변경</h2>
+        <p>① 본 방침은 법령 변경 또는 서비스 정책에 따라 개정될 수 있으며, 변경 시 사이트 공지사항을 통해 7일 전 사전 안내합니다.</p>
+        <p>② 본 방침은 2026년 3월 17일부터 시행됩니다.</p>
       </div>
 
       <a href="index.html" class="back-button">홈으로 돌아가기</a>
     </div>
   </main>
 
-  <!-- Linear Footer -->
   <footer class="linear-footer"></footer>
-
   <script src="js/linear-header.js"></script>
 </body>
 </html>

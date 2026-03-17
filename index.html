@@ -77,6 +77,7 @@
   <link rel="stylesheet" href="css/tabs.css?v=2026031137" />
   <link rel="stylesheet" href="css/cert-selector.css?v=2026031137" />
   <link rel="stylesheet" href="css/mobile-ux-improvements.css?v=2026031137" />
+  <link rel="stylesheet" href="css/shop.css" />
   <link rel="stylesheet" href="css/premium-ui.css?v=2026031137" />
   <link rel="stylesheet" href="css/analytics-tab.css?v=2026031137" />
   <link rel="stylesheet" href="css/analytics-dashboard.css?v=2026031137" />
@@ -121,8 +122,10 @@
   <script type="module">
     import { initApp } from './js/app.js?v=2026031137';
     import UIUtils from './js/utils/ui-utils.js?v=2026031137';
+    import { initShop } from './js/payment/shop.js';
     document.addEventListener('DOMContentLoaded', initApp);
     document.addEventListener('DOMContentLoaded', UIUtils.enableGlobalLazyLoading);
+    document.addEventListener('DOMContentLoaded', initShop);
 
     // Hero 배경 이미지 지연 로드 (성능 최적화)
     document.addEventListener('DOMContentLoaded', () => {
@@ -276,7 +279,7 @@
             <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
           </li>
           <li class="linear-header__nav-item">
-            <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+            <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
           </li>
           <li class="linear-header__nav-item admin-only" id="admin-stats-nav" style="display:none">
             <a href="admin/statistics.html" class="linear-header__nav-link">관리자 통계</a>
@@ -339,7 +342,7 @@
       <a href="index.html" class="linear-header__nav-link">홈</a>
       <a href="notices.html" class="linear-header__nav-link">공지사항</a>
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="https://litt.ly/the1stpeng" class="linear-header__nav-link" target="_blank" rel="noopener noreferrer">강의</a>
+      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
       <!-- 관리자 전용 메뉴 -->
       <a href="admin/statistics.html" class="linear-header__nav-link admin-only" id="admin-stats-link" style="display:none">
         관리자 통계
@@ -1271,33 +1274,31 @@
       <!-- /1급 스포츠지도사 콘텐츠 끝 -->
     </div>
 
-    <!-- 강의 탭 -->
+    <!-- 강의 탭 (상점) -->
     <div id="lecture-tab" class="tab-content">
-      <!-- 일반 사용자용 (기본 표시) -->
-      <div id="lecture-coming-soon"
-        style="background: linear-gradient(135deg, var(--penguin-navy) 0%, var(--penguin-skyblue) 100%); padding: 60px 40px; border-radius: 16px; text-align: center; color: white; margin-bottom: 30px; box-shadow: 0 8px 24px rgba(29, 47, 78, 0.2);">
-        <div style="font-size: 80px; margin-bottom: 20px;">🚧</div>
-        <h2 style="color: white; margin-bottom: 15px; font-size: 36px; font-weight: 700;">준비중입니다</h2>
-        <p style="font-size: 18px; margin-bottom: 20px; opacity: 0.95;">더 나은 강의 서비스를 준비하고 있습니다</p>
-        <p style="font-size: 14px; opacity: 0.85;">곧 만나요! 🐧</p>
-      </div>
-
-      <!-- 관리자용 (숨김 처리) -->
-      <div id="lecture-admin-content" style="display: none;">
-        <div
-          style="background: linear-gradient(135deg, var(--penguin-navy) 0%, var(--penguin-skyblue) 100%); padding: 40px; border-radius: 16px; text-align: center; color: white; margin-bottom: 30px; box-shadow: 0 8px 24px rgba(29, 47, 78, 0.2);">
-          <div style="font-size: 64px; margin-bottom: 20px;">🎓</div>
-          <h2 style="color: white; margin-bottom: 15px; font-size: 32px;">인터넷 강의</h2>
-          <p style="font-size: 18px; margin-bottom: 30px; opacity: 0.95;">전문가의 명쾌한 강의로 확실하게 준비하세요</p>
-          <a href="https://litt.ly/the1stpeng"
-            style="display: inline-block; background: white; color: var(--penguin-navy); padding: 18px 50px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 18px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"
-            target="_blank" rel="noopener noreferrer">
-            강의 목록 보기 →
-          </a>
+      <div id="shop-container" class="shop-container">
+        <!-- 상점 헤더 -->
+        <div class="shop-hero">
+          <div class="shop-hero__icon">🎓</div>
+          <h2 class="shop-hero__title">퍼스트펭귄 스토어</h2>
+          <p class="shop-hero__subtitle">전문가의 자료로 확실하게 준비하세요</p>
         </div>
 
-        <div style="text-align: center; color: #999; padding: 40px 20px;">
-          <p>전문 강사의 핵심 강의로 효율적으로 학습하세요</p>
+        <!-- 타입 필터 -->
+        <div class="shop-filters">
+          <button class="shop-filter-btn active" data-filter="all">전체</button>
+          <button class="shop-filter-btn" data-filter="video">인강</button>
+          <button class="shop-filter-btn" data-filter="material">자료</button>
+          <button class="shop-filter-btn" data-filter="bundle">패키지</button>
+        </div>
+
+        <!-- 상품 그리드 -->
+        <div id="shop-product-grid" class="shop-grid"></div>
+
+        <!-- 빈 상태 -->
+        <div id="shop-empty" class="shop-empty" style="display:none;">
+          <div class="shop-empty__icon">📭</div>
+          <div class="shop-empty__text">등록된 상품이 없습니다</div>
         </div>
       </div>
     </div>
@@ -1618,6 +1619,9 @@
 
           // 서브탭 핸들러 재초기화
           initSubTabs();
+
+          // 🛒 상점 갱신 (자격증 전환 시)
+          document.dispatchEvent(new CustomEvent('certChanged'));
 
           // 🔄 학습분석 데이터 리로드 (자격증 전환 시 즉시 반영)
           (async () => {

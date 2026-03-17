@@ -42,28 +42,9 @@ function getAppVersion() {
  * 강의 탭 표시 제어 (관리자 vs 일반 사용자)
  */
 export function updateLectureTabVisibility() {
-  const comingSoon = document.getElementById('lecture-coming-soon');
-  const adminContent = document.getElementById('lecture-admin-content');
-
-  if (!comingSoon || !adminContent) {
-    window.Logger?.warn('⚠️ 강의 탭 요소를 찾을 수 없습니다');
-    return;
-  }
-
-  const adminStatus = isAdmin();
-  window.Logger?.debug('🎓 강의 탭 업데이트:', adminStatus ? '관리자' : '일반 사용자');
-
-  if (adminStatus) {
-    // 관리자: 강의 목록 보기
-    comingSoon.style.display = 'none';
-    adminContent.style.display = 'block';
-    window.Logger?.debug('✅ 관리자: 강의 탭 전체 접근 가능');
-  } else {
-    // 일반 사용자: 준비중 메시지
-    comingSoon.style.display = 'block';
-    adminContent.style.display = 'none';
-    window.Logger?.debug('👤 일반 사용자: 강의 준비중 메시지 표시');
-  }
+  // 상점은 모든 사용자에게 표시 (shop.js가 렌더링 담당)
+  // 로그인 상태 변경 시 상점 갱신
+  document.dispatchEvent(new CustomEvent('certChanged'));
 
   // 태그 검색 링크 표시 제어
   updateTagSearchLinkVisibility();
@@ -531,10 +512,9 @@ function initTabs() {
           }
         }
 
-        // 강의 탭: 외부 링크로 이동
+        // 강의 탭: 상점 표시 (자격증 변경 시 상점 갱신)
         if (tabId === 'lecture-tab') {
-          window.open('https://litt.ly/the1stpeng', '_blank', 'noopener,noreferrer');
-          return;
+          document.dispatchEvent(new CustomEvent('certChanged'));
         }
 
         if (tabId) {  // data-tab 속성이 있는 경우에만 처리

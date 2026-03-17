@@ -77,17 +77,50 @@ service cloud.firestore {
     // ============================================
     // 📚 강좌 및 상품 (Products & Lectures) - ⚠️ 중요 보안
     // ============================================
-    // 상품 정보 (가격, 이름 등)은 누구나 볼 수 있어야 함 (로그인 시)
+    // 상품 정보 — 비로그인도 상점 탐색 가능
     match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 에피소드 (커리큘럼) — 비로그인도 목록 확인 가능
+    match /episodes/{episodeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 강의 진도율
+    match /lectureProgress/{progressId} {
+      allow read: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // PDF 다운로드 기록
+    match /pdfDownloads/{downloadId} {
+      allow read: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // 쿠폰
+    match /coupons/{couponId} {
       allow read: if isLoggedIn();
       allow write: if isAdmin();
     }
-    
-    // [NEW] 강의 콘텐츠 (동영상 URL 등 민감 정보)
-    // 실제 콘텐츠 URL은 별도 컬렉션으로 분리하거나, 클라이언트 SDK가 아닌 Backend API를 통해 접근하는 것이 안전합니다.
+
+    // 쿠폰 사용 내역
+    match /couponUsage/{usageId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // 강의 콘텐츠 (레거시)
     match /lectures/{lectureId} {
-      // 기본 정보는 로그인 사용자에게 공개
-      allow read: if isLoggedIn(); 
+      allow read: if isLoggedIn();
       allow write: if isAdmin();
     }
 
