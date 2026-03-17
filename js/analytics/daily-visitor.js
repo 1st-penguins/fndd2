@@ -19,12 +19,15 @@ function getTodayKey() {
  * 로그인한 사용자의 오늘 방문을 Firestore에 기록.
  * 같은 날 같은 uid는 덮어쓰기라 중복 카운트 없음.
  */
-export async function recordDailyVisit(uid) {
+export async function recordDailyVisit(uid, displayName, email) {
   if (!uid) return;
   try {
     const today = getTodayKey();
     const ref = doc(db, 'daily_visits', today);
-    await setDoc(ref, { users: { [uid]: true } }, { merge: true });
+    const userData = { t: Date.now() };
+    if (displayName) userData.name = displayName;
+    if (email) userData.email = email;
+    await setDoc(ref, { users: { [uid]: userData } }, { merge: true });
   } catch (e) {
     // 방문 기록 실패는 조용히 무시
     console.warn('daily visit 기록 실패:', e);
@@ -46,6 +49,29 @@ export async function getTodayVisitorCount() {
   } catch (e) {
     console.warn('오늘 방문자 수 조회 실패:', e);
     return null;
+  }
+}
+
+/**
+ * 오늘 방문한 사용자 상세 목록 반환 (관리자 대시보드용).
+ * @returns {Promise<Array<{uid: string, name: string, email: string, time: number}>>}
+ */
+export async function getTodayVisitorList() {
+  try {
+    const today = getTodayKey();
+    const ref = doc(db, 'daily_visits', today);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return [];
+    const users = snap.data().users || {};
+    return Object.entries(users).map(([uid, val]) => ({
+      uid,
+      name: val.name || null,
+      email: val.email || null,
+      time: val.t || null
+    })).sort((a, b) => (b.time || 0) - (a.time || 0));
+  } catch (e) {
+    console.warn('오늘 방문자 목록 조회 실패:', e);
+    return [];
   }
 }
 

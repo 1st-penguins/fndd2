@@ -221,7 +221,7 @@
 
     <div class="purchase-card">
       <div class="purchase-header">
-        <div class="lecture-emoji" id="lectureEmoji">🎓</div>
+        <div class="lecture-emoji" id="lectureEmoji"><img src="/images/firstpenguin-logo2.png" alt="퍼스트펭귄" style="width:64px;height:64px;object-fit:contain;"></div>
         <h1 id="lectureTitle">상품 구매</h1>
       </div>
 
@@ -352,20 +352,6 @@
       messageEl.style.color = type === 'success' ? '#37b24d' : '#ff6b6b';
     }
 
-    // 이모지 매칭
-    const emojiMap = {
-      '운동생리학': '⭐️', '병태생리학': '👍🏻', '기능해부학': '🩻',
-      '운동처방론': '🔥', '운동부하검사': '📊', '운동상해': '🩹',
-      '건강체력평가': '💪', '스포츠심리학': '🧠', '요약본': '📄'
-    };
-
-    for (const [key, emoji] of Object.entries(emojiMap)) {
-      if (title.includes(key)) {
-        document.getElementById('lectureEmoji').textContent = emoji;
-        break;
-      }
-    }
-
     // Toss Payments 초기화
     const clientKey = 'test_ck_XZYkKL4MrjDJxNez7Jm130zJwlEW';
     const tossPayments = TossPayments(clientKey);
@@ -377,8 +363,6 @@
       if (!user) {
         if (typeof window.showLoginModal === 'function') {
           window.showLoginModal();
-        } else if (typeof window.lazyAuthAndShowLoginModal === 'function') {
-          window.lazyAuthAndShowLoginModal();
         } else {
           alert('로그인이 필요합니다.');
         }
@@ -395,7 +379,7 @@
           orderName: title,
           customerName: user.displayName || user.email,
           customerEmail: user.email,
-          successUrl: window.location.origin + `/lecture-success.html?productId=${productId}&orderId=${orderId}&type=${productType}${couponParam}`,
+          successUrl: window.location.origin + `/lecture-success.html?productId=${productId}&type=${productType}${couponParam}`,
           failUrl: window.location.origin + '/lecture-fail.html',
         });
       } catch (error) {

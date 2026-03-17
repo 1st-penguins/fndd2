@@ -119,7 +119,8 @@
 
 .shop-card__thumb img {
   width: 100% !important;
-  height: auto !important;
+  height: 180px !important;
+  object-fit: cover !important;
   display: block !important;
   max-width: none;
 }

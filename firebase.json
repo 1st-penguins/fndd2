@@ -2,6 +2,9 @@
   "firestore": {
     "rules": "firestore.rules"
   },
+  "functions": {
+    "source": "functions"
+  },
   "hosting": {
     "public": ".",
     "ignore": [
@@ -12,13 +15,14 @@
       "package.json",
       "package-lock.json",
       "scripts/**",
-      "**/*.md"
+      "**/*.md",
+      "functions/**"
     ],
     "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
+      { "source": "/notices", "destination": "/notices.html" },
+      { "source": "/terms", "destination": "/terms.html" },
+      { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
+      { "source": "/company-info", "destination": "/company-info.html" }
     ]
   }
 }

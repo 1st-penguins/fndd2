@@ -1,10 +1,13 @@
 // shop.js - 상점 카탈로그 로직
 // 강의 탭에서 상품 목록을 Firestore에서 가져와 렌더링
 
-import { db, auth } from '../core/firebase-core.js';
+import { ensureFirebase } from '../core/firebase-core.js';
 import {
   collection, query, where, orderBy, getDocs, doc, getDoc
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+let db = null;
+let auth = null;
 
 // 타입 라벨 매핑
 const TYPE_LABELS = {
@@ -39,6 +42,11 @@ let purchasesCache = null;
  */
 async function loadProducts() {
   if (productsCache) return productsCache;
+  if (!db) {
+    const firebase = await ensureFirebase();
+    db = firebase.db;
+    auth = firebase.auth;
+  }
 
   try {
     const q = query(

@@ -327,10 +327,12 @@
         <a href="dashboard.html">대시보드</a>
         <a href="notices.html">공지관리</a>
         <a href="coupons.html" class="active">쿠폰관리</a>
+        <a href="statistics.html">통계</a>
         <a href="../index.html">홈으로</a>
       </nav>
     </div>
   </header>
+
 
   <main class="main-content">
     <!-- 액션 바 -->
@@ -434,14 +436,35 @@
         <!-- 적용 상품 -->
         <div class="form-group">
           <label for="applicable-products">적용 상품</label>
-          <select id="applicable-products" multiple size="7" style="height: auto;">
+          <select id="applicable-products" multiple size="12" style="height: auto;">
             <option value="all" selected>전체 상품</option>
-            <option value="pdf_001">NSCA-CSCS 요약정리본</option>
-            <option value="pdf_002">운동생리학 요약본</option>
-            <option value="pdf_003">병태생리학 압축요약본</option>
-            <option value="pdf_004">기능해부학 상지 요약본</option>
-            <option value="pdf_005">운동처방론 요약정리본</option>
-            <option value="pdf_006">스페셜테스트 압축본</option>
+            <optgroup label="정규강의 (동영상)">
+              <option value="video_anatomy">기능해부학 정규강의</option>
+              <option value="video_injury">운동상해 정규강의</option>
+              <option value="video_physio">운동생리학 정규강의</option>
+              <option value="video_load">운동부하검사 정규강의</option>
+              <option value="video_ecg">심전도 정규강의</option>
+              <option value="video_patho">병태생리학 정규강의</option>
+              <option value="video_prescript">운동처방론 정규강의</option>
+              <option value="video_health">건강체력평가 정규강의</option>
+            </optgroup>
+            <optgroup label="요약본 (PDF)">
+              <option value="pdf_anatomy">기능해부학 요약본</option>
+              <option value="pdf_injury">운동상해 요약본</option>
+              <option value="pdf_physio">운동생리학 요약본</option>
+              <option value="pdf_load">운동부하검사 요약본</option>
+              <option value="pdf_patho">병태생리학 요약본</option>
+              <option value="pdf_psycho">스포츠심리학 요약본</option>
+              <option value="pdf_prescript">운동처방론 요약본</option>
+              <option value="pdf_health">건강체력평가 요약본</option>
+            </optgroup>
+            <optgroup label="레거시 상품">
+              <option value="pdf_001">NSCA-CSCS 요약정리본</option>
+              <option value="pdf_002">운동생리학 요약본 (구)</option>
+              <option value="pdf_003">병태생리학 압축요약본 (구)</option>
+              <option value="pdf_004">기능해부학 상지 요약본 (구)</option>
+              <option value="pdf_005">운동처방론 요약정리본 (구)</option>
+            </optgroup>
           </select>
           <div class="help-text">Ctrl/Cmd 클릭으로 여러 개 선택 가능</div>
         </div>
@@ -466,26 +489,20 @@
   </div>
 
   <script type="module">
-    import { auth, db } from '../js/core/firebase-core.js';
+    import { ensureFirebase, ensureAuthReady } from '../js/core/firebase-core.js';
+    import { isAdmin } from '../js/auth/auth-utils.js';
     import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    
+
+    const { auth, db } = await ensureFirebase();
+
     // 관리자 권한 확인
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        alert('로그인이 필요합니다.');
-        window.location.href = '../login.html';
-        return;
-      }
-      
-      const adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
-      if (!adminEmails.includes(user.email)) {
-        alert('관리자 권한이 없습니다.');
-        window.location.href = '../index.html';
-        return;
-      }
-      
-      await loadCoupons();
-    });
+    const user = await ensureAuthReady();
+    if (!user || !isAdmin(user)) {
+      alert('관리자 권한이 필요합니다.');
+      window.location.href = '../index.html';
+    }
+
+    await loadCoupons();
     
     // 쿠폰 로드
     async function loadCoupons() {

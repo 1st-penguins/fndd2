@@ -89,7 +89,7 @@ export async function initAuth() {
         setLoggedIn(user);
 
         // 오늘 방문 기록 (비동기, 실패해도 무관)
-        recordDailyVisit(user.uid);
+        recordDailyVisit(user.uid, user.displayName, user.email);
 
         // 팝업/외부 탭 로그인 복귀 시 남아있는 로그인 모달 정리
         if (typeof window.closeLoginModal === 'function') {

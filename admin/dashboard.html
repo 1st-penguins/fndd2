@@ -1,406 +1,585 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
   <meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 대시보드 | 퍼스트펭귄</title>
   <link rel="canonical" href="https://the1stpeng.com/admin/dashboard.html" />
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-
-  // 관리자 권한 확인
-  auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-  alert('로그인이 필요합니다.');
-  window.location.href = '../login.html';
-  return;
-  }
-
-  // 관리자 권한 확인
-  const adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
-  if (!adminEmails.includes(user.email)) {
-  alert('관리자 권한이 없습니다.');
-  window.location.href = '../index.html';
-  return;
-  }
-
-  // 데이터 로드
-  await loadDashboardData();
-  });
-
-  // 탭 전환
-  document.querySelectorAll('.admin-tab-btn').forEach(button => {
-  button.addEventListener('click', () => {
-  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-  button.classList.add('active');
-  document.getElementById(button.dataset.tab).classList.add('active');
-  });
-  });
-
-  // 대시보드 데이터 로드
-  async function loadDashboardData() {
-  try {
-  // 구매 내역 로드
-  const purchasesRef = collection(db, 'purchases');
-  const purchasesSnap = await getDocs(purchasesRef);
-
-  let totalRevenue = 0;
-  let totalSales = 0;
-  let todayRevenue = 0;
-  const today = new Date().toDateString();
-
-  const productPrices = {
-  'pdf_001': 50000,
-  'pdf_002': 50000,
-  'pdf_003': 50000,
-  'pdf_004': 30000,
-  'pdf_005': 30000,
-  'pdf_006': 20000
-  };
-
-  const productSales = {};
-  const purchasesList = [];
-
-  purchasesSnap.forEach(doc => {
-  const data = doc.data();
-  const productId = data.productId;
-  const price = productPrices[productId] || 0;
-
-  totalRevenue += price;
-  totalSales++;
-
-  // 상품별 판매수 집계
-  productSales[productId] = (productSales[productId] || 0) + 1;
-
-  // 오늘 매출
-  if (data.purchasedAt && data.purchasedAt.toDate().toDateString() === today) {
-  todayRevenue += price;
-  }
-
-  purchasesList.push({
-  ...data,
-  id: doc.id,
-  price: price
-  });
-  });
-
-  // 통계 업데이트
-  document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString() + '원';
-  document.getElementById('totalSales').textContent = totalSales + '건';
-  document.getElementById('todayRevenue').textContent = todayRevenue.toLocaleString() + '원';
-
-  // 상품별 판매수 업데이트
-  Object.keys(productSales).forEach(productId => {
-  const elem = document.getElementById(`sales_${productId}`);
-  if (elem) {
-  elem.textContent = productSales[productId] + '건';
-  }
-  });
-
-  // ⚡ 최적화 및 요약 통계 로드
-  let userActivityMap = {};
-  let activeUserCount = 0;
-
-  const summaryStatsRef = doc(db, 'adminStats', 'userSummary');
-  const summaryStatsDoc = await getDoc(summaryStatsRef);
-
-  if (summaryStatsDoc.exists()) {
-  const summaryData = summaryStatsDoc.data();
-  userActivityMap = summaryData.userActivityMap || {};
-  activeUserCount = Object.keys(userActivityMap).length;
-  document.getElementById('totalUsers').textContent = activeUserCount + '명';
-  } else {
-  // 자동 생성 로직 (생략 - 필요 시 generateSummaryStats 호출)
-  const result = await generateSummaryStats();
-  if (result.success) {
-  activeUserCount = result.totalUsers;
-  userActivityMap = result.userActivityMap;
-  document.getElementById('totalUsers').textContent = activeUserCount + '명';
-  }
-  }
-
-  // 최근 구매 내역 렌더링
-  renderRecentPurchases(purchasesList.slice(0, 10));
-
-  // 전체 구매 내역 렌더링
-  renderAllPurchases(purchasesList);
-
-  // 사용자 목록 렌더링
-  renderUsersList(userActivityMap);
-
-  } catch (error) {
-  console.error('데이터 로드 오류:', error);
-  alert('데이터를 불러오는 중 오류가 발생했습니다.');
-  }
-  }
-
-  // 최근 구매 내역 렌더링
-  function renderRecentPurchases(purchases) {
-  const container = document.getElementById('recentPurchases');
-
-  if (purchases.length === 0) {
-  container.innerHTML = '<div class="empty-state"><span class="empty-icon">📦</span>
-    <p>구매 내역이 없습니다.</p>
-  </div>';
-  return;
-  }
-
-  const productNames = {
-  'pdf_001': 'NSCA-CSCS 요약정리본',
-  'pdf_002': '운동생리학 요약본',
-  'pdf_003': '병태생리학 압축요약본',
-  'pdf_004': '기능해부학 상지 요약본',
-  'pdf_005': '운동처방론 요약정리본',
-  'pdf_006': '스페셜테스트 압축본'
-  };
-
-  container.innerHTML = `
-  <div style="overflow-x: auto;">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>구매일시</th>
-          <th>구매자</th>
-          <th>상품명</th>
-          <th>금액</th>
-          <th>상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${purchases.map(p => `
-        <tr>
-          <td>${p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleString('ko-KR') : '-'}</td>
-          <td>${p.userName || '-'}</td>
-          <td>${productNames[p.productId] || p.productId}</td>
-          <td>${p.price.toLocaleString()}원</td>
-          <td><span class="status-badge status-${p.status || 'completed'}">${p.status === 'completed' ? '완료' :
-              '대기'}</span></td>
-        </tr>
-        `).join('')}
-      </tbody>
-    </table>
+  <link rel="stylesheet" href="../css/base.css">
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:#f4f6f9;min-height:100vh}
+    .topbar{background:var(--penguin-navy,#1D2F4E);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+    .topbar-title{font-size:17px;font-weight:700}
+    .topbar nav{display:flex;gap:16px;align-items:center}
+    .topbar a{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px}
+    .topbar a:hover{color:#fff}
+    .topbar a.active{color:#fff;font-weight:700}
+    .dc{max-width:1400px;margin:24px auto;padding:0 20px}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+    .stat-box{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
+    .stat-box .label{font-size:12px;color:#868e96;margin-bottom:6px}
+    .stat-box .value{font-size:24px;font-weight:700;color:var(--penguin-navy,#1D2F4E)}
+    .stat-box .sub{font-size:11px;color:#adb5bd;margin-top:4px}
+    .tab-nav{display:flex;gap:4px;margin-bottom:20px;background:#fff;border-radius:10px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06);flex-wrap:wrap}
+    .tab-btn{padding:10px 16px;border:none;border-radius:8px;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#868e96;font-family:inherit;transition:all .2s}
+    .tab-btn:hover{color:#495057}
+    .tab-btn.active{background:var(--penguin-navy,#1D2F4E);color:#fff}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px}
+    .card h3{font-size:16px;font-weight:700;color:var(--penguin-navy,#1D2F4E);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+    .tbl{width:100%;border-collapse:collapse}
+    .tbl th{text-align:left;padding:10px 12px;font-size:12px;color:#868e96;font-weight:600;border-bottom:2px solid #f1f3f5;white-space:nowrap}
+    .tbl td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f1f3f5}
+    .tbl tbody tr:hover{background:#f8f9fa}
+    .tbl tbody tr.clickable{cursor:pointer}
+    .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
+    .b-ok{background:#d3f9d8;color:#2b8a3e}
+    .b-refund{background:#ffe3e3;color:#c92a2a}
+    .b-pending{background:#fff3bf;color:#e67700}
+    .empty{text-align:center;padding:40px;color:#868e96}
+    .empty .icon{font-size:48px;display:block;margin-bottom:12px}
+    .loading{text-align:center;padding:40px;color:#868e96}
+    .fr{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .fr select,.fr input{padding:8px 12px;border:1px solid #dee2e6;border-radius:8px;font-size:13px;font-family:inherit}
+    .fr input{flex:1;min-width:200px}
+    .btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:13px;transition:all .2s}
+    .btn-p{background:var(--penguin-navy,#1D2F4E);color:#fff}
+    .btn-p:hover{opacity:.85}
+    .btn-d{background:#c92a2a;color:#fff}
+    .btn-s{background:#e9ecef;color:#495057}
+    .btn-csv{background:#37b24d;color:#fff}
+    .mini-chart{display:flex;align-items:flex-end;gap:6px;height:60px;margin-top:12px}
+    .mini-bar{flex:1;background:var(--penguin-skyblue,#5FB2C9);border-radius:4px 4px 0 0;min-width:0;position:relative;transition:height .3s}
+    .mini-bar .tip{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:#868e96;white-space:nowrap}
+    .mini-bar .day{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:10px;color:#adb5bd}
+    .psg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    .psi{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f8f9fa;border-radius:8px}
+    .psi .nm{font-size:13px;color:#495057}
+    .psi .ct{font-weight:700;color:var(--penguin-navy,#1D2F4E)}
+    .psi .rv{font-size:11px;color:#868e96}
+    /* 모달 */
+    .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.active{display:flex}
+    .modal-box{background:#fff;border-radius:16px;padding:32px;max-width:600px;width:90%;max-height:85vh;overflow-y:auto}
+    .modal-box h2{font-size:20px;color:var(--penguin-navy,#1D2F4E);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+    .modal-box .close{background:none;border:none;font-size:24px;cursor:pointer;color:#868e96}
+    .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f3f5;font-size:14px}
+    .detail-row .dl{color:#868e96}
+    .detail-row .dv{font-weight:600;color:#333}
+    .copy-btn{background:#e9ecef;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:6px}
+    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.topbar{flex-direction:column;gap:8px}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="topbar-title">관리자 대시보드</span>
+    <nav>
+      <a href="dashboard.html" class="active">대시보드</a>
+      <a href="notices.html">공지관리</a>
+      <a href="coupons.html">쿠폰관리</a>
+      <a href="statistics.html">통계</a>
+      <a href="../index.html">홈으로</a>
+    </nav>
   </div>
-  `;
-  }
 
-  // 전체 구매 내역 렌더링
-  function renderAllPurchases(purchases) {
-  const container = document.getElementById('purchasesList');
+  <div class="dc">
+    <!-- 통계 카드 -->
+    <div class="stats-grid">
+      <div class="stat-box"><div class="label">총 매출</div><div class="value" id="sRevenue">-</div><div class="sub" id="sRefunded"></div></div>
+      <div class="stat-box"><div class="label">이번 달 매출</div><div class="value" id="sMonth">-</div></div>
+      <div class="stat-box"><div class="label">이번 주 매출</div><div class="value" id="sWeek">-</div></div>
+      <div class="stat-box"><div class="label">오늘 매출</div><div class="value" id="sToday">-</div></div>
+      <div class="stat-box"><div class="label">총 판매</div><div class="value" id="sSales">-</div></div>
+      <div class="stat-box"><div class="label">오늘 접속</div><div class="value" id="sVisitors">-</div></div>
+      <div class="stat-box"><div class="label">활성 사용자</div><div class="value" id="sUsers">-</div></div>
+    </div>
 
-  if (purchases.length === 0) {
-  container.innerHTML = '<div class="empty-state"><span class="empty-icon">📦</span>
-    <p>구매 내역이 없습니다.</p>
-  </div>';
-  return;
-  }
+    <!-- 탭 -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="tab-overview">개요</button>
+      <button class="tab-btn" data-tab="tab-all">전체 구매</button>
+      <button class="tab-btn" data-tab="tab-refund">환불 관리</button>
+      <button class="tab-btn" data-tab="tab-coupon">쿠폰 리포트</button>
+      <button class="tab-btn" data-tab="tab-users">사용자</button>
+    </div>
 
-  const productNames = {
-  'pdf_001': 'NSCA-CSCS 요약정리본',
-  'pdf_002': '운동생리학 요약본',
-  'pdf_003': '병태생리학 압축요약본',
-  'pdf_004': '기능해부학 상지 요약본',
-  'pdf_005': '운동처방론 요약정리본',
-  'pdf_006': '스페셜테스트 압축본'
-  };
+    <!-- 개요 -->
+    <div id="tab-overview" class="tab-panel active">
+      <div class="card"><h3>최근 7일 매출 추이</h3><div id="chartArea" class="mini-chart"></div></div>
+      <div class="card"><h3>상품별 매출 순위</h3><div id="productRanking" class="psg"></div></div>
+      <div class="card"><h3>최근 구매 (10건)</h3><div id="recentList"></div></div>
+      <div class="card"><h3>오늘 접속자</h3><div id="visitorList"></div></div>
+    </div>
 
-  container.innerHTML = `
-  <div style="overflow-x: auto;">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>주문번호</th>
-          <th>구매일시</th>
-          <th>구매자</th>
-          <th>상품명</th>
-          <th>유형</th>
-          <th>금액</th>
-          <th>상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${purchases.map(p => `
-        <tr>
-          <td>${p.orderId || '-'}</td>
-          <td>${p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleString('ko-KR') : '-'}</td>
-          <td>${p.userName || '-'}</td>
-          <td>${productNames[p.productId] || p.productId}</td>
-          <td>${p.productType === 'pdf' ? 'PDF' : '동영상'}</td>
-          <td>${p.price.toLocaleString()}원</td>
-          <td><span class="status-badge status-${p.status || 'completed'}">${p.status === 'completed' ? '완료' :
-              '대기'}</span></td>
-        </tr>
-        `).join('')}
-      </tbody>
-    </table>
+    <!-- 전체 구매 -->
+    <div id="tab-all" class="tab-panel">
+      <div class="card">
+        <h3>전체 구매 내역 <button class="btn btn-csv" onclick="downloadCSV('purchases')">CSV 다운로드</button></h3>
+        <div class="fr">
+          <select id="fType"><option value="all">전체 유형</option><option value="video">동영상</option><option value="pdf">PDF</option></select>
+          <select id="fStatus"><option value="all">전체 상태</option><option value="completed">결제완료</option><option value="refunded">환불완료</option></select>
+        </div>
+        <div id="allList"></div>
+      </div>
+    </div>
+
+    <!-- 환불 관리 -->
+    <div id="tab-refund" class="tab-panel">
+      <div class="card">
+        <h3>환불 조회 / 처리 <button class="btn btn-csv" onclick="downloadCSV('refunds')">CSV 다운로드</button></h3>
+        <div style="padding:12px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#9a3412;line-height:1.7;margin-bottom:16px;">
+          <strong>환불 처리 순서</strong><br>
+          1. 아래에서 이메일/이름 검색 → 시청률·환불 가능 여부 확인<br>
+          2. <a href="https://sellers.tosspayments.com" target="_blank" style="color:#1971c2;font-weight:600;">Toss 판매자센터</a>에서 해당 주문번호로 환불 처리<br>
+          3. 아래 "환불 완료" 버튼 클릭하여 기록
+        </div>
+        <div class="fr">
+          <input type="text" id="refundInput" placeholder="이메일 또는 이름으로 검색">
+          <button class="btn btn-p" id="refundSearchBtn">검색</button>
+        </div>
+        <div id="refundResult"></div>
+      </div>
+      <div class="card"><h3>환불 이력</h3><div id="refundHistory"></div></div>
+    </div>
+
+    <!-- 쿠폰 리포트 -->
+    <div id="tab-coupon" class="tab-panel">
+      <div class="card">
+        <h3>쿠폰 사용 리포트 <button class="btn btn-csv" onclick="downloadCSV('coupons')">CSV 다운로드</button></h3>
+        <div id="couponSummary"></div>
+        <div id="couponUsageList" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
+    <!-- 사용자 -->
+    <div id="tab-users" class="tab-panel">
+      <div class="card"><h3>사용자 활동</h3><div id="usersList"></div></div>
+    </div>
   </div>
-  `;
 
-  // 필터 이벤트 (Optional if elements exist)
-  const pFilter = document.getElementById('productFilter');
-  if(pFilter) {
-  pFilter.addEventListener('change', (e) => {
-  filterPurchases(purchases, e.target.value, document.getElementById('statusFilter').value);
-  });
-  }
+  <!-- 주문 상세 모달 -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-box">
+      <h2>주문 상세 <button class="close" onclick="closeModal()">&times;</button></h2>
+      <div id="orderDetail"></div>
+    </div>
+  </div>
 
-  const sFilter = document.getElementById('statusFilter');
-  if(sFilter) {
-  sFilter.addEventListener('change', (e) => {
-  filterPurchases(purchases, document.getElementById('productFilter').value, e.target.value);
-  });
-  }
-  }
+  <script type="module">
+    import { ensureFirebase, ensureAuthReady } from '../js/core/firebase-core.js';
+    import { isAdmin } from '../js/auth/auth-utils.js';
+    import { getTodayVisitorList } from '../js/analytics/daily-visitor.js';
+    import {
+      collection, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp, query, where
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-  // 구매 내역 필터링
-  function filterPurchases(purchases, productType, status) {
-  let filtered = purchases;
+    const { auth, db } = await ensureFirebase();
+    const user = await ensureAuthReady();
+    if (!user || !isAdmin(user)) { alert('관리자 권한이 필요합니다.'); window.location.href = '../index.html'; }
 
-  if (productType !== 'all') {
-  filtered = filtered.filter(p => p.productType === productType);
-  }
+    const PN = {
+      'video_anatomy':'기능해부학 정규강의','video_injury':'운동상해 정규강의',
+      'video_physio':'운동생리학 정규강의','video_load':'운동부하검사 정규강의',
+      'video_ecg':'심전도 정규강의','video_patho':'병태생리학 정규강의',
+      'video_prescript':'운동처방론 정규강의','video_health':'건강체력평가 정규강의',
+      'pdf_anatomy':'기능해부학 요약본','pdf_injury':'운동상해 요약본',
+      'pdf_physio':'운동생리학 요약본','pdf_load':'운동부하검사 요약본',
+      'pdf_patho':'병태생리학 요약본','pdf_psycho':'스포츠심리학 요약본',
+      'pdf_prescript':'운동처방론 요약본','pdf_health':'건강체력평가 요약본'
+    };
 
-  if (status !== 'all') {
-  filtered = filtered.filter(p => p.status === status);
-  }
+    let ALL = []; // 전체 구매 데이터
 
-  renderAllPurchases(filtered);
-  }
+    // 탭 전환
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById(b.dataset.tab).classList.add('active');
+      });
+    });
 
-  // 요약 통계 생성 함수
-  async function generateSummaryStats() {
-  try {
-  console.log('📊 요약 통계 생성 시작...');
-  const attemptsRef = collection(db, 'attempts');
-  const attemptsSnap = await getDocs(attemptsRef);
-  console.log(`📥 ${attemptsSnap.size.toLocaleString()}개 attempts 조회 완료`);
+    // ─── 데이터 로드 ───
+    async function load() {
+      const snap = await getDocs(collection(db, 'purchases'));
+      ALL = [];
+      snap.forEach(d => ALL.push({ ...d.data(), _id: d.id }));
+      ALL.sort((a, b) => {
+        const ta = a.purchasedAt?.toDate?.() || 0;
+        const tb = b.purchasedAt?.toDate?.() || 0;
+        return tb - ta;
+      });
 
-  const userActivityMap = {};
-  let totalAttempts = 0;
+      const now = new Date();
+      const todayStr = now.toDateString();
+      const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  attemptsSnap.forEach(doc => {
-  const data = doc.data();
-  totalAttempts++;
-  if (data.userId) {
-  if (!userActivityMap[data.userId]) {
-  userActivityMap[data.userId] = {
-  userId: data.userId,
-  userName: data.userName || null,
-  userEmail: data.userEmail || null,
-  attemptCount: 0,
-  correctCount: 0,
-  lastActivity: null,
-  deviceType: data.deviceType || 'unknown',
-  totalTimeSpent: 0
-  };
-  }
-  userActivityMap[data.userId].attemptCount++;
-  if (data.isCorrect) userActivityMap[data.userId].correctCount++;
-  if (data.timeSpent) userActivityMap[data.userId].totalTimeSpent += data.timeSpent;
-  if (data.userName) userActivityMap[data.userId].userName = data.userName;
-  if (data.userEmail) userActivityMap[data.userId].userEmail = data.userEmail;
-  const timestamp = data.timestamp?.toDate();
-  if (timestamp && (!userActivityMap[data.userId].lastActivity || timestamp >
-  userActivityMap[data.userId].lastActivity)) {
-  userActivityMap[data.userId].lastActivity = timestamp;
-  }
-  }
-  });
+      let total = 0, today = 0, week = 0, month = 0, refundTotal = 0, salesCount = 0;
+      const daily = {};
+      const productRevenue = {};
 
-  const userCount = Object.keys(userActivityMap).length;
-  const summaryRef = doc(db, 'adminStats', 'userSummary');
-  await setDoc(summaryRef, {
-  userActivityMap: userActivityMap,
-  totalUsers: userCount,
-  totalAttempts: totalAttempts,
-  lastUpdated: serverTimestamp(),
-  generatedAt: new Date().toISOString()
-  });
+      ALL.forEach(p => {
+        const amt = p.finalAmount || p.purchaseAmount || 0;
+        const d = p.purchasedAt?.toDate?.();
+        if (p.status === 'refunded') { refundTotal += amt; return; }
+        total += amt;
+        salesCount++;
+        if (d) {
+          if (d.toDateString() === todayStr) today += amt;
+          if (d >= weekAgo) week += amt;
+          if (d >= monthStart) month += amt;
+          const key = `${d.getMonth()+1}/${d.getDate()}`;
+          daily[key] = (daily[key] || 0) + amt;
+        }
+        productRevenue[p.productId] = (productRevenue[p.productId] || 0) + amt;
+      });
 
-  console.log(`✅ 요약 통계 저장 완료: ${userCount}명`);
-  return { success: true, userActivityMap: userActivityMap, totalUsers: userCount, totalAttempts: totalAttempts };
-  } catch (error) {
-  console.error('❌ 요약 통계 생성 오류:', error);
-  return { success: false, error: error.message };
-  }
-  }
+      document.getElementById('sRevenue').textContent = total.toLocaleString() + '원';
+      document.getElementById('sRefunded').textContent = refundTotal > 0 ? `환불: -${refundTotal.toLocaleString()}원` : '';
+      document.getElementById('sMonth').textContent = month.toLocaleString() + '원';
+      document.getElementById('sWeek').textContent = week.toLocaleString() + '원';
+      document.getElementById('sToday').textContent = today.toLocaleString() + '원';
+      document.getElementById('sSales').textContent = salesCount + '건';
 
-  // 사용자 목록 렌더링
-  function renderUsersList(userActivityMap) {
-  const container = document.getElementById('usersList');
+      // 7일 차트
+      renderChart(now, daily);
+      // 상품 매출 순위
+      renderProductRanking(productRevenue);
+      // 최근 구매
+      renderTable('recentList', ALL.filter(p => p.status !== 'refunded').slice(0, 10));
+      // 전체 구매
+      renderTable('allList', ALL, true);
+      // 접속자
+      const visitors = await getTodayVisitorList();
+      document.getElementById('sVisitors').textContent = visitors.length + '명';
+      renderVisitors(visitors);
+      // 사용자
+      await loadUsers();
+      // 쿠폰
+      await loadCouponReport();
+      // 환불 이력
+      renderRefundHistory();
+    }
 
-  if (Object.keys(userActivityMap).length === 0) {
-  container.innerHTML = '<div class="empty-state"><span class="empty-icon">👥</span>
-    <p>활성 사용자가 없습니다.</p>
-  </div>';
-  return;
-  }
+    // ─── 7일 차트 ───
+    function renderChart(now, daily) {
+      const el = document.getElementById('chartArea');
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now); d.setDate(now.getDate() - i);
+        const key = `${d.getMonth()+1}/${d.getDate()}`;
+        days.push({ key, val: daily[key] || 0 });
+      }
+      const max = Math.max(...days.map(d => d.val), 1);
+      el.innerHTML = days.map(d => {
+        const h = Math.max((d.val / max) * 100, 4);
+        return `<div class="mini-bar" style="height:${h}%"><span class="tip">${d.val > 0 ? (d.val/10000).toFixed(0)+'만' : '0'}</span><span class="day">${d.key}</span></div>`;
+      }).join('');
+      el.style.paddingBottom = '20px';
+    }
 
-  const sortedUsers = Object.values(userActivityMap).sort((a, b) => {
-  if (!a.lastActivity) return 1;
-  if (!b.lastActivity) return -1;
-  return b.lastActivity - a.lastActivity;
-  });
+    // ─── 상품 매출 순위 ───
+    function renderProductRanking(rev) {
+      const sorted = Object.entries(rev).sort((a, b) => b[1] - a[1]);
+      const el = document.getElementById('productRanking');
+      if (sorted.length === 0) { el.innerHTML = '<div class="empty"><span class="icon">📊</span><p>매출 데이터가 없습니다.</p></div>'; return; }
+      el.innerHTML = sorted.map(([pid, amt]) =>
+        `<div class="psi"><div><div class="nm">${PN[pid] || pid}</div><div class="rv">${amt.toLocaleString()}원</div></div><span class="ct">${ALL.filter(p => p.productId === pid && p.status !== 'refunded').length}건</span></div>`
+      ).join('');
+    }
 
-  container.innerHTML = `
-  <div style="overflow-x: auto;">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>UID</th>
-          <th>이름</th>
-          <th>이메일</th>
-          <th>문제 풀이 수</th>
-          <th>최근 활동</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${sortedUsers.map(u => `
-        <tr>
-          <td title="${u.userId}">
-            <code
-              style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">${u.userId.substring(0, 10)}...</code>
-          </td>
-          <td>${u.userName || '<span style="color: #999; font-style: italic;">미등록</span>'}</td>
-          <td>${u.userEmail || '<span style="color: #999; font-style: italic;">미등록</span>'}</td>
-          <td><strong style="color: var(--penguin-navy);">${u.attemptCount || 0}</strong> 문제</td>
+    // ─── 구매 테이블 ───
+    function renderTable(containerId, data, clickable = false) {
+      const el = document.getElementById(containerId);
+      if (data.length === 0) { el.innerHTML = '<div class="empty"><span class="icon">📦</span><p>구매 내역이 없습니다.</p></div>'; return; }
+      el.innerHTML = `<div style="overflow-x:auto"><table class="tbl"><thead><tr>
+        <th>구매일시</th><th>구매자</th><th>상품명</th><th>결제수단</th><th>금액</th><th>상태</th>
+      </tr></thead><tbody>
+        ${data.map((p, i) => {
+          const d = p.purchasedAt?.toDate?.();
+          const st = p.status === 'refunded' ? '<span class="badge b-refund">환불</span>' : '<span class="badge b-ok">완료</span>';
+          const amt = (p.finalAmount || p.purchaseAmount || 0);
+          return `<tr class="${clickable ? 'clickable' : ''}" ${clickable ? `data-idx="${ALL.indexOf(p)}"` : ''}>
+            <td>${d ? d.toLocaleString('ko-KR') : '-'}</td>
+            <td>${p.userName || p.userEmail || '-'}</td>
+            <td>${PN[p.productId] || p.productId}</td>
+            <td>${p.paymentMethod || '-'}</td>
+            <td>${amt.toLocaleString()}원</td>
+            <td>${st}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+      if (clickable) {
+        el.querySelectorAll('tr.clickable').forEach(tr => {
+          tr.addEventListener('click', () => openModal(parseInt(tr.dataset.idx)));
+        });
+      }
+    }
+
+    // 필터
+    document.getElementById('fType').addEventListener('change', applyFilter);
+    document.getElementById('fStatus').addEventListener('change', applyFilter);
+    function applyFilter() {
+      const t = document.getElementById('fType').value;
+      const s = document.getElementById('fStatus').value;
+      let f = ALL;
+      if (t !== 'all') f = f.filter(p => p.productType === t);
+      if (s !== 'all') f = f.filter(p => p.status === s);
+      renderTable('allList', f, true);
+    }
+
+    // ─── 주문 상세 모달 ───
+    window.openModal = function(idx) {
+      const p = ALL[idx];
+      if (!p) return;
+      const d = p.purchasedAt?.toDate?.();
+      const rows = [
+        ['주문번호', `<code>${p.orderId || '-'}</code><button class="copy-btn" onclick="copyText('${p.orderId}')">복사</button>`],
+        ['PaymentKey', `<code style="font-size:11px;word-break:break-all;">${p.paymentKey || '-'}</code><button class="copy-btn" onclick="copyText('${p.paymentKey}')">복사</button>`],
+        ['구매자', `${p.userName || '-'} (${p.userEmail || '-'})`],
+        ['상품', PN[p.productId] || p.productId],
+        ['유형', p.productType === 'pdf' ? 'PDF' : '동영상'],
+        ['결제수단', p.paymentMethod || '-'],
+        ['원래 가격', `${(p.purchaseAmount || 0).toLocaleString()}원`],
+        ['할인 금액', p.discountAmount ? `-${p.discountAmount.toLocaleString()}원` : '없음'],
+        ['쿠폰', p.couponId || '미사용'],
+        ['최종 결제', `<strong>${(p.finalAmount || p.purchaseAmount || 0).toLocaleString()}원</strong>`],
+        ['결제일시', d ? d.toLocaleString('ko-KR') : '-'],
+        ['상태', p.status === 'refunded' ? '<span class="badge b-refund">환불완료</span>' : '<span class="badge b-ok">결제완료</span>'],
+      ];
+      if (p.refundedAt) {
+        rows.push(['환불일시', p.refundedAt.toDate().toLocaleString('ko-KR')]);
+        rows.push(['환불 사유', p.refundReason || '-']);
+      }
+
+      let html = rows.map(([l, v]) => `<div class="detail-row"><span class="dl">${l}</span><span class="dv">${v}</span></div>`).join('');
+
+      if (p.status !== 'refunded') {
+        html += `<div style="margin-top:20px;display:flex;gap:10px;">
+          <a href="https://sellers.tosspayments.com" target="_blank" class="btn btn-s" style="text-decoration:none;text-align:center;flex:1;">Toss 판매자센터</a>
+          <button class="btn btn-d" style="flex:1;" onclick="processRefund('${p._id}')">환불 완료 기록</button>
+        </div>`;
+      }
+
+      document.getElementById('orderDetail').innerHTML = html;
+      document.getElementById('orderModal').classList.add('active');
+    };
+
+    window.closeModal = function() {
+      document.getElementById('orderModal').classList.remove('active');
+    };
+
+    window.copyText = function(text) {
+      navigator.clipboard.writeText(text || '');
+      alert('복사되었습니다.');
+    };
+
+    // ─── 환불 처리 기록 ───
+    window.processRefund = async function(docId) {
+      const reason = prompt('환불 사유를 입력하세요 (Toss에서 환불 처리 후 입력):');
+      if (reason === null) return;
+      try {
+        await updateDoc(doc(db, 'purchases', docId), {
+          status: 'refunded',
+          refundedAt: serverTimestamp(),
+          refundReason: reason || '사유 미입력'
+        });
+        alert('환불 완료 기록됨');
+        closeModal();
+        location.reload();
+      } catch (e) {
+        alert('오류: ' + e.message);
+      }
+    };
+
+    // ─── 환불 검색 ───
+    document.getElementById('refundSearchBtn').addEventListener('click', searchRefund);
+    document.getElementById('refundInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchRefund(); });
+
+    async function searchRefund() {
+      const kw = document.getElementById('refundInput').value.trim().toLowerCase();
+      const el = document.getElementById('refundResult');
+      if (!kw) { el.innerHTML = '<p style="color:#868e96">검색어를 입력하세요.</p>'; return; }
+      el.innerHTML = '<div class="loading">검색 중...</div>';
+
+      const matched = ALL.filter(p => (p.userEmail || '').toLowerCase().includes(kw) || (p.userName || '').toLowerCase().includes(kw));
+      if (!matched.length) { el.innerHTML = '<div class="empty"><span class="icon">🔍</span><p>결과 없음</p></div>'; return; }
+
+      const uid = matched[0].userId;
+      const progSnap = await getDocs(query(collection(db, 'lectureProgress'), where('userId', '==', uid)));
+      const pm = {};
+      progSnap.forEach(d => { const dd = d.data(); pm[dd.productId + '_' + dd.episode] = dd; });
+
+      let html = `<div style="margin-bottom:12px;padding:10px 14px;background:#f8f9fa;border-radius:8px;">
+        <strong>${matched[0].userName || matched[0].userEmail}</strong> <span style="color:#868e96;font-size:13px;">(${matched[0].userEmail || ''})</span>
+      </div>`;
+      html += `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>주문번호</th><th>상품</th><th>금액</th><th>상태</th><th>시청률</th><th>환불 가능</th><th>처리</th></tr></thead><tbody>`;
+
+      for (const p of matched) {
+        const amt = (p.finalAmount || p.purchaseAmount || 0).toLocaleString() + '원';
+        let maxProg = 0, watched = 0, epCount = 0;
+        Object.entries(pm).forEach(([k, v]) => { if (k.startsWith(p.productId + '_')) { epCount++; if (v.progress > 0) watched++; if (v.progress > maxProg) maxProg = v.progress; }});
+        let refSt, refCls;
+        if (p.status === 'refunded') { refSt = '환불완료'; refCls = 'color:#868e96;'; }
+        else if (p.productType === 'pdf') { refSt = '다운로드 상품'; refCls = 'color:#868e96;'; }
+        else if (watched === 0) { refSt = '전액 환불 가능'; refCls = 'color:#2b8a3e;font-weight:700;'; }
+        else if (maxProg < 30) { refSt = '50% 환불 가능'; refCls = 'color:#e67700;font-weight:700;'; }
+        else { refSt = '환불 불가'; refCls = 'color:#c92a2a;font-weight:700;'; }
+        const progText = p.productType === 'pdf' ? '-' : epCount > 0 ? `${watched}/${epCount}강 (${maxProg}%)` : '미시청';
+        const stBadge = p.status === 'refunded' ? '<span class="badge b-refund">환불</span>' : '<span class="badge b-ok">완료</span>';
+        const refBtn = p.status !== 'refunded' ? `<button class="btn btn-d" style="font-size:11px;padding:4px 10px;" onclick="processRefund('${p._id}')">환불 기록</button>` : '-';
+
+        html += `<tr><td style="font-size:11px;font-family:monospace;">${p.orderId || '-'}</td><td>${PN[p.productId] || p.productId}</td><td>${amt}</td><td>${stBadge}</td><td>${progText}</td><td style="${refCls}">${refSt}</td><td>${refBtn}</td></tr>`;
+      }
+      html += '</tbody></table></div>';
+      el.innerHTML = html;
+    }
+
+    // 환불 이력
+    function renderRefundHistory() {
+      const refunded = ALL.filter(p => p.status === 'refunded');
+      const el = document.getElementById('refundHistory');
+      if (!refunded.length) { el.innerHTML = '<div class="empty"><span class="icon">📋</span><p>환불 이력이 없습니다.</p></div>'; return; }
+      const totalRefund = refunded.reduce((s, p) => s + (p.finalAmount || p.purchaseAmount || 0), 0);
+      el.innerHTML = `<p style="margin-bottom:12px;color:#868e96;font-size:13px;">총 ${refunded.length}건 / ${totalRefund.toLocaleString()}원</p>
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>환불일</th><th>구매자</th><th>상품</th><th>금액</th><th>사유</th></tr></thead><tbody>
+        ${refunded.map(p => `<tr>
+          <td>${p.refundedAt?.toDate?.()?.toLocaleDateString('ko-KR') || '-'}</td>
+          <td>${p.userName || p.userEmail || '-'}</td>
+          <td>${PN[p.productId] || p.productId}</td>
+          <td>${(p.finalAmount || p.purchaseAmount || 0).toLocaleString()}원</td>
+          <td>${p.refundReason || '-'}</td>
+        </tr>`).join('')}
+        </tbody></table></div>`;
+    }
+
+    // ─── 쿠폰 리포트 ───
+    async function loadCouponReport() {
+      const snap = await getDocs(collection(db, 'couponUsage'));
+      const usages = [];
+      snap.forEach(d => usages.push(d.data()));
+
+      const el1 = document.getElementById('couponSummary');
+      const el2 = document.getElementById('couponUsageList');
+
+      if (!usages.length) { el1.innerHTML = '<div class="empty"><span class="icon">🎟️</span><p>쿠폰 사용 내역이 없습니다.</p></div>'; return; }
+
+      // 쿠폰별 요약
+      const byCoupon = {};
+      usages.forEach(u => {
+        if (!byCoupon[u.couponId]) byCoupon[u.couponId] = { count: 0, total: 0 };
+        byCoupon[u.couponId].count++;
+        byCoupon[u.couponId].total += u.discountAmount || 0;
+      });
+
+      // 쿠폰 코드 조회
+      const couponNames = {};
+      for (const cid of Object.keys(byCoupon)) {
+        try {
+          const cdoc = await getDoc(doc(db, 'coupons', cid));
+          couponNames[cid] = cdoc.exists() ? cdoc.data().code : cid;
+        } catch { couponNames[cid] = cid; }
+      }
+
+      el1.innerHTML = `<div class="psg">${Object.entries(byCoupon).map(([cid, v]) =>
+        `<div class="psi"><div><div class="nm">${couponNames[cid] || cid}</div><div class="rv">할인 합계: ${v.total.toLocaleString()}원</div></div><span class="ct">${v.count}회</span></div>`
+      ).join('')}</div>`;
+
+      usages.sort((a, b) => (b.usedAt?.toDate?.() || 0) - (a.usedAt?.toDate?.() || 0));
+      el2.innerHTML = `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>쿠폰코드</th><th>사용자</th><th>상품</th><th>할인금액</th><th>사용일</th></tr></thead><tbody>
+        ${usages.map(u => `<tr>
+          <td><code>${couponNames[u.couponId] || u.couponId}</code></td>
+          <td>${u.userName || u.userEmail || u.userId?.substring(0,8) || '-'}</td>
+          <td>${PN[u.productId] || u.productId || '-'}</td>
+          <td>${(u.discountAmount || 0).toLocaleString()}원</td>
+          <td>${u.usedAt?.toDate?.()?.toLocaleDateString('ko-KR') || '-'}</td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    // ─── 사용자 ───
+    async function loadUsers() {
+      let uam = {};
+      const ss = await getDoc(doc(db, 'adminStats', 'userSummary'));
+      if (ss.exists()) { uam = ss.data().userActivityMap || {}; }
+      document.getElementById('sUsers').textContent = Object.keys(uam).length + '명';
+      const el = document.getElementById('usersList');
+      const sorted = Object.values(uam).sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0));
+      if (!sorted.length) { el.innerHTML = '<div class="empty"><span class="icon">👥</span><p>사용자 없음</p></div>'; return; }
+      el.innerHTML = `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>이름</th><th>이메일</th><th>문제 풀이</th><th>최근 활동</th></tr></thead><tbody>
+        ${sorted.map(u => `<tr>
+          <td>${u.userName || '-'}</td>
+          <td>${u.userEmail || '-'}</td>
+          <td><strong>${u.attemptCount || 0}</strong></td>
           <td>${u.lastActivity ? new Date(u.lastActivity).toLocaleDateString('ko-KR') : '-'}</td>
-        </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  </div>
-  <div style="margin-top: 15px; text-align: center; color: #666; font-size: 0.9rem;">
-    📊 활성 사용자 ${sortedUsers.length}명
-  </div>
-  <div style="margin-top: 10px; text-align: center;">
-    <button onclick="refreshSummaryStats()" class="admin-btn admin-btn-primary">
-      🔄 통계 새로고침
-    </button>
-  </div>
-  `;
-  }
+        </tr>`).join('')}
+      </tbody></table></div>
+      <div style="margin-top:10px;text-align:center;">
+        <button class="btn btn-p" id="refreshUsersBtn">통계 새로고침</button>
+      </div>`;
+      document.getElementById('refreshUsersBtn').addEventListener('click', async (e) => {
+        if (!confirm('통계를 새로고침하시겠습니까?')) return;
+        e.target.disabled = true; e.target.textContent = '생성 중...';
+        try {
+          const snap = await getDocs(collection(db, 'attempts'));
+          const map = {};
+          snap.forEach(d => { const dd = d.data(); if (!dd.userId) return; if (!map[dd.userId]) map[dd.userId] = { userId:dd.userId,userName:dd.userName||null,userEmail:dd.userEmail||null,attemptCount:0,lastActivity:null }; map[dd.userId].attemptCount++; if(dd.userName)map[dd.userId].userName=dd.userName; if(dd.userEmail)map[dd.userId].userEmail=dd.userEmail; const ts=dd.timestamp?.toDate(); if(ts&&(!map[dd.userId].lastActivity||ts>map[dd.userId].lastActivity))map[dd.userId].lastActivity=ts; });
+          await setDoc(doc(db, 'adminStats', 'userSummary'), { userActivityMap: map, totalUsers: Object.keys(map).length, lastUpdated: serverTimestamp() });
+          alert('완료'); location.reload();
+        } catch (err) { alert('오류: ' + err.message); }
+      });
+    }
 
-  window.refreshSummaryStats = async function() {
-  if (!confirm('요약 통계를 새로고침하시겠습니까?')) return;
-  const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = '⏳ 생성 중...';
-  try {
-  const result = await generateSummaryStats();
-  if (result.success) {
-  alert('✅ 완료');
-  location.reload();
-  } else {
-  alert('❌ 실패: ' + result.error);
-  }
-  } catch (e) {
-  alert('오류: ' + e.message);
-  } finally {
-  btn.disabled = false;
-  btn.textContent = '🔄 통계 새로고침';
-  }
-  };
+    // ─── 접속자 ───
+    function renderVisitors(visitors) {
+      const el = document.getElementById('visitorList');
+      if (!visitors.length) { el.innerHTML = '<div class="empty"><span class="icon">👤</span><p>오늘 접속자가 없습니다.</p></div>'; return; }
+      el.innerHTML = `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>이름</th><th>이메일</th><th>접속 시간</th></tr></thead><tbody>
+        ${visitors.map(v => `<tr><td>${v.name || '-'}</td><td>${v.email || '-'}</td><td>${v.time ? new Date(v.time).toLocaleTimeString('ko-KR') : '-'}</td></tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    // ─── CSV 내보내기 ───
+    window.downloadCSV = function(type) {
+      let rows = [], filename = '';
+      if (type === 'purchases') {
+        filename = `구매내역_${new Date().toISOString().slice(0,10)}.csv`;
+        rows.push(['주문번호','구매일시','구매자','이메일','상품','유형','원래가격','할인','최종금액','결제수단','상태']);
+        ALL.forEach(p => {
+          const d = p.purchasedAt?.toDate?.();
+          rows.push([p.orderId||'',d?d.toLocaleString('ko-KR'):'',p.userName||'',p.userEmail||'',PN[p.productId]||p.productId,p.productType||'',p.purchaseAmount||0,p.discountAmount||0,p.finalAmount||p.purchaseAmount||0,p.paymentMethod||'',p.status||'']);
+        });
+      } else if (type === 'refunds') {
+        filename = `환불내역_${new Date().toISOString().slice(0,10)}.csv`;
+        rows.push(['주문번호','환불일','구매자','이메일','상품','금액','사유']);
+        ALL.filter(p => p.status === 'refunded').forEach(p => {
+          rows.push([p.orderId||'',p.refundedAt?.toDate?.()?.toLocaleDateString('ko-KR')||'',p.userName||'',p.userEmail||'',PN[p.productId]||p.productId,p.finalAmount||p.purchaseAmount||0,p.refundReason||'']);
+        });
+      } else if (type === 'coupons') {
+        filename = `쿠폰사용내역_${new Date().toISOString().slice(0,10)}.csv`;
+        rows.push(['쿠폰ID','사용자','이메일','상품','할인금액','사용일']);
+        // 쿠폰은 별도 로드 필요 — 현재 화면 데이터 사용
+        const trs = document.querySelectorAll('#couponUsageList tbody tr');
+        trs.forEach(tr => { const cells = tr.querySelectorAll('td'); rows.push(Array.from(cells).map(c => c.textContent.trim())); });
+      }
+      if (rows.length <= 1) { alert('내보낼 데이터가 없습니다.'); return; }
+      const bom = '\uFEFF';
+      const csv = bom + rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    };
+
+    await load();
   </script>
-  </body>
-
+</body>
 </html>

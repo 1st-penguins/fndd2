@@ -1,0 +1,14 @@
+{
+  "name": "firstpenguin-functions",
+  "description": "퍼스트펭귄 Cloud Functions (결제 확인 등)",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^11.11.0",
+    "firebase-functions": "^4.5.0",
+    "node-fetch": "^2.7.0"
+  },
+  "private": true
+}

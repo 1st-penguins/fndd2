@@ -323,10 +323,10 @@
   <footer class="linear-footer"></footer>
 
   <script type="module">
-    import { auth, db } from './js/core/firebase-core.js';
+    import { ensureFirebase } from './js/core/firebase-core.js';
     import { isAdmin } from './js/auth/auth-utils.js';
     import {
-      doc, getDoc, collection, query, where, orderBy, getDocs, setDoc, serverTimestamp
+      doc, getDoc, collection, query, where, orderBy, getDocs, setDoc, updateDoc, serverTimestamp
     } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -340,11 +340,16 @@
     let episodes = [];
     let currentEpIndex = 0;
     let vimeoPlayer = null;
+    let sessionToken = null;
+    let sessionCheckInterval = null;
+    let progressMap = {}; // 에피소드별 진도율 캐시
+
+    const { auth, db } = await ensureFirebase();
 
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         alert('로그인이 필요합니다.');
-        window.location.href = 'login.html';
+        window.location.href = 'index.html#lecture-tab';
         return;
       }
 
@@ -386,7 +391,8 @@
           return;
         }
 
-        // 구매 확인됨
+        // 구매 확인됨 — 세션 토큰 등록
+        await startVideoSession(user.uid);
         await loadAndPlay();
 
       } catch (error) {
@@ -466,8 +472,14 @@
       document.getElementById('play-back-link').href = `product-detail.html?id=${productId}`;
       document.getElementById('play-ep-title').textContent = `커리큘럼 (${episodes.length}강)`;
 
+      // 진도율 로드
+      await loadProgressMap();
+
       // 에피소드 목록 렌더
       renderEpisodeList(freeOnly);
+
+      // 워터마크
+      createWatermark();
 
       // 첫 에피소드 재생
       playEpisode(currentEpIndex);
@@ -481,6 +493,8 @@
         const activeClass = i === currentEpIndex ? 'active' : '';
         const lockIcon = locked ? '<span style="color:#dee2e6;font-size:14px;">🔒</span>' : '';
         const freeTag = ep.isFree ? '<span style="font-size:11px;color:#059669;font-weight:700;">무료</span>' : '';
+        const savedProgress = progressMap[ep.episode];
+        const completedBadge = (savedProgress && savedProgress.progress >= 90) ? '<span style="font-size:12px;color:#2b8a3e;">✅</span>' : '';
 
         return `
           <li class="play-ep-item ${activeClass}" data-index="${i}" ${locked ? 'data-locked="true"' : ''}>
@@ -490,6 +504,7 @@
               <div class="play-ep-item__duration">${ep.duration || ''}</div>
             </div>
             ${i === currentEpIndex ? '<span class="play-ep-item__playing">재생중</span>' : ''}
+            ${completedBadge}
             ${freeTag}
             ${lockIcon}
           </li>
@@ -550,8 +565,13 @@
 
         // 10초마다 진도율 저장
         if (Math.floor(data.seconds) % 10 === 0) {
-          saveProgress(ep, percent);
+          saveProgress(ep, percent, data.seconds);
         }
+      });
+
+      // 이어보기: 재생 준비 후 마지막 위치로 이동
+      vimeoPlayer.on('loaded', () => {
+        resumeFromLastPosition(ep);
       });
 
       // 페이지 타이틀 업데이트
@@ -559,21 +579,28 @@
     }
 
     // 진도율 저장
-    async function saveProgress(ep, percent) {
+    async function saveProgress(ep, percent, currentSeconds) {
       const user = auth.currentUser;
       if (!user) return;
 
       try {
         const progressId = `${user.uid}_${productId}_ep${ep.episode}`;
-        await setDoc(doc(db, 'lectureProgress', progressId), {
+        const data = {
           userId: user.uid,
           productId: productId,
           episodeId: ep.id || `${productId}_ep${String(ep.episode).padStart(2, '0')}`,
           episode: ep.episode,
           episodeTitle: ep.title,
           progress: percent,
+          lastPosition: currentSeconds || 0,
           lastWatched: serverTimestamp()
-        }, { merge: true });
+        };
+        if (percent >= 90) data.completed = true;
+
+        await setDoc(doc(db, 'lectureProgress', progressId), data, { merge: true });
+
+        // 로컬 캐시도 업데이트
+        progressMap[ep.episode] = { ...progressMap[ep.episode], ...data };
       } catch (error) {
         console.error('진도율 저장 오류:', error);
       }
@@ -584,6 +611,116 @@
       document.getElementById('play-denied').style.display = 'block';
       if (productId) {
         document.getElementById('play-denied-btn').href = `product-detail.html?id=${productId}`;
+      }
+    }
+
+    // ─── 2. 동시접속 차단 (Session Token) ───
+    async function startVideoSession(uid) {
+      sessionToken = crypto.randomUUID();
+      const userRef = doc(db, 'users', uid);
+      await setDoc(userRef, {
+        videoSessionToken: sessionToken,
+        videoSessionStartedAt: serverTimestamp(),
+        videoSessionProductId: productId
+      }, { merge: true });
+
+      // 30초마다 토큰 검증
+      sessionCheckInterval = setInterval(() => checkSession(uid), 30000);
+
+      // 페이지 이탈 시 세션 정리
+      window.addEventListener('beforeunload', () => clearVideoSession(uid));
+    }
+
+    async function checkSession(uid) {
+      try {
+        const userSnap = await getDoc(doc(db, 'users', uid));
+        if (!userSnap.exists()) return;
+        const data = userSnap.data();
+        if (data.videoSessionToken && data.videoSessionToken !== sessionToken) {
+          // 다른 기기에서 재생 시작됨
+          if (vimeoPlayer) vimeoPlayer.pause();
+          clearInterval(sessionCheckInterval);
+          showSessionBlockedOverlay();
+        }
+      } catch (e) {
+        console.warn('세션 확인 오류:', e);
+      }
+    }
+
+    function showSessionBlockedOverlay() {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
+      overlay.innerHTML = `
+        <div style="text-align:center;color:white;padding:40px;">
+          <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+          <h2 style="margin-bottom:12px;">다른 기기에서 재생 중입니다</h2>
+          <p style="color:#adb5bd;margin-bottom:24px;">동시에 여러 기기에서 시청할 수 없습니다.</p>
+          <a href="index.html#lecture-tab" style="padding:12px 32px;background:var(--penguin-skyblue,#5FB2C9);color:white;border-radius:8px;text-decoration:none;font-weight:600;">강의 목록으로</a>
+        </div>`;
+      document.body.appendChild(overlay);
+    }
+
+    async function clearVideoSession(uid) {
+      try {
+        await updateDoc(doc(db, 'users', uid), {
+          videoSessionToken: null,
+          videoSessionStartedAt: null,
+          videoSessionProductId: null
+        });
+      } catch (e) { /* 페이지 이탈 시 실패 무시 */ }
+    }
+
+    // ─── 5. 커스텀 워터마크 ───
+    function createWatermark() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const wrapper = document.querySelector('.play-video__wrapper');
+      if (!wrapper) return;
+
+      const wm = document.createElement('div');
+      wm.id = 'video-watermark';
+      wm.textContent = user.email || '';
+      wm.style.cssText = 'position:absolute;z-index:10;color:white;opacity:0.15;font-size:14px;font-weight:600;pointer-events:none;user-select:none;letter-spacing:1px;text-shadow:0 0 4px rgba(0,0,0,0.3);';
+      wrapper.style.position = 'relative';
+      wrapper.appendChild(wm);
+
+      function moveWatermark() {
+        wm.style.top = (10 + Math.random() * 70) + '%';
+        wm.style.left = (5 + Math.random() * 60) + '%';
+      }
+      moveWatermark();
+      setInterval(moveWatermark, 10000);
+    }
+
+    // ─── 6. 이어보기 ───
+    async function loadProgressMap() {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const q = query(
+          collection(db, 'lectureProgress'),
+          where('userId', '==', user.uid),
+          where('productId', '==', productId)
+        );
+        const snap = await getDocs(q);
+        snap.forEach(d => {
+          const data = d.data();
+          progressMap[data.episode] = data;
+        });
+      } catch (e) {
+        console.warn('진도율 로드 실패:', e);
+      }
+    }
+
+    async function resumeFromLastPosition(ep) {
+      const saved = progressMap[ep.episode];
+      if (saved && saved.lastPosition && saved.lastPosition > 5 && vimeoPlayer) {
+        try {
+          await vimeoPlayer.setCurrentTime(saved.lastPosition);
+          console.log(`▶️ 이어보기: ${Math.floor(saved.lastPosition)}초부터`);
+        } catch (e) {
+          console.warn('이어보기 실패:', e);
+        }
       }
     }
   </script>

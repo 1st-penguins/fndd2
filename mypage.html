@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마이페이지 | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="canonical" href="https://the1stpeng.com/mypage.html">
+  <meta name="robots" content="noindex">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/linear-header.css">
+  <link rel="stylesheet" href="css/linear-footer.css">
+  <link rel="stylesheet" href="css/layout.css">
+
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  <script src="js/linear-header.js"></script>
+
+  <style>
+    .mypage-container {
+      max-width: 800px;
+      margin: 80px auto 60px;
+      padding: 0 16px;
+    }
+    .mypage-profile {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .mypage-avatar {
+      width: 64px; height: 64px;
+      background: var(--penguin-navy);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .mypage-name { font-size: 20px; font-weight: 700; color: var(--penguin-navy); }
+    .mypage-email { font-size: 14px; color: #868e96; margin-top: 4px; }
+    .mypage-joined { font-size: 12px; color: #adb5bd; margin-top: 4px; }
+
+    .mypage-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+    }
+    .mypage-section h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--penguin-navy);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f3f5;
+    }
+
+    .purchase-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    .purchase-card:hover { background: #f1f3f5; }
+    .purchase-icon { font-size: 32px; flex-shrink: 0; }
+    .purchase-info { flex: 1; min-width: 0; }
+    .purchase-title { font-size: 15px; font-weight: 600; color: #333; }
+    .purchase-meta { font-size: 12px; color: #868e96; margin-top: 4px; }
+    .purchase-progress {
+      width: 100%;
+      height: 5px;
+      background: #e9ecef;
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .purchase-progress-fill {
+      height: 100%;
+      background: var(--penguin-skyblue);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .purchase-action {
+      padding: 8px 16px;
+      background: var(--penguin-navy);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .purchase-action:hover { background: var(--penguin-skyblue); }
+
+    .payment-table { width: 100%; border-collapse: collapse; }
+    .payment-table th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #868e96;
+      font-weight: 600;
+      border-bottom: 2px solid #f1f3f5;
+    }
+    .payment-table td {
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #868e96;
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+    .loading-text { text-align: center; padding: 40px; color: #868e96; }
+
+    @media (max-width: 480px) {
+      .mypage-container { margin: 70px auto 40px; }
+      .mypage-profile { flex-direction: column; text-align: center; }
+      .purchase-card { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="linear-header" id="linear-header">
+    <div class="linear-header__container">
+      <a href="index.html" class="linear-header__brand">
+        <div class="linear-header__logo"><img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고"></div>
+        <span class="linear-header__brand-text">퍼스트펭귄</span>
+      </a>
+      <nav class="linear-header__nav">
+        <ul class="linear-header__nav-list">
+          <li class="linear-header__nav-item"><a href="index.html" class="linear-header__nav-link">홈</a></li>
+          <li class="linear-header__nav-item"><a href="notices.html" class="linear-header__nav-link">공지사항</a></li>
+          <li class="linear-header__nav-item"><a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a></li>
+          <li class="linear-header__nav-item"><a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a></li>
+        </ul>
+      </nav>
+      <div class="linear-header__auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
+        <div id="user-profile-container" style="display:none;">
+          <div class="linear-header__user-profile">
+            <div class="linear-header__user-avatar" id="user-avatar">U</div>
+            <span class="linear-header__user-name" id="user-name">사용자</span>
+          </div>
+          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
+        </div>
+      </div>
+      <div class="linear-header__actions">
+        <button class="linear-header__mobile-toggle" id="mobile-toggle">
+          <span class="linear-header__mobile-toggle-line"></span><span class="linear-header__mobile-toggle-line"></span><span class="linear-header__mobile-toggle-line"></span>
+        </button>
+      </div>
+    </div>
+    <div class="linear-header__mobile-menu" id="mobile-menu">
+      <a href="index.html" class="linear-header__nav-link">홈</a>
+      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
+      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
+      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
+    </div>
+  </header>
+
+  <main class="mypage-container">
+    <div id="mypage-loading" class="loading-text">불러오는 중...</div>
+    <div id="mypage-content" style="display:none;"></div>
+    <div id="mypage-login" style="display:none;text-align:center;padding:80px 20px;">
+      <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+      <h2 style="color:var(--penguin-navy);margin-bottom:12px;">로그인이 필요합니다</h2>
+      <p style="color:#868e96;margin-bottom:24px;">마이페이지를 이용하려면 로그인해주세요.</p>
+      <a href="index.html" style="padding:12px 28px;background:var(--penguin-navy);color:white;border-radius:12px;text-decoration:none;font-weight:600;">홈으로</a>
+    </div>
+  </main>
+
+  <footer class="linear-footer"></footer>
+
+  <script type="module">
+    import { ensureFirebase, ensureAuthReady } from './js/core/firebase-core.js';
+    import {
+      collection, query, where, getDocs, doc, getDoc
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const { auth, db } = await ensureFirebase();
+    const user = await ensureAuthReady();
+
+    if (!user) {
+      document.getElementById('mypage-loading').style.display = 'none';
+      document.getElementById('mypage-login').style.display = 'block';
+    } else {
+      await loadMypage(user);
+    }
+
+    const PRODUCT_NAMES = {
+      'video_anatomy': '기능해부학 정규강의', 'video_injury': '운동상해 정규강의',
+      'video_physio': '운동생리학 정규강의', 'video_load': '운동부하검사 정규강의',
+      'video_ecg': '심전도 정규강의', 'video_patho': '병태생리학 정규강의',
+      'video_prescript': '운동처방론 정규강의', 'video_health': '건강체력평가 정규강의',
+      'pdf_anatomy': '기능해부학 요약본', 'pdf_injury': '운동상해 요약본',
+      'pdf_physio': '운동생리학 요약본', 'pdf_load': '운동부하검사 요약본',
+      'pdf_patho': '병태생리학 요약본', 'pdf_psycho': '스포츠심리학 요약본',
+      'pdf_prescript': '운동처방론 요약본', 'pdf_health': '건강체력평가 요약본'
+    };
+
+    async function loadMypage(user) {
+      try {
+        // 구매 내역
+        const purchasesSnap = await getDocs(query(
+          collection(db, 'purchases'),
+          where('userId', '==', user.uid),
+          where('status', '==', 'completed')
+        ));
+        const purchases = [];
+        purchasesSnap.forEach(d => purchases.push({ id: d.id, ...d.data() }));
+
+        // 진도율
+        const progressSnap = await getDocs(query(
+          collection(db, 'lectureProgress'),
+          where('userId', '==', user.uid)
+        ));
+        const progressByProduct = {};
+        progressSnap.forEach(d => {
+          const data = d.data();
+          if (!progressByProduct[data.productId]) progressByProduct[data.productId] = [];
+          progressByProduct[data.productId].push(data);
+        });
+
+        // 상품별 에피소드 수 (비디오만)
+        const videoProductIds = purchases.filter(p => p.productType === 'video').map(p => p.productId);
+        const episodeCounts = {};
+        for (const pid of videoProductIds) {
+          const epSnap = await getDocs(query(
+            collection(db, 'episodes'),
+            where('productId', '==', pid)
+          ));
+          episodeCounts[pid] = epSnap.size;
+        }
+
+        renderMypage(user, purchases, progressByProduct, episodeCounts);
+
+      } catch (error) {
+        console.error('마이페이지 로드 오류:', error);
+        document.getElementById('mypage-loading').textContent = '데이터를 불러오는 중 오류가 발생했습니다.';
+      }
+    }
+
+    function renderMypage(user, purchases, progressByProduct, episodeCounts) {
+      const creationDate = user.metadata?.creationTime
+        ? new Date(user.metadata.creationTime).toLocaleDateString('ko-KR')
+        : '-';
+      const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+
+      let html = `
+        <div class="mypage-profile">
+          <div class="mypage-avatar">${initial}</div>
+          <div>
+            <div class="mypage-name">${user.displayName || '사용자'}</div>
+            <div class="mypage-email">${user.email || ''}</div>
+            <div class="mypage-joined">가입일: ${creationDate}</div>
+          </div>
+        </div>`;
+
+      // 구매 상품
+      html += `<div class="mypage-section"><h2>내 강의 / 자료</h2>`;
+
+      if (purchases.length === 0) {
+        html += '<div class="empty-state"><div class="icon">📦</div><p>구매한 상품이 없습니다.</p></div>';
+      } else {
+        for (const p of purchases) {
+          const name = PRODUCT_NAMES[p.productId] || p.productId;
+          const icon = p.productType === 'video' ? '🎬' : '📄';
+          const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
+
+          let progressHtml = '';
+          let actionHref = '';
+
+          if (p.productType === 'video') {
+            const progList = progressByProduct[p.productId] || [];
+            const totalEp = episodeCounts[p.productId] || 0;
+            const completedEp = progList.filter(pr => pr.progress >= 90).length;
+            const percent = totalEp > 0 ? Math.round((completedEp / totalEp) * 100) : 0;
+            progressHtml = `
+              <div class="purchase-meta">${completedEp}/${totalEp}강 완료 (${percent}%)</div>
+              <div class="purchase-progress"><div class="purchase-progress-fill" style="width:${percent}%"></div></div>`;
+            actionHref = `lecture-play.html?id=${p.productId}`;
+          } else {
+            progressHtml = `<div class="purchase-meta">구매일: ${date}</div>`;
+            actionHref = `pdf-download.html?id=${p.productId}`;
+          }
+
+          const actionLabel = p.productType === 'video' ? '수강하기' : '다운로드';
+
+          html += `
+            <div class="purchase-card">
+              <div class="purchase-icon">${icon}</div>
+              <div class="purchase-info">
+                <div class="purchase-title">${name}</div>
+                ${progressHtml}
+              </div>
+              <a href="${actionHref}" class="purchase-action">${actionLabel}</a>
+            </div>`;
+        }
+      }
+      html += '</div>';
+
+      // 결제 내역
+      html += `<div class="mypage-section"><h2>결제 내역</h2>`;
+      if (purchases.length === 0) {
+        html += '<div class="empty-state"><div class="icon">🧾</div><p>결제 내역이 없습니다.</p></div>';
+      } else {
+        html += `<div style="overflow-x:auto;"><table class="payment-table">
+          <thead><tr><th>상품명</th><th>결제일</th><th>금액</th><th>상태</th></tr></thead><tbody>`;
+        for (const p of purchases) {
+          const name = PRODUCT_NAMES[p.productId] || p.productId;
+          const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
+          const amount = (p.finalAmount || p.purchaseAmount || 0).toLocaleString() + '원';
+          const status = p.status === 'completed' ? '결제완료' : p.status;
+          html += `<tr><td>${name}</td><td>${date}</td><td>${amount}</td><td>${status}</td></tr>`;
+        }
+        html += '</tbody></table></div>';
+      }
+      html += '</div>';
+
+      document.getElementById('mypage-loading').style.display = 'none';
+      const content = document.getElementById('mypage-content');
+      content.innerHTML = html;
+      content.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

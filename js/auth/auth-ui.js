@@ -170,6 +170,10 @@ if (isDevMode()) {
 
 
 function setupLoginModalEvents(modal) {
+  // 이미 이벤트가 부착된 경우 중복 방지
+  if (modal.dataset.eventsAttached) return;
+  modal.dataset.eventsAttached = 'true';
+
   // 닫기 버튼
   const closeButton = modal.querySelector('.login-modal-close');
   if (closeButton) {

@@ -180,13 +180,15 @@
   <footer class="linear-footer"></footer>
 
   <script type="module">
-    import { auth, db } from './js/core/firebase-core.js';
-    import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    import { applyCoupon } from './js/payment/coupon-manager.js';
+    import { ensureFirebase, ensureAuthReady } from './js/core/firebase-core.js';
+    import { getApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js';
 
     const urlParams = new URLSearchParams(window.location.search);
+    const paymentKey = urlParams.get('paymentKey');   // Toss가 자동 추가
     const productId = urlParams.get('productId');
     const orderId = urlParams.get('orderId');
+    const amount = parseInt(urlParams.get('amount')) || 0;
     const productType = urlParams.get('type') || 'pdf';
     const couponId = urlParams.get('couponId');
     const discountAmount = parseInt(urlParams.get('discount')) || 0;
@@ -194,57 +196,65 @@
     let savedProductId = productId;
     let savedProductType = productType;
 
-    // 결제 정보 저장
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        alert('로그인이 필요합니다.');
-        window.location.href = 'login.html';
-        return;
-      }
+    const { auth, db } = await ensureFirebase();
+    const user = await ensureAuthReady();
 
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      window.location.href = 'login.html';
+    } else if (!paymentKey || !orderId) {
+      document.getElementById('loadingMessage').textContent = '결제 정보가 올바르지 않습니다.';
+    } else {
+      await confirmPayment();
+    }
+
+    async function confirmPayment() {
       try {
-        // Firebase에 구매 내역 저장
-        await setDoc(doc(db, 'purchases', `${user.uid}_${productId}`), {
-          userId: user.uid,
-          userName: user.displayName || user.email,
-          productId: productId,
-          productType: productType,
-          orderId: orderId,
+        document.getElementById('loadingMessage').textContent = '결제를 확인하는 중...';
+
+        // Cloud Function 호출 — 서버에서 Toss 결제 승인 + Firestore 저장
+        const app = getApp();
+        const functions = getFunctions(app, 'asia-northeast3');
+        const confirmFn = httpsCallable(functions, 'confirmPayment');
+
+        const result = await confirmFn({
+          paymentKey,
+          orderId,
+          amount,
+          productId,
+          productType,
           couponId: couponId || null,
-          discountAmount: discountAmount,
-          purchasedAt: serverTimestamp(),
-          status: 'completed'
+          discountAmount: discountAmount || 0
         });
 
-        console.log('구매 내역 저장 완료');
+        if (result.data.success) {
+          console.log('✅ 결제 확인 완료:', result.data);
 
-        // 쿠폰 사용 처리
-        if (couponId) {
-          await applyCoupon(couponId, user.uid, orderId, productId, discountAmount);
-          console.log('쿠폰 사용 처리 완료');
-        }
+          // 버튼 표시
+          document.getElementById('loadingMessage').style.display = 'none';
+          document.getElementById('actionButtons').style.display = 'flex';
 
-        // 버튼 표시
-        document.getElementById('loadingMessage').style.display = 'none';
-        document.getElementById('actionButtons').style.display = 'flex';
+          const messageEl = document.getElementById('successMessage');
+          const buttonEl = document.getElementById('mainActionButton');
 
-        // 상품 유형에 따라 메시지 및 버튼 변경
-        const messageEl = document.getElementById('successMessage');
-        const buttonEl = document.getElementById('mainActionButton');
-
-        if (productType === 'pdf') {
-          messageEl.innerHTML = 'PDF 구매가 완료되었습니다.<br>이제 다운로드하실 수 있습니다.';
-          buttonEl.textContent = 'PDF 다운로드';
-        } else {
-          messageEl.innerHTML = '강의 구매가 완료되었습니다.<br>이제 강의를 수강하실 수 있습니다.';
-          buttonEl.textContent = '강의 수강하기';
+          if (result.data.alreadyPurchased) {
+            messageEl.innerHTML = '이미 구매된 상품입니다.<br>바로 이용하실 수 있습니다.';
+          } else if (productType === 'pdf') {
+            messageEl.innerHTML = 'PDF 구매가 완료되었습니다.<br>이제 다운로드하실 수 있습니다.';
+            buttonEl.textContent = 'PDF 다운로드';
+          } else {
+            messageEl.innerHTML = '강의 구매가 완료되었습니다.<br>이제 강의를 수강하실 수 있습니다.';
+            buttonEl.textContent = '강의 수강하기';
+          }
         }
 
       } catch (error) {
-        console.error('구매 내역 저장 오류:', error);
-        document.getElementById('loadingMessage').textContent = '저장 중 오류가 발생했습니다.';
+        console.error('결제 확인 오류:', error);
+        const msg = error.message || '결제 확인 중 오류가 발생했습니다.';
+        document.getElementById('loadingMessage').textContent = msg;
+        document.getElementById('loadingMessage').style.color = '#c92a2a';
       }
-    });
+    }
 
     window.goToLecture = function() {
       if (savedProductType === 'pdf') {

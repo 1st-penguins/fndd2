@@ -117,10 +117,17 @@ async function getUserCouponUsageCount(userId, couponId) {
  */
 export async function applyCoupon(couponId, userId, orderId, productId, discountAmount) {
   try {
+    // 사용자 정보
+    const currentUser = auth.currentUser;
+    const userName = currentUser?.displayName || null;
+    const userEmail = currentUser?.email || null;
+
     // 쿠폰 사용 내역 저장
     await addDoc(collection(db, 'couponUsage'), {
       couponId: couponId,
       userId: userId,
+      userName: userName,
+      userEmail: userEmail,
       orderId: orderId,
       productId: productId,
       discountAmount: discountAmount,
