@@ -15,7 +15,8 @@ const firebaseConfig = {
 export const ADMIN_EMAILS = [
   'kspo0324@gmail.com',
   'mingdy7283@gmail.com',
-  'sungsoo702@gmail.com'
+  'sungsoo702@gmail.com',
+  'pyogobear@gmail.com'
 ];
 
 // Firebase 초기화 상태

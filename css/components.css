@@ -89,11 +89,12 @@
   margin: 0 28px 24px;
   padding: 14px 18px;
   background: #F0F7FF;
-  border-left: 4px solid #5FB2C9;
-  border-radius: 0 8px 8px 0;
+  border-top: 3px solid #5FB2C9;
+  border-radius: 8px;
   font-size: 0.875rem;
   color: #1D2F4E;
   line-height: 1.7;
+  text-align: center;
 }
 
 .exam-notice strong {

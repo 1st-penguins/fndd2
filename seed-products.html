@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Firestore 상품/에피소드 시드</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    button { padding: 12px 24px; font-size: 16px; cursor: pointer; margin: 8px 4px; }
+    #log { background: #1a1a2e; color: #0f0; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 13px; max-height: 600px; overflow-y: auto; white-space: pre-wrap; }
+    .success { color: #0f0; } .error { color: #f55; } .info { color: #5bf; }
+  </style>
+</head>
+<body>
+  <h1>Firestore 상품/에피소드 시드</h1>
+  <p>관리자 계정으로 로그인한 후 실행하세요.</p>
+  <button id="btn-login">1. Google 로그인</button>
+  <button id="btn-seed" disabled>2. 상품+에피소드 등록</button>
+  <button id="btn-check">3. 등록 확인</button>
+  <div id="log"></div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, collection, getDocs, query, where, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const app = initializeApp({
+      apiKey: "AIzaSyBVEYHjLzbitnfpykUO7yjzT_Ye-Dix7pI",
+      authDomain: "first-penguins-new.firebaseapp.com",
+      projectId: "first-penguins-new",
+      storageBucket: "first-penguins-new.firebasestorage.app",
+      messagingSenderId: "532317002827",
+      appId: "1:532317002827:web:d8ee3b15f269b2571381ce"
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const logEl = document.getElementById('log');
+
+    function log(msg, cls = 'info') {
+      logEl.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ──────────────────────────────────────
+    // 상품 데이터
+    // ──────────────────────────────────────
+    const products = [
+      // === 정규강의 (video) ===
+      {
+        id: 'health-anatomy-lecture',
+        title: '건강운동관리사 기능해부학 정규강의',
+        description: '기능해부학 전 범위 정규강의',
+        type: 'video',
+        category: 'health',
+        price: 150000,
+        originalPrice: 150000,
+        totalEpisodes: 7,
+        totalDuration: '약 6시간 20분',
+        isActive: true,
+        sortOrder: 10
+      },
+      {
+        id: 'health-injury-lecture',
+        title: '건강운동관리사 운동상해 정규강의',
+        description: '운동상해 전 범위 정규강의',
+        type: 'video',
+        category: 'health',
+        price: 150000,
+        originalPrice: 150000,
+        totalEpisodes: 9,
+        totalDuration: '약 6시간 36분',
+        isActive: true,
+        sortOrder: 20
+      },
+      {
+        id: 'health-physiology-lecture',
+        title: '건강운동관리사 운동생리학 정규강의',
+        description: '운동생리학 전 범위 정규강의',
+        type: 'video',
+        category: 'health',
+        price: 150000,
+        originalPrice: 150000,
+        totalEpisodes: 11,
+        totalDuration: '약 9시간 16분',
+        isActive: true,
+        sortOrder: 30
+      },
+      {
+        id: 'health-stress-test-lecture',
+        title: '건강운동관리사 운동부하검사 정규강의',
+        description: '운동부하검사 전 범위 정규강의 (심전도 제외)',
+        type: 'video',
+        category: 'health',
+        price: 150000,
+        originalPrice: 150000,
+        totalEpisodes: 6,
+        totalDuration: '약 5시간 41분',
+        isActive: true,
+        sortOrder: 40
+      },
+      {
+        id: 'health-ecg-lecture',
+        title: '건강운동관리사를 위한 심전도',
+        description: '심전도 판독 집중 강의',
+        type: 'video',
+        category: 'health',
+        price: 50000,
+        originalPrice: 50000,
+        totalEpisodes: 2,
+        totalDuration: '약 2시간 43분',
+        isActive: true,
+        sortOrder: 45
+      },
+      {
+        id: 'health-pathology-lecture',
+        title: '건강운동관리사 병태생리학 정규강의',
+        description: '병태생리학 전 범위 정규강의',
+        type: 'video',
+        category: 'health',
+        price: 150000,
+        originalPrice: 150000,
+        totalEpisodes: 7,
+        totalDuration: '약 5시간 57분',
+        isActive: true,
+        sortOrder: 50
+      },
+      {
+        id: 'health-prescription-lecture',
+        title: '건강운동관리사 운동처방론 정규강의',
+        description: '운동처방론 전 범위 정규강의',
+        type: 'video',
+        category: 'health',
+        price: 100000,
+        originalPrice: 100000,
+        totalEpisodes: 5,
+        totalDuration: '약 4시간 59분',
+        isActive: true,
+        sortOrder: 60
+      },
+      {
+        id: 'health-fitness-eval-lecture',
+        title: '건강운동관리사 건강체력평가 정규강의',
+        description: '건강체력평가 전 범위 정규강의',
+        type: 'video',
+        category: 'health',
+        price: 150000,
+        originalPrice: 150000,
+        totalEpisodes: 5,
+        totalDuration: '약 5시간 33분',
+        isActive: true,
+        sortOrder: 70
+      },
+
+      // === 요약본 (pdf) ===
+      {
+        id: 'health-anatomy-summary',
+        title: '건강운동관리사 기능해부학 요약본',
+        description: '기능해부학 핵심 요약 자료',
+        type: 'pdf',
+        category: 'health',
+        price: 80000,
+        originalPrice: 80000,
+        isActive: true,
+        sortOrder: 15
+      },
+      {
+        id: 'health-injury-summary',
+        title: '건강운동관리사 운동상해 요약본',
+        description: '운동상해 핵심 요약 자료',
+        type: 'pdf',
+        category: 'health',
+        price: 50000,
+        originalPrice: 50000,
+        isActive: true,
+        sortOrder: 25
+      },
+      {
+        id: 'health-physiology-summary',
+        title: '건강운동관리사 운동생리학 요약본',
+        description: '운동생리학 핵심 요약 자료',
+        type: 'pdf',
+        category: 'health',
+        price: 50000,
+        originalPrice: 50000,
+        isActive: true,
+        sortOrder: 35
+      },
+      {
+        id: 'health-stress-test-summary',
+        title: '건강운동관리사 운동부하검사 요약본',
+        description: '운동부하검사 핵심 요약 자료',
+        type: 'pdf',
+        category: 'health',
+        price: 50000,
+        originalPrice: 50000,
+        isActive: true,
+        sortOrder: 46
+      },
+      {
+        id: 'health-pathology-summary',
+        title: '건강운동관리사 병태생리학 요약본',
+        description: '병태생리학 핵심 요약 자료',
+        type: 'pdf',
+        category: 'health',
+        price: 50000,
+        originalPrice: 50000,
+        isActive: true,
+        sortOrder: 55
+      },
+      {
+        id: 'health-sports-psych-summary',
+        title: '건강운동관리사 스포츠심리학 요약본',
+        description: '스포츠심리학 핵심 요약 자료',
+        type: 'pdf',
+        category: 'health',
+        price: 50000,
+        originalPrice: 50000,
+        isActive: true,
+        sortOrder: 56
+      },
+      {
+        id: 'health-prescription-summary',
+        title: '건강운동관리사 운동처방론 요약본',
+        description: '운동처방론 핵심 요약 자료',
+        type: 'pdf',
+        category: 'health',
+        price: 50000,
+        originalPrice: 50000,
+        isActive: true,
+        sortOrder: 65
+      },
+      {
+        id: 'health-fitness-eval-summary',
+        title: '건강운동관리사 건강체력평가 요약본',
+        description: '건강체력평가 핵심 요약 자료',
+        type: 'pdf',
+        category: 'health',
+        price: 50000,
+        originalPrice: 50000,
+        isActive: true,
+        sortOrder: 75
+      }
+    ];
+
+    // ──────────────────────────────────────
+    // 에피소드 데이터 (Vimeo 연동)
+    // ──────────────────────────────────────
+    const episodes = [
+      // 기능해부학 (7강, 00번은 무료)
+      { productId: 'health-anatomy-lecture', episode: 0, title: '무료강의', vimeoId: '1174294721', duration: '11:14', sortOrder: 0, isFree: true },
+      { productId: 'health-anatomy-lecture', episode: 1, title: '기본개념', vimeoId: '1174294828', duration: '48:46', sortOrder: 1, isFree: false },
+      { productId: 'health-anatomy-lecture', episode: 2, title: '상지', vimeoId: '1174295118', duration: '97:54', sortOrder: 2, isFree: false },
+      { productId: 'health-anatomy-lecture', episode: 3, title: '복부환기', vimeoId: '1174295840', duration: '12:45', sortOrder: 3, isFree: false },
+      { productId: 'health-anatomy-lecture', episode: 4, title: '하지', vimeoId: '1174295985', duration: '85:10', sortOrder: 4, isFree: false },
+      { productId: 'health-anatomy-lecture', episode: 5, title: '보행주행', vimeoId: '1174297147', duration: '12:14', sortOrder: 5, isFree: false },
+      { productId: 'health-anatomy-lecture', episode: 6, title: '운동역학', vimeoId: '1174297377', duration: '112:05', sortOrder: 6, isFree: false },
+
+      // 운동상해 (9강)
+      { productId: 'health-injury-lecture', episode: 1, title: '운동상해개요', vimeoId: '1174300648', duration: '93:27', sortOrder: 1, isFree: true },
+      { productId: 'health-injury-lecture', episode: 2, title: '뇌손상', vimeoId: '1174301395', duration: '8:55', sortOrder: 2, isFree: false },
+      { productId: 'health-injury-lecture', episode: 3, title: '어깨팔손상', vimeoId: '1174301492', duration: '43:15', sortOrder: 3, isFree: false },
+      { productId: 'health-injury-lecture', episode: 4, title: '팔꿈치손가락', vimeoId: '1174301976', duration: '43:23', sortOrder: 4, isFree: false },
+      { productId: 'health-injury-lecture', episode: 5, title: '척추손상', vimeoId: '1174302315', duration: '23:53', sortOrder: 5, isFree: false },
+      { productId: 'health-injury-lecture', episode: 6, title: '엉덩관절골반', vimeoId: '1174302462', duration: '37:21', sortOrder: 6, isFree: false },
+      { productId: 'health-injury-lecture', episode: 7, title: '무릎손상', vimeoId: '1174302746', duration: '47:41', sortOrder: 7, isFree: false },
+      { productId: 'health-injury-lecture', episode: 8, title: '발발목손상', vimeoId: '1174303096', duration: '52:46', sortOrder: 8, isFree: false },
+      { productId: 'health-injury-lecture', episode: 9, title: '재활운동', vimeoId: '1174303456', duration: '45:56', sortOrder: 9, isFree: false },
+
+      // 운동생리학 (11강)
+      { productId: 'health-physiology-lecture', episode: 1, title: '생체에너지학', vimeoId: '1174271107', duration: '58:35', sortOrder: 1, isFree: true },
+      { productId: 'health-physiology-lecture', episode: 2, title: '운동대사', vimeoId: '1174271511', duration: '57:21', sortOrder: 2, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 3, title: '호르몬', vimeoId: '1174271934', duration: '54:27', sortOrder: 3, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 4, title: '신경계', vimeoId: '1174272066', duration: '55:36', sortOrder: 4, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 5, title: '골격근', vimeoId: '1174272430', duration: '56:25', sortOrder: 5, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 6, title: '순환계', vimeoId: '1174272722', duration: '102:14', sortOrder: 6, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 7, title: '호흡계', vimeoId: '1174273328', duration: '75:54', sortOrder: 7, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 8, title: '체온조절', vimeoId: '1174273798', duration: '23:22', sortOrder: 8, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 9, title: '훈련생리학', vimeoId: '1174273952', duration: '32:58', sortOrder: 9, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 10, title: '저항성훈련생리학', vimeoId: '1174274199', duration: '17:09', sortOrder: 10, isFree: false },
+      { productId: 'health-physiology-lecture', episode: 11, title: '운동과환경', vimeoId: '1174274334', duration: '21:30', sortOrder: 11, isFree: false },
+
+      // 운동부하검사 (6강, 심전도 제외)
+      { productId: 'health-stress-test-lecture', episode: 1, title: '개요 및 적응증', vimeoId: '1174288117', duration: '24:38', sortOrder: 1, isFree: true },
+      { productId: 'health-stress-test-lecture', episode: 2, title: '검사실시', vimeoId: '1174288316', duration: '84:19', sortOrder: 2, isFree: false },
+      { productId: 'health-stress-test-lecture', episode: 3, title: '검사해석', vimeoId: '1174290112', duration: '142:22', sortOrder: 3, isFree: false },
+      { productId: 'health-stress-test-lecture', episode: 4, title: '질환자검사', vimeoId: '1174291330', duration: '53:13', sortOrder: 4, isFree: false },
+      { productId: 'health-stress-test-lecture', episode: 5, title: '기타질환자검사', vimeoId: '1174291917', duration: '25:11', sortOrder: 5, isFree: false },
+      { productId: 'health-stress-test-lecture', episode: 6, title: '특수대상자검사', vimeoId: '1174292278', duration: '11:16', sortOrder: 6, isFree: false },
+
+      // 심전도 (2강)
+      { productId: 'health-ecg-lecture', episode: 1, title: '심전도 (1)', vimeoId: '1174292400', duration: '77:49', sortOrder: 1, isFree: false },
+      { productId: 'health-ecg-lecture', episode: 2, title: '심전도 (2)', vimeoId: '1174293166', duration: '84:47', sortOrder: 2, isFree: false },
+
+      // 병태생리학 (7강)
+      { productId: 'health-pathology-lecture', episode: 1, title: '기본적인 질병 과정', vimeoId: '1174298176', duration: '72:41', sortOrder: 1, isFree: true },
+      { productId: 'health-pathology-lecture', episode: 2, title: '심혈관계 질환', vimeoId: '1174298685', duration: '99:05', sortOrder: 2, isFree: false },
+      { productId: 'health-pathology-lecture', episode: 3, title: '호흡계 질환', vimeoId: '1174299448', duration: '48:29', sortOrder: 3, isFree: false },
+      { productId: 'health-pathology-lecture', episode: 4, title: '척추관절 질환', vimeoId: '1174300039', duration: '26:02', sortOrder: 4, isFree: false },
+      { productId: 'health-pathology-lecture', episode: 5, title: '골 질환', vimeoId: '1174300304', duration: '26:53', sortOrder: 5, isFree: false },
+      { productId: 'health-pathology-lecture', episode: 6, title: '대사계 질환', vimeoId: '1174300571', duration: '39:43', sortOrder: 6, isFree: false },
+      { productId: 'health-pathology-lecture', episode: 7, title: '신경계 질환', vimeoId: '1174300615', duration: '43:57', sortOrder: 7, isFree: false },
+
+      // 운동처방론 (5강)
+      { productId: 'health-prescription-lecture', episode: 1, title: '운동처방의 기초이론', vimeoId: '1174284845', duration: '26:30', sortOrder: 1, isFree: true },
+      { productId: 'health-prescription-lecture', episode: 2, title: '체력향상을 위한 운동처방', vimeoId: '1174285136', duration: '54:23', sortOrder: 2, isFree: false },
+      { productId: 'health-prescription-lecture', episode: 3, title: '질환자를 위한 운동처방', vimeoId: '1174285593', duration: '108:20', sortOrder: 3, isFree: false },
+      { productId: 'health-prescription-lecture', episode: 4, title: '기타질환자를 위한 운동처방', vimeoId: '1174286542', duration: '83:04', sortOrder: 4, isFree: false },
+      { productId: 'health-prescription-lecture', episode: 5, title: '특수대상자의 운동처방', vimeoId: '1174287173', duration: '26:24', sortOrder: 5, isFree: false },
+
+      // 건강체력평가 (5강)
+      { productId: 'health-fitness-eval-lecture', episode: 1, title: '신체활동과 건강', vimeoId: '1174274432', duration: '24:38', sortOrder: 1, isFree: true },
+      { productId: 'health-fitness-eval-lecture', episode: 2, title: '운동참여 전 평가', vimeoId: '1174274581', duration: '56:00', sortOrder: 2, isFree: false },
+      { productId: 'health-fitness-eval-lecture', episode: 3, title: '체력검사와 평가', vimeoId: '1174293851', duration: '104:42', sortOrder: 3, isFree: false },
+      { productId: 'health-fitness-eval-lecture', episode: 4, title: '통계', vimeoId: '1174283754', duration: '103:58', sortOrder: 4, isFree: false },
+      { productId: 'health-fitness-eval-lecture', episode: 5, title: '국민체력100', vimeoId: '1174284539', duration: '44:15', sortOrder: 5, isFree: false },
+    ];
+
+    // ──────────────────────────────────────
+    // 로그인
+    // ──────────────────────────────────────
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      try {
+        const result = await signInWithPopup(auth, new GoogleAuthProvider());
+        log(`✅ 로그인 성공: ${result.user.email}`, 'success');
+        document.getElementById('btn-seed').disabled = false;
+      } catch (e) {
+        log(`❌ 로그인 실패: ${e.message}`, 'error');
+      }
+    });
+
+    // ──────────────────────────────────────
+    // 시드 실행
+    // ──────────────────────────────────────
+    document.getElementById('btn-seed').addEventListener('click', async () => {
+      if (!auth.currentUser) { log('❌ 먼저 로그인하세요', 'error'); return; }
+
+      log('━━━ 상품 등록 시작 ━━━', 'info');
+
+      for (const p of products) {
+        try {
+          const { id, ...data } = p;
+          data.createdAt = serverTimestamp();
+          await setDoc(doc(db, 'products', id), data, { merge: true });
+          log(`✅ 상품: ${p.title} (${id})`, 'success');
+        } catch (e) {
+          log(`❌ 상품 실패 [${p.id}]: ${e.message}`, 'error');
+        }
+      }
+
+      log('\n━━━ 에피소드 등록 시작 ━━━', 'info');
+
+      for (const ep of episodes) {
+        try {
+          const epId = `${ep.productId}_ep${String(ep.episode).padStart(2, '0')}`;
+          await setDoc(doc(db, 'episodes', epId), {
+            ...ep,
+            createdAt: serverTimestamp()
+          }, { merge: true });
+          log(`✅ EP: ${ep.productId} ${ep.episode}강 "${ep.title}" (vimeo:${ep.vimeoId})`, 'success');
+        } catch (e) {
+          log(`❌ EP 실패 [${ep.productId} ${ep.episode}강]: ${e.message}`, 'error');
+        }
+      }
+
+      log(`\n━━━ 완료! 상품 ${products.length}개, 에피소드 ${episodes.length}개 ━━━`, 'success');
+    });
+
+    // ──────────────────────────────────────
+    // 확인
+    // ──────────────────────────────────────
+    document.getElementById('btn-check').addEventListener('click', async () => {
+      log('\n━━━ 등록 확인 ━━━', 'info');
+
+      const prodSnap = await getDocs(query(collection(db, 'products'), where('isActive', '==', true), orderBy('sortOrder', 'asc')));
+      log(`상품: ${prodSnap.size}개`, 'info');
+      prodSnap.docs.forEach(d => {
+        const p = d.data();
+        log(`  [${d.id}] ${p.title} — ${p.type} — ${p.price?.toLocaleString()}원`, 'success');
+      });
+
+      const epSnap = await getDocs(collection(db, 'episodes'));
+      log(`에피소드: ${epSnap.size}개`, 'info');
+
+      const byProduct = {};
+      epSnap.docs.forEach(d => {
+        const e = d.data();
+        if (!byProduct[e.productId]) byProduct[e.productId] = [];
+        byProduct[e.productId].push(e);
+      });
+      for (const [pid, eps] of Object.entries(byProduct)) {
+        eps.sort((a, b) => a.sortOrder - b.sortOrder);
+        log(`  ${pid}: ${eps.length}강`, 'info');
+        eps.forEach(e => log(`    ${e.episode}강 ${e.title} (vimeo:${e.vimeoId})`, 'success'));
+      }
+    });
+  </script>
+</body>
+</html>

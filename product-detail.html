@@ -392,11 +392,9 @@
       if (product.price > 0) {
         let refundText = '';
         if (product.type === 'video') {
-          refundText = '이용기간: 구매일로부터 6개월 / 1강이라도 재생 시 환불 불가 / 미재생 + 7일 이내: 전액 환불';
+          refundText = '이용기간: 구매일로부터 6개월 / 1강이라도 재생한 경우: 환불 불가 / 미재생 + 구매일로부터 7일 이내: 전액 환불 / 미재생 + 7일 초과: 환불 불가';
         } else if (product.type === 'pdf' || product.type === 'ppt') {
-          refundText = '다운로드 전: 전액 환불 / 다운로드 후: 환불 불가';
-        } else if (product.type === 'bundle') {
-          refundText = '포함 상품 중 하나라도 이용 시 환불 불가';
+          refundText = '다운로드한 경우: 환불 불가 / 미다운로드 + 구매일로부터 7일 이내: 전액 환불 / 미다운로드 + 7일 초과: 환불 불가';
         }
         if (refundText) {
           refundHtml = `
@@ -423,7 +421,6 @@
             <div class="detail-price-box">
               <div class="detail-price-row">${priceRowHtml}</div>
               ${product.type === 'video' ? '<div class="detail-price-note">구매일로부터 6개월간 시청 가능</div>' : ''}
-              ${(product.type === 'pdf' || product.type === 'ppt') ? '<div class="detail-price-note">다운로드 후 영구 보관 가능</div>' : ''}
             </div>
             ${actionBtn}
           </div>

@@ -67,6 +67,11 @@ async function loadProducts() {
  * 사용자 구매 내역 로드
  */
 async function loadPurchases() {
+  if (!auth) {
+    const firebase = await ensureFirebase();
+    db = firebase.db;
+    auth = firebase.auth;
+  }
   const user = auth.currentUser;
   if (!user) return [];
   if (purchasesCache) return purchasesCache;

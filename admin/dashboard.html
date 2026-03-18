@@ -72,7 +72,26 @@
     .detail-row .dl{color:#868e96}
     .detail-row .dv{font-weight:600;color:#333}
     .copy-btn{background:#e9ecef;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:6px}
-    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.topbar{flex-direction:column;gap:8px}}
+    /* 캘린더 */
+    .cal-wrap{display:flex;gap:20px;flex-wrap:wrap}
+    .cal-left{flex:0 0 320px}
+    .cal-right{flex:1;min-width:260px}
+    .cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .cal-nav button{background:none;border:1px solid #dee2e6;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px}
+    .cal-nav button:hover{background:#f1f3f5}
+    .cal-nav span{font-weight:700;color:var(--penguin-navy,#1D2F4E);font-size:14px}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+    .cal-header{font-size:11px;color:#868e96;font-weight:600;padding:4px 0}
+    .cal-day{padding:6px 2px;border-radius:6px;cursor:pointer;font-size:12px;position:relative;min-height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .cal-day:hover{background:#e7f5ff}
+    .cal-day.today{background:#e7f5ff;font-weight:700}
+    .cal-day.selected{background:var(--penguin-navy,#1D2F4E);color:#fff}
+    .cal-day.selected:hover{background:var(--penguin-navy,#1D2F4E)}
+    .cal-day.other-month{color:#ced4da}
+    .cal-day .cal-count{font-size:9px;color:#339af0;margin-top:1px}
+    .cal-day.selected .cal-count{color:#a5d8ff}
+    .cal-day.has-visitors{font-weight:600}
+    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.topbar{flex-direction:column;gap:8px}.cal-wrap{flex-direction:column}.cal-left{flex:unset}}
   </style>
 </head>
 <body>
@@ -80,6 +99,8 @@
     <span class="topbar-title">관리자 대시보드</span>
     <nav>
       <a href="dashboard.html" class="active">대시보드</a>
+      <a href="user-lookup.html">사용자 조회</a>
+      <a href="analytics.html">학습분석</a>
       <a href="notices.html">공지관리</a>
       <a href="coupons.html">쿠폰관리</a>
       <a href="statistics.html">통계</a>
@@ -96,7 +117,7 @@
       <div class="stat-box"><div class="label">오늘 매출</div><div class="value" id="sToday">-</div></div>
       <div class="stat-box"><div class="label">총 판매</div><div class="value" id="sSales">-</div></div>
       <div class="stat-box"><div class="label">오늘 접속</div><div class="value" id="sVisitors">-</div></div>
-      <div class="stat-box"><div class="label">활성 사용자</div><div class="value" id="sUsers">-</div></div>
+      <div class="stat-box"><div class="label">누적 사용자</div><div class="value" id="sUsers">-</div></div>
     </div>
 
     <!-- 탭 -->
@@ -113,7 +134,23 @@
       <div class="card"><h3>최근 7일 매출 추이</h3><div id="chartArea" class="mini-chart"></div></div>
       <div class="card"><h3>상품별 매출 순위</h3><div id="productRanking" class="psg"></div></div>
       <div class="card"><h3>최근 구매 (10건)</h3><div id="recentList"></div></div>
-      <div class="card"><h3>오늘 접속자</h3><div id="visitorList"></div></div>
+      <div class="card">
+        <h3>접속자 조회</h3>
+        <div class="cal-wrap">
+          <div class="cal-left">
+            <div class="cal-nav">
+              <button id="calPrev">&lt;</button>
+              <span id="calTitle"></span>
+              <button id="calNext">&gt;</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+          <div class="cal-right">
+            <div style="font-size:14px;font-weight:700;color:var(--penguin-navy,#1D2F4E);margin-bottom:8px" id="visitorTitle">오늘 접속자</div>
+            <div id="visitorList"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 전체 구매 -->
@@ -256,10 +293,10 @@
       renderTable('recentList', ALL.filter(p => p.status !== 'refunded').slice(0, 10));
       // 전체 구매
       renderTable('allList', ALL, true);
-      // 접속자
+      // 접속자 캘린더
       const visitors = await getTodayVisitorList();
       document.getElementById('sVisitors').textContent = visitors.length + '명';
-      renderVisitors(visitors);
+      initCalendar();
       // 사용자
       await loadUsers();
       // 쿠폰
@@ -427,11 +464,14 @@
         let maxProg = 0, watched = 0, epCount = 0;
         Object.entries(pm).forEach(([k, v]) => { if (k.startsWith(p.productId + '_')) { epCount++; if (v.progress > 0) watched++; if (v.progress > maxProg) maxProg = v.progress; }});
         let refSt, refCls;
+        const purchasedAt = p.purchasedAt?.toDate ? p.purchasedAt.toDate() : p.purchasedAt ? new Date(p.purchasedAt) : null;
+        const daysSincePurchase = purchasedAt ? Math.floor((Date.now() - purchasedAt.getTime()) / (1000 * 60 * 60 * 24)) : null;
+        const within7Days = daysSincePurchase !== null && daysSincePurchase <= 7;
         if (p.status === 'refunded') { refSt = '환불완료'; refCls = 'color:#868e96;'; }
         else if (p.productType === 'pdf') { refSt = '다운로드 상품'; refCls = 'color:#868e96;'; }
-        else if (watched === 0) { refSt = '전액 환불 가능'; refCls = 'color:#2b8a3e;font-weight:700;'; }
-        else if (maxProg < 30) { refSt = '50% 환불 가능'; refCls = 'color:#e67700;font-weight:700;'; }
-        else { refSt = '환불 불가'; refCls = 'color:#c92a2a;font-weight:700;'; }
+        else if (watched > 0) { refSt = '재생됨 (환불 불가)'; refCls = 'color:#c92a2a;font-weight:700;'; }
+        else if (!within7Days) { refSt = `미재생 (7일 초과, ${daysSincePurchase}일 경과)`; refCls = 'color:#c92a2a;font-weight:700;'; }
+        else { refSt = `미재생 (${daysSincePurchase}일째, 전액 환불 가능)`; refCls = 'color:#2b8a3e;font-weight:700;'; }
         const progText = p.productType === 'pdf' ? '-' : epCount > 0 ? `${watched}/${epCount}강 (${maxProg}%)` : '미시청';
         const stBadge = p.status === 'refunded' ? '<span class="badge b-refund">환불</span>' : '<span class="badge b-ok">완료</span>';
         const refBtn = p.status !== 'refunded' ? `<button class="btn btn-d" style="font-size:11px;padding:4px 10px;" onclick="processRefund('${p._id}')">환불 기록</button>` : '-';
@@ -518,30 +558,156 @@
           <td>${u.userName || '-'}</td>
           <td>${u.userEmail || '-'}</td>
           <td><strong>${u.attemptCount || 0}</strong></td>
-          <td>${u.lastActivity ? new Date(u.lastActivity).toLocaleDateString('ko-KR') : '-'}</td>
+          <td>${u.lastActivity ? (u.lastActivity.toDate ? u.lastActivity.toDate() : new Date(u.lastActivity)).toLocaleDateString('ko-KR') : '-'}</td>
         </tr>`).join('')}
       </tbody></table></div>
       <div style="margin-top:10px;text-align:center;">
         <button class="btn btn-p" id="refreshUsersBtn">통계 새로고침</button>
       </div>`;
       document.getElementById('refreshUsersBtn').addEventListener('click', async (e) => {
-        if (!confirm('통계를 새로고침하시겠습니까?')) return;
-        e.target.disabled = true; e.target.textContent = '생성 중...';
+        if (!confirm('새로운 데이터만 가져와서 통계를 업데이트합니다.')) return;
+        e.target.disabled = true; e.target.textContent = '업데이트 중...';
         try {
-          const snap = await getDocs(collection(db, 'attempts'));
-          const map = {};
-          snap.forEach(d => { const dd = d.data(); if (!dd.userId) return; if (!map[dd.userId]) map[dd.userId] = { userId:dd.userId,userName:dd.userName||null,userEmail:dd.userEmail||null,attemptCount:0,lastActivity:null }; map[dd.userId].attemptCount++; if(dd.userName)map[dd.userId].userName=dd.userName; if(dd.userEmail)map[dd.userId].userEmail=dd.userEmail; const ts=dd.timestamp?.toDate(); if(ts&&(!map[dd.userId].lastActivity||ts>map[dd.userId].lastActivity))map[dd.userId].lastActivity=ts; });
-          await setDoc(doc(db, 'adminStats', 'userSummary'), { userActivityMap: map, totalUsers: Object.keys(map).length, lastUpdated: serverTimestamp() });
-          alert('완료'); location.reload();
-        } catch (err) { alert('오류: ' + err.message); }
+          // 기존 집계 데이터 로드
+          const summaryDoc = await getDoc(doc(db, 'adminStats', 'userSummary'));
+          const existing = summaryDoc.exists() ? summaryDoc.data() : {};
+          const map = existing.userActivityMap || {};
+          const lastUpdated = existing.lastUpdated?.toDate ? existing.lastUpdated.toDate() : null;
+
+          // 마지막 업데이트 이후 데이터만 가져오기
+          let q;
+          if (lastUpdated) {
+            const { Timestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+            q = query(collection(db, 'attempts'), where('timestamp', '>', Timestamp.fromDate(lastUpdated)));
+          } else {
+            q = collection(db, 'attempts');
+          }
+          const snap = await getDocs(q);
+          let newCount = 0;
+          snap.forEach(d => {
+            const dd = d.data();
+            if (!dd.userId) return;
+            newCount++;
+            if (!map[dd.userId]) map[dd.userId] = { userId:dd.userId,userName:null,userEmail:null,attemptCount:0,correctCount:0,lastActivity:null };
+            map[dd.userId].attemptCount++;
+            if (dd.isCorrect) map[dd.userId].correctCount = (map[dd.userId].correctCount||0) + 1;
+            if (dd.userName) map[dd.userId].userName = dd.userName;
+            if (dd.userEmail) map[dd.userId].userEmail = dd.userEmail;
+            const ts = dd.timestamp?.toDate();
+            const prevLast = map[dd.userId].lastActivity?.toDate ? map[dd.userId].lastActivity.toDate() : map[dd.userId].lastActivity ? new Date(map[dd.userId].lastActivity) : null;
+            if (ts && (!prevLast || ts > prevLast)) map[dd.userId].lastActivity = ts;
+          });
+          await setDoc(doc(db, 'adminStats', 'userSummary'), { userActivityMap: map, totalUsers: Object.keys(map).length, totalAttempts: Object.values(map).reduce((s,u) => s + (u.attemptCount||0), 0), lastUpdated: serverTimestamp() });
+          alert(`완료! 새로운 데이터 ${newCount}건 반영`); location.reload();
+        } catch (err) { alert('오류: ' + err.message); console.error(err); }
       });
     }
 
-    // ─── 접속자 ───
+    // ─── 접속자 + 캘린더 ───
+    let calYear, calMonth, calVisitCache = {};
+    function initCalendar() {
+      const now = new Date();
+      calYear = now.getFullYear(); calMonth = now.getMonth();
+      document.getElementById('calPrev').addEventListener('click', () => { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); });
+      document.getElementById('calNext').addEventListener('click', () => { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); });
+      renderCalendar();
+    }
+
+    async function getVisitorsForDate(dateKey) {
+      if (calVisitCache[dateKey]) return calVisitCache[dateKey];
+      try {
+        const snap = await getDoc(doc(db, 'daily_visits', dateKey));
+        if (!snap.exists()) { calVisitCache[dateKey] = []; return []; }
+        const users = snap.data().users || {};
+        const list = Object.entries(users).map(([uid, v]) => ({ uid, name: v.name || null, email: v.email || null, time: v.t || null })).sort((a, b) => (b.time || 0) - (a.time || 0));
+        calVisitCache[dateKey] = list;
+        return list;
+      } catch { return []; }
+    }
+
+    async function getMonthVisitCounts(year, month) {
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const promises = [];
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        promises.push(getVisitorsForDate(key).then(list => ({ key, count: list.length })));
+      }
+      return Promise.all(promises);
+    }
+
+    async function renderCalendar() {
+      document.getElementById('calTitle').textContent = `${calYear}년 ${calMonth + 1}월`;
+      const grid = document.getElementById('calGrid');
+      const today = new Date();
+      const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      // 헤더
+      let html = ['일','월','화','수','목','금','토'].map(d => `<div class="cal-header">${d}</div>`).join('');
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const prevDays = new Date(calYear, calMonth, 0).getDate();
+
+      // 이전 달
+      for (let i = firstDay - 1; i >= 0; i--) {
+        html += `<div class="cal-day other-month">${prevDays - i}</div>`;
+      }
+
+      // 이번 달
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isToday = key === todayKey;
+        html += `<div class="cal-day ${isToday ? 'today' : ''}" data-date="${key}"><span>${d}</span><span class="cal-count" id="cc-${key}"></span></div>`;
+      }
+
+      // 다음 달 채우기
+      const totalCells = firstDay + daysInMonth;
+      const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      for (let i = 1; i <= remaining; i++) {
+        html += `<div class="cal-day other-month">${i}</div>`;
+      }
+
+      grid.innerHTML = html;
+
+      // 날짜 클릭 이벤트
+      grid.querySelectorAll('.cal-day[data-date]').forEach(el => {
+        el.addEventListener('click', () => selectDate(el.dataset.date));
+      });
+
+      // 접속자 수 비동기 로드
+      const counts = await getMonthVisitCounts(calYear, calMonth);
+      counts.forEach(({ key, count }) => {
+        const countEl = document.getElementById('cc-' + key);
+        const dayEl = countEl?.parentElement;
+        if (countEl && count > 0) {
+          countEl.textContent = count;
+          dayEl?.classList.add('has-visitors');
+        }
+      });
+
+      // 오늘 자동 선택
+      const todayEl = grid.querySelector(`[data-date="${todayKey}"]`);
+      if (todayEl) { todayEl.classList.add('selected'); selectDate(todayKey); }
+    }
+
+    async function selectDate(dateKey) {
+      // 선택 표시
+      document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+      const target = document.querySelector(`[data-date="${dateKey}"]`);
+      if (target) target.classList.add('selected');
+
+      const [y, m, d] = dateKey.split('-');
+      document.getElementById('visitorTitle').textContent = `${Number(m)}월 ${Number(d)}일 접속자`;
+
+      const visitors = await getVisitorsForDate(dateKey);
+      renderVisitors(visitors);
+    }
+
     function renderVisitors(visitors) {
       const el = document.getElementById('visitorList');
-      if (!visitors.length) { el.innerHTML = '<div class="empty"><span class="icon">👤</span><p>오늘 접속자가 없습니다.</p></div>'; return; }
-      el.innerHTML = `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>이름</th><th>이메일</th><th>접속 시간</th></tr></thead><tbody>
+      if (!visitors.length) { el.innerHTML = '<div class="empty" style="padding:20px"><span class="icon">👤</span><p>접속자 없음</p></div>'; return; }
+      el.innerHTML = `<div style="margin-bottom:8px;font-size:13px;color:#495057;font-weight:600">${visitors.length}명</div>
+        <div style="overflow-x:auto;max-height:300px;overflow-y:auto"><table class="tbl"><thead><tr><th>이름</th><th>이메일</th><th>접속 시간</th></tr></thead><tbody>
         ${visitors.map(v => `<tr><td>${v.name || '-'}</td><td>${v.email || '-'}</td><td>${v.time ? new Date(v.time).toLocaleTimeString('ko-KR') : '-'}</td></tr>`).join('')}
       </tbody></table></div>`;
     }

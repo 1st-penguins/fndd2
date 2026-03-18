@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사용자 조회 | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="stylesheet" href="../css/base.css">
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:#f4f6f9;min-height:100vh}
+    .topbar{background:var(--penguin-navy,#1D2F4E);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+    .topbar-title{font-size:17px;font-weight:700}
+    .topbar nav{display:flex;gap:16px;align-items:center}
+    .topbar a{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px}
+    .topbar a:hover{color:#fff}
+    .topbar a.active{color:#fff;font-weight:700}
+    .dc{max-width:1200px;margin:24px auto;padding:0 20px}
+    .card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px}
+    .card h3{font-size:16px;font-weight:700;color:var(--penguin-navy,#1D2F4E);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+    .tbl{width:100%;border-collapse:collapse}
+    .tbl th{text-align:left;padding:10px 12px;font-size:12px;color:#868e96;font-weight:600;border-bottom:2px solid #f1f3f5;white-space:nowrap}
+    .tbl td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f1f3f5}
+    .tbl tbody tr:hover{background:#f8f9fa}
+    .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
+    .b-ok{background:#d3f9d8;color:#2b8a3e}
+    .b-refund{background:#ffe3e3;color:#c92a2a}
+    .empty{text-align:center;padding:40px;color:#868e96}
+    .empty .icon{font-size:48px;display:block;margin-bottom:12px}
+    .loading{text-align:center;padding:40px;color:#868e96}
+    .fr{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .fr input{padding:10px 14px;border:1px solid #dee2e6;border-radius:8px;font-size:14px;font-family:inherit;flex:1;min-width:200px}
+    .btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:13px;transition:all .2s}
+    .btn-p{background:var(--penguin-navy,#1D2F4E);color:#fff}
+    .btn-p:hover{opacity:.85}
+    .btn-d{background:#c92a2a;color:#fff}
+    .btn-s{background:#e9ecef;color:#495057}
+    .tab-nav{display:flex;gap:4px;margin-bottom:20px;background:#fff;border-radius:10px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06);flex-wrap:wrap}
+    .tab-btn{padding:10px 16px;border:none;border-radius:8px;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#868e96;font-family:inherit;transition:all .2s}
+    .tab-btn:hover{color:#495057}
+    .tab-btn.active{background:var(--penguin-navy,#1D2F4E);color:#fff}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    /* 사용자 프로필 카드 */
+    .user-profile{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+    .user-avatar{width:56px;height:56px;border-radius:50%;background:var(--penguin-navy,#1D2F4E);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0}
+    .user-info h2{font-size:18px;color:#333;margin-bottom:4px}
+    .user-info p{font-size:13px;color:#868e96}
+    .user-info .uid{font-family:monospace;font-size:11px;color:#adb5bd}
+    .user-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid #f1f3f5}
+    .user-stat{text-align:center}
+    .user-stat .val{font-size:20px;font-weight:700;color:var(--penguin-navy,#1D2F4E)}
+    .user-stat .lbl{font-size:11px;color:#868e96;margin-top:2px}
+
+    /* 과목 카드 */
+    .subject-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    .subject-card{background:#f8f9fa;border-radius:10px;padding:16px}
+    .subject-card .name{font-size:14px;font-weight:600;color:#333;margin-bottom:8px}
+    .subject-card .stat-row{display:flex;justify-content:space-between;font-size:12px;color:#868e96;margin-bottom:4px}
+    .subject-card .stat-row .v{font-weight:600;color:#333}
+    .progress-bar{height:6px;background:#e9ecef;border-radius:3px;overflow:hidden;margin-top:8px}
+    .progress-bar .fill{height:100%;border-radius:3px;transition:width .3s}
+    .fill-green{background:#37b24d}
+    .fill-yellow{background:#f59f00}
+    .fill-red{background:#e03131}
+
+    /* 강의 진도 */
+    .lecture-group{margin-bottom:20px}
+    .lecture-group-title{font-size:14px;font-weight:700;color:var(--penguin-navy,#1D2F4E);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f3f5}
+    .episode-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f8f9fa}
+    .episode-row .ep-name{font-size:13px;color:#333;min-width:80px}
+    .episode-row .ep-bar{flex:1;height:8px;background:#e9ecef;border-radius:4px;overflow:hidden}
+    .episode-row .ep-bar .ep-fill{height:100%;border-radius:4px}
+    .episode-row .ep-pct{font-size:12px;font-weight:600;min-width:40px;text-align:right}
+    .episode-row .ep-date{font-size:11px;color:#adb5bd;min-width:80px;text-align:right}
+
+    /* 최근 활동 로그 */
+    .activity-log{max-height:400px;overflow-y:auto}
+    .log-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #f8f9fa;font-size:13px}
+    .log-item .log-date{color:#868e96;min-width:90px;font-size:12px}
+    .log-item .log-subject{font-weight:600;color:var(--penguin-navy,#1D2F4E);min-width:100px}
+    .log-item .log-result{min-width:30px}
+    .log-item .log-result.correct{color:#2b8a3e}
+    .log-item .log-result.wrong{color:#c92a2a}
+
+    @media(max-width:768px){.topbar{flex-direction:column;gap:8px}.user-profile{flex-direction:column;text-align:center}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="topbar-title">사용자 조회</span>
+    <nav>
+      <a href="dashboard.html">대시보드</a>
+      <a href="user-lookup.html" class="active">사용자 조회</a>
+      <a href="analytics.html">학습분석</a>
+      <a href="notices.html">공지관리</a>
+      <a href="coupons.html">쿠폰관리</a>
+      <a href="statistics.html">통계</a>
+      <a href="../index.html">홈으로</a>
+    </nav>
+  </div>
+
+  <div class="dc">
+    <!-- 검색 -->
+    <div class="card">
+      <h3>사용자 검색</h3>
+      <div class="fr">
+        <input type="text" id="searchInput" placeholder="이메일 주소를 입력하세요" autofocus>
+        <button class="btn btn-p" id="searchBtn">검색</button>
+      </div>
+      <p style="font-size:12px;color:#adb5bd;">이메일로 검색하면 해당 사용자의 구매내역, 학습활동, 강의진도를 조회할 수 있습니다.</p>
+    </div>
+
+    <!-- 사용자 프로필 (검색 후 표시) -->
+    <div id="userProfileCard" class="card" style="display:none">
+      <div id="userProfileContent"></div>
+    </div>
+
+    <!-- 탭 (검색 후 표시) -->
+    <div id="userTabs" style="display:none">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="tab-purchases">구매내역</button>
+        <button class="tab-btn" data-tab="tab-learning">학습활동</button>
+        <button class="tab-btn" data-tab="tab-lectures">강의진도</button>
+        <button class="tab-btn" data-tab="tab-log">최근 활동 로그</button>
+        <button class="tab-btn" data-tab="tab-sessions">문제풀이기록</button>
+        <button class="tab-btn" data-tab="tab-wrong">오답노트</button>
+      </div>
+
+      <div id="tab-purchases" class="tab-panel active">
+        <div class="card"><h3>구매내역 및 환불 가능 여부</h3><div id="purchasesList"></div></div>
+      </div>
+
+      <div id="tab-learning" class="tab-panel">
+        <div class="card"><h3>과목별 학습 현황</h3><div id="subjectGrid"></div></div>
+      </div>
+
+      <div id="tab-lectures" class="tab-panel">
+        <div class="card"><h3>강의 시청 진도</h3><div id="lectureProgress"></div></div>
+      </div>
+
+      <div id="tab-log" class="tab-panel">
+        <div class="card"><h3>최근 활동 로그 <span style="font-size:12px;color:#868e96;font-weight:400;">(최근 500건)</span></h3><div id="activityLog"></div></div>
+      </div>
+
+      <div id="tab-sessions" class="tab-panel">
+        <div class="card"><h3>문제풀이 세션 기록</h3><div id="sessionsList"></div></div>
+      </div>
+
+      <div id="tab-wrong" class="tab-panel">
+        <div class="card"><h3>오답노트 <span style="font-size:12px;color:#868e96;font-weight:400;">틀린 문제 목록</span></h3><div id="wrongList"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ensureFirebase, ensureAuthReady } from '../js/core/firebase-core.js';
+    import { isAdmin } from '../js/auth/auth-utils.js';
+    import {
+      collection, getDocs, doc, getDoc, query, where, orderBy, limit
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const { auth, db } = await ensureFirebase();
+    const user = await ensureAuthReady();
+    if (!user || !isAdmin(user)) { alert('관리자 권한이 필요합니다.'); window.location.href = '../index.html'; }
+
+    const PN = {
+      'video_anatomy':'기능해부학 정규강의','video_injury':'운동상해 정규강의',
+      'video_physio':'운동생리학 정규강의','video_load':'운동부하검사 정규강의',
+      'video_ecg':'심전도 정규강의','video_patho':'병태생리학 정규강의',
+      'video_prescript':'운동처방론 정규강의','video_health':'건강체력평가 정규강의',
+      'pdf_anatomy':'기능해부학 요약본','pdf_injury':'운동상해 요약본',
+      'pdf_physio':'운동생리학 요약본','pdf_load':'운동부하검사 요약본',
+      'pdf_patho':'병태생리학 요약본','pdf_psycho':'스포츠심리학 요약본',
+      'pdf_prescript':'운동처방론 요약본','pdf_health':'건강체력평가 요약본',
+      'health-anatomy-lecture':'기능해부학 정규강의','health-injury-lecture':'운동상해 정규강의',
+      'health-physiology-lecture':'운동생리학 정규강의','health-stress-test-lecture':'운동부하검사 정규강의',
+      'health-ecg-lecture':'심전도 정규강의','health-pathology-lecture':'병태생리학 정규강의',
+      'health-prescription-lecture':'운동처방론 정규강의','health-fitness-eval-lecture':'건강체력평가 정규강의',
+      'health-anatomy-summary':'기능해부학 요약본','health-injury-summary':'운동상해 요약본',
+      'health-physiology-summary':'운동생리학 요약본','health-stress-test-summary':'운동부하검사 요약본',
+      'health-pathology-summary':'병태생리학 요약본','health-sports-psych-summary':'스포츠심리학 요약본',
+      'health-prescription-summary':'운동처방론 요약본','health-fitness-eval-summary':'건강체력평가 요약본'
+    };
+
+    // URL 인코딩된 과목명 디코딩
+    function decodeSubj(s) { if (!s) return s; try { return /%[0-9A-Fa-f]{2}/.test(s) ? decodeURIComponent(s) : s; } catch { return s; } }
+
+    // 탭 전환
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById(b.dataset.tab).classList.add('active');
+      });
+    });
+
+    // 검색
+    document.getElementById('searchBtn').addEventListener('click', doSearch);
+    document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+    async function doSearch() {
+      const email = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!email) return alert('이메일을 입력하세요.');
+
+      document.getElementById('userProfileCard').style.display = 'none';
+      document.getElementById('userTabs').style.display = 'none';
+      document.getElementById('searchBtn').disabled = true;
+      document.getElementById('searchBtn').textContent = '검색 중...';
+
+      try {
+        // 1. userId 찾기: purchases → attempts → summaryStats 순서
+        let userId = null, userName = null, userEmail = email;
+
+        // purchases에서 찾기
+        const pq = query(collection(db, 'purchases'), where('userEmail', '==', email));
+        const ps = await getDocs(pq);
+        if (!ps.empty) {
+          const d = ps.docs[0].data();
+          userId = d.userId;
+          userName = d.userName;
+        }
+
+        // purchases에 없으면 attempts에서 찾기
+        if (!userId) {
+          const aq = query(collection(db, 'attempts'), where('userEmail', '==', email), limit(1));
+          const as2 = await getDocs(aq);
+          if (!as2.empty) {
+            const d = as2.docs[0].data();
+            userId = d.userId;
+            userName = d.userName;
+          }
+        }
+
+        // summaryStats에서 찾기
+        if (!userId) {
+          const ss = await getDoc(doc(db, 'adminStats', 'userSummary'));
+          if (ss.exists()) {
+            const uam = ss.data().userActivityMap || {};
+            for (const [uid, u] of Object.entries(uam)) {
+              if (u.userEmail && u.userEmail.toLowerCase() === email) {
+                userId = uid;
+                userName = u.userName;
+                break;
+              }
+            }
+          }
+        }
+
+        if (!userId) {
+          alert('해당 이메일의 사용자를 찾을 수 없습니다.');
+          return;
+        }
+
+        // 2. 모든 데이터 병렬 로드
+        const [purchases, attempts, lectureProgs, pdfDls, sessions, wrongAnswers] = await Promise.all([
+          getDocs(query(collection(db, 'purchases'), where('userId', '==', userId))),
+          getDocs(query(collection(db, 'attempts'), where('userId', '==', userId), orderBy('timestamp', 'desc'), limit(500))),
+          getDocs(query(collection(db, 'lectureProgress'), where('userId', '==', userId))),
+          getDocs(query(collection(db, 'pdfDownloads'), where('userId', '==', userId))),
+          getDocs(query(collection(db, 'sessions'), where('userId', '==', userId))),
+          getDocs(query(collection(db, 'wrong_answers'), where('userId', '==', userId)))
+        ]);
+
+        const purchaseData = purchases.docs.map(d => ({ _id: d.id, ...d.data() }));
+        const attemptData = attempts.docs.map(d => d.data());
+        const lectureData = lectureProgs.docs.map(d => ({ _id: d.id, ...d.data() }));
+        const pdfData = pdfDls.docs.map(d => ({ _id: d.id, ...d.data() }));
+        const sessionData = sessions.docs.map(d => ({ _id: d.id, ...d.data() }));
+        const wrongData = wrongAnswers.docs.map(d => ({ _id: d.id, ...d.data() }));
+
+        // 3. 렌더링
+        renderProfile(userId, userName, userEmail, purchaseData, attemptData);
+        renderPurchases(purchaseData, lectureData, pdfData);
+        renderLearning(attemptData);
+        renderLectures(lectureData);
+        renderActivityLog(attemptData);
+        renderSessions(sessionData);
+        renderWrongAnswers(wrongData);
+
+        document.getElementById('userProfileCard').style.display = '';
+        document.getElementById('userTabs').style.display = '';
+
+      } catch (err) {
+        console.error('검색 오류:', err);
+        alert('검색 중 오류가 발생했습니다: ' + err.message);
+      } finally {
+        document.getElementById('searchBtn').disabled = false;
+        document.getElementById('searchBtn').textContent = '검색';
+      }
+    }
+
+    // ── 프로필 렌더링 ──
+    function renderProfile(userId, userName, userEmail, purchases, attempts) {
+      const totalAttempts = attempts.length;
+      const correctCount = attempts.filter(a => a.isCorrect).length;
+      const accuracy = totalAttempts > 0 ? Math.round(correctCount / totalAttempts * 100) : 0;
+      const totalPurchases = purchases.filter(p => p.status !== 'refunded').length;
+      const totalSpent = purchases.filter(p => p.status !== 'refunded').reduce((s, p) => s + (p.finalAmount || p.purchaseAmount || 0), 0);
+      const initial = (userName || userEmail || '?')[0].toUpperCase();
+
+      const firstActivity = attempts.length > 0 ? attempts[attempts.length - 1].timestamp : null;
+      const firstDateStr = firstActivity ? (firstActivity.toDate ? firstActivity.toDate() : new Date(firstActivity)).toLocaleDateString('ko-KR') : '-';
+
+      document.getElementById('userProfileContent').innerHTML = `
+        <div class="user-profile">
+          <div class="user-avatar">${initial}</div>
+          <div class="user-info">
+            <h2>${userName || '이름 없음'}</h2>
+            <p>${userEmail}</p>
+            <div class="uid">UID: ${userId}</div>
+          </div>
+        </div>
+        <div class="user-stats">
+          <div class="user-stat"><div class="val">${totalAttempts.toLocaleString()}</div><div class="lbl">문제 풀이</div></div>
+          <div class="user-stat"><div class="val">${accuracy}%</div><div class="lbl">정답률</div></div>
+          <div class="user-stat"><div class="val">${totalPurchases}</div><div class="lbl">구매 상품</div></div>
+          <div class="user-stat"><div class="val">${totalSpent.toLocaleString()}원</div><div class="lbl">총 결제액</div></div>
+          <div class="user-stat"><div class="val">${firstDateStr}</div><div class="lbl">첫 활동일</div></div>
+        </div>
+      `;
+    }
+
+    // ── 구매내역 렌더링 ──
+    function renderPurchases(purchases, lectureData, pdfData) {
+      const el = document.getElementById('purchasesList');
+      if (!purchases.length) { el.innerHTML = '<div class="empty"><span class="icon">🛒</span><p>구매 내역 없음</p></div>'; return; }
+
+      // 진도 맵
+      const progMap = {};
+      lectureData.forEach(l => { progMap[l._id] = l; });
+
+      // PDF 다운로드 맵
+      const dlMap = {};
+      pdfData.forEach(d => { dlMap[d._id] = d; });
+
+      let html = '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>상품</th><th>금액</th><th>상태</th><th>구매일</th><th>경과</th><th>이용현황</th><th>환불 판정</th></tr></thead><tbody>';
+
+      for (const p of purchases) {
+        const amt = (p.finalAmount || p.purchaseAmount || 0).toLocaleString() + '원';
+        const purchasedAt = p.purchasedAt?.toDate ? p.purchasedAt.toDate() : p.purchasedAt ? new Date(p.purchasedAt) : null;
+        const dateStr = purchasedAt ? purchasedAt.toLocaleDateString('ko-KR') : '-';
+        const daysSince = purchasedAt ? Math.floor((Date.now() - purchasedAt.getTime()) / (1000 * 60 * 60 * 24)) : null;
+        const daysStr = daysSince !== null ? `${daysSince}일` : '-';
+        const within7 = daysSince !== null && daysSince <= 7;
+        const stBadge = p.status === 'refunded' ? '<span class="badge b-refund">환불</span>' : '<span class="badge b-ok">완료</span>';
+
+        // 이용 현황 & 환불 판정
+        let usageStr = '-', refStr = '', refCls = '';
+        if (p.status === 'refunded') {
+          refStr = '환불완료'; refCls = 'color:#868e96;';
+        } else if (p.productType === 'video') {
+          // 에피소드 시청 여부
+          let watched = 0, epCount = 0;
+          Object.entries(progMap).forEach(([k, v]) => { if (k.includes(p.productId)) { epCount++; if (v.progress > 0) watched++; }});
+          usageStr = epCount > 0 ? `${watched}/${epCount}강 재생` : '미시청';
+          if (watched > 0) { refStr = '재생됨 (환불 불가)'; refCls = 'color:#c92a2a;font-weight:700;'; }
+          else if (!within7) { refStr = `미재생 (${daysSince}일 경과, 환불 불가)`; refCls = 'color:#c92a2a;font-weight:700;'; }
+          else { refStr = `미재생 (${daysSince}일째, 전액 환불 가능)`; refCls = 'color:#2b8a3e;font-weight:700;'; }
+        } else if (p.productType === 'pdf' || p.productType === 'ppt') {
+          const dlKey = `${p.userId}_${p.productId}`;
+          const dl = dlMap[dlKey];
+          if (dl) { usageStr = `다운로드 ${dl.downloadCount || 1}회`; refStr = '다운로드됨 (환불 불가)'; refCls = 'color:#c92a2a;font-weight:700;'; }
+          else if (!within7) { usageStr = '미다운로드'; refStr = `미다운로드 (${daysSince}일 경과, 환불 불가)`; refCls = 'color:#c92a2a;font-weight:700;'; }
+          else { usageStr = '미다운로드'; refStr = `미다운로드 (${daysSince}일째, 전액 환불 가능)`; refCls = 'color:#2b8a3e;font-weight:700;'; }
+        }
+
+        html += `<tr>
+          <td>${PN[p.productId] || p.productId}</td>
+          <td>${amt}</td>
+          <td>${stBadge}</td>
+          <td>${dateStr}</td>
+          <td>${daysStr}</td>
+          <td>${usageStr}</td>
+          <td style="${refCls}">${refStr}</td>
+        </tr>`;
+      }
+      html += '</tbody></table></div>';
+      el.innerHTML = html;
+    }
+
+    // ── 학습활동 렌더링 ──
+    function renderLearning(attempts) {
+      const el = document.getElementById('subjectGrid');
+      if (!attempts.length) { el.innerHTML = '<div class="empty"><span class="icon">📚</span><p>학습 기록 없음</p></div>'; return; }
+
+      // 자격증별 + 과목별 집계
+      const certNames = { 'health-manager': '건강운동관리사', 'sports-instructor': '2급 스포츠지도사', 'sports-instructor-1': '1급 스포츠지도사' };
+      const certColors = { 'health-manager': '#1D2F4E', 'sports-instructor': '#059669', 'sports-instructor-1': '#7C3AED' };
+      const byCert = {};
+      attempts.forEach(a => {
+        const cert = a.questionData?.certificateType || a.certType || 'health-manager';
+        const subj = decodeSubj(a.subject || a.questionData?.subject || '기타');
+        if (!byCert[cert]) byCert[cert] = {};
+        if (!byCert[cert][subj]) byCert[cert][subj] = { total: 0, correct: 0 };
+        byCert[cert][subj].total++;
+        if (a.isCorrect) byCert[cert][subj].correct++;
+      });
+
+      let html = '';
+      Object.entries(byCert).forEach(([cert, subjects]) => {
+        const sorted = Object.entries(subjects).sort((a, b) => b[1].total - a[1].total);
+        const color = certColors[cert] || '#495057';
+        const name = certNames[cert] || cert;
+        html += `<div style="margin-bottom:20px">
+          <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid ${color}20">${name}</div>
+          <div class="subject-grid">`;
+        sorted.forEach(([subj, s]) => {
+          const acc = Math.round(s.correct / s.total * 100);
+          const fillClass = acc >= 70 ? 'fill-green' : acc >= 50 ? 'fill-yellow' : 'fill-red';
+          html += `<div class="subject-card">
+            <div class="name">${subj}</div>
+            <div class="stat-row"><span>풀이 횟수</span><span class="v">${s.total.toLocaleString()}</span></div>
+            <div class="stat-row"><span>정답</span><span class="v">${s.correct.toLocaleString()}</span></div>
+            <div class="stat-row"><span>정답률</span><span class="v">${acc}%</span></div>
+            <div class="progress-bar"><div class="fill ${fillClass}" style="width:${acc}%"></div></div>
+          </div>`;
+        });
+        html += '</div></div>';
+      });
+      el.innerHTML = html;
+    }
+
+    // ── 강의진도 렌더링 ──
+    function renderLectures(lectureData) {
+      const el = document.getElementById('lectureProgress');
+      if (!lectureData.length) { el.innerHTML = '<div class="empty"><span class="icon">🎬</span><p>강의 시청 기록 없음</p></div>'; return; }
+
+      // productId별 그룹
+      const groups = {};
+      lectureData.forEach(l => {
+        const pid = l.productId || l._id.split('_ep')[0];
+        if (!groups[pid]) groups[pid] = [];
+        groups[pid].push(l);
+      });
+
+      let html = '';
+      for (const [pid, episodes] of Object.entries(groups)) {
+        episodes.sort((a, b) => (a.episode || '').localeCompare(b.episode || ''));
+        html += `<div class="lecture-group">
+          <div class="lecture-group-title">${PN[pid] || pid}</div>`;
+        for (const ep of episodes) {
+          const pct = Math.round(ep.progress || 0);
+          const fillClass = pct >= 80 ? 'fill-green' : pct >= 30 ? 'fill-yellow' : 'fill-red';
+          const lastDate = ep.lastWatchedAt ? (ep.lastWatchedAt.toDate ? ep.lastWatchedAt.toDate() : new Date(ep.lastWatchedAt)).toLocaleDateString('ko-KR') : '-';
+          const epLabel = ep.episode ? `EP${ep.episode}` : ep._id.split('_ep')[1] ? `EP${ep._id.split('_ep')[1]}` : ep._id;
+          html += `<div class="episode-row">
+            <span class="ep-name">${epLabel}</span>
+            <div class="ep-bar"><div class="ep-fill ${fillClass}" style="width:${pct}%"></div></div>
+            <span class="ep-pct">${pct}%</span>
+            <span class="ep-date">${lastDate}</span>
+          </div>`;
+        }
+        html += '</div>';
+      }
+      el.innerHTML = html;
+    }
+
+    // ── 최근 활동 로그 ──
+    function renderActivityLog(attempts) {
+      const el = document.getElementById('activityLog');
+      if (!attempts.length) { el.innerHTML = '<div class="empty"><span class="icon">📋</span><p>활동 기록 없음</p></div>'; return; }
+
+      let html = '<div class="activity-log">';
+      for (const a of attempts.slice(0, 500)) {
+        const ts = a.timestamp ? (a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp)) : null;
+        const dateStr = ts ? `${ts.toLocaleDateString('ko-KR')} ${ts.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}` : '-';
+        const subj = decodeSubj(a.subject || a.questionData?.subject || '-');
+        const year = a.year || a.questionData?.year || '';
+        const qNum = a.questionNumber || a.questionData?.number || a.questionData?.questionNumber || '';
+        const resultClass = a.isCorrect ? 'correct' : 'wrong';
+        const resultIcon = a.isCorrect ? 'O' : 'X';
+
+        html += `<div class="log-item">
+          <span class="log-date">${dateStr}</span>
+          <span class="log-subject">${subj}</span>
+          <span>${year}년 ${qNum}번</span>
+          <span class="log-result ${resultClass}">${resultIcon}</span>
+        </div>`;
+      }
+      html += '</div>';
+      if (attempts.length >= 500) {
+        html += '<p style="text-align:center;margin-top:12px;font-size:12px;color:#868e96;">최근 500건까지 표시됩니다.</p>';
+      }
+      el.innerHTML = html;
+    }
+
+    // ── 문제풀이 세션 기록 ──
+    function renderSessions(sessions) {
+      const el = document.getElementById('sessionsList');
+      if (!sessions.length) { el.innerHTML = '<div class="empty"><span class="icon">📝</span><p>세션 기록 없음</p></div>'; return; }
+
+      // 최신순 정렬
+      sessions.sort((a, b) => {
+        const ta = a.startTime?.toDate ? a.startTime.toDate() : a.startTime ? new Date(a.startTime) : new Date(0);
+        const tb = b.startTime?.toDate ? b.startTime.toDate() : b.startTime ? new Date(b.startTime) : new Date(0);
+        return tb - ta;
+      });
+
+      let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
+      for (const s of sessions.slice(0, 50)) {
+        const startTime = s.startTime?.toDate ? s.startTime.toDate() : s.startTime ? new Date(s.startTime) : null;
+        const dateStr = startTime ? startTime.toLocaleDateString('ko-KR') + ' ' + startTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-';
+        const subject = decodeSubj(s.subject || '-');
+        const year = s.year || '';
+        const qCount = s.questionCount || s.attemptCount || 0;
+        const correct = s.correctCount || 0;
+        const acc = qCount > 0 ? Math.round(correct / qCount * 100) : 0;
+        const type = s.type === 'mockexam' ? '모의고사' : '일반';
+        const typeBadge = s.type === 'mockexam'
+          ? '<span style="background:#e8d5ff;color:#7048e8;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">모의고사</span>'
+          : '<span style="background:#d3f9d8;color:#2b8a3e;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">일반</span>';
+        const accColor = acc >= 70 ? '#2b8a3e' : acc >= 50 ? '#e67700' : '#c92a2a';
+        const hour = s.hour || s.mockExamHour || s.mockExamPart || '';
+        const hourStr = hour ? ` ${hour}교시` : '';
+
+        html += `<div style="background:#f8f9fa;border-radius:10px;padding:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            ${typeBadge}
+            <span style="font-size:11px;color:#868e96">${dateStr}</span>
+          </div>
+          <div style="font-weight:600;color:#333;margin-bottom:4px">${subject} ${year}${hourStr}</div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:#495057">
+            <span>${correct}/${qCount}문제</span>
+            <span style="color:${accColor};font-weight:700">${acc}%</span>
+          </div>
+          <div style="height:6px;background:#e9ecef;border-radius:3px;margin-top:8px;overflow:hidden">
+            <div style="height:100%;width:${acc}%;background:${accColor};border-radius:3px"></div>
+          </div>
+        </div>`;
+      }
+      html += '</div>';
+      if (sessions.length > 50) {
+        html += `<p style="text-align:center;margin-top:12px;font-size:12px;color:#868e96">최근 50개 세션 표시 (전체 ${sessions.length}개)</p>`;
+      }
+      el.innerHTML = html;
+    }
+
+    // ── 오답노트 ──
+    function renderWrongAnswers(wrongAnswers) {
+      const el = document.getElementById('wrongList');
+      if (!wrongAnswers.length) { el.innerHTML = '<div class="empty"><span class="icon">✅</span><p>오답 기록 없음</p></div>'; return; }
+
+      // 과목별 그룹
+      const bySubject = {};
+      wrongAnswers.forEach(w => {
+        const subj = decodeSubj(w.subject || w.questionData?.subject || '기타');
+        if (!bySubject[subj]) bySubject[subj] = [];
+        bySubject[subj].push(w);
+      });
+
+      // 과목별 오답 수 요약
+      const subjSorted = Object.entries(bySubject).sort((a, b) => b[1].length - a[1].length);
+
+      let html = `<div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap">
+        ${subjSorted.map(([subj, items]) =>
+          `<span style="background:#ffe3e3;color:#c92a2a;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600">${subj} ${items.length}문제</span>`
+        ).join('')}
+        <span style="background:#f1f3f5;color:#495057;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600">총 ${wrongAnswers.length}문제</span>
+      </div>`;
+
+      html += '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>과목</th><th>연도</th><th>문제</th><th>선택한 답</th><th>정답</th><th>날짜</th></tr></thead><tbody>';
+
+      // 최신순 정렬
+      const sorted = [...wrongAnswers].sort((a, b) => {
+        const ta = a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp ? new Date(a.timestamp) : new Date(0);
+        const tb = b.timestamp?.toDate ? b.timestamp.toDate() : b.timestamp ? new Date(b.timestamp) : new Date(0);
+        return tb - ta;
+      });
+
+      for (const w of sorted.slice(0, 200)) {
+        const subj = decodeSubj(w.subject || w.questionData?.subject || '-');
+        const year = w.year || w.questionData?.year || '-';
+        const num = w.questionNumber || w.questionData?.number || w.questionData?.questionNumber || '-';
+        const userAns = w.userAnswer !== undefined && w.userAnswer !== null ? (Number(w.userAnswer) + 1) + '번' : '-';
+        const correctAns = w.correctAnswer !== undefined && w.correctAnswer !== null ? (Number(w.correctAnswer) + 1) + '번' : '-';
+        const ts = w.timestamp?.toDate ? w.timestamp.toDate() : w.timestamp ? new Date(w.timestamp) : null;
+        const dateStr = ts && !isNaN(ts.getTime()) ? ts.toLocaleDateString('ko-KR') : '-';
+
+        html += `<tr>
+          <td>${subj}</td><td>${year}</td><td>${num}번</td>
+          <td style="color:#c92a2a;font-weight:600">${userAns}</td>
+          <td style="color:#2b8a3e;font-weight:600">${correctAns}</td>
+          <td style="font-size:11px">${dateStr}</td>
+        </tr>`;
+      }
+      html += '</tbody></table></div>';
+      if (wrongAnswers.length > 200) {
+        html += `<p style="text-align:center;margin-top:12px;font-size:12px;color:#868e96">최근 200건 표시 (전체 ${wrongAnswers.length}건)</p>`;
+      }
+      el.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학습 분석 | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="stylesheet" href="../css/base.css">
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:#f4f6f9;min-height:100vh}
+    .topbar{background:var(--penguin-navy,#1D2F4E);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+    .topbar-title{font-size:17px;font-weight:700}
+    .topbar nav{display:flex;gap:16px;align-items:center}
+    .topbar a{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px}
+    .topbar a:hover{color:#fff}
+    .topbar a.active{color:#fff;font-weight:700}
+    .dc{max-width:1400px;margin:24px auto;padding:0 20px}
+    .card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px}
+    .card h3{font-size:16px;font-weight:700;color:var(--penguin-navy,#1D2F4E);margin-bottom:16px}
+    .card h3 .sub{font-size:12px;color:#868e96;font-weight:400;margin-left:8px}
+    .tbl{width:100%;border-collapse:collapse}
+    .tbl th{text-align:left;padding:10px 12px;font-size:12px;color:#868e96;font-weight:600;border-bottom:2px solid #f1f3f5;white-space:nowrap}
+    .tbl td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f1f3f5}
+    .tbl tbody tr:hover{background:#f8f9fa}
+    .tab-nav{display:flex;gap:4px;margin-bottom:20px;background:#fff;border-radius:10px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06);flex-wrap:wrap}
+    .tab-btn{padding:10px 16px;border:none;border-radius:8px;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#868e96;font-family:inherit;transition:all .2s}
+    .tab-btn:hover{color:#495057}
+    .tab-btn.active{background:var(--penguin-navy,#1D2F4E);color:#fff}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+    .stat-box{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
+    .stat-box .label{font-size:12px;color:#868e96;margin-bottom:6px}
+    .stat-box .value{font-size:24px;font-weight:700;color:var(--penguin-navy,#1D2F4E)}
+    .stat-box .sub{font-size:11px;color:#adb5bd;margin-top:4px}
+    .loading{text-align:center;padding:60px;color:#868e96;font-size:14px}
+    .btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:13px}
+    .btn-p{background:var(--penguin-navy,#1D2F4E);color:#fff}
+    .btn-s{background:#e9ecef;color:#495057}
+    .empty{text-align:center;padding:40px;color:#868e96}
+
+    /* 히트맵 */
+    .heatmap{display:grid;gap:2px;margin-top:12px}
+    .heatmap-cell{padding:8px 4px;text-align:center;border-radius:6px;font-size:11px;font-weight:600;min-width:60px}
+    .heatmap-header{font-weight:700;color:#495057;background:transparent;font-size:11px}
+
+    /* 바 차트 */
+    .bar-chart{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .bar-row{display:flex;align-items:center;gap:12px}
+    .bar-label{min-width:50px;font-size:12px;color:#495057;text-align:right}
+    .bar-track{flex:1;height:28px;background:#f1f3f5;border-radius:6px;overflow:hidden;position:relative}
+    .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#fff;transition:width .5s}
+    .bar-val{min-width:60px;font-size:12px;color:#868e96;text-align:right}
+
+    /* 세그먼트 카드 */
+    .seg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+    .seg-card{border-radius:12px;padding:20px;text-align:center}
+    .seg-card .seg-count{font-size:32px;font-weight:700}
+    .seg-card .seg-label{font-size:13px;margin-top:4px}
+    .seg-card .seg-detail{font-size:11px;margin-top:8px;opacity:.8}
+
+    /* 합격률 차트 */
+    .pass-chart{display:flex;align-items:flex-end;gap:16px;height:200px;margin-top:20px;padding:0 20px}
+    .pass-bar-group{flex:1;display:flex;flex-direction:column;align-items:center;height:100%}
+    .pass-bar-wrap{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+    .pass-bar{width:48px;border-radius:8px 8px 0 0;position:relative;transition:height .5s;min-height:4px}
+    .pass-bar .pass-pct{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:700;white-space:nowrap}
+    .pass-year{font-size:13px;color:#495057;margin-top:8px;font-weight:600}
+
+    /* 난이도 분포 */
+    .diff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+    .diff-card{border-radius:12px;padding:20px;text-align:center}
+    .diff-card .diff-count{font-size:28px;font-weight:700}
+    .diff-card .diff-label{font-size:13px;margin-top:4px}
+
+    @media(max-width:768px){
+      .topbar{flex-direction:column;gap:8px}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .heatmap{overflow-x:auto}
+      .pass-chart{overflow-x:auto;min-width:400px}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="topbar-title">학습 데이터 분석</span>
+    <nav>
+      <a href="dashboard.html">대시보드</a>
+      <a href="user-lookup.html">사용자 조회</a>
+      <a href="analytics.html" class="active">학습분석</a>
+      <a href="notices.html">공지관리</a>
+      <a href="coupons.html">쿠폰관리</a>
+      <a href="statistics.html">통계</a>
+      <a href="../index.html">홈으로</a>
+    </nav>
+  </div>
+
+  <div class="dc">
+    <!-- 요약 통계 -->
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+      <div>
+        <span style="font-size:13px;color:#868e96" id="cacheStatus">캐시 데이터 로딩 중...</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-p" id="refreshBtn" disabled>데이터 갱신 (증분)</button>
+        <button class="btn btn-s" id="fullRefreshBtn" disabled>전체 재집계</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box"><div class="label">총 풀이 수</div><div class="value" id="sTotalAttempts">-</div></div>
+      <div class="stat-box"><div class="label">전체 정답률</div><div class="value" id="sOverallAcc">-</div></div>
+      <div class="stat-box"><div class="label">총 사용자</div><div class="value" id="sTotalUsers">-</div></div>
+      <div class="stat-box"><div class="label">모의고사 응시</div><div class="value" id="sTotalMocks">-</div></div>
+      <div class="stat-box"><div class="label">추정 합격률</div><div class="value" id="sPassRate">-</div></div>
+    </div>
+
+    <!-- 탭 -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="tab-difficulty">문제 난이도</button>
+      <button class="tab-btn" data-tab="tab-heatmap">과목 취약점</button>
+      <button class="tab-btn" data-tab="tab-time">시간대/요일</button>
+      <button class="tab-btn" data-tab="tab-segment">사용자 세그먼트</button>
+      <button class="tab-btn" data-tab="tab-passrate">합격률 추정</button>
+      <button class="tab-btn" data-tab="tab-retry">학습 효과</button>
+      <button class="tab-btn" data-tab="tab-device">디바이스</button>
+      <button class="tab-btn" data-tab="tab-dau">DAU/MAU</button>
+      <button class="tab-btn" data-tab="tab-predict">합격 예측</button>
+      <button class="tab-btn" data-tab="tab-lecture-effect">강의 효과</button>
+      <button class="tab-btn" data-tab="tab-funnel">고객 퍼널</button>
+      <button class="tab-btn" data-tab="tab-ltv">고객 가치</button>
+    </div>
+
+    <!-- 문제 난이도 -->
+    <div id="tab-difficulty" class="tab-panel active">
+      <div class="card"><h3>난이도 분포</h3><div id="diffDist"></div></div>
+      <div class="card"><h3>가장 어려운 문제 TOP 15 <span class="sub">정답률 기준</span></h3><div id="hardestQ"></div></div>
+      <div class="card"><h3>가장 많이 선택된 오답 보기 TOP 15 <span class="sub">왜 틀리는가</span></h3><div id="wrongChoice"></div></div>
+      <div class="card"><h3>연도별 평균 난이도 추이</h3><div id="yearDiff"></div></div>
+    </div>
+
+    <!-- 과목 취약점 히트맵 -->
+    <div id="tab-heatmap" class="tab-panel">
+      <div class="card"><h3>과목 × 연도 정답률 히트맵</h3><div id="heatmapArea"></div></div>
+      <div class="card"><h3>과목별 평균 정답률 랭킹</h3><div id="subjectRank"></div></div>
+    </div>
+
+    <!-- 시간대/요일 -->
+    <div id="tab-time" class="tab-panel">
+      <div class="card"><h3>시간대별 풀이 분포</h3><div id="hourChart"></div></div>
+      <div class="card"><h3>요일별 풀이 분포</h3><div id="dayChart"></div></div>
+      <div class="card"><h3>시간대별 정답률</h3><div id="hourAcc"></div></div>
+    </div>
+
+    <!-- 사용자 세그먼트 -->
+    <div id="tab-segment" class="tab-panel">
+      <div class="card"><h3>활동량 기반 세그먼트</h3><div id="segCards"></div></div>
+      <div class="card"><h3>세그먼트별 상세</h3><div id="segDetail"></div></div>
+      <div class="card"><h3>이탈 위험 사용자 <span class="sub">14일 이상 미접속 + 구매 이력</span></h3><div id="churnRisk"></div></div>
+    </div>
+
+    <!-- 합격률 추정 -->
+    <div id="tab-passrate" class="tab-panel">
+      <div class="card"><h3>연도별 추정 합격률</h3><div id="passChart"></div></div>
+      <div class="card"><h3>과목별 과락률 <span class="sub">40% 미만 비율</span></h3><div id="failSubject"></div></div>
+      <div class="card"><h3>모의고사 점수 분포</h3><div id="scoreDist"></div></div>
+    </div>
+
+    <!-- 학습 효과 (재시도 패턴) -->
+    <div id="tab-retry" class="tab-panel">
+      <div class="card"><h3>재시도별 정답률 변화 <span class="sub">같은 문제를 반복할수록 정답률이 올라가는가</span></h3><div id="retryChart"></div></div>
+      <div class="card"><h3>반복해도 안 되는 문제 TOP 15 <span class="sub">3회 이상 풀었는데 정답률 40% 미만</span></h3><div id="stubbornQ"></div></div>
+      <div class="card"><h3>학습 효과 지수 <span class="sub">과목별 재시도 시 정답률 향상도</span></h3><div id="retryEffect"></div></div>
+    </div>
+
+    <!-- 디바이스 분석 -->
+    <div id="tab-device" class="tab-panel">
+      <div class="card"><h3>디바이스 비율</h3><div id="deviceRatio"></div></div>
+      <div class="card"><h3>디바이스별 성과 비교</h3><div id="devicePerf"></div></div>
+    </div>
+
+    <!-- DAU/WAU/MAU -->
+    <div id="tab-dau" class="tab-panel">
+      <div class="card"><h3>일별 활성 사용자 (DAU) <span class="sub">최근 30일</span></h3><div id="dauChart"></div></div>
+      <div class="card"><h3>주별 활성 사용자 (WAU) <span class="sub">최근 12주</span></h3><div id="wauChart"></div></div>
+      <div class="card"><h3>월별 활성 사용자 (MAU) <span class="sub">최근 6개월</span></h3><div id="mauChart"></div></div>
+      <div class="card"><h3>리텐션 요약</h3><div id="retentionSummary"></div></div>
+    </div>
+
+    <!-- 합격 예측 -->
+    <div id="tab-predict" class="tab-panel">
+      <div class="card"><h3>사용자별 합격 예측 스코어 <span class="sub">과목 정답률 + 풀이량 기반</span></h3><div id="predictList"></div></div>
+      <div class="card"><h3>과락 위험 과목 분포 <span class="sub">사용자별 40% 미만 과목 수</span></h3><div id="predictRisk"></div></div>
+    </div>
+
+    <!-- 강의 효과 -->
+    <div id="tab-lecture-effect" class="tab-panel">
+      <div class="card"><h3>강의 구매자 vs 비구매자 정답률 <span class="sub">같은 과목 기준</span></h3><div id="lectureCompare"></div></div>
+      <div class="card"><h3>강의 효과 랭킹 <span class="sub">구매 전후 정답률 변화가 큰 순</span></h3><div id="lectureRank"></div></div>
+    </div>
+
+    <!-- 고객 퍼널 -->
+    <div id="tab-funnel" class="tab-panel">
+      <div class="card"><h3>전환 퍼널 <span class="sub">방문 → 문제풀기 → 구매</span></h3><div id="funnelChart"></div></div>
+      <div class="card"><h3>학습 여정 분석 <span class="sub">첫 활동부터 구매까지</span></h3><div id="journeyStats"></div></div>
+    </div>
+
+    <!-- 고객 가치 -->
+    <div id="tab-ltv" class="tab-panel">
+      <div class="card"><h3>고객 가치(LTV) 분포</h3><div id="ltvDist"></div></div>
+      <div class="card"><h3>상위 고객 TOP 20 <span class="sub">총 결제액 기준</span></h3><div id="ltvTop"></div></div>
+      <div class="card"><h3>재구매 분석</h3><div id="repurchase"></div></div>
+    </div>
+  </div>
+
+  <div class="loading" id="globalLoading">📊 캐시 데이터 로딩 중...</div>
+
+  <script type="module">
+    import { ensureFirebase, ensureAuthReady } from '../js/core/firebase-core.js';
+    import { isAdmin } from '../js/auth/auth-utils.js';
+    import {
+      collection, getDocs, doc, getDoc, query, where, orderBy, limit
+    } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const { auth, db } = await ensureFirebase();
+    const user = await ensureAuthReady();
+    if (!user || !isAdmin(user)) { alert('관리자 권한이 필요합니다.'); window.location.href = '../index.html'; }
+
+    // URL 인코딩된 과목명 디코딩
+    function dS(s) { try { return decodeURIComponent(s); } catch { return s; } }
+
+    // 탭 전환
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById(b.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ── 데이터 (캐시 기반) ──
+    const loadingEl = document.getElementById('globalLoading');
+    let allAttempts = [], allMockResults = [], allPurchases = [], userMap = {}, dailyVisits = {};
+    let cacheData = null;
+
+    // 페이지 로드: 캐시만 읽기 (Firestore 2~3건)
+    try {
+      const [summaryDoc, cacheDoc, purchSnap, visitsSnap] = await Promise.all([
+        getDoc(doc(db, 'adminStats', 'userSummary')),
+        getDoc(doc(db, 'adminStats', 'analyticsCache')),
+        getDocs(collection(db, 'purchases')),
+        getDocs(collection(db, 'daily_visits'))
+      ]);
+
+      if (summaryDoc.exists()) userMap = summaryDoc.data().userActivityMap || {};
+      allPurchases = purchSnap.docs.map(d => d.data());
+      visitsSnap.docs.forEach(d => { dailyVisits[d.id] = d.data(); });
+
+      if (cacheDoc.exists()) {
+        cacheData = cacheDoc.data();
+        allAttempts = cacheData.attempts || [];
+        allMockResults = cacheData.mockResults || [];
+        const lastGen = cacheData.generatedAt?.toDate ? cacheData.generatedAt.toDate() : cacheData.generatedAt ? new Date(cacheData.generatedAt) : null;
+        document.getElementById('cacheStatus').textContent = lastGen ? `마지막 집계: ${lastGen.toLocaleString('ko-KR')} (${allAttempts.length.toLocaleString()}건)` : '캐시 있음';
+        loadingEl.style.display = 'none';
+        renderAll();
+      } else {
+        document.getElementById('cacheStatus').innerHTML = '<span style="color:#e67700">캐시 없음 — "전체 재집계" 버튼을 눌러주세요</span>';
+        loadingEl.style.display = 'none';
+      }
+    } catch (err) {
+      loadingEl.textContent = '로딩 실패: ' + err.message;
+      console.error(err);
+    }
+
+    document.getElementById('refreshBtn').disabled = false;
+    document.getElementById('fullRefreshBtn').disabled = false;
+
+    // 증분 갱신
+    document.getElementById('refreshBtn').addEventListener('click', () => runAggregation(false));
+    document.getElementById('fullRefreshBtn').addEventListener('click', () => runAggregation(true));
+
+    async function runAggregation(full) {
+      const label = full ? '전체 재집계' : '증분 갱신';
+      if (!confirm(`${label}을 실행합니다. 계속할까요?`)) return;
+      const btn = full ? document.getElementById('fullRefreshBtn') : document.getElementById('refreshBtn');
+      btn.disabled = true; btn.textContent = '집계 중...';
+      document.getElementById('cacheStatus').textContent = '집계 진행 중...';
+
+      try {
+        const { Timestamp, setDoc: fsSetDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const cacheRef = doc(db, 'adminStats', 'analyticsCache');
+        const existingCache = full ? null : (await getDoc(cacheRef)).data?.() || null;
+        const lastGen = (!full && existingCache?.generatedAt?.toDate) ? existingCache.generatedAt.toDate() : null;
+
+        // attempts 쿼리
+        let attQuery = lastGen ? query(collection(db, 'attempts'), where('timestamp', '>', Timestamp.fromDate(lastGen))) : collection(db, 'attempts');
+        let mockQuery = lastGen ? query(collection(db, 'mockExamResults'), where('timestamp', '>', Timestamp.fromDate(lastGen))) : collection(db, 'mockExamResults');
+
+        const [attSnap, mockSnap] = await Promise.all([getDocs(attQuery), getDocs(mockQuery)]);
+
+        const newAttempts = attSnap.docs.map(d => {
+          const data = d.data();
+          return {
+            userId: data.userId || null, subject: data.subject || data.questionData?.subject || '',
+            year: data.year || data.questionData?.year || '', questionNumber: data.questionNumber || data.questionData?.number || '',
+            isCorrect: data.isCorrect || false, userAnswer: data.userAnswer ?? null,
+            timestamp: data.timestamp || null, device: data.device || '',
+            sessionId: data.sessionId || null, certType: data.questionData?.certificateType || data.certType || '',
+            userName: data.userName || null, userEmail: data.userEmail || null
+          };
+        });
+        const newMocks = mockSnap.docs.map(d => {
+          const data = d.data();
+          return {
+            userId: data.userId || null, year: data.year || '', completed: data.completed || false,
+            totalQuestions: data.totalQuestions || 0, correctCount: data.correctCount || 0,
+            subjectResults: data.subjectResults || {}, timestamp: data.timestamp || null
+          };
+        });
+
+        // 합치기
+        const mergedAttempts = full ? newAttempts : [...(existingCache?.attempts || []), ...newAttempts];
+        const mergedMocks = full ? newMocks : [...(existingCache?.mockResults || []), ...newMocks];
+
+        // Firestore 문서 크기 제한(1MB) 대비: attempts가 너무 많으면 요약 데이터만 저장
+        // 실제 attempts 원본 대신 집계 결과를 저장
+        const aggData = buildAggregation(mergedAttempts, mergedMocks);
+
+        await setDoc(cacheRef, {
+          attempts: mergedAttempts.length <= 50000 ? mergedAttempts : [],
+          mockResults: mergedMocks,
+          aggregation: aggData,
+          totalAttemptCount: mergedAttempts.length,
+          generatedAt: serverTimestamp()
+        });
+
+        // 로컬 상태 업데이트
+        allAttempts = mergedAttempts;
+        allMockResults = mergedMocks;
+        document.getElementById('cacheStatus').textContent = `집계 완료 — ${mergedAttempts.length.toLocaleString()}건 (신규 ${newAttempts.length}건)`;
+        renderAll();
+        btn.textContent = full ? '전체 재집계' : '데이터 갱신 (증분)';
+        btn.disabled = false;
+      } catch (err) {
+        alert('집계 오류: ' + err.message);
+        console.error(err);
+        btn.textContent = full ? '전체 재집계' : '데이터 갱신 (증분)';
+        btn.disabled = false;
+      }
+    }
+
+    // 사전 집계 데이터 빌드 (Firestore 저장용)
+    function buildAggregation(attempts, mocks) {
+      return { totalAttempts: attempts.length, totalMocks: mocks.length, builtAt: new Date().toISOString() };
+    }
+
+    function renderAll() {
+      renderSummary();
+      renderDifficulty();
+      renderHeatmap();
+      renderTime();
+      renderSegment();
+      renderPassRate();
+      renderRetry();
+      renderDevice();
+      renderDAU();
+      renderPredict();
+      renderLectureEffect();
+      renderFunnel();
+      renderLTV();
+    }
+
+    // ── 요약 통계 ──
+    function renderSummary() {
+      const total = allAttempts.length;
+      const correct = allAttempts.filter(a => a.isCorrect).length;
+      const acc = total > 0 ? Math.round(correct / total * 100) : 0;
+      const users = new Set(allAttempts.map(a => a.userId).filter(Boolean)).size;
+
+      // 합격률
+      const passResults = calcPassResults();
+      const passRate = passResults.total > 0 ? Math.round(passResults.passed / passResults.total * 100) : 0;
+
+      document.getElementById('sTotalAttempts').textContent = total.toLocaleString();
+      document.getElementById('sOverallAcc').textContent = acc + '%';
+      document.getElementById('sTotalUsers').textContent = users + '명';
+      document.getElementById('sTotalMocks').textContent = allMockResults.length.toLocaleString();
+      document.getElementById('sPassRate').textContent = passRate + '%';
+    }
+
+    // ── 1. 문제 난이도 ──
+    function renderDifficulty() {
+      // 문제별 집계 (subject + year + number)
+      const qMap = {};
+      allAttempts.forEach(a => {
+        const subj = dS(a.subject || a.questionData?.subject || '');
+        const year = a.year || a.questionData?.year || '';
+        const num = a.questionNumber || a.questionData?.number || '';
+        if (!subj || !year || !num) return;
+        const key = `${year}_${subj}_${num}`;
+        if (!qMap[key]) qMap[key] = { year, subject: subj, number: num, total: 0, correct: 0, wrongChoices: {} };
+        qMap[key].total++;
+        if (a.isCorrect) qMap[key].correct++;
+        else {
+          const ans = a.userAnswer ?? a.questionData?.userAnswer;
+          if (ans !== undefined && ans !== null && ans >= 0) {
+            qMap[key].wrongChoices[ans] = (qMap[key].wrongChoices[ans] || 0) + 1;
+          }
+        }
+      });
+
+      const questions = Object.values(qMap).filter(q => q.total >= 5);
+      questions.forEach(q => q.acc = Math.round(q.correct / q.total * 100));
+
+      // 난이도 분포
+      const hard = questions.filter(q => q.acc < 40).length;
+      const medium = questions.filter(q => q.acc >= 40 && q.acc < 70).length;
+      const easy = questions.filter(q => q.acc >= 70).length;
+
+      document.getElementById('diffDist').innerHTML = `
+        <div class="diff-grid">
+          <div class="diff-card" style="background:#ffe3e3;color:#c92a2a"><div class="diff-count">${hard}</div><div class="diff-label">어려움 (40% 미만)</div></div>
+          <div class="diff-card" style="background:#fff3bf;color:#e67700"><div class="diff-count">${medium}</div><div class="diff-label">보통 (40~70%)</div></div>
+          <div class="diff-card" style="background:#d3f9d8;color:#2b8a3e"><div class="diff-count">${easy}</div><div class="diff-label">쉬움 (70% 이상)</div></div>
+        </div>`;
+
+      // 가장 어려운 문제 TOP 15
+      const hardest = [...questions].sort((a, b) => a.acc - b.acc).slice(0, 15);
+      document.getElementById('hardestQ').innerHTML = hardest.length ? `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>순위</th><th>연도</th><th>과목</th><th>문제</th><th>정답률</th><th>응시</th><th>가장 많이 고른 오답</th></tr></thead><tbody>
+        ${hardest.map((q, i) => {
+          const topWrong = Object.entries(q.wrongChoices).sort((a, b) => b[1] - a[1])[0];
+          const topWrongStr = topWrong ? `${topWrong[0] * 1 + 1}번 (${Math.round(topWrong[1] / q.total * 100)}%)` : '-';
+          return `<tr><td>${i + 1}</td><td>${q.year}</td><td>${q.subject}</td><td>${q.number}번</td>
+            <td style="color:#c92a2a;font-weight:700">${q.acc}%</td><td>${q.total}</td><td>${topWrongStr}</td></tr>`;
+        }).join('')}
+        </tbody></table></div>` : '<div class="empty">데이터 부족</div>';
+
+      // 가장 많이 선택된 오답 TOP 15
+      const wrongList = [];
+      questions.forEach(q => {
+        Object.entries(q.wrongChoices).forEach(([choice, count]) => {
+          wrongList.push({ ...q, choice: Number(choice), choiceCount: count, choicePct: Math.round(count / q.total * 100) });
+        });
+      });
+      wrongList.sort((a, b) => b.choicePct - a.choicePct);
+
+      document.getElementById('wrongChoice').innerHTML = wrongList.length ? `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>연도</th><th>과목</th><th>문제</th><th>오답 보기</th><th>선택률</th><th>정답률</th></tr></thead><tbody>
+        ${wrongList.slice(0, 15).map(w => `<tr><td>${w.year}</td><td>${w.subject}</td><td>${w.number}번</td>
+          <td style="color:#e67700;font-weight:700">${w.choice + 1}번</td>
+          <td>${w.choicePct}%</td><td>${w.acc}%</td></tr>`).join('')}
+        </tbody></table></div>` : '';
+
+      // 연도별 평균 난이도
+      const yearAcc = {};
+      questions.forEach(q => {
+        if (!yearAcc[q.year]) yearAcc[q.year] = { total: 0, correct: 0 };
+        yearAcc[q.year].total += q.total;
+        yearAcc[q.year].correct += q.correct;
+      });
+      const years = Object.keys(yearAcc).sort();
+      const maxTotal = Math.max(...years.map(y => yearAcc[y].total));
+
+      document.getElementById('yearDiff').innerHTML = `<div class="bar-chart">
+        ${years.map(y => {
+          const acc = Math.round(yearAcc[y].correct / yearAcc[y].total * 100);
+          const color = acc < 50 ? '#e03131' : acc < 65 ? '#f59f00' : '#37b24d';
+          return `<div class="bar-row">
+            <span class="bar-label">${y}년</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${acc}%;background:${color}">${acc}%</div></div>
+            <span class="bar-val">${yearAcc[y].total.toLocaleString()}건</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+
+    // ── 2. 과목 취약점 히트맵 ──
+    function renderHeatmap() {
+      const matrix = {}; // subject → year → {total, correct}
+      const subjects = new Set(), years = new Set();
+
+      allAttempts.forEach(a => {
+        const subj = dS(a.subject || a.questionData?.subject || '');
+        const year = a.year || a.questionData?.year || '';
+        if (!subj || !year) return;
+        subjects.add(subj); years.add(year);
+        const key = `${subj}_${year}`;
+        if (!matrix[key]) matrix[key] = { total: 0, correct: 0 };
+        matrix[key].total++;
+        if (a.isCorrect) matrix[key].correct++;
+      });
+
+      const sortedYears = [...years].sort();
+      const subjStats = {};
+      [...subjects].forEach(s => {
+        let t = 0, c = 0;
+        sortedYears.forEach(y => { const m = matrix[`${s}_${y}`]; if (m) { t += m.total; c += m.correct; }});
+        subjStats[s] = { total: t, correct: c, acc: t > 0 ? Math.round(c / t * 100) : 0 };
+      });
+      const sortedSubjects = [...subjects].sort((a, b) => subjStats[a].acc - subjStats[b].acc);
+
+      const cols = sortedYears.length + 2;
+      let html = `<div class="heatmap" style="grid-template-columns:120px repeat(${sortedYears.length},1fr) 60px">`;
+      // Header
+      html += `<div class="heatmap-cell heatmap-header">과목</div>`;
+      sortedYears.forEach(y => { html += `<div class="heatmap-cell heatmap-header">${y}</div>`; });
+      html += `<div class="heatmap-cell heatmap-header">평균</div>`;
+
+      // Rows
+      sortedSubjects.forEach(s => {
+        html += `<div class="heatmap-cell" style="text-align:left;font-weight:600;font-size:12px">${s}</div>`;
+        sortedYears.forEach(y => {
+          const m = matrix[`${s}_${y}`];
+          if (m && m.total >= 3) {
+            const acc = Math.round(m.correct / m.total * 100);
+            const bg = accColor(acc);
+            html += `<div class="heatmap-cell" style="background:${bg};color:#fff">${acc}%</div>`;
+          } else {
+            html += `<div class="heatmap-cell" style="background:#f1f3f5;color:#adb5bd">-</div>`;
+          }
+        });
+        const avg = subjStats[s];
+        const bg = accColor(avg.acc);
+        html += `<div class="heatmap-cell" style="background:${bg};color:#fff;font-weight:700">${avg.acc}%</div>`;
+      });
+      html += '</div>';
+      document.getElementById('heatmapArea').innerHTML = html;
+
+      // 과목별 랭킹
+      document.getElementById('subjectRank').innerHTML = `<div class="bar-chart">
+        ${sortedSubjects.map(s => {
+          const a = subjStats[s];
+          const color = a.acc < 50 ? '#e03131' : a.acc < 65 ? '#f59f00' : '#37b24d';
+          return `<div class="bar-row">
+            <span class="bar-label" style="min-width:90px">${s}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${a.acc}%;background:${color}">${a.acc}%</div></div>
+            <span class="bar-val">${a.total.toLocaleString()}건</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+
+    function accColor(acc) {
+      if (acc >= 80) return '#2b8a3e';
+      if (acc >= 70) return '#37b24d';
+      if (acc >= 60) return '#74b816';
+      if (acc >= 50) return '#f59f00';
+      if (acc >= 40) return '#e67700';
+      return '#e03131';
+    }
+
+    // ── 3. 시간대/요일 ──
+    function renderTime() {
+      const hourData = Array(24).fill(null).map(() => ({ total: 0, correct: 0 }));
+      const dayData = Array(7).fill(null).map(() => ({ total: 0, correct: 0 }));
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+      allAttempts.forEach(a => {
+        const ts = a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp ? new Date(a.timestamp) : null;
+        if (!ts || isNaN(ts.getTime())) return;
+        const h = ts.getHours();
+        const d = ts.getDay();
+        hourData[h].total++;
+        dayData[d].total++;
+        if (a.isCorrect) { hourData[h].correct++; dayData[d].correct++; }
+      });
+
+      const maxHour = Math.max(...hourData.map(h => h.total));
+      const maxDay = Math.max(...dayData.map(d => d.total));
+
+      // 시간대별 분포
+      document.getElementById('hourChart').innerHTML = `<div class="bar-chart">
+        ${hourData.map((h, i) => {
+          const pct = maxHour > 0 ? Math.round(h.total / maxHour * 100) : 0;
+          const label = `${String(i).padStart(2, '0')}시`;
+          const color = i >= 22 || i < 6 ? '#845ef7' : i < 12 ? '#339af0' : i < 18 ? '#37b24d' : '#f59f00';
+          return `<div class="bar-row">
+            <span class="bar-label">${label}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}">${h.total > 0 ? h.total.toLocaleString() : ''}</div></div>
+            <span class="bar-val">${h.total > 0 ? Math.round(h.correct / h.total * 100) + '% 정답' : '-'}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+      // 요일별 분포
+      document.getElementById('dayChart').innerHTML = `<div class="bar-chart">
+        ${dayData.map((d, i) => {
+          const pct = maxDay > 0 ? Math.round(d.total / maxDay * 100) : 0;
+          const color = i === 0 ? '#e03131' : i === 6 ? '#339af0' : '#495057';
+          return `<div class="bar-row">
+            <span class="bar-label">${dayNames[i]}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}">${d.total > 0 ? d.total.toLocaleString() : ''}</div></div>
+            <span class="bar-val">${d.total > 0 ? Math.round(d.correct / d.total * 100) + '% 정답' : '-'}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+      // 시간대별 정답률
+      const accHours = hourData.map((h, i) => ({ hour: i, acc: h.total >= 10 ? Math.round(h.correct / h.total * 100) : null, total: h.total }))
+        .filter(h => h.acc !== null);
+
+      if (accHours.length) {
+        const best = accHours.reduce((a, b) => a.acc > b.acc ? a : b);
+        const worst = accHours.reduce((a, b) => a.acc < b.acc ? a : b);
+        document.getElementById('hourAcc').innerHTML = `
+          <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+            <div class="stat-box" style="border:2px solid #d3f9d8"><div class="label">정답률 최고 시간대</div><div class="value" style="color:#2b8a3e">${best.hour}시</div><div class="sub">${best.acc}% (${best.total.toLocaleString()}건)</div></div>
+            <div class="stat-box" style="border:2px solid #ffe3e3"><div class="label">정답률 최저 시간대</div><div class="value" style="color:#c92a2a">${worst.hour}시</div><div class="sub">${worst.acc}% (${worst.total.toLocaleString()}건)</div></div>
+          </div>`;
+      }
+    }
+
+    // ── 4. 사용자 세그먼트 ──
+    function renderSegment() {
+      const users = Object.values(userMap);
+      const now = Date.now();
+      const purchaseUserIds = new Set(allPurchases.filter(p => p.status !== 'refunded').map(p => p.userId));
+
+      const segments = {
+        heavy: { label: '헤비유저', desc: '500문제 이상', color: '#1D2F4E', users: [] },
+        regular: { label: '일반', desc: '100~499문제', color: '#339af0', users: [] },
+        light: { label: '가벼운', desc: '1~99문제', color: '#37b24d', users: [] },
+        inactive: { label: '비활성', desc: '30일+ 미접속', color: '#868e96', users: [] }
+      };
+
+      users.forEach(u => {
+        const lastAct = u.lastActivity?.toDate ? u.lastActivity.toDate() : u.lastActivity ? new Date(u.lastActivity) : null;
+        const daysSince = lastAct ? Math.floor((now - lastAct.getTime()) / 86400000) : 999;
+        const cnt = u.attemptCount || 0;
+        const acc = cnt > 0 ? Math.round((u.correctCount || 0) / cnt * 100) : 0;
+        const userData = { ...u, daysSince, acc, hasPurchase: purchaseUserIds.has(u.userId) };
+
+        if (daysSince > 30) segments.inactive.users.push(userData);
+        else if (cnt >= 500) segments.heavy.users.push(userData);
+        else if (cnt >= 100) segments.regular.users.push(userData);
+        else segments.light.users.push(userData);
+      });
+
+      document.getElementById('segCards').innerHTML = `<div class="seg-grid">
+        ${Object.values(segments).map(s => {
+          const avgAcc = s.users.length > 0 ? Math.round(s.users.reduce((sum, u) => sum + u.acc, 0) / s.users.length) : 0;
+          const purchPct = s.users.length > 0 ? Math.round(s.users.filter(u => u.hasPurchase).length / s.users.length * 100) : 0;
+          return `<div class="seg-card" style="background:${s.color};color:#fff">
+            <div class="seg-count">${s.users.length}명</div>
+            <div class="seg-label">${s.label} (${s.desc})</div>
+            <div class="seg-detail">평균 정답률 ${avgAcc}% · 구매율 ${purchPct}%</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+      // 세그먼트별 상세
+      document.getElementById('segDetail').innerHTML = `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>세그먼트</th><th>인원</th><th>평균 풀이</th><th>평균 정답률</th><th>구매 전환율</th></tr></thead><tbody>
+        ${Object.values(segments).map(s => {
+          const avgCnt = s.users.length > 0 ? Math.round(s.users.reduce((sum, u) => sum + (u.attemptCount || 0), 0) / s.users.length) : 0;
+          const avgAcc = s.users.length > 0 ? Math.round(s.users.reduce((sum, u) => sum + u.acc, 0) / s.users.length) : 0;
+          const purchPct = s.users.length > 0 ? Math.round(s.users.filter(u => u.hasPurchase).length / s.users.length * 100) : 0;
+          return `<tr><td><strong>${s.label}</strong></td><td>${s.users.length}명</td><td>${avgCnt.toLocaleString()}</td><td>${avgAcc}%</td><td>${purchPct}%</td></tr>`;
+        }).join('')}
+        </tbody></table></div>`;
+
+      // 이탈 위험
+      const churnUsers = segments.inactive.users.filter(u => u.hasPurchase).sort((a, b) => b.daysSince - a.daysSince);
+      document.getElementById('churnRisk').innerHTML = churnUsers.length ? `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>이름</th><th>이메일</th><th>풀이 수</th><th>정답률</th><th>미접속</th></tr></thead><tbody>
+        ${churnUsers.slice(0, 20).map(u => `<tr>
+          <td>${u.userName || '-'}</td><td>${u.userEmail || '-'}</td>
+          <td>${(u.attemptCount || 0).toLocaleString()}</td><td>${u.acc}%</td>
+          <td style="color:#c92a2a;font-weight:700">${u.daysSince}일</td></tr>`).join('')}
+        </tbody></table></div>` : '<div class="empty">이탈 위험 사용자 없음</div>';
+    }
+
+    // ── 5. 합격률 추정 ──
+    function calcPassResults() {
+      let passed = 0, total = 0;
+      allMockResults.forEach(r => {
+        if (!r.completed || !r.subjectResults) return;
+        total++;
+        const overallAcc = r.totalQuestions > 0 ? (r.correctCount / r.totalQuestions * 100) : 0;
+        if (overallAcc < 60) return;
+        const hasFail = Object.values(r.subjectResults).some(s => s.total > 0 && (s.correct / s.total * 100) < 40);
+        if (!hasFail) passed++;
+      });
+      return { passed, total };
+    }
+
+    function renderPassRate() {
+      // 연도별 합격률
+      const yearResults = {};
+      allMockResults.forEach(r => {
+        if (!r.completed || !r.subjectResults) return;
+        const year = r.year || '';
+        if (!year) return;
+        if (!yearResults[year]) yearResults[year] = { passed: 0, total: 0 };
+        yearResults[year].total++;
+
+        const overallAcc = r.totalQuestions > 0 ? (r.correctCount / r.totalQuestions * 100) : 0;
+        if (overallAcc < 60) return;
+        const hasFail = Object.values(r.subjectResults).some(s => s.total > 0 && (s.correct / s.total * 100) < 40);
+        if (!hasFail) yearResults[year].passed++;
+      });
+
+      const years = Object.keys(yearResults).sort();
+      if (years.length) {
+        const maxCount = Math.max(...years.map(y => yearResults[y].total));
+        document.getElementById('passChart').innerHTML = `
+          <div class="pass-chart">
+            ${years.map(y => {
+              const r = yearResults[y];
+              const pct = r.total > 0 ? Math.round(r.passed / r.total * 100) : 0;
+              const h = Math.max(pct * 1.6, 8);
+              const color = pct >= 60 ? '#37b24d' : pct >= 40 ? '#f59f00' : '#e03131';
+              return `<div class="pass-bar-group">
+                <div class="pass-bar-wrap"><div class="pass-bar" style="height:${h}px;background:${color}"><span class="pass-pct">${pct}%</span></div></div>
+                <div class="pass-year">${y}년</div>
+                <div style="font-size:11px;color:#868e96">${r.total}회</div>
+              </div>`;
+            }).join('')}
+          </div>
+          <p style="text-align:center;margin-top:16px;font-size:12px;color:#868e96">합격 기준: 전체 60% 이상 + 과목별 40% 이상</p>`;
+      } else {
+        document.getElementById('passChart').innerHTML = '<div class="empty">모의고사 데이터 없음</div>';
+      }
+
+      // 과목별 과락률
+      const subjFail = {};
+      allMockResults.forEach(r => {
+        if (!r.completed || !r.subjectResults) return;
+        Object.entries(r.subjectResults).forEach(([subj, s]) => {
+          if (!subjFail[subj]) subjFail[subj] = { total: 0, failed: 0 };
+          if (s.total > 0) {
+            subjFail[subj].total++;
+            if ((s.correct / s.total * 100) < 40) subjFail[subj].failed++;
+          }
+        });
+      });
+
+      const sortedFail = Object.entries(subjFail).sort((a, b) => {
+        const rateA = a[1].total > 0 ? b[1].failed / b[1].total : 0;
+        const rateB = b[1].total > 0 ? a[1].failed / a[1].total : 0;
+        return rateA - rateB;
+      }).sort((a, b) => {
+        return (b[1].total > 0 ? b[1].failed / b[1].total : 0) - (a[1].total > 0 ? a[1].failed / a[1].total : 0);
+      });
+
+      document.getElementById('failSubject').innerHTML = sortedFail.length ? `<div class="bar-chart">
+        ${sortedFail.map(([subj, s]) => {
+          const rate = s.total > 0 ? Math.round(s.failed / s.total * 100) : 0;
+          const color = rate > 30 ? '#e03131' : rate > 15 ? '#f59f00' : '#37b24d';
+          return `<div class="bar-row">
+            <span class="bar-label" style="min-width:90px">${subj}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.max(rate, 2)}%;background:${color}">${rate}%</div></div>
+            <span class="bar-val">${s.failed}/${s.total}회</span>
+          </div>`;
+        }).join('')}
+      </div>` : '<div class="empty">데이터 없음</div>';
+
+      // 점수 분포 히스토그램
+      const scores = allMockResults.filter(r => r.completed && r.totalQuestions > 0)
+        .map(r => Math.round(r.correctCount / r.totalQuestions * 100));
+
+      if (scores.length) {
+        const bins = Array(10).fill(0); // 0-10, 10-20, ..., 90-100
+        scores.forEach(s => { const idx = Math.min(Math.floor(s / 10), 9); bins[idx]++; });
+        const maxBin = Math.max(...bins);
+
+        document.getElementById('scoreDist').innerHTML = `
+          <div class="bar-chart">
+            ${bins.map((count, i) => {
+              const label = `${i * 10}-${i * 10 + 9}`;
+              const pct = maxBin > 0 ? Math.round(count / maxBin * 100) : 0;
+              const color = i * 10 >= 60 ? '#37b24d' : i * 10 >= 40 ? '#f59f00' : '#e03131';
+              const isPassLine = i === 6;
+              return `<div class="bar-row">
+                <span class="bar-label">${label}%</span>
+                <div class="bar-track" ${isPassLine ? 'style="border-left:3px solid #2b8a3e"' : ''}>
+                  <div class="bar-fill" style="width:${pct}%;background:${color}">${count > 0 ? count + '명' : ''}</div>
+                </div>
+                <span class="bar-val">${count}회</span>
+              </div>`;
+            }).join('')}
+          </div>
+          <p style="text-align:center;margin-top:8px;font-size:12px;color:#868e96">총 ${scores.length}회 모의고사 · 평균 ${Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)}점</p>`;
+      } else {
+        document.getElementById('scoreDist').innerHTML = '<div class="empty">모의고사 데이터 없음</div>';
+      }
+    }
+    // ── 6. 학습 효과 (재시도 패턴) ──
+    function renderRetry() {
+      // 사용자별 + 문제별 시도 그룹
+      const userQMap = {}; // userId_year_subject_number → [{isCorrect, timestamp}]
+      allAttempts.forEach(a => {
+        if (!a.userId) return;
+        const subj = dS(a.subject || a.questionData?.subject || '');
+        const year = a.year || a.questionData?.year || '';
+        const num = a.questionNumber || a.questionData?.number || '';
+        if (!subj || !year || !num) return;
+        const key = `${a.userId}_${year}_${subj}_${num}`;
+        if (!userQMap[key]) userQMap[key] = { subject: subj, year, number: num, attempts: [] };
+        const ts = a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp ? new Date(a.timestamp) : new Date(0);
+        userQMap[key].attempts.push({ isCorrect: a.isCorrect, ts });
+      });
+
+      // 시도 횟수별 정답률
+      const byNth = {}; // nth → {total, correct}
+      Object.values(userQMap).forEach(q => {
+        q.attempts.sort((a, b) => a.ts - b.ts);
+        q.attempts.forEach((a, i) => {
+          const nth = Math.min(i + 1, 5); // 5회 이상은 5로 묶기
+          if (!byNth[nth]) byNth[nth] = { total: 0, correct: 0 };
+          byNth[nth].total++;
+          if (a.isCorrect) byNth[nth].correct++;
+        });
+      });
+
+      const nths = Object.keys(byNth).sort((a, b) => a - b);
+      const labels = { 1: '1회차', 2: '2회차', 3: '3회차', 4: '4회차', 5: '5회+' };
+      document.getElementById('retryChart').innerHTML = nths.length ? `<div class="bar-chart">
+        ${nths.map(n => {
+          const d = byNth[n];
+          const acc = Math.round(d.correct / d.total * 100);
+          const color = acc >= 70 ? '#37b24d' : acc >= 50 ? '#f59f00' : '#e03131';
+          return `<div class="bar-row">
+            <span class="bar-label">${labels[n] || n + '회차'}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${acc}%;background:${color}">${acc}%</div></div>
+            <span class="bar-val">${d.total.toLocaleString()}건</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <p style="text-align:center;margin-top:8px;font-size:12px;color:#868e96">같은 문제를 반복 풀었을 때 n회차별 정답률</p>` : '<div class="empty">데이터 부족</div>';
+
+      // 반복해도 안 되는 문제
+      const stubborn = [];
+      const qAgg = {}; // year_subject_number → {total attempts across users, correct, retryUsers}
+      Object.values(userQMap).forEach(q => {
+        if (q.attempts.length < 3) return;
+        const key = `${q.year}_${q.subject}_${q.number}`;
+        if (!qAgg[key]) qAgg[key] = { year: q.year, subject: q.subject, number: q.number, total: 0, correct: 0, users: 0 };
+        qAgg[key].users++;
+        q.attempts.forEach(a => { qAgg[key].total++; if (a.isCorrect) qAgg[key].correct++; });
+      });
+      Object.values(qAgg).filter(q => q.total >= 5 && (q.correct / q.total * 100) < 40)
+        .sort((a, b) => (a.correct / a.total) - (b.correct / b.total))
+        .slice(0, 15).forEach(q => stubborn.push(q));
+
+      document.getElementById('stubbornQ').innerHTML = stubborn.length ? `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>연도</th><th>과목</th><th>문제</th><th>재시도자</th><th>총 시도</th><th>정답률</th></tr></thead><tbody>
+        ${stubborn.map(q => {
+          const acc = Math.round(q.correct / q.total * 100);
+          return `<tr><td>${q.year}</td><td>${q.subject}</td><td>${q.number}번</td><td>${q.users}명</td>
+            <td>${q.total}</td><td style="color:#c92a2a;font-weight:700">${acc}%</td></tr>`;
+        }).join('')}
+        </tbody></table></div>` : '<div class="empty">해당 문제 없음</div>';
+
+      // 과목별 학습 효과 지수 (1회차 → 2회차+ 정답률 향상도)
+      const subjEffect = {};
+      Object.values(userQMap).forEach(q => {
+        if (q.attempts.length < 2) return;
+        const subj = q.subject;
+        if (!subjEffect[subj]) subjEffect[subj] = { first: { t: 0, c: 0 }, later: { t: 0, c: 0 } };
+        subjEffect[subj].first.t++;
+        if (q.attempts[0].isCorrect) subjEffect[subj].first.c++;
+        q.attempts.slice(1).forEach(a => { subjEffect[subj].later.t++; if (a.isCorrect) subjEffect[subj].later.c++; });
+      });
+
+      const effects = Object.entries(subjEffect).map(([subj, d]) => {
+        const firstAcc = d.first.t > 0 ? Math.round(d.first.c / d.first.t * 100) : 0;
+        const laterAcc = d.later.t > 0 ? Math.round(d.later.c / d.later.t * 100) : 0;
+        return { subj, firstAcc, laterAcc, improvement: laterAcc - firstAcc };
+      }).sort((a, b) => b.improvement - a.improvement);
+
+      document.getElementById('retryEffect').innerHTML = effects.length ? `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>과목</th><th>1회차 정답률</th><th>2회차+ 정답률</th><th>향상도</th></tr></thead><tbody>
+        ${effects.map(e => {
+          const color = e.improvement > 0 ? '#2b8a3e' : e.improvement < 0 ? '#c92a2a' : '#868e96';
+          const arrow = e.improvement > 0 ? '▲' : e.improvement < 0 ? '▼' : '─';
+          return `<tr><td>${e.subj}</td><td>${e.firstAcc}%</td><td>${e.laterAcc}%</td>
+            <td style="color:${color};font-weight:700">${arrow} ${Math.abs(e.improvement)}%p</td></tr>`;
+        }).join('')}
+        </tbody></table></div>` : '<div class="empty">데이터 부족</div>';
+    }
+
+    // ── 7. 디바이스 분석 ──
+    function renderDevice() {
+      const devices = { mobile: { total: 0, correct: 0 }, desktop: { total: 0, correct: 0 }, tablet: { total: 0, correct: 0 }, other: { total: 0, correct: 0 } };
+
+      allAttempts.forEach(a => {
+        const ua = (a.device || a.userAgent || '').toLowerCase();
+        let type = 'other';
+        if (/ipad|tablet/i.test(ua)) type = 'tablet';
+        else if (/mobile|iphone|android.*mobile/i.test(ua)) type = 'mobile';
+        else if (/windows|macintosh|linux/i.test(ua) && !/mobile/i.test(ua)) type = 'desktop';
+        devices[type].total++;
+        if (a.isCorrect) devices[type].correct++;
+      });
+
+      const total = Object.values(devices).reduce((s, d) => s + d.total, 0);
+      const deviceLabels = { mobile: '모바일', desktop: '데스크톱', tablet: '태블릿', other: '기타' };
+      const deviceColors = { mobile: '#339af0', desktop: '#1D2F4E', tablet: '#37b24d', other: '#868e96' };
+      const sorted = Object.entries(devices).filter(([, d]) => d.total > 0).sort((a, b) => b[1].total - a[1].total);
+
+      document.getElementById('deviceRatio').innerHTML = `<div class="seg-grid">
+        ${sorted.map(([type, d]) => {
+          const pct = total > 0 ? Math.round(d.total / total * 100) : 0;
+          return `<div class="seg-card" style="background:${deviceColors[type]};color:#fff">
+            <div class="seg-count">${pct}%</div>
+            <div class="seg-label">${deviceLabels[type]}</div>
+            <div class="seg-detail">${d.total.toLocaleString()}건</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+      document.getElementById('devicePerf').innerHTML = `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>디바이스</th><th>풀이 수</th><th>비율</th><th>정답률</th></tr></thead><tbody>
+        ${sorted.map(([type, d]) => {
+          const pct = total > 0 ? Math.round(d.total / total * 100) : 0;
+          const acc = d.total > 0 ? Math.round(d.correct / d.total * 100) : 0;
+          return `<tr><td><strong>${deviceLabels[type]}</strong></td><td>${d.total.toLocaleString()}</td><td>${pct}%</td><td>${acc}%</td></tr>`;
+        }).join('')}
+        </tbody></table></div>`;
+    }
+
+    // ── 8. DAU/WAU/MAU ──
+    function renderDAU() {
+      const now = new Date();
+
+      // daily_visits 기반 DAU
+      const dauData = [];
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const visit = dailyVisits[key];
+        const count = visit?.users ? Object.keys(visit.users).length : 0;
+        dauData.push({ date: key, count, label: `${d.getMonth() + 1}/${d.getDate()}` });
+      }
+
+      const maxDAU = Math.max(...dauData.map(d => d.count), 1);
+      document.getElementById('dauChart').innerHTML = `<div class="bar-chart">
+        ${dauData.map(d => {
+          const pct = Math.round(d.count / maxDAU * 100);
+          return `<div class="bar-row">
+            <span class="bar-label" style="min-width:45px">${d.label}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:#339af0">${d.count > 0 ? d.count : ''}</div></div>
+            <span class="bar-val">${d.count}명</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+      // WAU (최근 12주)
+      const wauData = [];
+      for (let w = 11; w >= 0; w--) {
+        const weekUsers = new Set();
+        for (let d = 0; d < 7; d++) {
+          const date = new Date(now); date.setDate(date.getDate() - (w * 7 + d));
+          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          const visit = dailyVisits[key];
+          if (visit?.users) Object.keys(visit.users).forEach(uid => weekUsers.add(uid));
+        }
+        const weekEnd = new Date(now); weekEnd.setDate(weekEnd.getDate() - w * 7);
+        wauData.push({ label: `${weekEnd.getMonth() + 1}/${weekEnd.getDate()}주`, count: weekUsers.size });
+      }
+
+      const maxWAU = Math.max(...wauData.map(d => d.count), 1);
+      document.getElementById('wauChart').innerHTML = `<div class="bar-chart">
+        ${wauData.map(d => {
+          const pct = Math.round(d.count / maxWAU * 100);
+          return `<div class="bar-row">
+            <span class="bar-label" style="min-width:55px">${d.label}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:#7048e8">${d.count > 0 ? d.count : ''}</div></div>
+            <span class="bar-val">${d.count}명</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+      // MAU (최근 6개월)
+      const mauData = [];
+      for (let m = 5; m >= 0; m--) {
+        const monthUsers = new Set();
+        const targetMonth = new Date(now.getFullYear(), now.getMonth() - m, 1);
+        const daysInMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0).getDate();
+        for (let d = 1; d <= daysInMonth; d++) {
+          const key = `${targetMonth.getFullYear()}-${String(targetMonth.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const visit = dailyVisits[key];
+          if (visit?.users) Object.keys(visit.users).forEach(uid => monthUsers.add(uid));
+        }
+        mauData.push({ label: `${targetMonth.getFullYear()}.${targetMonth.getMonth() + 1}`, count: monthUsers.size });
+      }
+
+      const maxMAU = Math.max(...mauData.map(d => d.count), 1);
+      document.getElementById('mauChart').innerHTML = `<div class="bar-chart">
+        ${mauData.map(d => {
+          const pct = Math.round(d.count / maxMAU * 100);
+          return `<div class="bar-row">
+            <span class="bar-label" style="min-width:55px">${d.label}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:#e64980">${d.count > 0 ? d.count : ''}</div></div>
+            <span class="bar-val">${d.count}명</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+      // 리텐션 요약
+      const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const todayCount = dailyVisits[todayKey]?.users ? Object.keys(dailyVisits[todayKey].users).length : 0;
+      const thisWeekCount = wauData.length ? wauData[wauData.length - 1].count : 0;
+      const thisMonthCount = mauData.length ? mauData[mauData.length - 1].count : 0;
+      const lastMonthCount = mauData.length >= 2 ? mauData[mauData.length - 2].count : 0;
+      const monthGrowth = lastMonthCount > 0 ? Math.round((thisMonthCount - lastMonthCount) / lastMonthCount * 100) : 0;
+      const stickiness = thisMonthCount > 0 ? Math.round(dauData.reduce((s, d) => s + d.count, 0) / 30 / thisMonthCount * 100) : 0;
+
+      document.getElementById('retentionSummary').innerHTML = `
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+          <div class="stat-box"><div class="label">오늘 DAU</div><div class="value">${todayCount}</div></div>
+          <div class="stat-box"><div class="label">이번 주 WAU</div><div class="value">${thisWeekCount}</div></div>
+          <div class="stat-box"><div class="label">이번 달 MAU</div><div class="value">${thisMonthCount}</div></div>
+          <div class="stat-box"><div class="label">전월 대비</div><div class="value" style="color:${monthGrowth >= 0 ? '#2b8a3e' : '#c92a2a'}">${monthGrowth >= 0 ? '+' : ''}${monthGrowth}%</div></div>
+          <div class="stat-box"><div class="label">DAU/MAU</div><div class="value">${stickiness}%</div><div class="sub">서비스 점착도</div></div>
+        </div>`;
+    }
+
+    // ── 9. 합격 예측 스코어 ──
+    function renderPredict() {
+      // 사용자별 과목 정답률 계산
+      const userSubj = {}; // userId → { subjects: { subj: {t,c} }, totalAttempts, userName, userEmail }
+      allAttempts.forEach(a => {
+        if (!a.userId) return;
+        const subj = dS(a.subject || a.questionData?.subject || '');
+        if (!subj) return;
+        if (!userSubj[a.userId]) userSubj[a.userId] = { subjects: {}, total: 0, correct: 0, userName: a.userName, userEmail: a.userEmail };
+        if (!userSubj[a.userId].subjects[subj]) userSubj[a.userId].subjects[subj] = { t: 0, c: 0 };
+        userSubj[a.userId].subjects[subj].t++;
+        userSubj[a.userId].subjects[subj].c += a.isCorrect ? 1 : 0;
+        userSubj[a.userId].total++;
+        userSubj[a.userId].correct += a.isCorrect ? 1 : 0;
+        if (a.userName) userSubj[a.userId].userName = a.userName;
+        if (a.userEmail) userSubj[a.userId].userEmail = a.userEmail;
+      });
+
+      // 합격 예측: 전체 60% 이상 + 모든 과목 40% 이상 + 풀이량 보정
+      const predictions = [];
+      Object.entries(userSubj).forEach(([uid, u]) => {
+        if (u.total < 20) return; // 최소 20문제 이상 풀어야 예측
+        const overallAcc = u.total > 0 ? u.correct / u.total * 100 : 0;
+        const subjEntries = Object.entries(u.subjects);
+        const failSubjects = subjEntries.filter(([, s]) => s.t >= 5 && (s.c / s.t * 100) < 40);
+        const weakSubjects = subjEntries.filter(([, s]) => s.t >= 5 && (s.c / s.t * 100) < 60);
+
+        // 점수 산출: 기본 정답률 + 풀이량 보정 + 과락 패널티
+        let score = overallAcc;
+        if (u.total >= 500) score += 5;
+        else if (u.total >= 200) score += 3;
+        score -= failSubjects.length * 10;
+        score = Math.max(0, Math.min(100, Math.round(score)));
+
+        const status = score >= 70 ? 'safe' : score >= 50 ? 'warning' : 'danger';
+        predictions.push({ uid, ...u, overallAcc: Math.round(overallAcc), score, status, failSubjects: failSubjects.map(([s]) => s), weakSubjects: weakSubjects.map(([s]) => s) });
+      });
+
+      predictions.sort((a, b) => b.score - a.score);
+
+      // 상태별 요약
+      const safe = predictions.filter(p => p.status === 'safe').length;
+      const warn = predictions.filter(p => p.status === 'warning').length;
+      const danger = predictions.filter(p => p.status === 'danger').length;
+
+      document.getElementById('predictList').innerHTML = predictions.length ? `
+        <div class="diff-grid" style="margin-bottom:20px">
+          <div class="diff-card" style="background:#d3f9d8;color:#2b8a3e"><div class="diff-count">${safe}</div><div class="diff-label">합격 안전권 (70+)</div></div>
+          <div class="diff-card" style="background:#fff3bf;color:#e67700"><div class="diff-count">${warn}</div><div class="diff-label">경계 (50~69)</div></div>
+          <div class="diff-card" style="background:#ffe3e3;color:#c92a2a"><div class="diff-count">${danger}</div><div class="diff-label">위험 (50 미만)</div></div>
+        </div>
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>이름</th><th>이메일</th><th>풀이</th><th>정답률</th><th>예측 점수</th><th>과락 위험 과목</th></tr></thead><tbody>
+        ${predictions.slice(0, 30).map(p => {
+          const scoreColor = p.status === 'safe' ? '#2b8a3e' : p.status === 'warning' ? '#e67700' : '#c92a2a';
+          const failStr = p.failSubjects.length ? `<span style="color:#c92a2a">${p.failSubjects.join(', ')}</span>` : '<span style="color:#2b8a3e">없음</span>';
+          return `<tr><td>${p.userName || '-'}</td><td style="font-size:11px">${p.userEmail || '-'}</td>
+            <td>${p.total.toLocaleString()}</td><td>${p.overallAcc}%</td>
+            <td style="color:${scoreColor};font-weight:700;font-size:16px">${p.score}</td>
+            <td>${failStr}</td></tr>`;
+        }).join('')}
+        </tbody></table></div>
+        ${predictions.length > 30 ? `<p style="text-align:center;margin-top:8px;font-size:12px;color:#868e96">상위 30명 표시 (전체 ${predictions.length}명)</p>` : ''}` : '<div class="empty">데이터 부족 (20문제 이상 풀어야 예측)</div>';
+
+      // 과락 위험 과목 분포
+      const riskCount = {};
+      predictions.forEach(p => {
+        p.failSubjects.forEach(s => { riskCount[s] = (riskCount[s] || 0) + 1; });
+      });
+      const riskSorted = Object.entries(riskCount).sort((a, b) => b[1] - a[1]);
+      const maxRisk = riskSorted.length ? riskSorted[0][1] : 1;
+
+      document.getElementById('predictRisk').innerHTML = riskSorted.length ? `<div class="bar-chart">
+        ${riskSorted.map(([subj, count]) => {
+          const pct = Math.round(count / maxRisk * 100);
+          return `<div class="bar-row">
+            <span class="bar-label" style="min-width:90px">${subj}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:#e03131">${count}명</div></div>
+            <span class="bar-val">${Math.round(count / predictions.length * 100)}%</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <p style="text-align:center;margin-top:8px;font-size:12px;color:#868e96">해당 과목에서 40% 미만 정답률을 보이는 사용자 수</p>` : '<div class="empty">과락 위험 사용자 없음</div>';
+    }
+
+    // ── 10. 강의 효과 분석 ──
+    function renderLectureEffect() {
+      // 상품ID → 과목명 매핑
+      const productToSubject = {
+        'video_anatomy': '기능해부학', 'health-anatomy-lecture': '기능해부학',
+        'video_injury': '운동상해', 'health-injury-lecture': '운동상해',
+        'video_physio': '운동생리학', 'health-physiology-lecture': '운동생리학',
+        'video_load': '운동부하검사', 'health-stress-test-lecture': '운동부하검사',
+        'video_ecg': '운동부하검사', 'health-ecg-lecture': '운동부하검사',
+        'video_patho': '병태생리학', 'health-pathology-lecture': '병태생리학',
+        'video_prescript': '운동처방론', 'health-prescription-lecture': '운동처방론',
+        'video_health': '건강체력평가', 'health-fitness-eval-lecture': '건강체력평가'
+      };
+
+      // 구매자 userId → 구매한 과목 set
+      const buyerSubjects = {};
+      allPurchases.filter(p => p.status !== 'refunded' && p.productType === 'video').forEach(p => {
+        const subj = productToSubject[p.productId];
+        if (!subj || !p.userId) return;
+        if (!buyerSubjects[p.userId]) buyerSubjects[p.userId] = new Set();
+        buyerSubjects[p.userId].add(subj);
+      });
+
+      // 과목별: 구매자 정답률 vs 비구매자 정답률
+      const subjCompare = {};
+      allAttempts.forEach(a => {
+        if (!a.userId) return;
+        const subj = dS(a.subject || a.questionData?.subject || '');
+        if (!subj) return;
+        if (!subjCompare[subj]) subjCompare[subj] = { buyer: { t: 0, c: 0 }, nonBuyer: { t: 0, c: 0 } };
+        const isBuyer = buyerSubjects[a.userId]?.has(subj);
+        const group = isBuyer ? 'buyer' : 'nonBuyer';
+        subjCompare[subj][group].t++;
+        if (a.isCorrect) subjCompare[subj][group].c++;
+      });
+
+      const compareData = Object.entries(subjCompare)
+        .filter(([, d]) => d.buyer.t >= 10 && d.nonBuyer.t >= 10)
+        .map(([subj, d]) => {
+          const buyerAcc = Math.round(d.buyer.c / d.buyer.t * 100);
+          const nonBuyerAcc = Math.round(d.nonBuyer.c / d.nonBuyer.t * 100);
+          return { subj, buyerAcc, nonBuyerAcc, diff: buyerAcc - nonBuyerAcc, buyerCount: d.buyer.t, nonBuyerCount: d.nonBuyer.t };
+        })
+        .sort((a, b) => b.diff - a.diff);
+
+      document.getElementById('lectureCompare').innerHTML = compareData.length ? `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>과목</th><th>구매자 정답률</th><th>비구매자 정답률</th><th>차이</th><th>구매자 풀이</th><th>비구매자 풀이</th></tr></thead><tbody>
+        ${compareData.map(d => {
+          const color = d.diff > 0 ? '#2b8a3e' : d.diff < 0 ? '#c92a2a' : '#868e96';
+          const arrow = d.diff > 0 ? '▲' : d.diff < 0 ? '▼' : '─';
+          return `<tr><td><strong>${d.subj}</strong></td>
+            <td style="color:#2b8a3e;font-weight:700">${d.buyerAcc}%</td>
+            <td>${d.nonBuyerAcc}%</td>
+            <td style="color:${color};font-weight:700">${arrow} ${Math.abs(d.diff)}%p</td>
+            <td style="font-size:11px">${d.buyerCount.toLocaleString()}</td>
+            <td style="font-size:11px">${d.nonBuyerCount.toLocaleString()}</td></tr>`;
+        }).join('')}
+        </tbody></table></div>
+        <p style="text-align:center;margin-top:8px;font-size:12px;color:#868e96">해당 과목 강의를 구매한 사용자와 미구매 사용자의 정답률 비교</p>` : '<div class="empty">강의 구매자 데이터가 부족합니다 (과목별 10건 이상 필요)</div>';
+
+      // 강의 효과 랭킹
+      document.getElementById('lectureRank').innerHTML = compareData.length ? `<div class="bar-chart">
+        ${compareData.map(d => {
+          const color = d.diff > 10 ? '#2b8a3e' : d.diff > 0 ? '#74b816' : '#e03131';
+          const width = Math.max(Math.abs(d.diff) * 2, 5);
+          return `<div class="bar-row">
+            <span class="bar-label" style="min-width:90px">${d.subj}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.min(width, 100)}%;background:${color}">${d.diff > 0 ? '+' : ''}${d.diff}%p</div></div>
+            <span class="bar-val">${d.diff > 0 ? '효과 있음' : '데이터 부족'}</span>
+          </div>`;
+        }).join('')}
+      </div>` : '';
+    }
+
+    // ── 11. 고객 퍼널 ──
+    function renderFunnel() {
+      const totalVisitors = new Set();
+      Object.values(dailyVisits).forEach(dv => {
+        if (dv.users) Object.keys(dv.users).forEach(uid => totalVisitors.add(uid));
+      });
+
+      const solvers = new Set(allAttempts.map(a => a.userId).filter(Boolean));
+      const purchasers = new Set(allPurchases.filter(p => p.status !== 'refunded').map(p => p.userId).filter(Boolean));
+
+      const funnel = [
+        { label: '방문자 (총 고유)', count: totalVisitors.size, color: '#339af0' },
+        { label: '문제 풀이 시작', count: solvers.size, color: '#7048e8' },
+        { label: '구매 완료', count: purchasers.size, color: '#37b24d' }
+      ];
+      const maxFunnel = funnel[0].count || 1;
+
+      document.getElementById('funnelChart').innerHTML = `
+        <div style="max-width:500px;margin:0 auto">
+          ${funnel.map((f, i) => {
+            const pct = Math.round(f.count / maxFunnel * 100);
+            const convRate = i > 0 ? Math.round(f.count / funnel[i - 1].count * 100) : 100;
+            const width = Math.max(pct, 20);
+            return `<div style="margin-bottom:4px">
+              <div style="background:${f.color};color:#fff;padding:16px;border-radius:8px;text-align:center;width:${width}%;margin:0 auto;font-weight:600">
+                ${f.label}: ${f.count.toLocaleString()}명
+              </div>
+              ${i < funnel.length - 1 ? `<div style="text-align:center;padding:4px;font-size:12px;color:#868e96">▼ 전환율 ${convRate}%</div>` : ''}
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="stats-grid" style="margin-top:20px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+          <div class="stat-box"><div class="label">방문→풀이 전환</div><div class="value">${totalVisitors.size > 0 ? Math.round(solvers.size / totalVisitors.size * 100) : 0}%</div></div>
+          <div class="stat-box"><div class="label">풀이→구매 전환</div><div class="value">${solvers.size > 0 ? Math.round(purchasers.size / solvers.size * 100) : 0}%</div></div>
+          <div class="stat-box"><div class="label">전체 구매 전환율</div><div class="value">${totalVisitors.size > 0 ? Math.round(purchasers.size / totalVisitors.size * 100) : 0}%</div></div>
+        </div>`;
+
+      // 학습 여정: 첫 활동 → 구매까지 걸린 기간
+      const userFirstActivity = {};
+      allAttempts.forEach(a => {
+        if (!a.userId) return;
+        const ts = a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp ? new Date(a.timestamp) : null;
+        if (!ts || isNaN(ts.getTime())) return;
+        if (!userFirstActivity[a.userId] || ts < userFirstActivity[a.userId]) userFirstActivity[a.userId] = ts;
+      });
+
+      const journeys = [];
+      const prePurchaseAttempts = [];
+      allPurchases.filter(p => p.status !== 'refunded').forEach(p => {
+        if (!p.userId) return;
+        const purchaseDate = p.purchasedAt?.toDate ? p.purchasedAt.toDate() : p.purchasedAt ? new Date(p.purchasedAt) : null;
+        const firstAct = userFirstActivity[p.userId];
+        if (purchaseDate && firstAct) {
+          const days = Math.floor((purchaseDate - firstAct) / 86400000);
+          journeys.push(days);
+        }
+        // 구매 전 풀이 수
+        const userAttempts = allAttempts.filter(a => a.userId === p.userId);
+        const beforePurchase = purchaseDate ? userAttempts.filter(a => {
+          const ts = a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp ? new Date(a.timestamp) : null;
+          return ts && ts < purchaseDate;
+        }).length : userAttempts.length;
+        prePurchaseAttempts.push(beforePurchase);
+      });
+
+      const avgDays = journeys.length ? Math.round(journeys.reduce((s, d) => s + d, 0) / journeys.length) : 0;
+      const medianDays = journeys.length ? journeys.sort((a, b) => a - b)[Math.floor(journeys.length / 2)] : 0;
+      const avgPreAttempts = prePurchaseAttempts.length ? Math.round(prePurchaseAttempts.reduce((s, n) => s + n, 0) / prePurchaseAttempts.length) : 0;
+
+      // 기간별 분포
+      const dayBuckets = { '당일': 0, '1~3일': 0, '4~7일': 0, '1~2주': 0, '2주~1달': 0, '1달+': 0 };
+      journeys.forEach(d => {
+        if (d === 0) dayBuckets['당일']++;
+        else if (d <= 3) dayBuckets['1~3일']++;
+        else if (d <= 7) dayBuckets['4~7일']++;
+        else if (d <= 14) dayBuckets['1~2주']++;
+        else if (d <= 30) dayBuckets['2주~1달']++;
+        else dayBuckets['1달+']++;
+      });
+
+      document.getElementById('journeyStats').innerHTML = journeys.length ? `
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:20px">
+          <div class="stat-box"><div class="label">평균 가입→구매</div><div class="value">${avgDays}일</div></div>
+          <div class="stat-box"><div class="label">중간값</div><div class="value">${medianDays}일</div></div>
+          <div class="stat-box"><div class="label">구매 전 평균 풀이</div><div class="value">${avgPreAttempts}문제</div></div>
+        </div>
+        <h4 style="font-size:14px;color:#495057;margin-bottom:12px">가입→구매 기간 분포</h4>
+        <div class="bar-chart">
+          ${Object.entries(dayBuckets).map(([label, count]) => {
+            const pct = journeys.length > 0 ? Math.round(count / journeys.length * 100) : 0;
+            return `<div class="bar-row">
+              <span class="bar-label" style="min-width:70px">${label}</span>
+              <div class="bar-track"><div class="bar-fill" style="width:${Math.max(pct, 2)}%;background:#7048e8">${count > 0 ? count + '명' : ''}</div></div>
+              <span class="bar-val">${pct}%</span>
+            </div>`;
+          }).join('')}
+        </div>` : '<div class="empty">구매 데이터 부족</div>';
+    }
+
+    // ── 12. 고객 가치 (LTV) ──
+    function renderLTV() {
+      // 사용자별 총 결제액
+      const userLTV = {};
+      allPurchases.filter(p => p.status !== 'refunded').forEach(p => {
+        if (!p.userId) return;
+        if (!userLTV[p.userId]) userLTV[p.userId] = { total: 0, count: 0, userName: p.userName, userEmail: p.userEmail, products: [], firstPurchase: null, lastPurchase: null };
+        const amt = p.finalAmount || p.purchaseAmount || 0;
+        userLTV[p.userId].total += amt;
+        userLTV[p.userId].count++;
+        userLTV[p.userId].products.push(p.productId);
+        const pd = p.purchasedAt?.toDate ? p.purchasedAt.toDate() : p.purchasedAt ? new Date(p.purchasedAt) : null;
+        if (pd) {
+          if (!userLTV[p.userId].firstPurchase || pd < userLTV[p.userId].firstPurchase) userLTV[p.userId].firstPurchase = pd;
+          if (!userLTV[p.userId].lastPurchase || pd > userLTV[p.userId].lastPurchase) userLTV[p.userId].lastPurchase = pd;
+        }
+      });
+
+      const ltvList = Object.entries(userLTV).map(([uid, d]) => ({ uid, ...d })).sort((a, b) => b.total - a.total);
+
+      // LTV 분포
+      const buckets = { '0~5만': 0, '5~10만': 0, '10~20만': 0, '20~50만': 0, '50만+': 0 };
+      ltvList.forEach(u => {
+        if (u.total < 50000) buckets['0~5만']++;
+        else if (u.total < 100000) buckets['5~10만']++;
+        else if (u.total < 200000) buckets['10~20만']++;
+        else if (u.total < 500000) buckets['20~50만']++;
+        else buckets['50만+']++;
+      });
+
+      const totalRevenue = ltvList.reduce((s, u) => s + u.total, 0);
+      const avgLTV = ltvList.length ? Math.round(totalRevenue / ltvList.length) : 0;
+      const maxLTVBucket = Math.max(...Object.values(buckets), 1);
+
+      document.getElementById('ltvDist').innerHTML = ltvList.length ? `
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:20px">
+          <div class="stat-box"><div class="label">구매 고객 수</div><div class="value">${ltvList.length}명</div></div>
+          <div class="stat-box"><div class="label">총 매출</div><div class="value">${totalRevenue.toLocaleString()}원</div></div>
+          <div class="stat-box"><div class="label">고객당 평균</div><div class="value">${avgLTV.toLocaleString()}원</div></div>
+          <div class="stat-box"><div class="label">최고 LTV</div><div class="value">${ltvList[0]?.total.toLocaleString()}원</div></div>
+        </div>
+        <div class="bar-chart">
+          ${Object.entries(buckets).map(([label, count]) => {
+            const pct = Math.round(count / maxLTVBucket * 100);
+            return `<div class="bar-row">
+              <span class="bar-label" style="min-width:70px">${label}</span>
+              <div class="bar-track"><div class="bar-fill" style="width:${Math.max(pct, 2)}%;background:#e64980">${count > 0 ? count + '명' : ''}</div></div>
+              <span class="bar-val">${count}명</span>
+            </div>`;
+          }).join('')}
+        </div>` : '<div class="empty">구매 데이터 없음</div>';
+
+      // TOP 20
+      document.getElementById('ltvTop').innerHTML = ltvList.length ? `
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>#</th><th>이름</th><th>이메일</th><th>총 결제액</th><th>구매 수</th><th>첫 구매</th></tr></thead><tbody>
+        ${ltvList.slice(0, 20).map((u, i) => `<tr>
+          <td>${i + 1}</td><td>${u.userName || '-'}</td><td style="font-size:11px">${u.userEmail || '-'}</td>
+          <td style="font-weight:700">${u.total.toLocaleString()}원</td><td>${u.count}</td>
+          <td style="font-size:11px">${u.firstPurchase ? u.firstPurchase.toLocaleDateString('ko-KR') : '-'}</td></tr>`).join('')}
+        </tbody></table></div>` : '';
+
+      // 재구매 분석
+      const repeatBuyers = ltvList.filter(u => u.count >= 2);
+      const singleBuyers = ltvList.filter(u => u.count === 1);
+      const repeatRate = ltvList.length > 0 ? Math.round(repeatBuyers.length / ltvList.length * 100) : 0;
+      const repeatAvgAmt = repeatBuyers.length ? Math.round(repeatBuyers.reduce((s, u) => s + u.total, 0) / repeatBuyers.length) : 0;
+      const singleAvgAmt = singleBuyers.length ? Math.round(singleBuyers.reduce((s, u) => s + u.total, 0) / singleBuyers.length) : 0;
+
+      document.getElementById('repurchase').innerHTML = `
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+          <div class="stat-box"><div class="label">재구매율</div><div class="value">${repeatRate}%</div><div class="sub">${repeatBuyers.length}/${ltvList.length}명</div></div>
+          <div class="stat-box"><div class="label">재구매 고객 평균</div><div class="value">${repeatAvgAmt.toLocaleString()}원</div></div>
+          <div class="stat-box"><div class="label">단일구매 고객 평균</div><div class="value">${singleAvgAmt.toLocaleString()}원</div></div>
+          <div class="stat-box"><div class="label">재구매 고객 가치 배수</div><div class="value">${singleAvgAmt > 0 ? (repeatAvgAmt / singleAvgAmt).toFixed(1) + 'x' : '-'}</div><div class="sub">단일구매 대비</div></div>
+        </div>`;
+    }
+  </script>
+</body>
+</html>

@@ -180,11 +180,11 @@ function updateCertTabs() {
     <button class="wrong-note-cert-btn ${activeCertType === 'health-manager' ? 'active' : ''}" data-cert="health-manager">
       건강운동관리사 <span class="wrong-note-cert-count">${healthCount}</span>
     </button>
-    <button class="wrong-note-cert-btn ${activeCertType === 'sports-instructor' ? 'active' : ''}" data-cert="sports-instructor">
-      생활스포츠지도사 <span class="wrong-note-cert-count">${sportsCount}</span>
-    </button>
     <button class="wrong-note-cert-btn ${activeCertType === 'sports-instructor-1' ? 'active' : ''}" data-cert="sports-instructor-1">
       1급 스포츠지도사 <span class="wrong-note-cert-count">${sports1Count}</span>
+    </button>
+    <button class="wrong-note-cert-btn ${activeCertType === 'sports-instructor' ? 'active' : ''}" data-cert="sports-instructor">
+      2급 스포츠지도사 <span class="wrong-note-cert-count">${sportsCount}</span>
     </button>
   `;
 

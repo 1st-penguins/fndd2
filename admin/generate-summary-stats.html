@@ -239,23 +239,42 @@
       generateBtn.textContent = '⏳ 생성 중...';
       
       try {
-        addLog('🚀 요약 통계 생성 시작...', 'info');
-        
-        // 1. attempts 데이터 수집
-        addLog('📥 attempts 데이터 조회 중...', 'info');
-        const attemptsRef = collection(db, 'attempts');
-        const attemptsSnap = await getDocs(attemptsRef);
-        addLog(`✅ ${attemptsSnap.size.toLocaleString()}개 attempts 조회 완료`, 'success');
-        
-        // 2. 사용자별 집계
+        addLog('🚀 증분 통계 업데이트 시작...', 'info');
+
+        // 1. 기존 집계 데이터 로드
+        addLog('📥 기존 집계 데이터 로드 중...', 'info');
+        const summaryRef = doc(db, 'adminStats', 'userSummary');
+        const existingDoc = await getDoc(summaryRef);
+        const existing = existingDoc.exists() ? existingDoc.data() : {};
+        const userActivityMap = existing.userActivityMap || {};
+        const lastUpdated = existing.lastUpdated?.toDate ? existing.lastUpdated.toDate() : null;
+
+        if (lastUpdated) {
+          addLog(`📌 마지막 업데이트: ${lastUpdated.toLocaleString('ko-KR')}`, 'info');
+        } else {
+          addLog('📌 최초 집계 (전체 스캔)', 'info');
+        }
+
+        // 2. 마지막 업데이트 이후 데이터만 조회
+        addLog('📥 새로운 attempts 데이터 조회 중...', 'info');
+        let attemptsQuery;
+        if (lastUpdated) {
+          const { Timestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+          attemptsQuery = query(collection(db, 'attempts'), where('timestamp', '>', Timestamp.fromDate(lastUpdated)));
+        } else {
+          attemptsQuery = collection(db, 'attempts');
+        }
+        const attemptsSnap = await getDocs(attemptsQuery);
+        addLog(`✅ 새로운 데이터 ${attemptsSnap.size.toLocaleString()}개 조회 완료`, 'success');
+
+        // 3. 증분 집계
         addLog('📊 사용자별 데이터 집계 중...', 'info');
-        const userActivityMap = {};
-        let totalAttempts = 0;
-        
-        attemptsSnap.forEach(doc => {
-          const data = doc.data();
-          totalAttempts++;
-          
+        let newAttempts = 0;
+
+        attemptsSnap.forEach(d => {
+          const data = d.data();
+          newAttempts++;
+
           if (data.userId) {
             if (!userActivityMap[data.userId]) {
               userActivityMap[data.userId] = {
@@ -269,29 +288,28 @@
                 totalTimeSpent: 0
               };
             }
-            
+
             userActivityMap[data.userId].attemptCount++;
-            if (data.isCorrect) userActivityMap[data.userId].correctCount++;
-            if (data.timeSpent) userActivityMap[data.userId].totalTimeSpent += data.timeSpent;
-            
-            // 최신 정보로 업데이트
+            if (data.isCorrect) userActivityMap[data.userId].correctCount = (userActivityMap[data.userId].correctCount || 0) + 1;
+            if (data.timeSpent) userActivityMap[data.userId].totalTimeSpent = (userActivityMap[data.userId].totalTimeSpent || 0) + data.timeSpent;
+
             if (data.userName) userActivityMap[data.userId].userName = data.userName;
             if (data.userEmail) userActivityMap[data.userId].userEmail = data.userEmail;
-            
-            // 최근 활동일
+
             const timestamp = data.timestamp?.toDate();
-            if (timestamp && (!userActivityMap[data.userId].lastActivity || timestamp > userActivityMap[data.userId].lastActivity)) {
+            const prevLast = userActivityMap[data.userId].lastActivity?.toDate ? userActivityMap[data.userId].lastActivity.toDate() : userActivityMap[data.userId].lastActivity ? new Date(userActivityMap[data.userId].lastActivity) : null;
+            if (timestamp && (!prevLast || timestamp > prevLast)) {
               userActivityMap[data.userId].lastActivity = timestamp;
             }
           }
         });
-        
+
         const userCount = Object.keys(userActivityMap).length;
-        addLog(`✅ ${userCount.toLocaleString()}명 사용자 집계 완료`, 'success');
-        
-        // 3. 요약 통계 저장
+        const totalAttempts = Object.values(userActivityMap).reduce((s, u) => s + (u.attemptCount || 0), 0);
+        addLog(`✅ ${userCount.toLocaleString()}명 사용자 집계 완료 (신규 ${newAttempts}건)`, 'success');
+
+        // 4. 저장
         addLog('💾 요약 통계 저장 중...', 'info');
-        const summaryRef = doc(db, 'adminStats', 'userSummary');
         await setDoc(summaryRef, {
           userActivityMap: userActivityMap,
           totalUsers: userCount,
@@ -299,12 +317,12 @@
           lastUpdated: serverTimestamp(),
           generatedAt: new Date().toISOString()
         });
-        
-        addLog(`✅ 요약 통계 저장 완료!`, 'success');
-        addLog(`📊 총 ${userCount}명, ${totalAttempts.toLocaleString()}개 문제 풀이`, 'success');
+
+        addLog(`✅ 저장 완료!`, 'success');
+        addLog(`📊 총 ${userCount}명, ${totalAttempts.toLocaleString()}개 문제 풀이 (신규 ${newAttempts}건 반영)`, 'success');
         addLog('', 'info');
-        addLog('🎉 완료! 이제 대시보드가 빠르게 로드됩니다!', 'success');
-        addLog('💰 Firebase 읽기 비용도 90% 절감됩니다!', 'success');
+        addLog('🎉 증분 업데이트 완료!', 'success');
+        addLog('💰 새로운 데이터만 읽어서 비용을 절감했습니다!', 'success');
         
         // 상태 업데이트
         await checkCurrentStats();

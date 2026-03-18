@@ -43,6 +43,34 @@
             ]
         },
         {
+            "collectionGroup": "episodes",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "productId",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "sortOrder",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "products",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "isActive",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "sortOrder",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
             "collectionGroup": "comments",
             "queryScope": "COLLECTION",
             "fields": [

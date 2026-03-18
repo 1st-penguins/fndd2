@@ -140,7 +140,7 @@ export async function getLectureProgress(lectureId) {
 }
 
 /**
- * 환불 가능 여부 확인 (30% 미만 시청 시만 가능)
+ * 환불 가능 여부 확인 (1강이라도 재생 시 환불 불가)
  * @param {string} lectureId - 강의 ID
  * @returns {Promise<Object>} 환불 가능 여부 및 정보
  */
@@ -152,39 +152,21 @@ export async function checkRefundEligibility(lectureId) {
     }
 
     const progressData = await getLectureProgress(lectureId);
-    
-    if (!progressData) {
-      // 시청 기록 없음 = 전액 환불 가능
+
+    if (!progressData || (progressData.progress || 0) === 0) {
+      // 미재생 상태: 구매일로부터 7일 이내 전액 환불 가능
       return {
         eligible: true,
         refundRate: 100,
-        reason: '시청 기록 없음'
-      };
-    }
-    
-    const progress = progressData.progress || 0;
-    
-    if (progress === 0) {
-      // 전혀 시청 안 함 = 전액 환불
-      return {
-        eligible: true,
-        refundRate: 100,
-        reason: '전혀 시청하지 않음'
-      };
-    } else if (progress < 30) {
-      // 30% 미만 시청 = 50% 환불
-      return {
-        eligible: true,
-        refundRate: 50,
-        reason: `${progress}% 시청 (30% 미만)`
+        reason: '미재생 상태 (구매일로부터 7일 이내: 전액 환불 / 7일 초과: 환불 불가)'
       };
     } else {
-      // 30% 이상 시청 = 환불 불가
+      // 1강이라도 재생한 경우: 환불 불가
       return {
         eligible: false,
         refundRate: 0,
-        reason: `${progress}% 시청 (30% 이상)`,
-        progress: progress
+        reason: '1강이라도 재생한 경우: 환불 불가',
+        progress: progressData.progress
       };
     }
     

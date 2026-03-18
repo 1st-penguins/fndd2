@@ -278,7 +278,7 @@
           <li class="linear-header__nav-item">
             <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
           </li>
-          <li class="linear-header__nav-item">
+          <li class="linear-header__nav-item" id="nav-lecture-link">
             <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
           </li>
           <li class="linear-header__nav-item admin-only" id="admin-stats-nav" style="display:none;position:relative;">
@@ -348,7 +348,7 @@
       <a href="index.html" class="linear-header__nav-link">홈</a>
       <a href="notices.html" class="linear-header__nav-link">공지사항</a>
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
+      <a href="index.html#lecture-tab" class="linear-header__nav-link" id="mobile-lecture-link">강의</a>
       <!-- 관리자 전용 메뉴 -->
       <div class="mobile-admin-links admin-only" style="display:none;">
         <span style="font-size:12px;color:rgba(0,0,0,0.35);padding:4px 0;">관리자</span>
@@ -392,7 +392,7 @@
         <h1 class="linear-hero__title">
           <span class="linear-hero__title-line linear-hero__title-line--primary">건강운동관리사 / 건운사</span>
           <span class="linear-hero__title-line linear-hero__title-line--secondary">1급 · 2급 스포츠지도사</span>
-          <span class="linear-hero__title-line linear-hero__title-line--tertiary">기출문제 · 문제풀이</span>
+          <span class="linear-hero__title-line linear-hero__title-line--tertiary">기출문제 · 해설 · 오답분석</span>
         </h1>
         <p class="linear-hero__description">기출문제로 실전처럼 연습하고, 취약 과목을 빠르게 보완하세요.</p>
         <div class="linear-hero__highlight">
@@ -1289,8 +1289,8 @@
           <img src="/images/firstpenguin-logo2.png" alt="" class="shop-hero__logo" />
           <div class="shop-hero__content">
             <span class="shop-hero__label">FIRST PENGUIN STORE</span>
-            <h2 class="shop-hero__title">합격을 위한 최적의 학습자료</h2>
-            <p class="shop-hero__subtitle">인강 · PDF · 패키지를 한 곳에서</p>
+            <h2 class="shop-hero__title">건강운동관리사 합격을 위한 학습자료</h2>
+            <p class="shop-hero__subtitle">인터넷강의 · 요약자료</p>
           </div>
         </div>
 
@@ -1299,7 +1299,8 @@
           <button class="shop-filter-btn active" data-filter="all">전체</button>
           <button class="shop-filter-btn" data-filter="video">인강</button>
           <button class="shop-filter-btn" data-filter="material">자료</button>
-          <button class="shop-filter-btn" data-filter="bundle">패키지</button>
+          <!-- 패키지 상품 등록 후 복구할 것 -->
+          <!-- <button class="shop-filter-btn" data-filter="bundle">패키지</button> -->
         </div>
 
         <!-- 상품 그리드 -->
@@ -1630,6 +1631,21 @@
           // 서브탭 핸들러 재초기화
           initSubTabs();
 
+          // 🛒 상점 탭 + 네비 강의 링크 표시/숨김 (상품이 있는 자격증만 노출)
+          const certsWithShop = ['health-manager'];
+          const lectureTabBtn = document.querySelector('.tab-button[data-tab="lecture-tab"]');
+          const lectureTab = document.getElementById('lecture-tab');
+          const navLectureLink = document.getElementById('nav-lecture-link');
+          const mobileLectureLink = document.getElementById('mobile-lecture-link');
+          const showShop = certsWithShop.includes(targetCert);
+          if (lectureTabBtn) lectureTabBtn.style.display = showShop ? '' : 'none';
+          if (navLectureLink) navLectureLink.style.display = showShop ? '' : 'none';
+          if (mobileLectureLink) mobileLectureLink.style.display = showShop ? '' : 'none';
+          if (!showShop && lectureTab && lectureTab.classList.contains('active')) {
+            const quizTabBtn = document.querySelector('.tab-button[data-tab="quiz-tab"]');
+            if (quizTabBtn) quizTabBtn.click();
+          }
+
           // 🛒 상점 갱신 (자격증 전환 시)
           document.dispatchEvent(new CustomEvent('certChanged'));
 
@@ -1645,6 +1661,20 @@
           })();
         });
       });
+
+      // 🎯 초기 로드 시 강의 탭 + 네비 링크 표시/숨김 설정
+      {
+        const certsWithShop = ['health-manager'];
+        const initialCert = getCurrentCertificateType();
+        if (!certsWithShop.includes(initialCert)) {
+          const lectureTabBtn = document.querySelector('.tab-button[data-tab="lecture-tab"]');
+          const navLectureLink = document.getElementById('nav-lecture-link');
+          const mobileLectureLink = document.getElementById('mobile-lecture-link');
+          if (lectureTabBtn) lectureTabBtn.style.display = 'none';
+          if (navLectureLink) navLectureLink.style.display = 'none';
+          if (mobileLectureLink) mobileLectureLink.style.display = 'none';
+        }
+      }
 
       // 🎯 초기 로드 시 서브탭 핸들러 설정
       initSubTabs();

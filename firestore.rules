@@ -9,7 +9,7 @@ service cloud.firestore {
     
     // 관리자 여부 확인 (이메일 목록 + DB 기반)
     function isAdmin() {
-      let adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com'];
+      let adminEmails = ['kspo0324@gmail.com', 'mingdy7283@gmail.com', 'sungsoo702@gmail.com', 'pyogobear@gmail.com'];
       return request.auth != null && (
         request.auth.token.email in adminEmails || 
         exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
@@ -91,7 +91,7 @@ service cloud.firestore {
 
     // 강의 진도율
     match /lectureProgress/{progressId} {
-      allow read: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow read: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
       allow delete: if isAdmin();
@@ -99,7 +99,7 @@ service cloud.firestore {
 
     // PDF 다운로드 기록
     match /pdfDownloads/{downloadId} {
-      allow read: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow read: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
       allow delete: if isAdmin();
@@ -129,9 +129,8 @@ service cloud.firestore {
     // ============================================
     match /purchases/{purchaseId} {
       // 본인의 구매 내역만 읽기/생성 가능
-      // resource.data.userId == request.auth.uid (읽기)
-      // request.resource.data.userId == request.auth.uid (생성)
-      allow read: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      // 문서가 존재하지 않을 때도 get()이 가능하도록 resource == null 체크 추가
+      allow read: if isLoggedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin(); // 사용자는 구매 내역 수정 불가
     }
@@ -176,7 +175,7 @@ service cloud.firestore {
     // 📝 오답 노트 (Wrong Answers)
     // ============================================
     match /wrong_answers/{docId} {
-      allow read: if isLoggedIn() && resource.data.userId == request.auth.uid;
+      allow read: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
       allow delete: if isLoggedIn() && resource.data.userId == request.auth.uid;
