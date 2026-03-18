@@ -130,6 +130,11 @@ export async function initAuth() {
         window.updateLoginUI();
       }
 
+      // 헤더 로그인 상태 즉시 동기화
+      window.dispatchEvent(new CustomEvent('loginStateChanged', {
+        detail: { isLoggedIn: isLoggedIn }
+      }));
+
       // 공지사항 재로드 (로그인 상태가 실제로 변경된 경우만)
       if (stateChanged && typeof window.reloadNotices === 'function') {
         window.reloadNotices();

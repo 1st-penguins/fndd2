@@ -64,7 +64,8 @@
       "Bash(file *.png)",
       "Bash(ekg)",
       "Bash(심전도)",
-      "Bash(heart)"
+      "Bash(heart)",
+      "Bash(echo \"=== $f ===\")"
     ]
   }
 }

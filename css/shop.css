@@ -8,30 +8,57 @@
 
 /* ===== 상점 헤더 배너 ===== */
 .shop-hero {
-  background: linear-gradient(135deg, var(--penguin-navy) 0%, var(--penguin-skyblue) 100%);
-  padding: 36px 28px;
+  position: relative;
+  background: linear-gradient(135deg, #1D2F4E 0%, #2a4a7f 50%, #5FB2C9 100%);
+  padding: 48px 32px;
   border-radius: var(--radius-premium);
   text-align: center;
   color: white;
   margin-bottom: 28px;
-  box-shadow: var(--shadow-premium);
+  box-shadow: 0 8px 32px rgba(29, 47, 78, 0.25);
+  overflow: hidden;
 }
 
-.shop-hero__icon {
-  font-size: 48px;
+.shop-hero__logo {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 85%;
+  max-height: 140px;
+  opacity: 0.1;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+  user-select: none;
+}
+
+.shop-hero__content {
+  position: relative;
+  z-index: 1;
+}
+
+.shop-hero__label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  opacity: 0.7;
   margin-bottom: 12px;
 }
 
 .shop-hero__title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   color: white;
+  letter-spacing: -0.5px;
 }
 
 .shop-hero__subtitle {
   font-size: 15px;
-  opacity: 0.9;
+  opacity: 0.85;
+  font-weight: 400;
 }
 
 /* ===== 타입 필터 (인강/자료/패키지) ===== */
@@ -100,6 +127,7 @@
   color: inherit;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .shop-card:hover {
@@ -192,6 +220,9 @@
 /* 카드 바디 */
 .shop-card__body {
   padding: 12px 14px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .shop-card__title {
@@ -237,6 +268,7 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
+  margin-top: auto;
 }
 
 .shop-card__price {
@@ -364,16 +396,16 @@
   }
 
   .shop-hero {
-    padding: 28px 20px;
+    padding: 32px 20px;
     margin-bottom: 20px;
-  }
-
-  .shop-hero__icon {
-    font-size: 40px;
   }
 
   .shop-hero__title {
     font-size: 22px;
+  }
+
+  .shop-hero__label {
+    font-size: 10px;
   }
 }
 

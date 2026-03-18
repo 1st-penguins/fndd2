@@ -413,12 +413,23 @@
   box-shadow: 0 8px 24px rgba(29, 47, 78, 0.12);
   display: none;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   padding: 16px;
   gap: 8px;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.3s ease;
   transform-origin: top;
-  z-index: 1003; /* 헤더 액션(1002) 위에 표시, 아래 콘텐츠 위에 확실히 표시 */
+  z-index: 1003;
+}
+
+.linear-header__mobile-menu .mobile-menu-auth,
+.linear-header__mobile-menu .mobile-admin-links {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .linear-header__mobile-menu--active {
@@ -510,33 +521,15 @@
 
   /* 모바일 메뉴 인증 영역 스타일 */
   .mobile-menu-auth {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(29, 47, 78, 0.1);
-  }
-
-  .mobile-menu-auth .linear-header__nav-link {
-    padding: 16px 20px;
-    min-height: 48px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    width: 100%;
+    text-align: center;
   }
 
   .mobile-user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    margin-bottom: 8px;
-  }
-
-  .mobile-menu-auth .linear-header__user-avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-
-  .mobile-menu-auth .linear-header__user-name {
-    font-size: 16px;
-    font-weight: 510;
+    display: none;
   }
 }
 

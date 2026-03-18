@@ -249,10 +249,10 @@
       <div class="linear-header__auth">
         <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
         <div id="user-profile-container" style="display:none;">
-          <div class="linear-header__user-profile">
+          <a href="mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
             <div class="linear-header__user-avatar" id="user-avatar">U</div>
             <span class="linear-header__user-name" id="user-name">사용자</span>
-          </div>
+          </a>
           <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
         </div>
       </div>
@@ -267,6 +267,13 @@
       <a href="notices.html" class="linear-header__nav-link">공지사항</a>
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
       <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
+      <div class="mobile-menu-auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
+        <div id="mobile-user-profile-container" style="display: none;">
+          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
+          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -360,6 +367,12 @@
         // 직접 구매
         const purchaseSnap = await getDoc(doc(db, 'purchases', `${user.uid}_${productId}`));
         if (purchaseSnap.exists() && purchaseSnap.data().status === 'completed') {
+          // 이용기간 만료 체크
+          const purchaseData = purchaseSnap.data();
+          if (purchaseData.expiresAt && purchaseData.expiresAt.toDate() < new Date()) {
+            showExpired();
+            return;
+          }
           purchased = true;
         }
 
@@ -375,6 +388,10 @@
             if (bData.includedProducts && bData.includedProducts.includes(productId)) {
               const bPurchase = await getDoc(doc(db, 'purchases', `${user.uid}_${bd.id}`));
               if (bPurchase.exists() && bPurchase.data().status === 'completed') {
+                const bpData = bPurchase.data();
+                if (bpData.expiresAt && bpData.expiresAt.toDate() < new Date()) {
+                  continue; // 만료된 패키지는 건너뛰기
+                }
                 purchased = true;
                 break;
               }
@@ -611,6 +628,18 @@
       document.getElementById('play-denied').style.display = 'block';
       if (productId) {
         document.getElementById('play-denied-btn').href = `product-detail.html?id=${productId}`;
+      }
+    }
+
+    function showExpired() {
+      document.getElementById('play-loading').style.display = 'none';
+      document.getElementById('play-denied').style.display = 'block';
+      document.querySelector('.play-denied__icon').textContent = '⏰';
+      document.querySelector('.play-denied__title').textContent = '이용 기간이 만료되었습니다';
+      document.querySelector('.play-denied__text').textContent = '구매일로부터 6개월이 경과하여 시청이 불가합니다. 재구매 후 이용해주세요.';
+      if (productId) {
+        document.getElementById('play-denied-btn').href = `product-detail.html?id=${productId}`;
+        document.getElementById('play-denied-btn').textContent = '재구매하기';
       }
     }
 

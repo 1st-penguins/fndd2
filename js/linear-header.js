@@ -695,7 +695,7 @@ function injectFooter() {
 
       <div class="linear-footer__business-info">
         <p>퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호</p>
-        <p>주소: 서울특별시 강동구 양재대로 | E-mail: the1stpeng@gmail.com | © 2025 퍼스트펭귄. All rights reserved.</p>
+        <p>주소: 서울특별시 강동구 양재대로 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com | © 2025 퍼스트펭귄. All rights reserved.</p>
       </div>
     </div>
   `;

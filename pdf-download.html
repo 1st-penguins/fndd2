@@ -226,10 +226,10 @@
           로그인
         </a>
         <div id="user-profile-container" style="display: none;">
-          <div class="linear-header__user-profile">
+          <a href="mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
             <div class="linear-header__user-avatar" id="user-avatar">U</div>
             <span class="linear-header__user-name" id="user-name">사용자</span>
-          </div>
+          </a>
           <a href="#" class="linear-header__nav-link" data-action="logout">
             로그아웃
           </a>
@@ -249,7 +249,14 @@
       <a href="index.html" class="linear-header__nav-link">홈</a>
       <a href="notices.html" class="linear-header__nav-link">공지사항</a>
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="index.html#lecture-tab" target="_blank" rel="noopener noreferrer" class="linear-header__nav-link linear-header__nav-link--active">강의</a>
+      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
+      <div class="mobile-menu-auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
+        <div id="mobile-user-profile-container" style="display: none;">
+          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
+          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
+        </div>
+      </div>
     </div>
   </header>
 

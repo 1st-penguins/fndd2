@@ -57,10 +57,10 @@
       <div class="linear-header__auth">
         <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
         <div id="user-profile-container" style="display: none;">
-          <div class="linear-header__user-profile">
+          <a href="mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
             <div class="linear-header__user-avatar" id="user-avatar">U</div>
             <span class="linear-header__user-name" id="user-name">사용자</span>
-          </div>
+          </a>
           <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
         </div>
       </div>
@@ -79,6 +79,13 @@
       <a href="notices.html" class="linear-header__nav-link">공지사항</a>
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
       <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
+      <div class="mobile-menu-auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
+        <div id="mobile-user-profile-container" style="display: none;">
+          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
+          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -161,13 +168,19 @@
 
         // 구매 여부 확인
         let purchased = false;
+        let expired = false;
         const user = auth.currentUser;
         if (user) {
           try {
             // 직접 구매
             const purchaseSnap = await getDoc(doc(db, 'purchases', `${user.uid}_${productId}`));
             if (purchaseSnap.exists() && purchaseSnap.data().status === 'completed') {
-              purchased = true;
+              const pData = purchaseSnap.data();
+              if (pData.expiresAt && pData.expiresAt.toDate() < new Date()) {
+                expired = true;
+              } else {
+                purchased = true;
+              }
             }
             // 패키지로 구매
             if (!purchased) {
@@ -211,7 +224,7 @@
           } catch (e) { console.warn('진도율 조회 실패:', e); }
         }
 
-        renderDetail(product, episodes, bundleProducts, purchased, progressMap);
+        renderDetail(product, episodes, bundleProducts, purchased, progressMap, expired);
 
       } catch (error) {
         console.error('상품 상세 로드 오류:', error);
@@ -219,7 +232,7 @@
       }
     }
 
-    function renderDetail(product, episodes, bundleProducts, purchased, progressMap = {}) {
+    function renderDetail(product, episodes, bundleProducts, purchased, progressMap = {}, expired = false) {
       const TYPE_LABELS = { video: '인강', pdf: '자료', ppt: '자료', bundle: '패키지' };
       const TYPE_ICONS = { video: '🎬', pdf: '📄', ppt: '📊', bundle: '📦' };
 
@@ -264,7 +277,11 @@
 
       // 구매 버튼
       let actionBtn;
-      if (purchased) {
+      if (expired) {
+        const purchaseUrl = `lecture-purchase.html?id=${product.id}&price=${product.price}&title=${encodeURIComponent(product.title)}&type=${product.type}`;
+        actionBtn = `<div style="margin-bottom:8px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#9a3412;">⏰ 이용 기간이 만료되었습니다. 재구매 후 이용 가능합니다.</div>
+          <button class="detail-buy-btn" onclick="location.href='${purchaseUrl}'">${product.price.toLocaleString()}원 재구매하기</button>`;
+      } else if (purchased) {
         if (product.type === 'video') {
           actionBtn = `<button class="detail-purchased-btn" onclick="location.href='lecture-play.html?id=${product.id}'">▶ 강의 보기</button>`;
         } else if (product.type === 'pdf' || product.type === 'ppt') {
@@ -375,7 +392,7 @@
       if (product.price > 0) {
         let refundText = '';
         if (product.type === 'video') {
-          refundText = '시청 30% 미만: 50% 환불 / 30% 이상: 환불 불가';
+          refundText = '이용기간: 구매일로부터 6개월 / 1강이라도 재생 시 환불 불가 / 미재생 + 7일 이내: 전액 환불';
         } else if (product.type === 'pdf' || product.type === 'ppt') {
           refundText = '다운로드 전: 전액 환불 / 다운로드 후: 환불 불가';
         } else if (product.type === 'bundle') {
@@ -405,7 +422,8 @@
             <div class="detail-meta">${metaHtml}</div>
             <div class="detail-price-box">
               <div class="detail-price-row">${priceRowHtml}</div>
-              ${product.type === 'video' ? '<div class="detail-price-note">구매 후 무기한 시청 가능</div>' : ''}
+              ${product.type === 'video' ? '<div class="detail-price-note">구매일로부터 6개월간 시청 가능</div>' : ''}
+              ${(product.type === 'pdf' || product.type === 'ppt') ? '<div class="detail-price-note">다운로드 후 영구 보관 가능</div>' : ''}
             </div>
             ${actionBtn}
           </div>

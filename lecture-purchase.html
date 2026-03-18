@@ -195,10 +195,10 @@
       <div class="linear-header__auth">
         <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
         <div id="user-profile-container" style="display:none;">
-          <div class="linear-header__user-profile">
+          <a href="mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
             <div class="linear-header__user-avatar" id="user-avatar">U</div>
             <span class="linear-header__user-name" id="user-name">사용자</span>
-          </div>
+          </a>
           <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
         </div>
       </div>
@@ -213,6 +213,13 @@
       <a href="notices.html" class="linear-header__nav-link">공지사항</a>
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
       <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
+      <div class="mobile-menu-auth">
+        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
+        <div id="mobile-user-profile-container" style="display: none;">
+          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
+          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -272,7 +279,8 @@
         <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
           <li>결제 후 즉시 이용이 가능합니다</li>
           <li>결제 수단은 다음 단계에서 선택하실 수 있습니다</li>
-          <li>인터넷 강의는 구매 후 무기한 시청 가능합니다</li>
+          <li>인터넷 강의는 구매일로부터 6개월간 시청 가능합니다</li>
+          <li>PDF/PPT 자료는 다운로드 후 영구 보관 가능합니다</li>
           <li>상세 환불 규정은 <a href="terms.html" style="color: var(--penguin-skyblue);">이용약관 제9조</a>를 참고해주세요</li>
         </ul>
       </div>

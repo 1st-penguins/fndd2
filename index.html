@@ -302,11 +302,10 @@
 
         <!-- 로그인 후 상태 (JavaScript로 동적 생성) -->
         <div id="user-profile-container" style="display: none;">
-          <div class="linear-header__user-profile">
+          <a href="mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
             <div class="linear-header__user-avatar" id="user-avatar">U</div>
             <span class="linear-header__user-name" id="user-name">사용자</span>
-          </div>
-          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
+          </a>
           <a href="#" class="linear-header__nav-link" data-action="logout">
             로그아웃
           </a>
@@ -351,8 +350,8 @@
       <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
       <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
       <!-- 관리자 전용 메뉴 -->
-      <div class="mobile-admin-links admin-only" style="display:none;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px;">
-        <span style="font-size:12px;color:rgba(255,255,255,0.5);padding:4px 0;">관리자</span>
+      <div class="mobile-admin-links admin-only" style="display:none;">
+        <span style="font-size:12px;color:rgba(0,0,0,0.35);padding:4px 0;">관리자</span>
         <a href="admin/dashboard.html" class="linear-header__nav-link">대시보드</a>
         <a href="admin/statistics.html" class="linear-header__nav-link">통계</a>
         <a href="admin/notices.html" class="linear-header__nav-link">공지관리</a>
@@ -364,10 +363,6 @@
           로그인
         </a>
         <div id="mobile-user-profile-container" style="display: none;">
-          <div class="mobile-user-info">
-            <div class="linear-header__user-avatar" id="mobile-user-avatar">U</div>
-            <span class="linear-header__user-name" id="mobile-user-name">사용자</span>
-          </div>
           <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
           <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">
             로그아웃
@@ -1291,9 +1286,12 @@
       <div id="shop-container" class="shop-container">
         <!-- 상점 헤더 -->
         <div class="shop-hero">
-          <div class="shop-hero__icon"><img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" style="width:48px;height:48px;object-fit:contain;"></div>
-          <h2 class="shop-hero__title">퍼스트펭귄 스토어</h2>
-          <p class="shop-hero__subtitle">전문가의 자료로 확실하게 준비하세요</p>
+          <img src="/images/firstpenguin-logo2.png" alt="" class="shop-hero__logo" />
+          <div class="shop-hero__content">
+            <span class="shop-hero__label">FIRST PENGUIN STORE</span>
+            <h2 class="shop-hero__title">합격을 위한 최적의 학습자료</h2>
+            <p class="shop-hero__subtitle">인강 · PDF · 패키지를 한 곳에서</p>
+          </div>
         </div>
 
         <!-- 타입 필터 -->
