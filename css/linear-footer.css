@@ -75,7 +75,7 @@
 }
 
 .linear-footer__brand-text {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 680;
   font-size: 28px;
   color: white;
@@ -84,7 +84,7 @@
 }
 
 .linear-footer__brand-description {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   font-size: 16px;
   color: rgba(255, 255, 255, 0.8);
@@ -107,7 +107,7 @@
 }
 
 .linear-footer__kspo-text {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.55);
   line-height: 1.7;
@@ -121,7 +121,7 @@
 }
 
 .linear-footer__section-title {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 590;
   font-size: 16px;
   color: white;
@@ -143,7 +143,7 @@
 }
 
 .linear-footer__nav-link {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
@@ -217,7 +217,7 @@
   text-decoration: none;
   color: rgba(255, 255, 255, 0.75);
   font-size: 13px;
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   padding: 5px 6px;
   border-radius: 8px;
   transition: all 0.2s ease;
@@ -290,13 +290,13 @@
 }
 
 .linear-footer__legal-desc {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.5);
 }
 
 .linear-footer__copyright {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.6);
@@ -315,7 +315,7 @@
 }
 
 .linear-footer__legal-link {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.6);
@@ -448,7 +448,7 @@
 }
 
 .linear-footer--simple .linear-footer__brand-text {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 680;
   font-size: 24px;
   color: white;
@@ -465,7 +465,7 @@
 }
 
 .linear-footer--simple .linear-footer__nav-link {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
@@ -478,7 +478,7 @@
 }
 
 .linear-footer--simple .linear-footer__copyright {
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.6);

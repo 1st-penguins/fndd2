@@ -49,7 +49,7 @@
   /* 패딩 줄임 */
   font-size: 1.4rem;
   /* 폰트 크기 약간 줄임 */
-  font-family: "Inter Variable", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 700;
   text-align: left;
   /* 제목 좌측 정렬 */
@@ -78,7 +78,7 @@
   color: #868E96;
   font-size: 0.95rem;
   /* 폰트 크기 약간 줄임 */
-  font-family: "Inter Variable", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   line-height: 1.6;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);

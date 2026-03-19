@@ -32,7 +32,7 @@
   /* 비활성 텍스트 색상 */
   border-radius: 9999px;
   /* 캡슐 형태 */
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
@@ -128,7 +128,7 @@
   color: var(--deep-sea-gray);
   border-radius: 9999px;
   /* 서브탭도 캡슐형 */
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;

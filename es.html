@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>건강운동관리사 — 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: var(--font-sans);
+      background: #ffffff;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; }
+
+    /* ── Header ── */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 max(1.5rem, 5vw);
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      z-index: 300;
+    }
+
+    .header__brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header__logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .header__name {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #1d1d1f;
+    }
+
+    .header__login {
+      font-size: 14px;
+      font-weight: 500;
+      color: #6e6e73;
+      padding: 4px 16px;
+      border-radius: 9999px;
+      border: 1px solid #d2d2d7;
+      transition: all 0.2s ease;
+    }
+
+    .header__login:hover {
+      color: #1D2F4E;
+      border-color: #1D2F4E;
+    }
+
+    /* ── Page Title ── */
+    .page-title {
+      padding: calc(48px + 48px) max(1.5rem, 5vw) 24px;
+      text-align: center;
+    }
+
+    .page-title__text {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -0.022em;
+      color: #1D2F4E;
+      line-height: 1.1;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      position: sticky;
+      top: 48px;
+      z-index: 200;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 0 max(1.5rem, 5vw);
+    }
+
+    .tabs__list {
+      display: flex;
+      max-width: 980px;
+      margin: 0 auto;
+      gap: 4px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .tabs__list::-webkit-scrollbar { display: none; }
+
+    .tabs__item {
+      flex-shrink: 0;
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #86868b;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      border: none;
+      background: none;
+      position: relative;
+      transition: color 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tabs__item:hover {
+      color: #1d1d1f;
+    }
+
+    .tabs__item--active {
+      color: #1D2F4E;
+      font-weight: 600;
+    }
+
+    .tabs__item--active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 16px;
+      right: 16px;
+      height: 2.5px;
+      background: #1D2F4E;
+      border-radius: 1px;
+    }
+
+    /* ── Content ── */
+    .content {
+      flex: 1;
+      max-width: 980px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px max(1.5rem, 5vw) 80px;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel--active { display: block; }
+
+    /* ── Toggle (과목별/연도별) ── */
+    .toggle {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    .toggle__group {
+      display: inline-flex;
+      background: #e8e8ed;
+      border-radius: 9999px;
+      padding: 3px;
+    }
+
+    .toggle__btn {
+      padding: 8px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6e6e73;
+      border: none;
+      background: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: -0.01em;
+    }
+
+    .toggle__btn--active {
+      background: #ffffff;
+      color: #1D2F4E;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .toggle__btn:not(.toggle__btn--active):hover {
+      color: #1d1d1f;
+    }
+
+    /* ── Card Grid ── */
+    .card-grid {
+      display: none;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .card-grid--active {
+      display: grid;
+    }
+
+    /* ── Subject/Year Card ── */
+    .card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px;
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+      transform: translateY(-4px);
+    }
+
+    .card:hover .card__name {
+      color: #F4511E;
+    }
+
+    .card:hover .card__arrow {
+      color: #F4511E;
+      transform: translateX(4px);
+    }
+
+    .card__info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card__name {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1d1d1f;
+      letter-spacing: -0.022em;
+      transition: color 0.2s ease;
+    }
+
+    .card__meta {
+      font-size: 13px;
+      color: #86868b;
+      letter-spacing: -0.01em;
+    }
+
+    .card__arrow {
+      font-size: 20px;
+      color: #aeaeb2;
+      transition: color 0.2s ease, transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    /* ── Section Label (교시) ── */
+    .section-label {
+      grid-column: 1 / -1;
+      font-size: 12px;
+      font-weight: 600;
+      color: #aeaeb2;
+      letter-spacing: 0.02em;
+      padding: 0 4px;
+      margin: 0;
+    }
+
+    .section-label:not(:first-child) {
+      margin-top: 16px;
+    }
+
+    /* ── Mock Exam (모의고사) ── */
+    /* ── Mock Exam (모의고사) ── */
+    .mock-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .mock-year {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mock-year__label {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1d1d1f;
+      min-width: 48px;
+    }
+
+    .mock-year__btns {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .mock-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6e6e73;
+      background: #f5f5f7;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .mock-btn:hover {
+      background: #1D2F4E;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(29,47,78,0.2);
+    }
+
+    /* ── Analytics Login Notice ── */
+    .analytics__login-notice {
+      text-align: center;
+      padding: 48px 16px;
+      color: #86868b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .analytics__login-btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 32px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      background: #1D2F4E;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .analytics__login-btn:hover {
+      background: #162640;
+      transform: translateY(-1px);
+    }
+
+    /* ── Progress Loading ── */
+    .progress-loading {
+      text-align: center;
+      padding: 64px 16px;
+    }
+
+    .progress-loading__text {
+      font-size: 14px;
+      color: #86868b;
+    }
+
+    /* ── Progress Tab Overrides (미니멀리즘) ── */
+    #progress-tab .progress-header-section { display: none !important; }
+
+    #progress-tab .progress-sub-tabs { gap: 4px; margin-bottom: 24px; }
+    #progress-tab .progress-sub-tab {
+      border: none !important;
+      background: #e8e8ed !important;
+      color: #86868b !important;
+      font-size: 13px !important;
+      padding: 8px 20px !important;
+    }
+    #progress-tab .progress-sub-tab.active {
+      background: #1D2F4E !important;
+      color: #fff !important;
+    }
+    #progress-tab .progress-sub-tab:hover:not(.active) {
+      background: #d2d2d7 !important;
+      color: #1d1d1f !important;
+    }
+
+    /* 연도 카드 */
+    #progress-tab .progress-year-group,
+    #progress-tab .health-year-card,
+    #progress-tab .sports-year-card {
+      background: #fff !important;
+      border: none !important;
+      border-radius: 18px !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+      padding: 28px !important;
+      margin-bottom: 20px !important;
+    }
+
+    /* 연도 타이틀 */
+    #progress-tab .year-group-title,
+    #progress-tab .health-year-title,
+    #progress-tab .sports-year-title {
+      font-size: 24px !important;
+      font-weight: 700 !important;
+      color: #1d1d1f !important;
+      letter-spacing: -0.022em !important;
+    }
+
+    /* 뱃지 — 그레이 기본 */
+    #progress-tab .year-group-badge,
+    #progress-tab .health-year-badge,
+    #progress-tab .sports-year-badge {
+      background: #e8e8ed !important;
+      color: #6e6e73 !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+    }
+    #progress-tab .progress-year-group.all-done .year-group-badge {
+      background: #1d1d1f !important;
+      color: #fff !important;
+    }
+    #progress-tab .progress-year-group.partial .year-group-badge {
+      background: #86868b !important;
+      color: #fff !important;
+    }
+
+    /* 프로그레스 바 — 블랙/그레이만 */
+    #progress-tab .health-year-progress-fill,
+    #progress-tab .sports-year-progress-fill,
+    #progress-tab .subj-bar-fill {
+      background: #1d1d1f !important;
+    }
+    #progress-tab .health-year-progress-bar,
+    #progress-tab .sports-year-progress-bar {
+      height: 4px !important;
+      background: #f0f0f0 !important;
+    }
+
+    /* 교시별 카드 */
+    #progress-tab .year-group-hours {
+      gap: 16px !important;
+      margin-top: 8px !important;
+    }
+    #progress-tab .progress-hour-card {
+      border-radius: 14px !important;
+      padding: 20px !important;
+    }
+    #progress-tab .progress-hour-card.completed {
+      background: #f5f5f7 !important;
+    }
+    #progress-tab .progress-hour-card.not-taken {
+      background: #fafafa !important;
+    }
+
+    /* 라벨/뱃지 — 그레이 톤 */
+    #progress-tab .hour-label {
+      color: #1d1d1f !important;
+      font-size: 14px !important;
+    }
+    #progress-tab .pass-tag.pass {
+      background: #f0f0f0 !important;
+      color: #1d1d1f !important;
+    }
+    #progress-tab .pass-tag.fail {
+      background: #f0f0f0 !important;
+      color: #86868b !important;
+    }
+
+    /* 점수 */
+    #progress-tab .score-big {
+      color: #1d1d1f !important;
+      font-size: 1.3rem !important;
+    }
+    #progress-tab .score-unit-big,
+    #progress-tab .score-sub {
+      color: #86868b !important;
+    }
+
+    /* 과목 항목 */
+    #progress-tab .subj-name {
+      color: #6e6e73 !important;
+    }
+    #progress-tab .subj-score {
+      color: #1d1d1f !important;
+    }
+    #progress-tab .subj-score.fail {
+      color: #86868b !important;
+    }
+    #progress-tab .subj-cutline {
+      background: rgba(0,0,0,0.08) !important;
+    }
+
+    /* 버튼 — ghost 스타일 */
+    #progress-tab .hour-action-btn.btn-start {
+      background: transparent !important;
+      color: #1D2F4E !important;
+      border: 1px solid #d2d2d7 !important;
+      border-radius: 9999px !important;
+      font-size: 13px !important;
+      padding: 6px 16px !important;
+      display: block !important;
+      width: fit-content !important;
+      margin: 12px auto 0 !important;
+      text-align: center !important;
+    }
+    #progress-tab .hour-action-btn.btn-start:hover {
+      border-color: #1D2F4E !important;
+    }
+    #progress-tab .hour-action-btn.btn-retry {
+      background: transparent !important;
+      color: #6e6e73 !important;
+      border: 1px solid #d2d2d7 !important;
+      border-radius: 9999px !important;
+      font-size: 13px !important;
+      padding: 6px 16px !important;
+      display: block !important;
+      width: fit-content !important;
+      margin: 12px auto 0 !important;
+      text-align: center !important;
+    }
+    #progress-tab .hour-action-btn.btn-retry:hover {
+      border-color: #1D2F4E !important;
+      color: #1D2F4E !important;
+    }
+
+    /* 응시 배지 — 네이비/그레이 */
+    #progress-tab .hour-badge.badge-done {
+      background: #1D2F4E !important;
+      color: #fff !important;
+    }
+    #progress-tab .hour-badge.badge-yet {
+      background: #f0f0f0 !important;
+      color: #aeaeb2 !important;
+    }
+
+    /* 프로그레스 바 — 네이비 */
+    #progress-tab .subj-bar-fill {
+      background: #1D2F4E !important;
+    }
+    #progress-tab .subject-start-btn {
+      background: #1d1d1f !important;
+      border-radius: 9999px !important;
+    }
+
+    /* 과목 그리드 아이템 */
+    #progress-tab .health-subject-item.done,
+    #progress-tab .sports-subject-item.done {
+      background: #1D2F4E !important;
+      color: #fff !important;
+    }
+    #progress-tab .health-subject-item.done .subject-name,
+    #progress-tab .sports-subject-item.done .subject-name {
+      color: #fff !important;
+    }
+    #progress-tab .health-subject-item.not-done,
+    #progress-tab .sports-subject-item.not-done {
+      background: #fafafa !important;
+      color: #86868b !important;
+    }
+    #progress-tab .subject-acc {
+      color: rgba(255,255,255,0.8) !important;
+    }
+
+    /* 카테고리 라벨 */
+    #progress-tab .health-category-label,
+    #progress-tab .sports-category-label {
+      color: #aeaeb2 !important;
+      margin-top: 20px !important;
+      margin-bottom: 12px !important;
+    }
+    #progress-tab .cat-count {
+      color: #aeaeb2 !important;
+    }
+
+    /* 과목 그리드 간격 */
+    #progress-tab .health-subjects-grid,
+    #progress-tab .sports-subjects-grid {
+      gap: 10px !important;
+    }
+    #progress-tab .health-subject-item,
+    #progress-tab .sports-subject-item {
+      padding: 12px 14px !important;
+      border-radius: 12px !important;
+    }
+
+    /* 연도 헤더 여백 */
+    #progress-tab .year-group-header,
+    #progress-tab .health-year-header,
+    #progress-tab .sports-year-header {
+      margin-bottom: 16px !important;
+      padding-bottom: 16px !important;
+      border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+    }
+
+    /* ── Lecture (강의) ── */
+    .lecture-filters {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 28px;
+    }
+
+    .lecture-filter {
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #86868b;
+      background: #e8e8ed;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lecture-filter.active {
+      background: #1D2F4E;
+      color: #fff;
+    }
+
+    .lecture-filter:hover:not(.active) {
+      background: #d2d2d7;
+      color: #1d1d1f;
+    }
+
+    .lecture-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .lecture-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      overflow: hidden;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .lecture-card:hover {
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+      transform: translateY(-4px);
+    }
+
+    .lecture-card__thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #f5f5f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .lecture-card__thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .lecture-card__thumb-icon {
+      font-size: 32px;
+      color: #aeaeb2;
+    }
+
+    .lecture-card__badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      background: #1D2F4E;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .lecture-card__badge--pdf {
+      background: #6e6e73;
+    }
+
+    .lecture-card__purchased {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(0,0,0,0.5);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .lecture-card__body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .lecture-card__title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1d1d1f;
+      letter-spacing: -0.022em;
+    }
+
+    .lecture-card__desc {
+      font-size: 13px;
+      color: #86868b;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .lecture-card__meta {
+      font-size: 12px;
+      color: #aeaeb2;
+      display: flex;
+      gap: 8px;
+    }
+
+    .lecture-card__price-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .lecture-card__discount {
+      font-size: 14px;
+      font-weight: 700;
+      color: #F4511E;
+    }
+
+    .lecture-card__price {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1d1d1f;
+    }
+
+    .lecture-card__original {
+      font-size: 12px;
+      color: #aeaeb2;
+      text-decoration: line-through;
+    }
+
+    .lecture-empty {
+      text-align: center;
+      padding: 64px 16px;
+      color: #86868b;
+      font-size: 14px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 32px max(1.5rem, 5vw);
+      text-align: center;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .footer__text {
+      font-size: 14px;
+      color: #86868b;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .page-title {
+        padding: calc(48px + 32px) 20px 20px;
+      }
+
+      .page-title__text {
+        font-size: 28px;
+      }
+
+      .tabs__item {
+        padding: 12px 16px;
+        font-size: 13px;
+      }
+
+      .tabs__item--active::after {
+        left: 16px;
+        right: 16px;
+      }
+
+      .content {
+        padding: 24px 20px 64px;
+      }
+
+      .toggle {
+        margin-bottom: 24px;
+      }
+
+      .toggle__btn {
+        padding: 7px 18px;
+        font-size: 13px;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .card {
+        padding: 20px;
+        border-radius: 14px;
+      }
+
+      .card__name {
+        font-size: 16px;
+      }
+
+      .mock-btn {
+        padding: 10px 0;
+        font-size: 12px;
+      }
+
+      .lecture-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <a href="landing.html" class="header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
+      <span class="header__name">퍼스트펭귄</span>
+    </a>
+    <a href="login.html" class="header__login">로그인</a>
+  </header>
+
+  <section class="page-title">
+    <h1 class="page-title__text">건강운동관리사</h1>
+  </section>
+
+  <nav class="tabs">
+    <div class="tabs__list">
+      <button class="tabs__item tabs__item--active" data-tab="quiz">문제풀기</button>
+      <button class="tabs__item" data-tab="mock">모의고사</button>
+      <button class="tabs__item" data-tab="progress">학습현황</button>
+      <button class="tabs__item" data-tab="lecture">강의</button>
+    </div>
+  </nav>
+
+  <main class="content">
+
+    <!-- ── 문제풀기 탭 ── -->
+    <div class="tab-panel tab-panel--active" data-panel="quiz">
+
+      <div class="toggle">
+        <div class="toggle__group">
+          <button class="toggle__btn toggle__btn--active" data-view="subject">과목별</button>
+          <button class="toggle__btn" data-view="year">연도별</button>
+        </div>
+      </div>
+
+      <!-- 과목별 -->
+      <div class="card-grid card-grid--active" data-grid="subject">
+        <p class="section-label">1교시</p>
+        <a href="subjects/subject_운동생리학.html" class="card">
+          <div class="card__info">
+            <span class="card__name">운동생리학</span>
+            <span class="card__meta">Exercise Physiology</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="subjects/subject_건강체력평가.html" class="card">
+          <div class="card__info">
+            <span class="card__name">건강체력평가</span>
+            <span class="card__meta">Health Fitness Assessment</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="subjects/subject_운동처방론.html" class="card">
+          <div class="card__info">
+            <span class="card__name">운동처방론</span>
+            <span class="card__meta">Exercise Prescription</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="subjects/subject_운동부하검사.html" class="card">
+          <div class="card__info">
+            <span class="card__name">운동부하검사</span>
+            <span class="card__meta">Exercise Stress Test</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <p class="section-label">2교시</p>
+        <a href="subjects/subject_운동상해.html" class="card">
+          <div class="card__info">
+            <span class="card__name">운동상해</span>
+            <span class="card__meta">Sports Injury</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="subjects/subject_기능해부학.html" class="card">
+          <div class="card__info">
+            <span class="card__name">기능해부학</span>
+            <span class="card__meta">Functional Anatomy</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="subjects/subject_병태생리학.html" class="card">
+          <div class="card__info">
+            <span class="card__name">병태생리학</span>
+            <span class="card__meta">Pathophysiology</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="subjects/subject_스포츠심리학.html" class="card">
+          <div class="card__info">
+            <span class="card__name">스포츠심리학</span>
+            <span class="card__meta">Sport Psychology</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 연도별 -->
+      <div class="card-grid" data-grid="year">
+        <a href="years/year_2025.html" class="card">
+          <div class="card__info">
+            <span class="card__name">2025년</span>
+            <span class="card__meta">최신 기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="years/year_2024.html" class="card">
+          <div class="card__info">
+            <span class="card__name">2024년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="years/year_2023.html" class="card">
+          <div class="card__info">
+            <span class="card__name">2023년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="years/year_2022.html" class="card">
+          <div class="card__info">
+            <span class="card__name">2022년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="years/year_2021.html" class="card">
+          <div class="card__info">
+            <span class="card__name">2021년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="years/year_2020.html" class="card">
+          <div class="card__info">
+            <span class="card__name">2020년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="years/year_2019.html" class="card">
+          <div class="card__info">
+            <span class="card__name">2019년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- ── 모의고사 탭 ── -->
+    <div class="tab-panel" data-panel="mock">
+      <div class="mock-section">
+        <div class="mock-year"><span class="mock-year__label">2025</span><div class="mock-year__btns"><a href="exam/2025_모의고사_1교시.html" class="mock-btn">1교시</a><a href="exam/2025_모의고사_2교시.html" class="mock-btn">2교시</a></div></div>
+        <div class="mock-year"><span class="mock-year__label">2024</span><div class="mock-year__btns"><a href="exam/2024_모의고사_1교시.html" class="mock-btn">1교시</a><a href="exam/2024_모의고사_2교시.html" class="mock-btn">2교시</a></div></div>
+        <div class="mock-year"><span class="mock-year__label">2023</span><div class="mock-year__btns"><a href="exam/2023_모의고사_1교시.html" class="mock-btn">1교시</a><a href="exam/2023_모의고사_2교시.html" class="mock-btn">2교시</a></div></div>
+        <div class="mock-year"><span class="mock-year__label">2022</span><div class="mock-year__btns"><a href="exam/2022_모의고사_1교시.html" class="mock-btn">1교시</a><a href="exam/2022_모의고사_2교시.html" class="mock-btn">2교시</a></div></div>
+        <div class="mock-year"><span class="mock-year__label">2021</span><div class="mock-year__btns"><a href="exam/2021_모의고사_1교시.html" class="mock-btn">1교시</a><a href="exam/2021_모의고사_2교시.html" class="mock-btn">2교시</a></div></div>
+        <div class="mock-year"><span class="mock-year__label">2020</span><div class="mock-year__btns"><a href="exam/2020_모의고사_1교시.html" class="mock-btn">1교시</a><a href="exam/2020_모의고사_2교시.html" class="mock-btn">2교시</a></div></div>
+        <div class="mock-year"><span class="mock-year__label">2019</span><div class="mock-year__btns"><a href="exam/2019_모의고사_1교시.html" class="mock-btn">1교시</a><a href="exam/2019_모의고사_2교시.html" class="mock-btn">2교시</a></div></div>
+      </div>
+    </div>
+
+    <!-- ── 학습진행률 탭 ── -->
+    <div class="tab-panel" data-panel="progress">
+      <div id="progress-tab">
+        <div class="progress-loading">
+          <p class="progress-loading__text">학습 데이터를 불러오는 중...</p>
+        </div>
+      </div>
+      <div id="progress-login-notice" style="display:none;">
+        <div class="analytics__login-notice">
+          <p>로그인하면 학습 기록이 자동으로 저장됩니다</p>
+          <button class="analytics__login-btn" onclick="window.location.href='login.html'">로그인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 강의 탭 ── -->
+    <div class="tab-panel" data-panel="lecture">
+      <div class="lecture-filters">
+        <button class="lecture-filter active" data-filter="all">전체</button>
+        <button class="lecture-filter" data-filter="video">인강</button>
+        <button class="lecture-filter" data-filter="material">자료</button>
+      </div>
+      <div id="lecture-grid" class="lecture-grid"></div>
+      <div id="lecture-empty" class="lecture-empty" style="display:none;">
+        <p>등록된 상품이 없습니다</p>
+      </div>
+      <div id="lecture-loading" class="progress-loading">
+        <p class="progress-loading__text">상품을 불러오는 중...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p class="footer__text">&copy; 2025 퍼스트펭귄</p>
+  </footer>
+
+  <script type="module">
+    // 탭 전환
+    const tabs = document.querySelectorAll('.tabs__item');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('tabs__item--active'));
+        tab.classList.add('tabs__item--active');
+        panels.forEach(p => {
+          p.classList.toggle('tab-panel--active', p.dataset.panel === tab.dataset.tab);
+        });
+
+        // 학습진행률 탭 클릭 시 데이터 로드
+        if (tab.dataset.tab === 'progress' && !window._progressLoaded) {
+          loadProgressData();
+        }
+        // 강의 탭 클릭 시 데이터 로드
+        if (tab.dataset.tab === 'lecture' && !window._lectureLoaded) {
+          loadLectureData();
+        }
+      });
+    });
+
+    // 과목별/연도별 토글
+    const toggleBtns = document.querySelectorAll('.toggle__btn');
+    const grids = document.querySelectorAll('.card-grid');
+
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        toggleBtns.forEach(b => b.classList.remove('toggle__btn--active'));
+        btn.classList.add('toggle__btn--active');
+        grids.forEach(g => {
+          g.classList.toggle('card-grid--active', g.dataset.grid === btn.dataset.view);
+        });
+      });
+    });
+
+    // ── 학습진행률 데이터 로드 ──
+    async function loadProgressData() {
+      try {
+        const { ensureAuthReady } = await import('./js/core/firebase-core.js');
+        const user = await ensureAuthReady();
+
+        if (!user) {
+          document.getElementById('progress-tab').style.display = 'none';
+          document.getElementById('progress-login-notice').style.display = 'block';
+          return;
+        }
+
+        const { getUserAttempts, getUserMockExamResults } = await import('./js/data/quiz-data-service.js');
+        const { renderProgressTabStandalone } = await import('./js/analytics/render-progress-tab-function.js');
+
+        const [attempts, mockExamResults] = await Promise.all([
+          getUserAttempts(3000, 'health-manager'),
+          getUserMockExamResults(100, 'health-manager')
+        ]);
+
+        renderProgressTabStandalone({
+          attempts,
+          mockExamResults,
+          userProgress: {},
+          certType: 'health-manager'
+        });
+
+        // 렌더 후 DOM 정리
+        // 미완료: 풀기 버튼 → 텍스트 화살표, 전체 클릭
+        document.querySelectorAll('#progress-tab .subject-start-btn').forEach(btn => {
+          const item = btn.closest('.health-subject-item, .sports-subject-item');
+          if (!item) return;
+          const href = btn.href;
+          item.style.cursor = 'pointer';
+          item.style.transition = 'all 0.2s ease';
+          item.onclick = () => window.location.href = href;
+          item.onmouseenter = () => { item.style.transform = 'translateY(-2px)'; item.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'; };
+          item.onmouseleave = () => { item.style.transform = ''; item.style.boxShadow = ''; };
+          const arrow = document.createElement('span');
+          arrow.textContent = '→';
+          arrow.style.cssText = 'color:#aeaeb2; font-size:16px;';
+          btn.replaceWith(arrow);
+        });
+        // 완료: % → 점, 전체 클릭
+        document.querySelectorAll('#progress-tab .subject-acc').forEach(el => {
+          const pct = parseInt(el.textContent);
+          if (!isNaN(pct)) el.textContent = pct + '점';
+          const item = el.closest('.health-subject-item, .sports-subject-item');
+          if (!item) return;
+          const name = item.querySelector('.subject-name')?.textContent;
+          const yearCard = item.closest('.health-year-card, .sports-year-card');
+          const year = yearCard?.querySelector('.health-year-title, .sports-year-title')?.textContent?.match(/\d{4}/)?.[0];
+          if (name && year) {
+            item.style.cursor = 'pointer';
+            item.style.transition = 'all 0.2s ease';
+            item.onclick = () => window.location.href = `exam/${year}_${name}.html`;
+            item.onmouseenter = () => { item.style.transform = 'translateY(-2px)'; item.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)'; };
+            item.onmouseleave = () => { item.style.transform = ''; item.style.boxShadow = ''; };
+          }
+        });
+
+        window._progressLoaded = true;
+      } catch (err) {
+        console.error('학습진행률 로드 실패:', err);
+        document.getElementById('progress-tab').innerHTML =
+          '<div class="analytics__login-notice"><p>데이터를 불러오지 못했습니다</p></div>';
+      }
+    }
+
+    // ── 강의 데이터 로드 ──
+    const FILTER_MAP = { all: null, video: ['video'], material: ['pdf', 'ppt'] };
+    let lectureProducts = null;
+    let lecturePurchases = [];
+
+    async function loadLectureData(typeFilter = 'all') {
+      const grid = document.getElementById('lecture-grid');
+      const empty = document.getElementById('lecture-empty');
+      const loading = document.getElementById('lecture-loading');
+
+      try {
+        if (!lectureProducts) {
+          const { ensureFirebase } = await import('./js/core/firebase-core.js');
+          const { db, auth } = await ensureFirebase();
+          const { collection, query, where, orderBy, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+          const q = query(collection(db, 'products'), where('isActive', '==', true), orderBy('sortOrder', 'asc'));
+          const snap = await getDocs(q);
+          lectureProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          // 구매 내역
+          const user = auth.currentUser;
+          if (user) {
+            const pq = query(collection(db, 'purchases'), where('userId', '==', user.uid), where('status', '==', 'completed'));
+            const pSnap = await getDocs(pq);
+            lecturePurchases = pSnap.docs.map(d => d.data().productId);
+          }
+        }
+
+        // 필터
+        let items = lectureProducts.filter(p => p.category === 'health' || p.category === 'common');
+        const types = FILTER_MAP[typeFilter];
+        if (types) items = items.filter(p => types.includes(p.type));
+
+        if (loading) loading.style.display = 'none';
+
+        if (items.length === 0) {
+          grid.innerHTML = '';
+          if (empty) empty.style.display = 'block';
+          return;
+        }
+        if (empty) empty.style.display = 'none';
+
+        grid.innerHTML = items.map(p => {
+          const purchased = lecturePurchases.includes(p.id);
+          const typeLabel = p.type === 'video' ? '인강' : '자료';
+          const badgeClass = p.type === 'pdf' || p.type === 'ppt' ? 'lecture-card__badge--pdf' : '';
+
+          let meta = '';
+          if (p.type === 'video' && p.totalEpisodes) meta += `${p.totalEpisodes}강`;
+          if (p.type === 'video' && p.totalDuration) meta += (meta ? ' · ' : '') + p.totalDuration;
+          if ((p.type === 'pdf' || p.type === 'ppt') && p.pages) meta += `${p.pages}쪽`;
+
+          let priceHtml = '';
+          const price = p.price === 0 ? '무료' : p.price.toLocaleString() + '원';
+          if (p.originalPrice && p.originalPrice > p.price) {
+            const disc = Math.round((1 - p.price / p.originalPrice) * 100);
+            priceHtml = `<span class="lecture-card__discount">${disc}%</span><span class="lecture-card__price">${price}</span><span class="lecture-card__original">${p.originalPrice.toLocaleString()}원</span>`;
+          } else {
+            priceHtml = `<span class="lecture-card__price">${price}</span>`;
+          }
+
+          const thumb = p.thumbnailUrl
+            ? `<img src="${p.thumbnailUrl}" alt="${p.title}">`
+            : `<span class="lecture-card__thumb-icon">${p.type === 'video' ? '🎬' : '📄'}</span>`;
+
+          return `
+            <a href="product-detail.html?id=${p.id}" class="lecture-card">
+              <div class="lecture-card__thumb">
+                ${thumb}
+                <span class="lecture-card__badge ${badgeClass}">${typeLabel}</span>
+                ${purchased ? '<span class="lecture-card__purchased">구매완료</span>' : ''}
+              </div>
+              <div class="lecture-card__body">
+                <div class="lecture-card__title">${p.title}</div>
+                ${p.description ? `<div class="lecture-card__desc">${p.description}</div>` : ''}
+                ${meta ? `<div class="lecture-card__meta"><span>${meta}</span></div>` : ''}
+                <div class="lecture-card__price-row">${priceHtml}</div>
+              </div>
+            </a>`;
+        }).join('');
+
+        window._lectureLoaded = true;
+      } catch (err) {
+        console.error('강의 로드 실패:', err);
+        if (loading) loading.style.display = 'none';
+        grid.innerHTML = '<div class="lecture-empty"><p>상품을 불러오지 못했습니다</p></div>';
+      }
+    }
+
+    // 강의 필터 버튼
+    document.querySelectorAll('.lecture-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lecture-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        window._lectureLoaded = false;
+        loadLectureData(btn.dataset.filter);
+      });
+    });
+  </script>
+
+</body>
+</html>
