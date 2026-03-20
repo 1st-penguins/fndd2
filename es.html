@@ -6,6 +6,7 @@
   <title>건강운동관리사 — 퍼스트펭귄</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/login.css">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -64,6 +65,27 @@
       color: #1d1d1f;
     }
 
+    .header__nav {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .header__nav-link {
+      font-size: 13px;
+      font-weight: 500;
+      color: #6e6e73;
+      transition: color 0.2s;
+    }
+
+    .header__nav-link:hover { color: #1d1d1f; }
+
+    .header__right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
     .header__login {
       font-size: 14px;
       font-weight: 500;
@@ -75,8 +97,69 @@
     }
 
     .header__login:hover {
-      color: #1D2F4E;
-      border-color: #1D2F4E;
+      color: #2B4A78;
+      border-color: #2B4A78;
+    }
+
+    .header__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 20px;
+      height: 16px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .header__hamburger span {
+      display: block;
+      width: 100%;
+      height: 1.5px;
+      background: #1d1d1f;
+      position: absolute;
+      left: 0;
+      transition: all 0.25s ease;
+    }
+
+    .header__hamburger span:nth-child(1) { top: 0; }
+    .header__hamburger span:nth-child(2) { top: 7px; }
+    .header__hamburger span:nth-child(3) { top: 14px; }
+
+    .header__mobile-menu {
+      display: none;
+      position: fixed;
+      top: 48px;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 12px 24px 16px;
+      z-index: 299;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header__mobile-menu.open { display: flex; }
+
+    .header__mobile-link {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1d1d1f;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      transition: color 0.2s;
+    }
+
+    .header__mobile-link:last-child { border-bottom: none; }
+    .header__mobile-link:hover { color: #2B4A78; }
+
+    @media (max-width: 768px) {
+      .header__nav { display: none; }
+      .header__login { display: none; }
+      .header__hamburger { display: block; }
     }
 
     /* ── Page Title ── */
@@ -89,7 +172,7 @@
       font-size: 40px;
       font-weight: 700;
       letter-spacing: -0.022em;
-      color: #1D2F4E;
+      color: #1d1d1f;
       line-height: 1.1;
     }
 
@@ -137,7 +220,7 @@
     }
 
     .tabs__item--active {
-      color: #1D2F4E;
+      color: #2B4A78;
       font-weight: 600;
     }
 
@@ -148,7 +231,7 @@
       left: 16px;
       right: 16px;
       height: 2.5px;
-      background: #1D2F4E;
+      background: #2B4A78;
       border-radius: 1px;
     }
 
@@ -193,7 +276,7 @@
 
     .toggle__btn--active {
       background: #ffffff;
-      color: #1D2F4E;
+      color: #2B4A78;
       font-weight: 600;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
@@ -232,11 +315,11 @@
     }
 
     .card:hover .card__name {
-      color: #F4511E;
+      color: #2B4A78;
     }
 
     .card:hover .card__arrow {
-      color: #F4511E;
+      color: #2B4A78;
       transform: translateX(4px);
     }
 
@@ -326,7 +409,7 @@
     }
 
     .mock-btn:hover {
-      background: #1D2F4E;
+      background: #2B4A78;
       color: #fff;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(29,47,78,0.2);
@@ -348,7 +431,7 @@
       font-size: 14px;
       font-weight: 600;
       color: #ffffff;
-      background: #1D2F4E;
+      background: #2B4A78;
       border: none;
       border-radius: 9999px;
       cursor: pointer;
@@ -383,7 +466,7 @@
       padding: 8px 20px !important;
     }
     #progress-tab .progress-sub-tab.active {
-      background: #1D2F4E !important;
+      background: #2B4A78 !important;
       color: #fff !important;
     }
     #progress-tab .progress-sub-tab:hover:not(.active) {
@@ -435,7 +518,7 @@
     #progress-tab .health-year-progress-fill,
     #progress-tab .sports-year-progress-fill,
     #progress-tab .subj-bar-fill {
-      background: #1d1d1f !important;
+      background: #aeaeb2 !important;
     }
     #progress-tab .health-year-progress-bar,
     #progress-tab .sports-year-progress-bar {
@@ -500,7 +583,7 @@
     /* 버튼 — ghost 스타일 */
     #progress-tab .hour-action-btn.btn-start {
       background: transparent !important;
-      color: #1D2F4E !important;
+      color: #2B4A78 !important;
       border: 1px solid #d2d2d7 !important;
       border-radius: 9999px !important;
       font-size: 13px !important;
@@ -511,7 +594,7 @@
       text-align: center !important;
     }
     #progress-tab .hour-action-btn.btn-start:hover {
-      border-color: #1D2F4E !important;
+      border-color: #2B4A78 !important;
     }
     #progress-tab .hour-action-btn.btn-retry {
       background: transparent !important;
@@ -526,13 +609,13 @@
       text-align: center !important;
     }
     #progress-tab .hour-action-btn.btn-retry:hover {
-      border-color: #1D2F4E !important;
-      color: #1D2F4E !important;
+      border-color: #2B4A78 !important;
+      color: #2B4A78 !important;
     }
 
     /* 응시 배지 — 네이비/그레이 */
     #progress-tab .hour-badge.badge-done {
-      background: #1D2F4E !important;
+      background: #2B4A78 !important;
       color: #fff !important;
     }
     #progress-tab .hour-badge.badge-yet {
@@ -542,17 +625,17 @@
 
     /* 프로그레스 바 — 네이비 */
     #progress-tab .subj-bar-fill {
-      background: #1D2F4E !important;
+      background: #aeaeb2 !important;
     }
     #progress-tab .subject-start-btn {
-      background: #1d1d1f !important;
+      background: #6e6e73 !important;
       border-radius: 9999px !important;
     }
 
     /* 과목 그리드 아이템 */
     #progress-tab .health-subject-item.done,
     #progress-tab .sports-subject-item.done {
-      background: #1D2F4E !important;
+      background: #2B4A78 !important;
       color: #fff !important;
     }
     #progress-tab .health-subject-item.done .subject-name,
@@ -590,13 +673,41 @@
       border-radius: 12px !important;
     }
 
-    /* 연도 헤더 여백 */
+    /* 연도 헤더 — 클릭 가능 아코디언 */
     #progress-tab .year-group-header,
     #progress-tab .health-year-header,
     #progress-tab .sports-year-header {
       margin-bottom: 16px !important;
       padding-bottom: 16px !important;
       border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+      cursor: pointer !important;
+      user-select: none !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+    }
+
+    #progress-tab .year-toggle-icon {
+      font-size: 14px;
+      color: #aeaeb2;
+      transition: transform 0.25s ease;
+      margin-left: 8px;
+    }
+
+    #progress-tab .year-toggle-icon.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    #progress-tab .year-group-body {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.25s ease;
+      max-height: 2000px;
+      opacity: 1;
+    }
+
+    #progress-tab .year-group-body.collapsed {
+      max-height: 0;
+      opacity: 0;
     }
 
     /* ── Lecture (강의) ── */
@@ -620,7 +731,7 @@
     }
 
     .lecture-filter.active {
-      background: #1D2F4E;
+      background: #2B4A78;
       color: #fff;
     }
 
@@ -679,7 +790,7 @@
       font-size: 11px;
       font-weight: 600;
       color: #fff;
-      background: #1D2F4E;
+      background: #2B4A78;
       padding: 2px 8px;
       border-radius: 6px;
     }
@@ -741,7 +852,7 @@
     .lecture-card__discount {
       font-size: 14px;
       font-weight: 700;
-      color: #F4511E;
+      color: #2B4A78;
     }
 
     .lecture-card__price {
@@ -765,15 +876,200 @@
 
     /* ── Footer ── */
     .footer {
-      padding: 32px max(1.5rem, 5vw);
-      text-align: center;
-      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      background: #1d1d1f;
+      color: rgba(255, 255, 255, 0.56);
+      padding: 48px 24px 36px;
     }
 
-    .footer__text {
+    .footer__inner {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .footer__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 28px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer__link {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.56);
+      transition: color 0.2s;
+    }
+
+    .footer__link:hover { color: rgba(255, 255, 255, 0.92); }
+
+    .footer__divider {
+      width: 1px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.16);
+      align-self: center;
+    }
+
+    .footer__meta {
+      font-size: 11px;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.36);
+      margin-bottom: 16px;
+    }
+
+    .footer__bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer__copyright {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.36);
+    }
+
+    .footer__sns {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer__sns-link {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.44);
+      transition: color 0.2s;
+    }
+
+    .footer__sns-link:hover { color: rgba(255, 255, 255, 0.92); }
+
+    @media (max-width: 768px) {
+      .footer { padding: 36px 20px 28px; }
+      .footer__bottom { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* ── Subject Detail (과목 상세 뷰) ── */
+    .subject-detail {
+      display: none;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .subject-detail.active {
+      display: block;
+    }
+
+    .subject-detail.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .subject-detail__back {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #2B4A78;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: opacity 0.2s;
+      background: none;
+      border: none;
+    }
+
+    .subject-detail__back:hover { opacity: 0.7; }
+
+    .subject-detail__title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1d1d1f;
+      letter-spacing: -0.022em;
+      margin-bottom: 4px;
+    }
+
+    .subject-detail__meta {
       font-size: 14px;
       color: #86868b;
-      letter-spacing: -0.01em;
+      margin-bottom: 28px;
+    }
+
+    .subject-detail__grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .year-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 24px;
+      background: #f5f5f7;
+      border-radius: 14px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .year-card:hover {
+      background: #fff;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .year-card:hover .year-card__name { color: #2B4A78; }
+    .year-card:hover .year-card__arrow { color: #2B4A78; transform: translateX(4px); }
+
+    .year-card__info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .year-card__name {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1d1d1f;
+      letter-spacing: -0.022em;
+      transition: color 0.2s;
+    }
+
+    .year-card__meta {
+      font-size: 13px;
+      color: #86868b;
+    }
+
+    .year-card__arrow {
+      font-size: 20px;
+      color: #aeaeb2;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .subject-detail__grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .year-card {
+        padding: 18px 20px;
+      }
+
+      .subject-detail__title {
+        font-size: 24px;
+      }
+    }
+
+    /* 퀴즈 목록 트랜지션 */
+    .quiz-list-view {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .quiz-list-view.hiding {
+      opacity: 0;
+      transform: translateX(-20px);
     }
 
     /* ── Responsive ── */
@@ -841,8 +1137,24 @@
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
       <span class="header__name">퍼스트펭귄</span>
     </a>
-    <a href="login.html" class="header__login">로그인</a>
+    <nav class="header__nav">
+      <a href="es.html" class="header__nav-link">건강운동관리사</a>
+      <a href="sports1.html" class="header__nav-link">1급 스포츠지도사</a>
+      <a href="sports2.html" class="header__nav-link">2급 스포츠지도사</a>
+    </nav>
+    <div class="header__right">
+      <a href="#" class="header__login" id="header-login-btn">로그인</a>
+      <button class="header__hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </header>
+  <div class="header__mobile-menu" id="mobile-menu">
+    <a href="es.html" class="header__mobile-link">건강운동관리사</a>
+    <a href="sports1.html" class="header__mobile-link">1급 스포츠지도사</a>
+    <a href="sports2.html" class="header__mobile-link">2급 스포츠지도사</a>
+    <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
+  </div>
 
   <section class="page-title">
     <h1 class="page-title__text">건강운동관리사</h1>
@@ -861,6 +1173,9 @@
 
     <!-- ── 문제풀기 탭 ── -->
     <div class="tab-panel tab-panel--active" data-panel="quiz">
+
+      <!-- 과목 목록 뷰 -->
+      <div class="quiz-list-view" id="quiz-list-view">
 
       <div class="toggle">
         <div class="toggle__group">
@@ -984,6 +1299,16 @@
         </a>
       </div>
 
+      </div><!-- /quiz-list-view -->
+
+      <!-- 과목 상세 뷰 -->
+      <div class="subject-detail" id="subject-detail">
+        <button class="subject-detail__back" id="subject-back">← 과목 목록</button>
+        <h2 class="subject-detail__title" id="subject-detail-title"></h2>
+        <p class="subject-detail__meta" id="subject-detail-meta"></p>
+        <div class="subject-detail__grid" id="subject-detail-grid"></div>
+      </div>
+
     </div>
 
     <!-- ── 모의고사 탭 ── -->
@@ -1033,9 +1358,106 @@
   </main>
 
   <footer class="footer">
-    <p class="footer__text">&copy; 2025 퍼스트펭귄</p>
+    <div class="footer__inner">
+      <nav class="footer__links">
+        <a href="es.html" class="footer__link">건강운동관리사</a>
+        <a href="sports1.html" class="footer__link">1급 스포츠지도사</a>
+        <a href="sports2.html" class="footer__link">2급 스포츠지도사</a>
+        <span class="footer__divider"></span>
+        <a href="/terms.html" class="footer__link">이용약관</a>
+        <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
+        <a href="/company-info.html" class="footer__link">사업자정보</a>
+      </nav>
+      <p class="footer__meta">
+        퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+        주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+      </p>
+      <div class="footer__bottom">
+        <span class="footer__copyright">© 2025 퍼스트펭귄. All rights reserved.</span>
+        <div class="footer__sns">
+          <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="footer__sns-link">Instagram</a>
+          <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="footer__sns-link">YouTube</a>
+          <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="footer__sns-link">KakaoTalk</a>
+        </div>
+      </div>
+    </div>
   </footer>
 
+  <script>
+    // 모바일 햄버거 메뉴
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('open');
+    });
+
+    // ── 과목 상세 뷰 (SPA 전환) ──
+    const SUBJECTS = {
+      '운동생리학': { en: 'Exercise Physiology', session: '1교시' },
+      '건강체력평가': { en: 'Health Fitness Assessment', session: '1교시' },
+      '운동처방론': { en: 'Exercise Prescription', session: '1교시' },
+      '운동부하검사': { en: 'Exercise Stress Test', session: '1교시' },
+      '운동상해': { en: 'Sports Injury', session: '2교시' },
+      '기능해부학': { en: 'Functional Anatomy', session: '2교시' },
+      '병태생리학': { en: 'Pathophysiology', session: '2교시' },
+      '스포츠심리학': { en: 'Sport Psychology', session: '2교시' }
+    };
+    const YEARS = [2025, 2024, 2023, 2022, 2021, 2020, 2019];
+
+    const listView = document.getElementById('quiz-list-view');
+    const detailView = document.getElementById('subject-detail');
+    const detailTitle = document.getElementById('subject-detail-title');
+    const detailMeta = document.getElementById('subject-detail-meta');
+    const detailGrid = document.getElementById('subject-detail-grid');
+    const backBtn = document.getElementById('subject-back');
+
+    // 과목 카드 클릭 인터셉트
+    document.querySelectorAll('[data-grid="subject"] .card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        const name = card.querySelector('.card__name').textContent.trim();
+        const info = SUBJECTS[name];
+        if (!info) return;
+        showSubjectDetail(name, info);
+      });
+    });
+
+    function showSubjectDetail(name, info) {
+      // 연도 카드 생성
+      detailTitle.textContent = name;
+      detailMeta.textContent = `${info.en} · ${info.session} · 20문항`;
+      detailGrid.innerHTML = YEARS.map((y, i) => `
+        <a href="exam-new/${y}_${name}.html?prev=subject&subject=${name}" class="year-card">
+          <div class="year-card__info">
+            <span class="year-card__name">${y}년</span>
+            <span class="year-card__meta">${i === 0 ? '최신 기출문제' : '기출문제'} · 20문항</span>
+          </div>
+          <span class="year-card__arrow">→</span>
+        </a>
+      `).join('');
+
+      // 전환 애니메이션
+      listView.classList.add('hiding');
+      setTimeout(() => {
+        listView.style.display = 'none';
+        detailView.classList.add('active');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => detailView.classList.add('visible'));
+        });
+      }, 300);
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    backBtn.addEventListener('click', () => {
+      detailView.classList.remove('visible');
+      setTimeout(() => {
+        detailView.classList.remove('active');
+        listView.style.display = '';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => listView.classList.remove('hiding'));
+        });
+      }, 300);
+    });
+  </script>
   <script type="module">
     // 탭 전환
     const tabs = document.querySelectorAll('.tabs__item');
@@ -1133,6 +1555,34 @@
             item.onmouseenter = () => { item.style.transform = 'translateY(-2px)'; item.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)'; };
             item.onmouseleave = () => { item.style.transform = ''; item.style.boxShadow = ''; };
           }
+        });
+
+        // 아코디언: 연도별 접기/펼치기
+        document.querySelectorAll('#progress-tab .year-group-header, #progress-tab .health-year-header, #progress-tab .sports-year-header').forEach(header => {
+          // 토글 아이콘 추가
+          const icon = document.createElement('span');
+          icon.className = 'year-toggle-icon';
+          icon.textContent = '▾';
+          header.appendChild(icon);
+
+          // 헤더 아래 형제 요소들을 body wrapper로 감싸기
+          const card = header.parentElement;
+          const body = document.createElement('div');
+          body.className = 'year-group-body';
+          const siblings = [];
+          let el = header.nextElementSibling;
+          while (el) {
+            siblings.push(el);
+            el = el.nextElementSibling;
+          }
+          siblings.forEach(s => body.appendChild(s));
+          card.appendChild(body);
+
+          // 클릭 토글
+          header.addEventListener('click', () => {
+            body.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+          });
         });
 
         window._progressLoaded = true;
@@ -1242,6 +1692,41 @@
         loadLectureData(btn.dataset.filter);
       });
     });
+  </script>
+
+  <!-- 로그인 모달 + 상태 관리 -->
+  <script type="module">
+    import { showLoginModal } from './js/auth/auth-ui.js';
+    import { ensureFirebase } from './js/core/firebase-core.js';
+
+    document.getElementById('header-login-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      showLoginModal();
+    });
+    document.getElementById('mobile-login-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      showLoginModal();
+    });
+
+    (async () => {
+      try {
+        const { auth } = await ensureFirebase();
+        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+        onAuthStateChanged(auth, (user) => {
+          const headerBtn = document.getElementById('header-login-btn');
+          const mobileBtn = document.getElementById('mobile-login-btn');
+          if (user) {
+            const name = user.displayName || user.email?.split('@')[0] || '마이페이지';
+            headerBtn.textContent = name;
+            headerBtn.href = 'mypage.html';
+            headerBtn.onclick = null;
+            mobileBtn.textContent = '마이페이지';
+            mobileBtn.href = 'mypage.html';
+            mobileBtn.onclick = null;
+          }
+        });
+      } catch (e) { console.error(e); }
+    })();
   </script>
 
 </body>
