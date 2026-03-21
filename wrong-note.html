@@ -27,8 +27,9 @@
 
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/linear-header.css">
-    <link rel="stylesheet" href="css/linear-footer.css">
+    <link rel="stylesheet" href="css/design-tokens.css">
+    <link rel="stylesheet" href="css/apple-header.css">
+    <link rel="stylesheet" href="css/apple-footer.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/wrong-note.css">
     <link rel="stylesheet" href="css/linear-themes.css">
@@ -70,63 +71,32 @@
 </head>
 
 <body>
-    <header class="linear-header" id="linear-header">
-        <div class="linear-header__container">
-            <a href="index.html" class="linear-header__brand">
-                <div class="linear-header__logo">
-                    <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
-                </div>
-                <span class="linear-header__brand-text">퍼스트펭귄</span>
-            </a>
-
-            <nav class="linear-header__nav">
-                <ul class="linear-header__nav-list">
-                    <li class="linear-header__nav-item">
-                        <a href="index.html" class="linear-header__nav-link">홈</a>
-                    </li>
-                    <li class="linear-header__nav-item">
-                        <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-                    </li>
-                    <li class="linear-header__nav-item">
-                        <a href="notices.html" class="linear-header__nav-link">공지사항</a>
-                    </li>
-                </ul>
-            </nav>
-
-            <div class="linear-header__auth">
-                <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
-                <div id="user-profile-container" style="display: none;">
-                    <a href="mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
-                        <div class="linear-header__user-avatar" id="user-avatar">U</div>
-                        <span class="linear-header__user-name" id="user-name">사용자</span>
-                    </a>
-                    <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
-                </div>
-            </div>
-
-            <div class="linear-header__actions">
-                <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴">
-                    <span class="linear-header__mobile-toggle-line"></span>
-                    <span class="linear-header__mobile-toggle-line"></span>
-                    <span class="linear-header__mobile-toggle-line"></span>
-                </button>
-            </div>
-        </div>
-
-        <div class="linear-header__mobile-menu" id="mobile-menu">
-      <a href="index.html" class="linear-header__nav-link">홈</a>
-      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
-      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-      <div class="mobile-menu-auth">
-        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
-        <div id="mobile-user-profile-container" style="display: none;">
-          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
-          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
-        </div>
+    <!-- Header -->
+    <header class="header" id="header">
+      <a href="index.html" class="header__brand">
+        <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
+        <span class="header__name">퍼스트펭귄</span>
+      </a>
+      <nav class="header__nav">
+        <a href="notices.html" class="header__nav-link">공지사항</a>
+        <a href="cft.html" class="header__nav-link">건운사</a>
+        <a href="si1.html" class="header__nav-link">1급</a>
+        <a href="si2.html" class="header__nav-link">2급</a>
+      </nav>
+      <div class="header__right">
+        <a href="#" class="header__login" id="header-login-btn">로그인</a>
+        <button class="header__hamburger" id="hamburger" aria-label="메뉴">
+          <span></span><span></span><span></span>
+        </button>
       </div>
+    </header>
+    <div class="header__mobile-menu" id="mobile-menu">
+      <a href="notices.html" class="header__mobile-link">공지사항</a>
+      <a href="cft.html" class="header__mobile-link">건운사</a>
+      <a href="si1.html" class="header__mobile-link">1급</a>
+      <a href="si2.html" class="header__mobile-link">2급</a>
+      <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
     </div>
-  </header>
 
     <main class="wrong-note-container">
         <div class="page-header">
@@ -182,13 +152,41 @@
         </div>
     </div>
 
-    <footer class="linear-footer"></footer>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__links">
+          <a href="cft.html" class="footer__link">건강운동관리사</a>
+          <a href="si1.html" class="footer__link">1급 스포츠지도사</a>
+          <a href="si2.html" class="footer__link">2급 스포츠지도사</a>
+          <span class="footer__divider"></span>
+          <a href="/terms.html" class="footer__link">이용약관</a>
+          <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
+          <a href="/company-info.html" class="footer__link">사업자정보</a>
+        </nav>
+        <p class="footer__meta">
+          퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+          주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+        </p>
+        <div class="footer__bottom">
+          <span class="footer__copyright">&copy; 2025 퍼스트펭귄. All rights reserved.</span>
+          <div class="footer__sns">
+            <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="footer__sns-link">Instagram</a>
+            <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="footer__sns-link">YouTube</a>
+            <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="footer__sns-link">KakaoTalk</a>
+          </div>
+        </div>
+      </div>
+    </footer>
 
     <script type="module" src="js/core/firebase-core.js"></script>
     <script type="module" src="js/auth/auth-utils.js"></script>
     <script type="module" src="js/auth/auth-ui.js"></script>
     <script type="module" src="js/auth/auth-core.js"></script>
-    <script src="js/linear-header.js"></script>
+    
+      const hamburger = document.getElementById('hamburger');
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (hamburger && mobileMenu) hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+    </script>
     <script src="js/utils/theme-manager.js"></script>
     <script type="module" src="js/quiz/wrong-note-ui.js"></script>
 </body>

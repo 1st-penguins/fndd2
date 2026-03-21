@@ -2,3 +2,5 @@ node_modules/
 serviceaccountkey.json
 service-account-key.json
 functions/.env
+.claude/settings.local.json
+.firebase/hosting..cache

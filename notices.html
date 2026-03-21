@@ -1,238 +1,352 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>공지사항 목록 - 퍼스트펭귄</title>
+  <title>공지사항 — 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="canonical" href="https://the1stpeng.com/notices.html" />
-  <meta name="description" content="건강운동관리사·2급 스포츠지도사 시험 관련 최신 공지사항, 이벤트, 무료 특강 소식을 확인하세요.">
+  <meta name="description" content="건강운동관리사·스포츠지도사 시험 관련 최신 공지사항, 이벤트, 무료 특강 소식을 확인하세요.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="공지사항 | 퍼스트펭귄">
-  <meta property="og:description" content="건강운동관리사·2급 스포츠지도사 시험 관련 최신 공지사항, 이벤트, 무료 특강 소식을 확인하세요.">
+  <meta property="og:description" content="건강운동관리사·스포츠지도사 시험 관련 최신 공지사항, 이벤트, 무료 특강 소식을 확인하세요.">
   <meta property="og:url" content="https://the1stpeng.com/notices.html">
   <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="공지사항 | 퍼스트펭귄">
-  <meta name="twitter:description" content="건강운동관리사·2급 스포츠지도사 시험 관련 최신 공지사항, 이벤트, 무료 특강 소식을 확인하세요.">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1D2F4E">
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="//www.gstatic.com">
-  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-  <link rel="dns-prefetch" href="//firestore.googleapis.com">
 
-  <!-- Firebase SDK 미리 다운로드 (실행은 firebase-core.js에서) -->
+  <link rel="stylesheet" href="css/design-tokens.css">
+
+  <!-- Firebase SDK -->
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js" crossorigin>
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js" crossorigin>
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js" crossorigin>
 
-  <!-- 외부 CSS 파일 연결 -->
-  <link rel="stylesheet" href="css/base.css?v=2026031009">
-  <link rel="stylesheet" href="css/linear-header.css?v=2026031009">
-  <link rel="stylesheet" href="css/linear-footer.css?v=2026031009">
-  <link rel="stylesheet" href="css/layout.css?v=2026031009">
-  <link rel="stylesheet" href="css/components.css?v=2026031009">
-  <link rel="stylesheet" href="css/premium-ui.css?v=2026031009">
-  <link rel="stylesheet" href="css/login.css?v=2026031009">
-  <link rel="stylesheet" href="css/pages/notice.css?v=2026031009">
+  <script src="js/logger.js"></script>
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  <script type="module" src="js/auth/auth-ui.js"></script>
+  <script type="module" src="js/notice/notice-ui.js"></script>
 
-  <!-- 로거 스크립트: 모든 JS 파일보다 먼저 로드 -->
-  <script src="js/logger.js?v=2026031009"></script>
-
-  <!-- Firebase Core + SDK 초기화 -->
-  <script type="module" src="js/core/firebase-core.js?v=2026031009"></script>
-
-  <!-- 인증 관련 스크립트 -->
-  <script type="module" src="js/auth/auth-core.js?v=2026031009"></script>
-  <script type="module" src="js/auth/auth-ui.js?v=2026031009"></script>
-
-  <!-- 페이지 전용 스크립트 -->
-  <script type="module" src="js/notice/notice-ui.js?v=2026031009"></script>
-
-  <!-- Linear Header 스크립트 -->
-  <script src="js/linear-header.js?v=2026031009"></script>
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/pages/notice.css">
 
   <style>
-    :root {
-      --penguin-navy: #1D2F4E;
-      --penguin-skyblue: #5FB2C9;
-      --frost-white: #ffffff;
-      --deep-sea-gray: #64748b;
-      --radius-8: 8px;
-      --radius-12: 12px;
-      --radius-16: 16px;
-      --page-padding-inline: 24px;
-      --page-padding-block: 64px;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: var(--font-sans);
+      background: #ffffff;
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     body {
-      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #f8f9fa;
       min-height: 100vh;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
-      margin: 0;
-      padding: 0;
     }
 
-    .main-content {
-      flex: 1;
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Header (Glassmorphism) ── */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: var(--page-padding-block) var(--page-padding-inline);
-      background: #f8f9fa;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 max(20px, env(safe-area-inset-left));
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--color-separator);
+      z-index: 100;
     }
 
-    .notices-container {
-      max-width: 1024px;
+    .header__brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header__logo {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .header__name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .header__nav {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .header__nav-link {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      transition: color 0.2s;
+    }
+
+    .header__nav-link:hover { color: var(--color-text-primary); }
+
+    .header__nav-link--active {
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+
+    .header__right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header__login {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      padding: 5px 14px;
+      border-radius: 980px;
+      border: 1px solid var(--color-border);
+      transition: all 0.2s;
+    }
+
+    .header__login:hover {
+      color: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+
+    .header__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 20px;
+      height: 16px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .header__hamburger span {
+      display: block;
       width: 100%;
-      padding: 32px 24px;
+      height: 1.5px;
+      background: var(--color-text-primary);
+      position: absolute;
+      left: 0;
+      transition: all 0.25s ease;
+    }
+
+    .header__hamburger span:nth-child(1) { top: 0; }
+    .header__hamburger span:nth-child(2) { top: 7px; }
+    .header__hamburger span:nth-child(3) { top: 14px; }
+
+    .header__mobile-menu {
+      display: none;
+      position: fixed;
+      top: 48px;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.98);
+      padding: 12px 24px 16px;
+      z-index: 99;
+      flex-direction: column;
+      gap: 4px;
+      border-bottom: 1px solid var(--color-separator);
+    }
+
+    .header__mobile-menu.open { display: flex; }
+
+    .header__mobile-link {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1d1d1f;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      transition: color 0.2s;
+    }
+
+    .header__mobile-link:last-child { border-bottom: none; }
+    .header__mobile-link:hover { color: #2B4A78; }
+
+    @media (max-width: 734px) {
+      .header__nav { display: none; }
+      .header__login { display: none; }
+      .header__hamburger { display: block; }
+    }
+
+    /* ── Page Content ── */
+    .page {
+      flex: 1;
+      padding: 100px 24px 80px;
+      max-width: 720px;
+      width: 100%;
       margin: 0 auto;
-      box-sizing: border-box;
-      overflow-x: hidden;
     }
 
-    .notices-header {
-      margin-bottom: 32px;
-      padding-bottom: 24px;
-      border-bottom: 2px solid rgba(95, 178, 201, 0.1);
+    .page__title {
+      font-size: var(--text-4xl);
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+      animation: fadeInUp 0.6s ease-out;
     }
 
-    .notices-title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: var(--penguin-navy);
+    .page__desc {
+      font-size: var(--text-base);
+      color: var(--color-text-tertiary);
+      margin-bottom: 48px;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
     }
 
-    .notices-header p {
-      font-size: 1.125rem;
-      color: var(--deep-sea-gray);
+    /* ── Notice List ── */
+    .notice-list {
+      list-style: none;
+      padding: 0;
       margin: 0;
-      line-height: 1.6;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
     }
 
+    /* ── Loading ── */
     .notices-loading {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
-      padding: 48px 24px;
-      color: rgba(29, 47, 78, 0.6);
-      font-size: 1rem;
+      padding: 64px 24px;
+      color: var(--color-text-quaternary);
+      font-size: var(--text-sm);
     }
 
     .loading-spinner {
-      border: 2px solid rgba(95, 178, 201, 0.1);
-      border-top: 2px solid var(--penguin-skyblue);
+      border: 2px solid var(--color-separator);
+      border-top: 2px solid var(--color-text-tertiary);
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
+      to { transform: rotate(360deg); }
     }
 
+    /* ── Empty State ── */
     .notices-empty {
       text-align: center;
-      padding: 64px 24px;
-      color: rgba(29, 47, 78, 0.5);
-      font-size: 1rem;
-      background: linear-gradient(135deg,
-          rgba(95, 178, 201, 0.02) 0%,
-          rgba(29, 47, 78, 0.02) 100%);
-      border-radius: var(--radius-12);
-      border: 1px dashed rgba(29, 47, 78, 0.1);
+      padding: 80px 24px;
+      color: var(--color-text-quaternary);
+      font-size: var(--text-sm);
     }
 
-    .notices-empty::before {
-      content: '📭';
-      display: block;
-      font-size: 3rem;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    .notice-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
+    /* ── Pagination ── */
     #notice-pagination {
-      margin-top: 32px;
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
     }
 
-    @media (max-width: 768px) {
-      .main-content {
-        padding: 32px 16px;
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-        box-sizing: border-box;
-      }
+    /* ── Footer ── */
+    .footer {
+      background: #1D2F4E;
+      color: rgba(255, 255, 255, 0.56);
+      padding: 48px 24px 36px;
+    }
 
-      .notices-container {
-        padding: 32px 20px;
-        border-radius: var(--radius-12);
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-      }
+    .footer__inner {
+      max-width: 980px;
+      margin: 0 auto;
+    }
 
-      .notices-title {
-        font-size: 2rem;
-      }
+    .footer__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 28px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer__link {
+      font-size: var(--text-xs);
+      color: rgba(255, 255, 255, 0.56);
+      transition: color 0.2s;
+    }
+
+    .footer__link:hover { color: rgba(255, 255, 255, 0.92); }
+
+    .footer__divider {
+      width: 1px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.16);
+      align-self: center;
+    }
+
+    .footer__meta {
+      font-size: 11px;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.36);
+      margin-bottom: 16px;
+    }
+
+    .footer__bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer__copyright {
+      font-size: var(--text-xs);
+      color: rgba(255, 255, 255, 0.36);
+    }
+
+    .footer__sns {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer__sns-link {
+      font-size: var(--text-xs);
+      color: rgba(255, 255, 255, 0.44);
+      transition: color 0.2s;
+    }
+
+    .footer__sns-link:hover { color: rgba(255, 255, 255, 0.92); }
+
+    @media (max-width: 734px) {
+      .page { padding: 80px 20px 60px; }
+      .page__title { font-size: var(--text-3xl); }
+      .footer { padding: 36px 20px 28px; }
+      .footer__bottom { flex-direction: column; align-items: flex-start; }
     }
 
     @media (max-width: 480px) {
-      .main-content {
-        padding: 24px 12px;
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-        box-sizing: border-box;
-      }
-
-      .notices-container {
-        padding: 24px 16px;
-        border-radius: var(--radius-8);
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-      }
-
-      .notices-title {
-        font-size: 1.75rem;
-      }
-
-      .notices-header {
-        margin-bottom: 24px;
-        padding-bottom: 20px;
-      }
-
-      .notices-header p {
-        font-size: 1rem;
-      }
+      .page__title { font-size: var(--text-2xl); }
     }
 
-    /* 로그인 관련 UI 정리 - Linear 테마에 맞게 */
-    .login-container {
-      display: none !important;
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* 로그인 모달 */
     .login-modal {
       display: none !important;
       position: fixed !important;
@@ -246,118 +360,87 @@
       align-items: center !important;
     }
 
-    .login-modal.show {
-      display: flex !important;
-    }
+    .login-modal.show { display: flex !important; }
   </style>
 </head>
-
 <body>
-  <!-- Linear Header -->
-  <header class="linear-header" id="linear-header">
-    <div class="linear-header__container">
-      <a href="index.html" class="linear-header__brand">
-        <div class="linear-header__logo">
-          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
-        </div>
-        <span class="linear-header__brand-text">퍼스트펭귄</span>
-        <span class="cert-badge" id="header-cert-badge">건강운동관리사</span>
-      </a>
 
-      <nav class="linear-header__nav">
-        <ul class="linear-header__nav-list">
-          <li class="linear-header__nav-item">
-            <a href="index.html" class="linear-header__nav-link">홈</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="notices.html" class="linear-header__nav-link linear-header__nav-link--active">공지사항</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-          </li>
-        </ul>
-      </nav>
-
-      <!-- 로그인/로그아웃을 별도 영역으로 분리 -->
-      <div class="linear-header__auth">
-        <!-- 로그인 전 상태 -->
-        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">
-          로그인
-        </a>
-
-        <!-- 로그인 후 상태 (JavaScript로 동적 생성) -->
-        <div id="user-profile-container" style="display: none;">
-          <a href="mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
-            <div class="linear-header__user-avatar" id="user-avatar">U</div>
-            <span class="linear-header__user-name" id="user-name">사용자</span>
-          </a>
-          <a href="#" class="linear-header__nav-link" data-action="logout">
-            로그아웃
-          </a>
-        </div>
-      </div>
-
-      <div class="linear-header__actions">
-        <!-- 개발 모드 토글 (개발 환경에서만 표시) -->
-        <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
-          <button id="dev-mode-btn" class="dev-mode-btn">
-            <span class="dev-mode-indicator"></span>
-            DEV
-          </button>
-        </div>
-
-        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
-          aria-expanded="false">
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 모바일 메뉴 -->
-    <div class="linear-header__mobile-menu" id="mobile-menu">
-      <a href="index.html" class="linear-header__nav-link">홈</a>
-      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
-      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-      <div class="mobile-menu-auth">
-        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
-        <div id="mobile-user-profile-container" style="display: none;">
-          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
-          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
-        </div>
-      </div>
+  <!-- Header -->
+  <header class="header" id="header">
+    <a href="index.html" class="header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
+      <span class="header__name">퍼스트펭귄</span>
+    </a>
+    <nav class="header__nav">
+      <a href="notices.html" class="header__nav-link header__nav-link--active">공지사항</a>
+      <a href="cft.html" class="header__nav-link">건운사</a>
+      <a href="si1.html" class="header__nav-link">1급</a>
+      <a href="si2.html" class="header__nav-link">2급</a>
+    </nav>
+    <div class="header__right">
+      <a href="#" class="header__login" id="header-login-btn">로그인</a>
+      <button class="header__hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
+  <div class="header__mobile-menu" id="mobile-menu">
+    <a href="notices.html" class="header__mobile-link">공지사항</a>
+    <a href="cft.html" class="header__mobile-link">건운사</a>
+    <a href="si1.html" class="header__mobile-link">1급</a>
+    <a href="si2.html" class="header__mobile-link">2급</a>
+    <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
+  </div>
 
-  <main class="main-content">
-    <div class="notices-container glass-card animate-premium">
-      <div class="notices-header">
-        <h2 class="notices-title">공지사항</h2>
-        <p>퍼스트펭귄의 주요 공지사항과 업데이트 내용을 확인하세요.</p>
-      </div>
+  <!-- Content -->
+  <main class="page">
+    <h1 class="page__title">공지사항</h1>
+    <p class="page__desc">퍼스트펭귄의 최신 소식과 업데이트</p>
 
-      <div id="notices-loading" class="notices-loading">
-        <div class="loading-spinner"></div>
-        <span>공지사항을 불러오는 중...</span>
-      </div>
+    <div id="notices-loading" class="notices-loading">
+      <div class="loading-spinner"></div>
+      <span>불러오는 중...</span>
+    </div>
 
-      <ul id="notice-list" class="notice-list" style="display: none;">
-        <!-- 공지사항이 여기에 동적으로 채워집니다 -->
-      </ul>
-      <div id="notice-pagination"></div>
+    <ul id="notice-list" class="notice-list" style="display: none;"></ul>
+    <div id="notice-pagination"></div>
 
-      <div id="notices-empty" class="notices-empty" style="display: none;">
-        등록된 공지사항이 없습니다.
-      </div>
+    <div id="notices-empty" class="notices-empty" style="display: none;">
+      등록된 공지사항이 없습니다.
     </div>
   </main>
 
-  <footer class="linear-footer"></footer>
-</body>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <nav class="footer__links">
+        <a href="cft.html" class="footer__link">건강운동관리사</a>
+        <a href="si1.html" class="footer__link">1급 스포츠지도사</a>
+        <a href="si2.html" class="footer__link">2급 스포츠지도사</a>
+        <span class="footer__divider"></span>
+        <a href="/terms.html" class="footer__link">이용약관</a>
+        <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
+        <a href="/company-info.html" class="footer__link">사업자정보</a>
+      </nav>
+      <p class="footer__meta">
+        퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+        주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+      </p>
+      <div class="footer__bottom">
+        <span class="footer__copyright">&copy; 2025 퍼스트펭귄. All rights reserved.</span>
+        <div class="footer__sns">
+          <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="footer__sns-link">Instagram</a>
+          <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="footer__sns-link">YouTube</a>
+          <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="footer__sns-link">KakaoTalk</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
+  
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  </script>
+</body>
 </html>

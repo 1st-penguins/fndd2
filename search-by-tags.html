@@ -1,224 +1,159 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="태그로 기출문제 검색하기 - 건강운동관리사, 생활스포츠지도사 자격증 시험 대비" />
-  <title>태그 검색 - 퍼스트펭귄</title>
-  <link rel="canonical" href="https://the1stpeng.com/search-by-tags.html" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>태그 검색 — 퍼스트펭귄</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="canonical" href="https://the1stpeng.com/search-by-tags.html" />
+  <meta name="description" content="태그로 기출문제 검색하기 - 건강운동관리사, 스포츠지도사 자격증 시험 대비">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1D2F4E">
 
-  <!-- 구글 폰트 -->
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/tag-search.css">
+  <link rel="stylesheet" href="css/wrong-note.css">
 
-  <!-- Firebase 리소스 힌트 -->
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="//www.gstatic.com">
-  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-  <link rel="dns-prefetch" href="//firestore.googleapis.com">
-
-  <!-- 외부 CSS 파일 연결 -->
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/linear-header.css" />
-  <link rel="stylesheet" href="css/linear-footer.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/login.css" />
-  <link rel="stylesheet" href="css/tag-search.css" />
-  <link rel="stylesheet" href="css/wrong-note.css" />
-
-  <!-- Firebase 관련 스크립트 -->
   <script type="module" src="js/core/firebase-core.js"></script>
   <script type="module" src="js/auth/auth-utils.js"></script>
   <script type="module" src="js/auth/auth-ui.js"></script>
   <script type="module" src="js/auth/auth-core.js"></script>
-  <!-- 태그 검색은 모든 사용자에게 개방 -->
 </head>
-
 <body>
-  <header class="linear-header" id="linear-header">
-    <div class="linear-header__container">
-      <a href="index.html" class="linear-header__brand">
-        <div class="linear-header__logo">
-          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
-        </div>
-        <span class="linear-header__brand-text">퍼스트펭귄</span>
-        <span class="cert-badge" id="header-cert-badge">건강운동관리사</span>
-      </a>
 
-      <nav class="linear-header__nav">
-        <ul class="linear-header__nav-list">
-          <li class="linear-header__nav-item">
-            <a href="index.html" class="linear-header__nav-link">홈</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="linear-header__auth">
-        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
-        <div id="user-profile-container" style="display: none;">
-          <a href="mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
-            <div class="linear-header__user-avatar" id="user-avatar">U</div>
-            <span class="linear-header__user-name" id="user-name">사용자</span>
-          </a>
-          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
-        </div>
-      </div>
-
-      <div class="linear-header__actions">
-        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
-          aria-expanded="false">
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 모바일 메뉴 -->
-    <div class="linear-header__mobile-menu" id="mobile-menu">
-      <a href="index.html" class="linear-header__nav-link">홈</a>
-      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
-      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-      <div class="mobile-menu-auth">
-        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
-        <div id="mobile-user-profile-container" style="display: none;">
-          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
-          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
-        </div>
-      </div>
+  <!-- Header -->
+  <header class="header" id="header">
+    <a href="index.html" class="header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
+      <span class="header__name">퍼스트펭귄</span>
+    </a>
+    <nav class="header__nav">
+      <a href="notices.html" class="header__nav-link">공지사항</a>
+      <a href="cft.html" class="header__nav-link">건운사</a>
+      <a href="si1.html" class="header__nav-link">1급</a>
+      <a href="si2.html" class="header__nav-link">2급</a>
+    </nav>
+    <div class="header__right">
+      <a href="#" class="header__login" id="header-login-btn">로그인</a>
+      <button class="header__hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
+  <div class="header__mobile-menu" id="mobile-menu">
+    <a href="notices.html" class="header__mobile-link">공지사항</a>
+    <a href="cft.html" class="header__mobile-link">건운사</a>
+    <a href="si1.html" class="header__mobile-link">1급</a>
+    <a href="si2.html" class="header__mobile-link">2급</a>
+    <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
+  </div>
 
-  <div class="main-content">
-    <div class="container">
-      <div class="tag-search-page">
-        <!-- 페이지 헤더 -->
-        <div class="tag-search-header">
-          <h1>🏷️ 태그로 문제 검색</h1>
-          <p class="tag-search-description">
-            문제에 태그를 추가하고, 태그로 빠르게 원하는 문제를 찾아보세요.
-          </p>
+  <!-- Content -->
+  <main class="page">
+    <div class="tag-search-page">
+
+      <!-- 페이지 헤더 -->
+      <div class="tag-search-header">
+        <h1>태그 검색</h1>
+        <p class="tag-search-description">태그로 원하는 기출문제를 빠르게 찾아보세요. (지문에 포함된 단어도 검색이 됩니다.)</p>
+      </div>
+
+      <!-- 검색 영역 -->
+      <div class="tag-search-section">
+        <div class="search-input-wrapper">
+          <input type="text" id="tag-search-input" class="tag-search-input"
+            placeholder="태그 또는 키워드 검색" autocomplete="off">
+          <button id="tag-search-button" class="tag-search-button">검색</button>
         </div>
 
-        <!-- 검색 영역 -->
-        <div class="tag-search-section">
-          <div class="search-input-wrapper">
-            <input type="text" id="tag-search-input" class="tag-search-input"
-              placeholder="태그 또는 키워드 검색 (예: 탈진, 심전도, 격변이론...)" autocomplete="off" />
-            <button id="tag-search-button" class="tag-search-button">검색</button>
-          </div>
+        <div id="tag-autocomplete" class="tag-autocomplete"></div>
+        <div id="selected-tags" class="selected-tags"></div>
 
-          <!-- 자동완성 드롭다운 -->
-          <div id="tag-autocomplete" class="tag-autocomplete"></div>
-
-          <!-- 선택된 태그 표시 -->
-          <div id="selected-tags" class="selected-tags"></div>
-
-          <!-- 인기 태그 -->
-          <div class="popular-tags-section">
-            <h3>인기 태그</h3>
-            <div id="popular-tags" class="popular-tags">
-              <div class="loading-tags">태그를 불러오는 중...</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 필터 영역 -->
-        <div class="filter-section">
-          <div class="filter-group">
-            <label for="year-filter">년도</label>
-            <select id="year-filter" class="filter-select">
-              <option value="all">전체</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="subject-filter">과목</label>
-            <select id="subject-filter" class="filter-select">
-              <option value="all">전체</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="certificate-filter">자격증</label>
-            <select id="certificate-filter" class="filter-select">
-              <option value="all">전체</option>
-              <option value="health-manager">건강운동관리사</option>
-              <option value="sports-instructor">생활스포츠지도사</option>
-              <option value="sports-instructor-1">1급 스포츠지도사</option>
-            </select>
-          </div>
-          <!-- 관리자 모드 토글 -->
-          <div class="filter-group admin-only-toggle" style="margin-left: auto;">
-            <label class="switch-label"
-              style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--text-muted);">
-              <span>검토자 모드</span>
-              <input type="checkbox" id="admin-mode-toggle" style="cursor: pointer;">
-            </label>
-          </div>
-        </div>
-
-        <!-- 검색 결과 -->
-        <div class="search-results-section">
-          <div class="results-header">
-            <h2 id="results-title">검색 결과</h2>
-            <div id="results-count" class="results-count">0개 문제</div>
-          </div>
-          <div id="search-results" class="search-results">
-            <div class="empty-state">
-              <div class="empty-state-icon">🔍</div>
-              <p>태그를 입력하거나 인기 태그를 클릭하여 검색해보세요.</p>
-            </div>
+        <!-- 인기 태그 -->
+        <div class="popular-tags-section">
+          <h3>인기 태그</h3>
+          <div id="popular-tags" class="popular-tags">
+            <div class="loading-tags">태그를 불러오는 중...</div>
           </div>
         </div>
       </div>
+
+      <!-- 필터 영역 -->
+      <div class="filter-section">
+        <div class="filter-group">
+          <label for="year-filter">연도</label>
+          <select id="year-filter" class="filter-select">
+            <option value="all">전체</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="subject-filter">과목</label>
+          <select id="subject-filter" class="filter-select">
+            <option value="all">전체</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="certificate-filter">자격증</label>
+          <select id="certificate-filter" class="filter-select">
+            <option value="all">전체</option>
+            <option value="health-manager">건강운동관리사</option>
+            <option value="sports-instructor">생활스포츠지도사</option>
+            <option value="sports-instructor-1">1급 스포츠지도사</option>
+          </select>
+        </div>
+        <div class="filter-group admin-only-toggle" style="margin-left: auto;">
+          <label class="switch-label">
+            <span>검토자 모드</span>
+            <input type="checkbox" id="admin-mode-toggle">
+          </label>
+        </div>
+      </div>
+
+      <!-- 검색 결과 -->
+      <div class="search-results-section">
+        <div class="results-header">
+          <h2 id="results-title">검색 결과</h2>
+          <span id="results-count" class="results-count">0개 문제</span>
+        </div>
+        <div id="search-results" class="search-results">
+          <div class="empty-state">
+            <p>태그를 입력하거나 인기 태그를 클릭하여 검색해보세요.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
-  </div>
+  </main>
 
   <!-- 인라인 태그 편집 모달 -->
   <div id="inline-edit-modal" class="modal"
-    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center;">
-    <div class="modal-content"
-      style="background: #1e293b; padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 600px; color: white; border: 1px solid rgba(255,255,255,0.1);">
-      <h3 id="modal-q-id" style="margin-top: 0; color: #38bdf8;">문제 태그 편집</h3>
-      <p id="modal-q-subject" style="font-size: 14px; color: #94a3b8; margin-bottom: 1.5rem;"></p>
+    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 2000; justify-content: center; align-items: center;">
+    <div style="background: #fff; padding: 32px; border-radius: 20px; width: 90%; max-width: 560px; color: #1d1d1f; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+      <h3 id="modal-q-id" style="margin: 0 0 4px; font-size: 17px; font-weight: 600;">문제 태그 편집</h3>
+      <p id="modal-q-subject" style="font-size: 13px; color: #86868b; margin: 0 0 20px;"></p>
 
-      <div
-        style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; max-height: 150px; overflow-y: auto; font-size: 13px; line-height: 1.6;"
-        id="modal-q-explanation">
-        <!-- 해설 텍스트 로드 -->
-      </div>
+      <div style="background: #f5f5f7; padding: 16px; border-radius: 12px; margin-bottom: 20px; max-height: 140px; overflow-y: auto; font-size: 13px; line-height: 1.7; color: #424245;"
+        id="modal-q-explanation"></div>
 
-      <div class="input-group" style="margin-bottom: 1.5rem;">
-        <label style="display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px;">매핑할 전문 용어 (해설에서 복사해서
-          붙여넣으세요)</label>
-        <input type="text" id="inline-tag-input" class="admin-input"
-          style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;"
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 6px; color: #86868b; font-size: 13px;">매핑할 전문 용어</label>
+        <input type="text" id="inline-tag-input"
+          style="width: 100%; padding: 10px 14px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.06); border-radius: 10px; font-size: 15px; color: #1d1d1f; outline: none; box-sizing: border-box;"
           placeholder="예: AMPK">
       </div>
 
-      <div class="input-group" style="margin-bottom: 2rem;">
-        <label style="display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px;">해당 용어가 속할 중간 카테고리</label>
-        <select id="inline-category-select" class="admin-input"
-          style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
-          <!-- 과목별 카테고리 로드 -->
-        </select>
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; margin-bottom: 6px; color: #86868b; font-size: 13px;">해당 용어가 속할 카테고리</label>
+        <select id="inline-category-select"
+          style="width: 100%; padding: 10px 14px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.06); border-radius: 10px; font-size: 15px; color: #1d1d1f; outline: none; box-sizing: border-box;"></select>
       </div>
 
-      <div style="display: flex; gap: 12px;">
-        <button id="save-inline-tag" class="admin-btn-primary"
-          style="flex: 1; background: #38bdf8; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer;">태그
-          사전에 추가</button>
+      <div style="display: flex; gap: 8px;">
+        <button id="save-inline-tag"
+          style="flex: 1; background: #1D2F4E; color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer;">태그 사전에 추가</button>
         <button onclick="document.getElementById('inline-edit-modal').style.display='none'"
-          style="flex: 1; background: rgba(255,255,255,0.1); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer;">취소</button>
+          style="flex: 1; background: #f5f5f7; color: #1d1d1f; border: none; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer;">취소</button>
       </div>
     </div>
   </div>
@@ -240,20 +175,38 @@
     </div>
   </div>
 
-  <!-- 코드 추출용 토스트/패널 -->
-  <div id="admin-export-toast"
-    style="display: none; position: fixed; bottom: 30px; right: 30px; background: #0A9E72; color: white; padding: 16px 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 3000; align-items: center; gap: 12px;">
-    <span>태그 사전이 수정되었습니다. 변경사항을 내보내시겠습니까?</span>
-    <button onclick="location.href='admin-tags.html'"
-      style="background: white; color: #0A9E72; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">관리자
-      페이지로 이동</button>
-  </div>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <nav class="footer__links">
+        <a href="cft.html" class="footer__link">건강운동관리사</a>
+        <a href="si1.html" class="footer__link">1급 스포츠지도사</a>
+        <a href="si2.html" class="footer__link">2급 스포츠지도사</a>
+        <span class="footer__divider"></span>
+        <a href="/terms.html" class="footer__link">이용약관</a>
+        <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
+        <a href="/company-info.html" class="footer__link">사업자정보</a>
+      </nav>
+      <p class="footer__meta">
+        퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+        주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+      </p>
+      <div class="footer__bottom">
+        <span class="footer__copyright">&copy; 2025 퍼스트펭귄. All rights reserved.</span>
+        <div class="footer__sns">
+          <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="footer__sns-link">Instagram</a>
+          <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="footer__sns-link">YouTube</a>
+          <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="footer__sns-link">KakaoTalk</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-  <footer class="linear-footer"></footer>
-
-  <!-- 스크립트 -->
-  <script src="js/linear-header.js"></script>
+  
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  </script>
   <script type="module" src="js/tag-search.js"></script>
 </body>
-
 </html>

@@ -402,7 +402,7 @@ function createNoticeItem(notice, options) {
   // 배지 HTML — [카테고리] 대괄호 스타일
   let badgeTag = '';
   if (options.showBadges && notice.badge) {
-    badgeTag = `<span class="notice-badge">[${notice.badge}]</span> `;
+    badgeTag = `<span class="notice-badge">${notice.badge}</span>`;
   }
 
   return `
@@ -481,32 +481,14 @@ async function renderAdminUsagePanel() {
  */
 function getBadgeClass(badge) {
   switch (badge) {
-    case '신규':
-      return 'new';
-    case '중요':
-      return 'important';
-    case '긴급':
-      return 'urgent';
-    case '강의예정':
-      return 'lecture-upcoming';
-    case '강의종료':
-      return 'lecture-ended';
-    case '마감됨':
-    case '종료됨':
-      return 'closed';
-    case '행사':
-      return 'event';
-    case '안내':
+    case '공지':
       return 'notice';
+    case '이벤트':
+      return 'event';
     case '업데이트':
       return 'update';
-    case 'FAQ':
-      return 'faq';
-    case '가이드':
-      return 'guide';
     default:
-      // 기본값으로 배지 텍스트를 소문자로 변환하고 공백을 하이픈으로 대체
-      return badge.toLowerCase().replace(/\s+/g, '-');
+      return 'notice';
   }
 }
 

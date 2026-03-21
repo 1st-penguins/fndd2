@@ -1,322 +1,320 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>사업자 정보 | 퍼스트펭귄</title>
+  <title>사업자 정보 — 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="canonical" href="https://the1stpeng.com/company-info.html" />
-  <meta name="description" content="퍼스트펭귄 사업자 등록 정보 및 이용약관을 확인하세요.">
+  <meta name="description" content="퍼스트펭귄 사업자 등록 정보를 확인하세요.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="사업자 정보 | 퍼스트펭귄">
-  <meta property="og:description" content="퍼스트펭귄 사업자 등록 정보 및 이용약관을 확인하세요.">
+  <meta property="og:description" content="퍼스트펭귄 사업자 등록 정보를 확인하세요.">
   <meta property="og:url" content="https://the1stpeng.com/company-info.html">
   <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="사업자 정보 | 퍼스트펭귄">
-  <meta name="twitter:description" content="퍼스트펭귄 사업자 등록 정보 및 이용약관을 확인하세요.">
-  
-  <!-- Linear Design System CSS -->
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/linear-themes.css">
-  <link rel="stylesheet" href="css/linear-header.css">
-  <link rel="stylesheet" href="css/linear-footer.css">
-  <link rel="stylesheet" href="css/components.css">
-  
+
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/apple-header.css">
+  <link rel="stylesheet" href="css/apple-footer.css">
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: var(--font-sans);
+      background: #ffffff;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     body {
-      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: var(--color-bg-primary);
-      color: var(--color-text-primary);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
-    main {
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Page ── */
+    .page {
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 64px 24px;
-    }
-
-    .info-container {
-      background: var(--color-bg-level-0);
-      border: 1px solid var(--color-border-primary);
-      border-radius: 16px;
-      padding: 48px;
-      max-width: 800px;
+      padding: 100px 24px 80px;
+      max-width: 680px;
       width: 100%;
-      box-shadow: 0 4px 16px var(--shadow-color);
+      margin: 0 auto;
     }
 
-    .info-header {
-      text-align: center;
+    .page__title {
+      font-size: var(--text-4xl, 36px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .page__desc {
+      font-size: var(--text-base, 16px);
+      color: #86868b;
       margin-bottom: 48px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--color-border-primary);
+      animation: fadeInUp 0.6s ease-out 0.1s both;
     }
 
-    .info-icon {
-      font-size: 64px;
-      margin-bottom: 24px;
-    }
-
-    h1 {
-      color: var(--color-text-primary);
-      margin-bottom: 16px;
-      font-size: 2.5rem;
-      font-weight: 700;
-    }
-
+    /* ── Info Section ── */
     .info-section {
-      margin-bottom: 36px;
+      margin-bottom: 40px;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
     }
 
-    .info-section h2 {
-      color: var(--color-text-primary);
-      font-size: 1.5rem;
+    .info-section__title {
+      font-size: 13px;
       font-weight: 600;
-      margin-bottom: 24px;
+      color: #86868b;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 1px solid var(--color-border-secondary);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
-    .info-grid {
-      display: grid;
-      grid-template-columns: 160px 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
-      align-items: center;
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
     }
 
     .info-label {
-      font-weight: 600;
-      color: var(--color-text-secondary);
-      font-size: 1rem;
+      font-size: 15px;
+      font-weight: 500;
+      color: #1d1d1f;
+      flex-shrink: 0;
     }
 
     .info-value {
-      color: var(--color-text-primary);
-      font-size: 1rem;
-      font-weight: 500;
+      font-size: 15px;
+      color: #86868b;
+      text-align: right;
     }
 
+    .info-value a {
+      color: #1D2F4E;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .info-value a:hover {
+      opacity: 0.7;
+    }
+
+    /* ── Notice Box ── */
     .notice-box {
-      background: var(--color-bg-level-1);
-      border: 1px solid var(--color-border-primary);
+      background: #f5f5f7;
+      border-radius: 16px;
       padding: 24px;
-      border-radius: 12px;
-      margin-top: 36px;
+      margin-top: 40px;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
     }
 
-    .notice-box .title {
-      font-weight: 700;
-      color: var(--color-text-primary);
-      margin-bottom: 16px;
-      font-size: 1.1rem;
+    .notice-box__title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 12px;
     }
 
-    .notice-box ul {
-      margin-left: 24px;
-      color: var(--color-text-secondary);
+    .notice-box__list {
+      list-style: none;
+      padding: 0;
     }
 
-    .notice-box ul li {
-      margin-bottom: 8px;
+    .notice-box__list li {
+      font-size: 14px;
+      color: #424245;
+      line-height: 1.7;
+      padding-left: 12px;
+      position: relative;
+      margin-bottom: 6px;
+    }
+
+    .notice-box__list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 4px;
+      height: 4px;
+      background: #aeaeb2;
+      border-radius: 50%;
+    }
+
+    .notice-box__list a {
+      color: #1D2F4E;
       font-weight: 500;
     }
 
-    .info-value a, .notice-box a {
-      color: var(--color-brand, #1D2F4E);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .back-button {
+    /* ── Back Link ── */
+    .back-link {
       display: block;
       text-align: center;
-      margin-top: 36px;
-      padding: 16px 32px;
-      background: var(--color-brand);
-      color: var(--color-text-on-brand);
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px var(--shadow-color);
+      margin-top: 48px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #1D2F4E;
+      transition: opacity 0.2s;
+      animation: fadeInUp 0.6s ease-out 0.35s both;
     }
 
-    .back-button:hover {
-      background: var(--color-accent-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px var(--shadow-color-hover);
+    .back-link:hover { opacity: 0.7; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 768px) {
-      .info-container {
-        padding: 32px 24px;
-      }
+    @media (max-width: 734px) {
+      .page { padding: 80px 20px 60px; }
+      .page__title { font-size: var(--text-3xl, 28px); }
 
-      h1 {
-        font-size: 2rem;
-      }
-
-      .info-grid {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-
-      .info-label {
-        margin-bottom: 4px;
-        font-weight: 700;
+      .info-row {
+        flex-direction: column;
+        gap: 2px;
       }
 
       .info-value {
-        margin-bottom: 12px;
+        text-align: left;
       }
+    }
+
+    @media (max-width: 480px) {
+      .page__title { font-size: var(--text-2xl, 24px); }
     }
   </style>
 </head>
 <body>
-  <!-- Linear Header -->
-  <header class="linear-header" id="linear-header">
-    <div class="linear-header__container">
-      <a href="index.html" class="linear-header__brand">
-        <div class="linear-header__logo">
-          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" width="36" height="36" />
-        </div>
-        <span class="linear-header__brand-text">퍼스트펭귄</span>
-      </a>
 
-      <nav class="linear-header__nav">
-        <ul class="linear-header__nav-list">
-          <li class="linear-header__nav-item">
-            <a href="index.html" class="linear-header__nav-link">홈</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="notices.html" class="linear-header__nav-link">공지사항</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="linear-header__actions">
-        <button class="linear-header__mobile-toggle" id="mobile-toggle" aria-label="메뉴" aria-controls="mobile-menu"
-          aria-expanded="false">
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 모바일 메뉴 -->
-    <div class="linear-header__mobile-menu" id="mobile-menu">
-      <a href="index.html" class="linear-header__nav-link">홈</a>
-      <a href="notices.html" class="linear-header__nav-link">공지사항</a>
-      <a href="index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-      <div class="mobile-menu-auth">
-        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
-        <div id="mobile-user-profile-container" style="display: none;">
-          <a href="mypage.html" class="linear-header__nav-link">마이페이지</a>
-          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
-        </div>
-      </div>
+  <!-- Header -->
+  <header class="header" id="header">
+    <a href="index.html" class="header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
+      <span class="header__name">퍼스트펭귄</span>
+    </a>
+    <nav class="header__nav">
+      <a href="notices.html" class="header__nav-link">공지사항</a>
+      <a href="cft.html" class="header__nav-link">건운사</a>
+      <a href="si1.html" class="header__nav-link">1급</a>
+      <a href="si2.html" class="header__nav-link">2급</a>
+    </nav>
+    <div class="header__right">
+      <a href="#" class="header__login" id="header-login-btn">로그인</a>
+      <button class="header__hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
+  <div class="header__mobile-menu" id="mobile-menu">
+    <a href="notices.html" class="header__mobile-link">공지사항</a>
+    <a href="cft.html" class="header__mobile-link">건운사</a>
+    <a href="si1.html" class="header__mobile-link">1급</a>
+    <a href="si2.html" class="header__mobile-link">2급</a>
+    <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
+  </div>
 
-  <main>
-    <div class="info-container">
-      <div class="info-header">
-        <div class="info-icon">🏢</div>
-        <h1>사업자 정보</h1>
+  <!-- Content -->
+  <main class="page">
+    <h1 class="page__title">사업자 정보</h1>
+    <p class="page__desc">퍼스트펭귄 사업자 등록 정보</p>
+
+    <div class="info-section">
+      <h2 class="info-section__title">기본 정보</h2>
+      <div class="info-row">
+        <span class="info-label">상호명</span>
+        <span class="info-value">퍼스트펭귄</span>
       </div>
-
-      <!-- 사업자 정보 -->
-      <div class="info-section">
-        <h2>📋 기본 정보</h2>
-        <div class="info-grid">
-          <div class="info-label">상호명</div>
-          <div class="info-value">퍼스트펭귄</div>
-        </div>
-        <div class="info-grid">
-          <div class="info-label">대표자명</div>
-          <div class="info-value">강민지</div>
-        </div>
-        <div class="info-grid">
-          <div class="info-label">사업자등록번호</div>
-          <div class="info-value">243-14-02752</div>
-        </div>
-        <div class="info-grid">
-          <div class="info-label">통신판매업 신고번호</div>
-          <div class="info-value">제2025-서울강동-1597호</div>
-        </div>
+      <div class="info-row">
+        <span class="info-label">대표자명</span>
+        <span class="info-value">강민지</span>
       </div>
-
-      <!-- 사업장 정보 -->
-      <div class="info-section">
-        <h2>🏢 사업장 정보</h2>
-        <div class="info-grid">
-          <div class="info-label">사업장 주소</div>
-          <div class="info-value">서울특별시 강동구 양재대로 1300, 201동 1408호</div>
-        </div>
+      <div class="info-row">
+        <span class="info-label">사업자등록번호</span>
+        <span class="info-value">243-14-02752</span>
       </div>
-
-      <!-- 연락처 정보 -->
-      <div class="info-section">
-        <h2>📞 연락처</h2>
-        <div class="info-grid">
-          <div class="info-label">전화번호</div>
-          <div class="info-value">010-9139-7328</div>
-        </div>
-        <div class="info-grid">
-          <div class="info-label">이메일</div>
-          <div class="info-value">the1stpeng@gmail.com</div>
-        </div>
-        <div class="info-grid">
-          <div class="info-label">웹사이트</div>
-          <div class="info-value"><a href="https://the1stpeng.com/" target="_blank" rel="noopener noreferrer">https://the1stpeng.com/</a></div>
-        </div>
-        <div class="info-grid">
-          <div class="info-label">강의 구매</div>
-          <div class="info-value"><a href="index.html#lecture-tab">the1stpeng.com 스토어</a></div>
-        </div>
+      <div class="info-row">
+        <span class="info-label">통신판매업 신고번호</span>
+        <span class="info-value">제2025-서울강동-1597호</span>
       </div>
-
-      <!-- 안내사항 -->
-      <div class="notice-box">
-        <div class="title">📌 안내사항</div>
-        <ul>
-          <li>본 사이트는 건강운동관리사 및 생활스포츠지도사 시험 준비를 위한 학습 플랫폼입니다</li>
-          <li>강의 및 학습 자료 구매는 <a href="index.html#lecture-tab">사이트 내 스토어</a>에서 진행됩니다</li>
-          <li>본 사이트의 기출문제는 국민체육진흥공단(KSPO)에서 출제한 문제로, 저작권은 KSPO에 있습니다. 퍼스트펭귄은 해당 문제를 학습 지원 목적으로 제공합니다</li>
-        </ul>
-      </div>
-
-      <a href="index.html" class="back-button">홈으로 돌아가기</a>
     </div>
+
+    <div class="info-section">
+      <h2 class="info-section__title">사업장</h2>
+      <div class="info-row">
+        <span class="info-label">주소</span>
+        <span class="info-value">서울특별시 강동구 양재대로 1300, 201동 1408호</span>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2 class="info-section__title">연락처</h2>
+      <div class="info-row">
+        <span class="info-label">전화번호</span>
+        <span class="info-value">010-9139-7328</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">이메일</span>
+        <span class="info-value">the1stpeng@gmail.com</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">웹사이트</span>
+        <span class="info-value"><a href="https://the1stpeng.com/">the1stpeng.com</a></span>
+      </div>
+    </div>
+
+    <div class="notice-box">
+      <p class="notice-box__title">안내사항</p>
+      <ul class="notice-box__list">
+        <li>본 사이트는 건강운동관리사 및 스포츠지도사 시험 준비를 위한 학습 플랫폼입니다</li>
+        <li>강의 및 학습 자료 구매는 <a href="index.html#lecture-tab">사이트 내 스토어</a>에서 진행됩니다</li>
+        <li>기출문제는 국민체육진흥공단(KSPO)에서 출제한 문제로, 저작권은 KSPO에 있습니다</li>
+      </ul>
+    </div>
+
+    <a href="index.html" class="back-link">홈으로 돌아가기</a>
   </main>
 
-  <!-- Linear Footer -->
-  <footer class="linear-footer"></footer>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <nav class="footer__links">
+        <a href="cft.html" class="footer__link">건강운동관리사</a>
+        <a href="si1.html" class="footer__link">1급 스포츠지도사</a>
+        <a href="si2.html" class="footer__link">2급 스포츠지도사</a>
+        <span class="footer__divider"></span>
+        <a href="/terms.html" class="footer__link">이용약관</a>
+        <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
+        <a href="/company-info.html" class="footer__link">사업자정보</a>
+      </nav>
+      <p class="footer__meta">
+        퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+        주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+      </p>
+      <div class="footer__bottom">
+        <span class="footer__copyright">&copy; 2025 퍼스트펭귄. All rights reserved.</span>
+        <div class="footer__sns">
+          <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="footer__sns-link">Instagram</a>
+          <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="footer__sns-link">YouTube</a>
+          <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="footer__sns-link">KakaoTalk</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-  <script src="js/linear-header.js"></script>
+  <script src="js/apple-header.js"></script>
 </body>
 </html>
-

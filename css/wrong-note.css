@@ -488,7 +488,7 @@
 }
 
 .wrong-modal__btn--resolve {
-    background: var(--penguin-navy);
+    background: var(--penguin-navy, #1D2F4E);
     color: white;
 }
 

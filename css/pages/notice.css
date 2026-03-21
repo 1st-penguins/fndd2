@@ -1,19 +1,17 @@
 /* ============================================
-   공지사항 스타일 - Linear Premium Redesign
+   공지사항 스타일 — Apple Minimal
    ============================================ */
 
-/* 공지사항 목록 컨테이너 — 통짜 카드 */
+/* 공지사항 목록 컨테이너 */
 .notice-list {
-  background: var(--glass-bg, rgba(255,255,255,0.7));
-  backdrop-filter: var(--glass-blur, blur(12px));
-  -webkit-backdrop-filter: var(--glass-blur, blur(12px));
-  border: 1px solid var(--glass-border, rgba(255,255,255,0.3));
-  border-radius: var(--radius-premium, 16px);
+  background: transparent;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
-  margin-bottom: 40px;
+  margin-bottom: 0;
 }
 
-/* 공지사항 헤더 카드 (신규 스타일) */
+/* 공지사항 헤더 카드 (레거시 호환) */
 .notice-header-card {
   padding: 24px;
   margin-bottom: 24px;
@@ -22,51 +20,57 @@
   gap: 8px;
 }
 
-.notice-header-card .section-header {
-  margin-bottom: 0 !important;
-}
+.notice-header-card .section-header { margin-bottom: 0 !important; }
+.notice-header-card .section-description { margin-top: 0 !important; color: #86868b; }
 
-.notice-header-card .section-description {
-  margin-top: 0 !important;
-  color: var(--deep-sea-gray);
-}
-
-/* 공지사항 아이템 — 구분선으로 분리 */
+/* 공지사항 아이템 */
 .notice-item {
   position: relative;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   transition: background 0.2s ease;
 }
 
-.notice-item + .notice-item {
+.notice-item:first-child {
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* 고정 공지 영역 뒤 구분선 */
-.pinned-notices + .notice-item {
+/* 고정 공지 영역 */
+.pinned-notices {
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* pinned-notices 내부 아이템 구분선 */
+.pinned-notices .notice-item:first-child {
+  border-top: none;
+}
+
 .pinned-notices .notice-item + .notice-item {
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: none;
+}
+
+.pinned-notices + .notice-item {
+  border-top: none;
 }
 
 /* 호버 효과 */
 .notice-item:hover {
-  background: rgba(95, 178, 201, 0.06);
+  background: rgba(0, 0, 0, 0.02);
 }
 
-/* 고정된 공지사항 (Pinned) */
+/* 고정된 공지사항 */
 .notice-item.pinned {
-  background: rgba(95, 178, 201, 0.08);
+  background: rgba(29, 47, 78, 0.02);
 }
 
-/* 공지사항 링크 — 좌: 제목, 우: 날짜 그리드 정렬 */
+.notice-item.pinned:hover {
+  background: rgba(29, 47, 78, 0.04);
+}
+
+/* 공지사항 링크 */
 .notice-link {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 16px;
-  padding: 13px 20px;
+  padding: 16px 0;
   text-decoration: none;
   color: inherit;
   width: 100%;
@@ -79,65 +83,82 @@
   min-width: 0;
 }
 
-/* 제목 Typography */
+/* 제목 */
 .notice-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--penguin-navy, #1D2F4E);
-  line-height: 1.55;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1d1d1f;
+  line-height: 1.5;
   margin: 0;
   letter-spacing: -0.01em;
   transition: color 0.2s ease;
 }
 
 .notice-item:hover .notice-title {
-  color: var(--penguin-skyblue, #5FB2C9);
+  color: #2B4A78;
 }
 
-/* 배지 — 단일 색상, [카테고리] 스타일 */
+/* 배지 — 작고 가벼운 태그 스타일 */
 .notice-badge {
-  color: var(--penguin-skyblue, #5FB2C9);
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin-right: 2px;
-  vertical-align: baseline;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1D2F4E;
+  background: rgba(29, 47, 78, 0.06);
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-right: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.02em;
 }
 
-/* 날짜 (우측 고정 정렬) */
+/* 날짜 */
 .notice-date {
-  font-size: 0.8rem;
-  color: #94a3b8;
+  font-size: 13px;
+  color: #86868b;
   font-weight: 400;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* 핀 이모지 (제목 뒤 인라인) */
+/* 화살표 인디케이터 */
+.notice-link::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid #c7c7cc;
+  border-bottom: 1.5px solid #c7c7cc;
+  transform: rotate(-45deg);
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+
+.notice-item:hover .notice-link::after {
+  border-color: #2B4A78;
+}
+
+/* 핀 아이콘 */
 .notice-pin {
-  font-size: 0.8em;
-  margin-left: 3px;
+  font-size: 0.75em;
+  margin-left: 4px;
   vertical-align: middle;
 }
 
-/* NEW 마크 — 제목 뒤 작은 N */
+/* NEW 마크 */
 .notice-new-dot {
   display: inline-block;
-  font-size: 0;
-  width: auto;
-  height: auto;
-  background: none;
-  border-radius: 0;
+  width: 6px;
+  height: 6px;
+  background: #ff3b30;
+  border-radius: 50%;
   margin-left: 6px;
   vertical-align: middle;
+  font-size: 0;
   animation: none;
 }
 
 .notice-new-dot::after {
-  content: 'N';
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #ef4444;
-  vertical-align: middle;
+  content: none;
 }
 
 /* ============================================
@@ -145,11 +166,11 @@
    ============================================ */
 .notice-content-wrapper h2,
 .notice-content-wrapper h3 {
-  margin-top: 24px;
-  margin-bottom: 10px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1D2F4E;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .notice-content-wrapper h2:first-child,
@@ -158,8 +179,9 @@
 }
 
 .notice-content-wrapper p {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   line-height: 1.8;
+  color: #424245;
 }
 
 .notice-content-wrapper ul,
@@ -169,14 +191,15 @@
 }
 
 .notice-content-wrapper li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   line-height: 1.7;
+  color: #424245;
 }
 
 .notice-content-wrapper hr {
-  margin: 20px 0;
+  margin: 28px 0;
   border: none;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 /* ============================================
@@ -186,8 +209,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6px;
-  margin-top: 32px;
+  gap: 4px;
+  margin-top: 40px;
   position: relative;
   min-height: 40px;
 }
@@ -208,9 +231,9 @@
   padding: 0 10px;
   border: none;
   background: transparent;
-  color: #64748b;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  color: #86868b;
+  border-radius: 980px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -220,117 +243,115 @@
 }
 
 .pagination-button:hover:not(:disabled) {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: rgba(0, 0, 0, 0.04);
+  color: #1d1d1f;
 }
 
 .pagination-button.active {
   background: #1D2F4E;
-  color: white;
+  color: #fff;
 }
 
 .pagination-button:disabled {
-  color: #cbd5e1;
+  color: #d2d2d7;
   cursor: not-allowed;
 }
 
-/* 관리자 글쓰기 버튼 (인라인 배치) */
+/* 관리자 글쓰기 버튼 */
 .write-notice-btn {
   position: static;
   background: #1D2F4E;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(29, 47, 78, 0.25);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 980px;
+  box-shadow: none;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 500;
+  font-size: 14px;
   z-index: 100;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .write-notice-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(29, 47, 78, 0.35);
   background: #2a4366;
-  opacity: 1 !important;
+  transform: none;
+  box-shadow: none;
 }
 
-/* 관리자 전용 통계 패널 */
+/* 관리자 통계 패널 */
 .admin-usage-panel {
   margin-top: 18px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .admin-usage-item {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 12px 14px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 16px;
 }
 
 .admin-usage-label {
-  font-size: 0.78rem;
-  color: #64748b;
+  font-size: 12px;
+  color: #86868b;
 }
 
 .admin-usage-value {
   margin-top: 4px;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #1D2F4E;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .admin-usage-empty {
-  padding: 12px 14px;
-  border-radius: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
   background: #fff1f2;
-  border: 1px solid #fecdd3;
+  border: none;
   color: #be123c;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 /* ============================================
-   반응형 디자인 (모바일 최적화)
+   반응형
    ============================================ */
 @media (max-width: 768px) {
-  .notice-list {
-    border-radius: 12px;
-  }
-
   .notice-link {
-    padding: 12px 16px;
-    gap: 10px;
+    padding: 14px 0;
+    gap: 12px;
   }
 
   .notice-title {
-    font-size: 0.88rem;
+    font-size: 14px;
   }
 
   .notice-date {
-    font-size: 0.75rem;
+    font-size: 12px;
+  }
+
+  .notice-badge {
+    font-size: 10px;
+    padding: 2px 6px;
   }
 
   .admin-usage-panel {
     grid-template-columns: 1fr;
   }
 
-  /* 페이지네이션 중앙 정렬 보장 */
   .notice-pagination {
-    margin-top: 24px;
+    margin-top: 28px;
     flex-wrap: wrap;
     justify-content: center;
   }
 
-  /* 모바일에서 작성 버튼 크기 조정 */
   .write-notice-btn {
-    padding: 10px 16px;
-    font-size: 0.9rem;
+    padding: 9px 16px;
+    font-size: 13px;
   }
 
   .notice-pagination-actions {

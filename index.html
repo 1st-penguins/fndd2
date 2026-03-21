@@ -271,7 +271,7 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      margin-top: 24px;
+      margin-top: 12px;
       padding: 16px 32px;
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.18);
@@ -392,12 +392,27 @@
     .exam-card:hover .exam-card__name { color: #2B4A78; }
     .exam-card:hover .exam-card__arrow { color: #2B4A78; transform: translateX(4px); }
 
+    .exam-card__info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-height: 38px;
+      justify-content: center;
+    }
+
     .exam-card__name {
       font-size: var(--text-base);
       font-weight: 600;
       letter-spacing: -0.02em;
       color: var(--color-text-primary);
       transition: color 0.2s;
+    }
+
+    .exam-card__detail {
+      font-size: 12px;
+      font-weight: 400;
+      color: #aeaeb2;
+      letter-spacing: 0;
     }
 
     .exam-card__arrow {
@@ -543,6 +558,12 @@
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
       <span class="header__name">퍼스트펭귄</span>
     </a>
+    <nav class="header__nav">
+      <a href="notices.html" class="header__nav-link">공지사항</a>
+      <a href="cft.html" class="header__nav-link">건운사</a>
+      <a href="si1.html" class="header__nav-link">1급</a>
+      <a href="si2.html" class="header__nav-link">2급</a>
+    </nav>
     <div class="header__right">
       <a href="#" class="header__login" id="header-login-btn">로그인</a>
       <button class="header__hamburger" id="hamburger" aria-label="메뉴">
@@ -551,6 +572,10 @@
     </div>
   </header>
   <div class="header__mobile-menu" id="mobile-menu">
+    <a href="notices.html" class="header__mobile-link">공지사항</a>
+    <a href="cft.html" class="header__mobile-link">건운사</a>
+    <a href="si1.html" class="header__mobile-link">1급</a>
+    <a href="si2.html" class="header__mobile-link">2급</a>
     <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
   </div>
 
@@ -585,15 +610,23 @@
 
     <div class="select__cards">
       <a href="cft.html" class="exam-card">
-        <span class="exam-card__name">건강운동관리사</span>
+        <div class="exam-card__info">
+          <span class="exam-card__name">건강운동관리사</span>
+        </div>
         <span class="exam-card__arrow">→</span>
       </a>
       <a href="si1.html" class="exam-card">
-        <span class="exam-card__name">1급 스포츠지도사</span>
+        <div class="exam-card__info">
+          <span class="exam-card__name">1급 스포츠지도사</span>
+          <span class="exam-card__detail">전문 · 생활 · 장애인</span>
+        </div>
         <span class="exam-card__arrow">→</span>
       </a>
       <a href="si2.html" class="exam-card">
-        <span class="exam-card__name">2급 스포츠지도사</span>
+        <div class="exam-card__info">
+          <span class="exam-card__name">2급 스포츠지도사</span>
+          <span class="exam-card__detail">전문 · 생활 · 장애인 · 유소년 · 노인</span>
+        </div>
         <span class="exam-card__arrow">→</span>
       </a>
     </div>

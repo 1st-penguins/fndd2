@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>배지 정리 | 관리자 | 퍼스트펭귄</title>
+
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 60px auto; padding: 20px; }
+    h1 { font-size: 1.5rem; margin-bottom: 24px; }
+    #log { background: #f5f5f5; padding: 16px; border-radius: 8px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; min-height: 200px; }
+    button { padding: 12px 24px; background: #1D2F4E; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; margin-bottom: 16px; }
+    button:hover { background: #2a4366; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <h1>공지사항 배지 일괄 정리</h1>
+  <p style="margin-bottom:16px;color:#666;">신규/안내/가이드/FAQ → 공지 | 행사 → 이벤트 | 중요/긴급/강의예정/강의종료/마감됨/종료됨 → 업데이트</p>
+  <button id="btn-run">실행</button>
+  <button id="btn-dry">미리보기 (변경 안 함)</button>
+  <div id="log">대기 중...</div>
+
+  <script type="module">
+    import { db } from '../js/core/firebase-core.js';
+    import { collection, getDocs, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const BADGE_MAP = {
+      '신규': '공지',
+      '안내': '공지',
+      '가이드': '공지',
+      'FAQ': '공지',
+      '행사': '이벤트',
+      '중요': '업데이트',
+      '긴급': '업데이트',
+      '강의예정': '업데이트',
+      '강의종료': '업데이트',
+      '마감됨': '업데이트',
+      '종료됨': '업데이트',
+    };
+
+    // 이미 올바른 배지
+    const VALID = ['공지', '이벤트', '업데이트'];
+
+    const logEl = document.getElementById('log');
+    function log(msg) { logEl.textContent += msg + '\n'; }
+
+    async function run(dryRun) {
+      logEl.textContent = '';
+      log(dryRun ? '=== 미리보기 모드 ===' : '=== 실행 모드 ===');
+
+      const snap = await getDocs(collection(db, 'notices'));
+      log(`총 ${snap.size}개 공지사항 발견\n`);
+
+      let changed = 0;
+      let skipped = 0;
+
+      for (const d of snap.docs) {
+        const data = d.data();
+        const oldBadge = data.badge || '';
+        const title = data.title || '(제목 없음)';
+
+        if (!oldBadge || VALID.includes(oldBadge)) {
+          skipped++;
+          continue;
+        }
+
+        const newBadge = BADGE_MAP[oldBadge] || '공지';
+        log(`[${d.id}] "${title}"\n  ${oldBadge} → ${newBadge}`);
+
+        if (!dryRun) {
+          await updateDoc(doc(db, 'notices', d.id), { badge: newBadge });
+          log('  ✓ 변경 완료');
+        }
+        changed++;
+      }
+
+      log(`\n--- 완료 ---`);
+      log(`변경: ${changed}개 | 유지: ${skipped}개`);
+    }
+
+    document.getElementById('btn-run').onclick = () => run(false);
+    document.getElementById('btn-dry').onclick = () => run(true);
+  </script>
+</body>
+</html>
