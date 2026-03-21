@@ -171,7 +171,7 @@ function renderHealthRegularProgress(attempts) {
         const s = yearData[subject];
         const isDone = (s?.count ?? 0) > 0;
         const acc = isDone ? Math.round((s.correct / s.count) * 100) : null;
-        const url = `exam/${year}_${subject}.html`;
+        const url = `exam-new/${year}_${subject}.html`;
         return `
           <div class="health-subject-item ${isDone ? 'done' : 'not-done'}">
             <span class="subject-name">${subject}</span>
@@ -222,11 +222,11 @@ export function renderProgressTabStandalone(data) {
 
   // 생활스포츠지도사: 2급 과목/연도 사용
   if (certType === 'sports-instructor') {
-    return renderSportsInstructorProgress(container, attempts, SPORTS_YEARS, SPORTS_CATEGORIES, SPORTS_SUBJECTS_ALL, 'exam-sports');
+    return renderSportsInstructorProgress(container, attempts, SPORTS_YEARS, SPORTS_CATEGORIES, SPORTS_SUBJECTS_ALL, 'exam-new-sports');
   }
   // 1급 스포츠지도사: 1급 과목/연도 사용
   if (certType === 'sports-instructor-1') {
-    return renderSportsInstructorProgress(container, attempts, SPORTS1_YEARS, SPORTS1_CATEGORIES, SPORTS1_SUBJECTS_ALL, 'exam-sports1');
+    return renderSportsInstructorProgress(container, attempts, SPORTS1_YEARS, SPORTS1_CATEGORIES, SPORTS1_SUBJECTS_ALL, 'exam-new-sports1');
   }
 
   // ── 레거시 포맷 정규화 헬퍼 ──────────────────────────────────────
@@ -343,7 +343,7 @@ export function renderProgressTabStandalone(data) {
 
     const renderHourCard = (hour, best) => {
       const isCompleted = !!best;
-      const examUrl = `exam/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}`;
+      const examUrl = `exam-new/${year}_모의고사_${hour}교시.html?year=${year}&hour=${hour}`;
       const PASS_PCT = 40;       // 과목별 과락 기준 (%)
       const TOTAL_PASS_PCT = 60; // 총점 합격 기준 (%)
       const PTS_PER_Q = 5;       // 1문제당 배점

@@ -6762,8 +6762,8 @@ function resumeSession(sessionId) {
     const certType = sessionData.certType || 'health';
     const lastQuestionNumber = sessionData.lastQuestionNumber || 1;
 
-    // 스포츠지도사는 exam-sports/, 건강운동관리사는 exam/
-    const examFolder = ({ 'health': 'exam', 'sports': 'exam-sports', 'sports1': 'exam-sports1' }[certType] || 'exam');
+    // 새 디자인 페이지로 이동
+    const examFolder = ({ 'health': 'exam-new', 'sports': 'exam-new-sports', 'sports1': 'exam-new-sports1' }[certType] || 'exam-new');
 
     if (!year) {
       console.error('세션에 년도 정보가 없습니다.');
@@ -6818,7 +6818,7 @@ function retrySession(sessionId) {
     }
 
     const { year, subject, certType, type, hour } = sessionData;
-    const examFolder = ({ 'health': 'exam', 'sports': 'exam-sports', 'sports1': 'exam-sports1' }[certType] || 'exam');
+    const examFolder = ({ 'health': 'exam-new', 'sports': 'exam-new-sports', 'sports1': 'exam-new-sports1' }[certType] || 'exam-new');
 
     let url;
     if (type === 'mockexam') {
