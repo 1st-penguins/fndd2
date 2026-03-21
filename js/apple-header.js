@@ -29,7 +29,7 @@
   let authUpdated = false;
 
   // 로그인 상태 UI 업데이트
-  function updateHeaderAuth(isLoggedIn) {
+  function updateHeaderAuth(isLoggedIn, isAdminFlag) {
     authUpdated = true;
     const loginBtn = document.getElementById('header-login-btn');
     const authSection = document.getElementById('menu-auth');
@@ -51,7 +51,10 @@
     // 햄버거 메뉴 내 계정 영역
     if (authSection) {
       if (isLoggedIn) {
-        const isAdminUser = typeof window.isAdmin === 'function' && window.isAdmin();
+        // isAdminFlag가 명시적으로 전달되면 사용, 아니면 window.isAdmin() 시도
+        const isAdminUser = isAdminFlag !== undefined
+          ? isAdminFlag
+          : (typeof window.isAdmin === 'function' && window.isAdmin());
 
         let adminLinks = '';
         if (isAdminUser) {
@@ -103,7 +106,8 @@
 
   // loginStateChanged 이벤트 (auth-core.js에서 발생)
   window.addEventListener('loginStateChanged', (e) => {
-    updateHeaderAuth(e.detail && e.detail.isLoggedIn);
+    const detail = e.detail || {};
+    updateHeaderAuth(detail.isLoggedIn, detail.isAdmin);
   });
 
   // 초기 상태 동기화 — auth 모듈 초기화 대기
