@@ -25,12 +25,12 @@
     path.includes('/notices/') || path.includes('/subjects') || path.includes('/years');
   const prefix = isSubDir ? '../' : '';
 
-  // 이미 업데이트했는지 추적
-  let authUpdated = false;
+  // 신뢰할 수 있는 소스(loginStateChanged 이벤트)에서 업데이트했는지 추적
+  let authFromEvent = false;
 
   // 로그인 상태 UI 업데이트
-  function updateHeaderAuth(isLoggedIn, isAdminFlag) {
-    authUpdated = true;
+  function updateHeaderAuth(isLoggedIn, isAdminFlag, fromEvent) {
+    if (fromEvent) authFromEvent = true;
     const loginBtn = document.getElementById('header-login-btn');
     const authSection = document.getElementById('menu-auth');
 
@@ -104,20 +104,23 @@
     }
   }
 
-  // loginStateChanged 이벤트 (auth-core.js에서 발생)
+  // loginStateChanged 이벤트 (auth-core.js에서 발생) — 가장 신뢰할 수 있는 소스
   window.addEventListener('loginStateChanged', (e) => {
     const detail = e.detail || {};
-    updateHeaderAuth(detail.isLoggedIn, detail.isAdmin);
+    updateHeaderAuth(detail.isLoggedIn, detail.isAdmin, true);
+    // 이벤트 수신 후 폴링 불필요
+    clearInterval(interval);
   });
 
-  // 초기 상태 동기화 — auth 모듈 초기화 대기
+  // 초기 상태 동기화 — auth 모듈 초기화 전 폴링 (이벤트 수신 전까지만)
   function trySync() {
-    // 방법 1: isUserLoggedIn 함수 사용
+    // 이벤트 기반 업데이트가 이미 되었으면 폴링 중단
+    if (authFromEvent) return true;
+
     if (typeof window.isUserLoggedIn === 'function') {
       updateHeaderAuth(window.isUserLoggedIn());
       return true;
     }
-    // 방법 2: __authStateResolved 플래그 확인
     if (window.__authStateResolved) {
       updateHeaderAuth(!!window.__lastAuthState);
       return true;
@@ -128,6 +131,7 @@
   // 500ms 간격으로 최대 30번(15초) 시도
   let attempts = 0;
   const interval = setInterval(() => {
+    if (authFromEvent) { clearInterval(interval); return; }
     attempts++;
     if (trySync() || attempts > 30) {
       clearInterval(interval);

@@ -446,10 +446,9 @@ export async function handleLogout() {
     await signOut(auth);
     clearLoginState();
 
-    // 2) 메모리 전역 변수 정리
+    // 2) 메모리 전역 변수 정리 (isAdmin 함수는 유지 — null로 덮어쓰면 안 됨)
     window.userId = null;
     window.userEmail = null;
-    window.isAdmin = null;
     window.userName = null;
 
     console.log('로그아웃 성공');
