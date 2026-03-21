@@ -47,30 +47,15 @@ if (document.readyState === 'loading') {
  * 로그인 모달 표시
  */
 export function showLoginModal() {
-  // 개발 모드 체크 생략 (유저 요청 우선)
-
-  // 모달이 존재하지 않으면 생성
+  // 모달이 존재하지 않으면 lazy 생성
   createLoginModal();
 
   const modal = document.getElementById('login-modal');
   if (modal) {
-    // 스타일 초기화 후 표시
-    modal.style.cssText = 'display: flex;';
-
-    // 애니메이션을 위해 약간의 지연 후 show 클래스 추가
+    // show 클래스로만 제어 (인라인 style 사용 안 함)
     requestAnimationFrame(() => {
       modal.classList.add('show');
     });
-
-    // 모달 내용 스타일 초기화
-    const content = modal.querySelector('.login-modal-content');
-    if (content) {
-      content.style = ''; // 인라인 스타일 제거하고 CSS 클래스 따름
-    }
-
-    if (window.Logger && window.Logger.isDev()) {
-      console.log('로그인 모달 표시됨 (CSS 클래스 기반)');
-    }
   }
 }
 
@@ -78,17 +63,10 @@ export function showLoginModal() {
  * 로그인 모달 닫기
  */
 export function closeLoginModal() {
-  const modal = document.getElementById('login-modal') || document.getElementById('login-required-modal') || document.querySelector('.login-modal[style*="display: flex"]');
-
-  if (modal) {
+  // show 클래스가 있는 모든 모달 닫기
+  document.querySelectorAll('.login-modal.show').forEach(modal => {
     modal.classList.remove('show');
-    modal.style.display = 'none'; // 즉시 숨김 (300ms 지연 제거 — 밀림 현상 방지)
-  }
-
-  // 모달 닫힐 때 오버레이 상태 업데이트 (즉시 반영)
-  if (typeof window.updateLoginOverlays === 'function') {
-    window.updateLoginOverlays();
-  }
+  });
 }
 
 /**
@@ -332,12 +310,7 @@ export function initAuthUI() {
     console.log('인증 UI 초기화 중...');
   }
 
-  // 모달 생성 (지연 없이 즉시 생성하되 스타일로 제어)
-  createLoginModal();
-  // 로그인 필요 모달은 restricted-content 또는 login-required-overlay가 있는 페이지에서만 생성
-  if (document.querySelector('.restricted-content, .login-required-overlay')) {
-    createLoginRequiredModal();
-  }
+  // 모달은 미리 생성하지 않음 — showLoginModal() 호출 시 lazy 생성
 
   // 로그인 버튼 이벤트 연결 (DOM이 준비된 후 실행되도록 보장)
   const attachEvents = () => {
