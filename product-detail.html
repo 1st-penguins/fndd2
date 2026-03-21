@@ -13,13 +13,42 @@
   <meta property="og:url" content="https://the1stpeng.com/product-detail.html">
   <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
 
-  <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/design-tokens.css">
   <link rel="stylesheet" href="css/apple-header.css">
   <link rel="stylesheet" href="css/login.css">
   <link rel="stylesheet" href="css/apple-footer.css">
-  <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/shop.css">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: var(--font-sans);
+      background: #ffffff;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    .detail-container {
+      flex: 1;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 
   <!-- Firebase -->
   <script type="module" src="js/core/firebase-core.js"></script>
@@ -68,7 +97,7 @@
 
     <!-- 에러 -->
     <div id="detail-error" style="display:none; text-align:center; padding:80px 20px;">
-      <div style="font-size:64px; margin-bottom:16px;">😵</div>
+      <div style="font-size:20px; font-weight:600; color:#86868b; margin-bottom:16px;">404</div>
       <h2 style="color:var(--penguin-navy); margin-bottom:12px;">상품을 찾을 수 없습니다</h2>
       <p style="color:var(--deep-sea-gray); margin-bottom:24px;">요청하신 상품이 존재하지 않거나 판매가 종료되었습니다.</p>
       <a href="index.html#lecture-tab" style="display:inline-block; padding:12px 28px; background:var(--penguin-navy); color:white; border-radius:var(--radius-sm); text-decoration:none; font-weight:600;">상점으로 돌아가기</a>

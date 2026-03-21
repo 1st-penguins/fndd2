@@ -2,11 +2,10 @@
 <html lang="ko">
 
 <head>
-  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>공지사항 상세 - 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
   <link rel="canonical" href="https://the1stpeng.com/notices/detail.html" />
   <meta name="description" content="퍼스트펭귄 공지사항 상세 내용을 확인하세요.">
   <meta property="og:type" content="website">
@@ -18,14 +17,10 @@
   <meta name="twitter:title" content="공지사항 상세 | 퍼스트펭귄">
   <meta name="twitter:description" content="퍼스트펭귄 공지사항 상세 내용을 확인하세요.">
 
-  <!-- 외부 CSS 파일 연결 -->
-  <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/design-tokens.css">
   <link rel="stylesheet" href="../css/apple-header.css">
   <link rel="stylesheet" href="../css/login.css">
   <link rel="stylesheet" href="../css/apple-footer.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages/notice.css">
   <link rel="stylesheet" href="../css/wrong-note.css">
 
@@ -38,48 +33,70 @@
   <script type="module" src="../js/data/notice-repository.js"></script>
   <script type="module" src="../js/utils/date-utils.js"></script>
 
-
   <!-- 페이지 전용 스크립트 -->
   <script type="module" src="../js/admin/notice-detail.js"></script>
   <script type="module" src="../js/notice/notice-question-modal.js"></script>
 
-
   <style>
-    /* 상세 페이지 전용 스타일 */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: var(--font-sans);
+      background: #ffffff;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* -- Page -- */
     .main-content {
-      padding-top: 80px;
-      /* 헤더 공간 확보 */
-      min-height: calc(100vh - 300px);
-      background: #f8f9fa;
-    }
-
-    .notice-detail-container {
-      max-width: 800px;
+      flex: 1;
+      padding: 100px 24px 80px;
+      max-width: 720px;
+      width: 100%;
       margin: 0 auto;
-      padding: 40px;
-      background-color: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
 
-    @media (max-width: 768px) {
-      .notice-detail-container {
-        padding: 24px 20px;
-        margin: 20px 16px;
-        border-radius: 12px;
-      }
+    /* -- Back Link -- */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 32px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #1D2F4E;
+      transition: opacity 0.2s;
+      animation: fadeInUp 0.6s ease-out;
     }
 
+    .back-link:hover { opacity: 0.7; }
+
+    /* -- Notice Detail Container -- */
+    .notice-detail-container {
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+
+    /* -- Header -- */
     .notice-header {
       margin-bottom: 32px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     .notice-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #1D2F4E;
+      font-size: var(--text-3xl, 28px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #1d1d1f;
       margin-bottom: 16px;
       line-height: 1.3;
     }
@@ -88,15 +105,15 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      color: #64748b;
-      font-size: 0.95rem;
+      color: #86868b;
+      font-size: 14px;
       flex-wrap: wrap;
     }
 
     #notice-view-count {
-      font-size: 0.82rem;
-      color: #64748b;
-      background: #f1f5f9;
+      font-size: 12px;
+      color: #86868b;
+      background: #f5f5f7;
       border-radius: 999px;
       padding: 2px 10px;
       font-weight: 600;
@@ -106,20 +123,21 @@
       display: inline-block;
       padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 12px;
       font-weight: 600;
     }
 
+    /* -- Content -- */
     .notice-content-wrapper {
       line-height: 1.8;
-      color: #334155;
-      font-size: 1.05rem;
+      color: #424245;
+      font-size: 15px;
     }
 
     .notice-content-wrapper img {
       max-width: 100%;
       height: auto;
-      border-radius: 8px;
+      border-radius: 12px;
       margin: 24px 0;
     }
 
@@ -127,25 +145,9 @@
       margin-bottom: 1.5em;
     }
 
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      margin-bottom: 24px;
-      text-decoration: none;
-      color: #64748b;
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: color 0.2s;
-    }
-
-    .back-link:hover {
-      color: #1D2F4E;
-    }
-
-
-    /* 좋아요 버튼 스타일 */
+    /* -- Like Button -- */
     .notice-actions {
-      margin: 40px 0;
+      margin: 48px 0;
       display: flex;
       justify-content: center;
     }
@@ -156,19 +158,18 @@
       gap: 8px;
       padding: 10px 24px;
       border-radius: 50px;
-      border: 1px solid #e2e8f0;
-      background: white;
-      color: #64748b;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: #f5f5f7;
+      color: #86868b;
+      font-family: var(--font-sans);
       font-weight: 600;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .like-button:hover {
-      background: #f8fafc;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background: #ebebed;
     }
 
     .like-button.liked {
@@ -177,12 +178,12 @@
       background: #fff1f2;
     }
 
-    /* 공지 내 문제 링크 스타일 */
+    /* -- Question Link -- */
     .notice-question-link {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      color: #2563eb;
+      color: #1D2F4E;
       text-decoration: underline;
       text-underline-offset: 2px;
       cursor: pointer;
@@ -190,15 +191,35 @@
     }
 
     .notice-question-link:hover {
-      color: #1d4ed8;
+      opacity: 0.7;
     }
 
-    /* 로그인 모달 방지 */
+    /* -- Login Modal Block -- */
     .login-modal,
     .login-container {
       display: none !important;
     }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 734px) {
+      .main-content { padding: 80px 20px 60px; }
+      .notice-title { font-size: var(--text-2xl, 24px); }
+    }
+
+    @media (max-width: 480px) {
+      .notice-title { font-size: var(--text-xl, 20px); }
+    }
   </style>
+
   <script type="module" src="../js/core/firebase-core.js"></script>
   <script type="module" src="../js/auth/auth-core.js"></script>
   <script type="module" src="../js/auth/auth-ui.js"></script>
@@ -232,38 +253,35 @@
   </div>
 
   <main class="main-content">
-    <div class="container">
-      <div class="notice-detail-container">
-        <a href="../notices.html" class="back-link">← 목록으로 돌아가기</a>
+    <a href="../notices.html" class="back-link">← 목록으로 돌아가기</a>
 
-        <div class="notice-header">
-          <h1 id="notice-title" class="notice-title">공지사항 제목</h1>
-          <div class="notice-meta">
-            <span id="notice-badge" class="notice-badge" style="display:none;">배지</span>
-            <span id="notice-date">날짜</span>
-            <span id="notice-view-count" style="display:none;">조회 0</span>
+    <div class="notice-detail-container">
+      <div class="notice-header">
+        <h1 id="notice-title" class="notice-title">공지사항 제목</h1>
+        <div class="notice-meta">
+          <span id="notice-badge" class="notice-badge" style="display:none;">배지</span>
+          <span id="notice-date">날짜</span>
+          <span id="notice-view-count" style="display:none;">조회 0</span>
+        </div>
+      </div>
+
+      <div class="notice-content-wrapper">
+        <div id="notice-content" class="notice-content">
+          <div style="display: flex; justify-content: center; padding: 40px;">
+            <div class="loading-spinner"
+              style="border: 2px solid #eee; border-top: 2px solid #1D2F4E; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;">
+            </div>
           </div>
+          <p style="text-align: center; color: #86868b;">공지사항 내용을 불러오는 중...</p>
         </div>
 
-        <div class="notice-content-wrapper">
-          <div id="notice-content" class="notice-content">
-            <div style="display: flex; justify-content: center; padding: 40px;">
-              <div class="loading-spinner"
-                style="border: 2px solid #eee; border-top: 2px solid #5FB2C9; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;">
-              </div>
-            </div>
-            <p style="text-align: center; color: #999;">공지사항 내용을 불러오는 중...</p>
-          </div>
-
-          <!-- 좋아요 버튼 -->
-          <div class="notice-actions">
-            <button class="like-button" id="likeButton" onclick="handleLike()" aria-label="좋아요">
-              <span id="likeIcon">❤️</span>
-              <span class="like-label">좋아요</span>
-              <span class="like-count" id="likeCount">0</span>
-            </button>
-          </div>
-
+        <!-- 좋아요 버튼 -->
+        <div class="notice-actions">
+          <button class="like-button" id="likeButton" onclick="handleLike()" aria-label="좋아요">
+            <span id="likeIcon">&#10084;</span>
+            <span class="like-label">좋아요</span>
+            <span class="like-count" id="likeCount">0</span>
+          </button>
         </div>
       </div>
     </div>
@@ -293,9 +311,9 @@
         <a href="../si1.html" class="footer__link">1급 스포츠지도사</a>
         <a href="../si2.html" class="footer__link">2급 스포츠지도사</a>
         <span class="footer__divider"></span>
-        <a href="/terms.html" class="footer__link">이용약관</a>
-        <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
-        <a href="/company-info.html" class="footer__link">사업자정보</a>
+        <a href="../terms.html" class="footer__link">이용약관</a>
+        <a href="../privacy-policy.html" class="footer__link">개인정보처리방침</a>
+        <a href="../company-info.html" class="footer__link">사업자정보</a>
       </nav>
       <p class="footer__meta">
         퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
@@ -311,19 +329,8 @@
       </div>
     </div>
   </footer>
-<script src="../js/apple-header.js"></script>
 
-  <style>
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
+  <script src="../js/apple-header.js"></script>
 
   <script type="module">
     // 로그인 모달 방지

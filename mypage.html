@@ -8,143 +8,352 @@
   <link rel="canonical" href="https://the1stpeng.com/mypage.html">
   <meta name="robots" content="noindex">
 
-  <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/design-tokens.css">
   <link rel="stylesheet" href="css/apple-header.css">
   <link rel="stylesheet" href="css/login.css">
   <link rel="stylesheet" href="css/apple-footer.css">
-  <link rel="stylesheet" href="css/layout.css">
 
   <script type="module" src="js/core/firebase-core.js"></script>
   <script type="module" src="js/auth/auth-core.js"></script>
+  <script type="module" src="js/auth/auth-ui.js"></script>
 
   <style>
-    .mypage-container {
-      max-width: 800px;
-      margin: 80px auto 60px;
-      padding: 0 16px;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: var(--font-sans);
+      background: #ffffff;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    .mypage-profile {
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      margin-bottom: 24px;
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* -- Page -- */
+    .page {
+      flex: 1;
+      padding: 100px 24px 80px;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .page__title {
+      font-size: var(--text-4xl, 36px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .page__desc {
+      font-size: var(--text-base, 16px);
+      color: #86868b;
+      margin-bottom: 48px;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+
+    /* -- Profile Card -- */
+    .profile-card {
       display: flex;
       align-items: center;
       gap: 20px;
+      padding: 28px;
+      background: #f5f5f7;
+      border-radius: 16px;
+      margin-bottom: 40px;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
     }
-    .mypage-avatar {
-      width: 64px; height: 64px;
-      background: var(--penguin-navy);
-      color: white;
+
+    .profile-avatar {
+      width: 60px;
+      height: 60px;
+      background: #1d1d1f;
+      color: #ffffff;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       flex-shrink: 0;
     }
-    .mypage-name { font-size: 20px; font-weight: 700; color: var(--penguin-navy); }
-    .mypage-email { font-size: 14px; color: #868e96; margin-top: 4px; }
-    .mypage-joined { font-size: 12px; color: #adb5bd; margin-top: 4px; }
 
-    .mypage-section {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      margin-bottom: 24px;
-    }
-    .mypage-section h2 {
-      font-size: 18px;
+    .profile-info { flex: 1; min-width: 0; }
+
+    .profile-name {
+      font-size: 20px;
       font-weight: 700;
-      color: var(--penguin-navy);
+      color: #1d1d1f;
+      line-height: 1.3;
+    }
+
+    .profile-email {
+      font-size: 14px;
+      color: #86868b;
+      margin-top: 2px;
+    }
+
+    .profile-joined {
+      font-size: 13px;
+      color: #aeaeb2;
+      margin-top: 2px;
+    }
+
+    /* -- Section -- */
+    .mypage-section {
+      margin-bottom: 40px;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
+    }
+
+    .mypage-section + .mypage-section {
+      animation-delay: 0.4s;
+    }
+
+    .section__title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #86868b;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 2px solid #f1f3f5;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
-    .purchase-card {
+    /* -- Purchase List -- */
+    .purchase-item {
       display: flex;
       align-items: center;
       gap: 16px;
-      padding: 16px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      margin-bottom: 10px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
       transition: background 0.2s;
     }
-    .purchase-card:hover { background: #f1f3f5; }
-    .purchase-icon { font-size: 32px; flex-shrink: 0; }
+
+    .purchase-item:last-child { border-bottom: none; }
+
+    .purchase-icon-wrap {
+      width: 44px;
+      height: 44px;
+      background: #f5f5f7;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .purchase-icon-wrap svg {
+      width: 20px;
+      height: 20px;
+      color: #1d1d1f;
+    }
+
     .purchase-info { flex: 1; min-width: 0; }
-    .purchase-title { font-size: 15px; font-weight: 600; color: #333; }
-    .purchase-meta { font-size: 12px; color: #868e96; margin-top: 4px; }
-    .purchase-progress {
+
+    .purchase-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .purchase-meta {
+      font-size: 13px;
+      color: #86868b;
+      margin-top: 2px;
+    }
+
+    .purchase-progress-bar {
       width: 100%;
-      height: 5px;
-      background: #e9ecef;
-      border-radius: 3px;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 2px;
       margin-top: 8px;
       overflow: hidden;
     }
+
     .purchase-progress-fill {
       height: 100%;
-      background: var(--penguin-skyblue);
-      border-radius: 3px;
-      transition: width 0.3s;
+      background: #1d1d1f;
+      border-radius: 2px;
+      transition: width 0.4s ease;
     }
+
     .purchase-action {
       padding: 8px 16px;
-      background: var(--penguin-navy);
-      color: white;
+      background: #1d1d1f;
+      color: #ffffff;
       border: none;
-      border-radius: 8px;
+      border-radius: 980px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       text-decoration: none;
       white-space: nowrap;
-      transition: background 0.2s;
+      transition: opacity 0.2s;
+      font-family: var(--font-sans);
     }
-    .purchase-action:hover { background: var(--penguin-skyblue); }
 
-    .payment-table { width: 100%; border-collapse: collapse; }
+    .purchase-action:hover { opacity: 0.7; }
+
+    /* -- Payment Table -- */
+    .payment-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
     .payment-table th {
       text-align: left;
-      padding: 10px 12px;
-      font-size: 12px;
-      color: #868e96;
-      font-weight: 600;
-      border-bottom: 2px solid #f1f3f5;
-    }
-    .payment-table td {
-      padding: 10px 12px;
+      padding: 10px 0;
       font-size: 13px;
-      border-bottom: 1px solid #f1f3f5;
+      color: #86868b;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
+    .payment-table td {
+      padding: 12px 0;
+      font-size: 14px;
+      color: #1d1d1f;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .payment-table tr:last-child td { border-bottom: none; }
+
+    .payment-status {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #34c759;
+    }
+
+    /* -- Empty State -- */
     .empty-state {
       text-align: center;
-      padding: 40px;
-      color: #868e96;
+      padding: 48px 24px;
+      color: #86868b;
+      font-size: 14px;
     }
-    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
 
-    .loading-text { text-align: center; padding: 40px; color: #868e96; }
+    .empty-state-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      color: #aeaeb2;
+    }
+
+    /* -- Loading -- */
+    .loading-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 80px 24px;
+      color: #86868b;
+      font-size: 14px;
+    }
+
+    .loading-spinner {
+      border: 2px solid rgba(0, 0, 0, 0.06);
+      border-top: 2px solid #86868b;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* -- Login Required -- */
+    .login-required {
+      text-align: center;
+      padding: 80px 24px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .login-required-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      color: #aeaeb2;
+    }
+
+    .login-required h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+    }
+
+    .login-required p {
+      font-size: 15px;
+      color: #86868b;
+      margin-bottom: 28px;
+    }
+
+    .login-required-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: #1d1d1f;
+      color: #ffffff;
+      border-radius: 980px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .login-required-btn:hover { opacity: 0.7; }
+
+    /* -- Back Link -- */
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 48px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #1D2F4E;
+      transition: opacity 0.2s;
+      animation: fadeInUp 0.6s ease-out 0.5s both;
+    }
+
+    .back-link:hover { opacity: 0.7; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 734px) {
+      .page { padding: 80px 20px 60px; }
+      .page__title { font-size: var(--text-3xl, 28px); }
+      .purchase-item { flex-wrap: wrap; }
+      .purchase-action { margin-top: 8px; }
+      .payment-table th,
+      .payment-table td { padding: 10px 8px; font-size: 13px; }
+    }
 
     @media (max-width: 480px) {
-      .mypage-container { margin: 70px auto 40px; }
-      .mypage-profile { flex-direction: column; text-align: center; }
-      .purchase-card { flex-direction: column; text-align: center; }
+      .page__title { font-size: var(--text-2xl, 24px); }
+      .profile-card {
+        flex-direction: column;
+        text-align: center;
+      }
     }
   </style>
-  <script type="module" src="js/core/firebase-core.js"></script>
-  <script type="module" src="js/auth/auth-core.js"></script>
-  <script type="module" src="js/auth/auth-ui.js"></script>
 </head>
 <body>
+
   <!-- Header -->
   <header class="header" id="header">
     <a href="index.html" class="header__brand">
@@ -172,17 +381,32 @@
     <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
   </div>
 
-  <main class="mypage-container">
-    <div id="mypage-loading" class="loading-text">불러오는 중...</div>
+  <!-- Content -->
+  <main class="page">
+    <h1 class="page__title">마이페이지</h1>
+    <p class="page__desc">내 계정 및 구매 내역 관리</p>
+
+    <div id="mypage-loading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <span>불러오는 중...</span>
+    </div>
+
     <div id="mypage-content" style="display:none;"></div>
-    <div id="mypage-login" style="display:none;text-align:center;padding:80px 20px;">
-      <div style="font-size:48px;margin-bottom:16px;">🔒</div>
-      <h2 style="color:var(--penguin-navy);margin-bottom:12px;">로그인이 필요합니다</h2>
-      <p style="color:#868e96;margin-bottom:24px;">마이페이지를 이용하려면 로그인해주세요.</p>
-      <a href="index.html" style="padding:12px 28px;background:var(--penguin-navy);color:white;border-radius:12px;text-decoration:none;font-weight:600;">홈으로</a>
+
+    <div id="mypage-login" style="display:none;">
+      <div class="login-required">
+        <svg class="login-required-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <h2>로그인이 필요합니다</h2>
+        <p>마이페이지를 이용하려면 로그인해주세요.</p>
+        <a href="index.html" class="login-required-btn">홈으로</a>
+      </div>
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="footer__inner">
       <nav class="footer__links">
@@ -238,7 +462,6 @@
 
     async function loadMypage(user) {
       try {
-        // 구매 내역
         const purchasesSnap = await getDocs(query(
           collection(db, 'purchases'),
           where('userId', '==', user.uid),
@@ -247,7 +470,6 @@
         const purchases = [];
         purchasesSnap.forEach(d => purchases.push({ id: d.id, ...d.data() }));
 
-        // 진도율
         const progressSnap = await getDocs(query(
           collection(db, 'lectureProgress'),
           where('userId', '==', user.uid)
@@ -259,7 +481,6 @@
           progressByProduct[data.productId].push(data);
         });
 
-        // 상품별 에피소드 수 (비디오만)
         const videoProductIds = purchases.filter(p => p.productType === 'video').map(p => p.productId);
         const episodeCounts = {};
         for (const pid of videoProductIds) {
@@ -274,7 +495,7 @@
 
       } catch (error) {
         console.error('마이페이지 로드 오류:', error);
-        document.getElementById('mypage-loading').textContent = '데이터를 불러오는 중 오류가 발생했습니다.';
+        document.getElementById('mypage-loading').innerHTML = '<span>데이터를 불러오는 중 오류가 발생했습니다.</span>';
       }
     }
 
@@ -284,25 +505,33 @@
         : '-';
       const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
 
+      const videoIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+      const pdfIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+
       let html = `
-        <div class="mypage-profile">
-          <div class="mypage-avatar">${initial}</div>
-          <div>
-            <div class="mypage-name">${user.displayName || '사용자'}</div>
-            <div class="mypage-email">${user.email || ''}</div>
-            <div class="mypage-joined">가입일: ${creationDate}</div>
+        <div class="profile-card">
+          <div class="profile-avatar">${initial}</div>
+          <div class="profile-info">
+            <div class="profile-name">${user.displayName || '사용자'}</div>
+            <div class="profile-email">${user.email || ''}</div>
+            <div class="profile-joined">가입일: ${creationDate}</div>
           </div>
         </div>`;
 
       // 구매 상품
-      html += `<div class="mypage-section"><h2>내 강의 / 자료</h2>`;
+      html += '<div class="mypage-section"><h2 class="section__title">내 강의 / 자료</h2>';
 
       if (purchases.length === 0) {
-        html += '<div class="empty-state"><div class="icon">📦</div><p>구매한 상품이 없습니다.</p></div>';
+        html += `<div class="empty-state">
+          <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          </svg>
+          <p>구매한 상품이 없습니다.</p>
+        </div>`;
       } else {
         for (const p of purchases) {
           const name = PRODUCT_NAMES[p.productId] || p.productId;
-          const icon = p.productType === 'video' ? '🎬' : '📄';
+          const icon = p.productType === 'video' ? videoIcon : pdfIcon;
           const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
 
           let progressHtml = '';
@@ -315,7 +544,7 @@
             const percent = totalEp > 0 ? Math.round((completedEp / totalEp) * 100) : 0;
             progressHtml = `
               <div class="purchase-meta">${completedEp}/${totalEp}강 완료 (${percent}%)</div>
-              <div class="purchase-progress"><div class="purchase-progress-fill" style="width:${percent}%"></div></div>`;
+              <div class="purchase-progress-bar"><div class="purchase-progress-fill" style="width:${percent}%"></div></div>`;
             actionHref = `lecture-play.html?id=${p.productId}`;
           } else {
             progressHtml = `<div class="purchase-meta">구매일: ${date}</div>`;
@@ -325,8 +554,8 @@
           const actionLabel = p.productType === 'video' ? '수강하기' : '다운로드';
 
           html += `
-            <div class="purchase-card">
-              <div class="purchase-icon">${icon}</div>
+            <div class="purchase-item">
+              <div class="purchase-icon-wrap">${icon}</div>
               <div class="purchase-info">
                 <div class="purchase-title">${name}</div>
                 ${progressHtml}
@@ -338,9 +567,15 @@
       html += '</div>';
 
       // 결제 내역
-      html += `<div class="mypage-section"><h2>결제 내역</h2>`;
+      html += '<div class="mypage-section"><h2 class="section__title">결제 내역</h2>';
       if (purchases.length === 0) {
-        html += '<div class="empty-state"><div class="icon">🧾</div><p>결제 내역이 없습니다.</p></div>';
+        html += `<div class="empty-state">
+          <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
+          <p>결제 내역이 없습니다.</p>
+        </div>`;
       } else {
         html += `<div style="overflow-x:auto;"><table class="payment-table">
           <thead><tr><th>상품명</th><th>결제일</th><th>금액</th><th>상태</th></tr></thead><tbody>`;
@@ -349,11 +584,13 @@
           const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
           const amount = (p.finalAmount || p.purchaseAmount || 0).toLocaleString() + '원';
           const status = p.status === 'completed' ? '결제완료' : p.status;
-          html += `<tr><td>${name}</td><td>${date}</td><td>${amount}</td><td>${status}</td></tr>`;
+          html += `<tr><td>${name}</td><td>${date}</td><td>${amount}</td><td><span class="payment-status">${status}</span></td></tr>`;
         }
         html += '</tbody></table></div>';
       }
       html += '</div>';
+
+      html += '<a href="index.html" class="back-link">홈으로 돌아가기</a>';
 
       document.getElementById('mypage-loading').style.display = 'none';
       const content = document.getElementById('mypage-content');
@@ -361,6 +598,6 @@
       content.style.display = 'block';
     }
   </script>
-<script src="js/apple-header.js"></script>
+  <script src="js/apple-header.js"></script>
 </body>
 </html>

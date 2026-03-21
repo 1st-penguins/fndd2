@@ -25,45 +25,76 @@
     <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
     <link rel="dns-prefetch" href="//firestore.googleapis.com">
 
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/design-tokens.css">
     <link rel="stylesheet" href="css/apple-header.css">
-  <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="css/apple-footer.css">
-    <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/wrong-note.css">
     <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            font-family: var(--font-sans);
+            background: #ffffff;
+            color: #1d1d1f;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
         .wrong-note-container {
+            flex: 1;
             max-width: 900px;
+            width: 100%;
             margin: 0 auto;
-            padding: 80px 16px 32px;
+            padding: 100px 24px 80px;
             min-height: 60vh;
         }
 
         .page-header {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .page-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 4px;
+            font-size: var(--text-4xl, 36px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #1d1d1f;
+            margin-bottom: 8px;
         }
 
         .page-subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
+            color: #86868b;
+            font-size: var(--text-base, 16px);
         }
 
-        @media (max-width: 480px) {
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 734px) {
             .wrong-note-container {
-                padding: 70px 12px 32px;
+                padding: 80px 20px 60px;
             }
 
             .page-title {
-                font-size: 18px;
+                font-size: var(--text-3xl, 28px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: var(--text-2xl, 24px);
             }
         }
     </style>

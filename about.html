@@ -21,335 +21,376 @@
   <meta name="twitter:description" content="건강운동관리사 · 생활스포츠지도사 기출문제 전과목 무료! 자동 채점, 오답노트, 성적 분석까지.">
   <meta name="twitter:image" content="https://the1stpeng.com/images/og-image.jpg">
 
-  <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/design-tokens.css">
   <link rel="stylesheet" href="css/apple-header.css">
   <link rel="stylesheet" href="css/login.css">
   <link rel="stylesheet" href="css/apple-footer.css">
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: var(--font-sans);
+      background: #ffffff;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
     body {
-      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: var(--color-bg-primary, #f8f9fa);
-      color: var(--color-text-primary, #1a1a1a);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
-    main { flex: 1; padding-top: 48px; }
+    a { text-decoration: none; color: inherit; }
 
-    /* ── 히어로 ── */
+    /* -- Hero -- */
     .hero {
-      background: linear-gradient(135deg, #1D2F4E 0%, #2a4a7a 50%, #5FB2C9 100%);
-      color: #fff;
+      padding: 120px 24px 80px;
       text-align: center;
-      padding: 80px 24px 60px;
-      position: relative;
-      overflow: hidden;
+      max-width: 720px;
+      margin: 0 auto;
+      width: 100%;
     }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at 30% 70%, rgba(95,178,201,0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 30%, rgba(255,255,255,0.05) 0%, transparent 50%);
-      animation: float 20s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0); }
-      50% { transform: translate(-20px, 10px); }
-    }
-    .hero-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
-    .hero-badge {
+
+    .hero__badge {
       display: inline-block;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 50px;
-      padding: 8px 20px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      margin-bottom: 28px;
-      backdrop-filter: blur(8px);
+      color: #86868b;
+      background: #f5f5f7;
+      padding: 6px 16px;
+      border-radius: 980px;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.6s ease-out;
     }
-    .hero h1 {
-      font-size: 40px;
+
+    .hero__title {
+      font-size: 48px;
       font-weight: 800;
-      line-height: 1.3;
+      letter-spacing: -2px;
+      line-height: 1.15;
+      color: #1d1d1f;
       margin-bottom: 20px;
-      letter-spacing: -0.02em;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
     }
-    .hero h1 em {
+
+    .hero__title em {
       font-style: normal;
-      color: #5FB2C9;
+      background: linear-gradient(135deg, #1D2F4E, #5FB2C9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .hero p {
+
+    .hero__desc {
       font-size: 18px;
-      opacity: 0.9;
+      color: #86868b;
       line-height: 1.7;
       margin-bottom: 36px;
-    }
-    .hero-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #fff;
-      color: #1D2F4E;
-      padding: 16px 36px;
-      border-radius: 12px;
-      font-size: 17px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.3s;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-    .hero-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      animation: fadeInUp 0.6s ease-out 0.2s both;
     }
 
-    /* ── 숫자 통계 ── */
-    .stats-bar {
-      background: #fff;
-      border-bottom: 1px solid #eee;
-      padding: 32px 24px;
+    .hero__cta {
+      display: inline-block;
+      padding: 16px 36px;
+      background: #1d1d1f;
+      color: #ffffff;
+      border-radius: 980px;
+      font-size: 17px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
     }
-    .stats-grid {
+
+    .hero__cta:hover { opacity: 0.7; }
+
+    /* -- Stats -- */
+    .stats {
+      padding: 48px 24px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .stats__grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
-      max-width: 800px;
+      max-width: 680px;
       margin: 0 auto;
       text-align: center;
     }
-    .stat-number {
+
+    .stats__number {
       font-size: 32px;
       font-weight: 800;
-      color: #1D2F4E;
+      color: #1d1d1f;
       line-height: 1;
     }
-    .stat-label {
+
+    .stats__label {
       font-size: 13px;
-      color: #888;
+      color: #86868b;
       margin-top: 6px;
     }
 
-    /* ── 기능 카드 ── */
-    .features {
-      padding: 60px 24px;
+    /* -- Section -- */
+    .section {
+      padding: 80px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .section--alt { background: #f5f5f7; max-width: 100%; }
+
+    .section--alt .section__inner {
       max-width: 900px;
       margin: 0 auto;
     }
-    .features h2 {
+
+    .section__eyebrow {
+      font-size: 13px;
+      font-weight: 600;
+      color: #86868b;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       text-align: center;
-      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .section__heading {
+      font-size: 32px;
       font-weight: 800;
-      color: #1D2F4E;
+      letter-spacing: -1px;
+      color: #1d1d1f;
+      text-align: center;
       margin-bottom: 12px;
     }
-    .features-subtitle {
-      text-align: center;
-      color: #888;
-      margin-bottom: 40px;
+
+    .section__sub {
       font-size: 16px;
+      color: #86868b;
+      text-align: center;
+      margin-bottom: 48px;
     }
+
+    /* -- Feature Grid -- */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+      gap: 16px;
     }
+
     .feature-card {
-      background: #fff;
-      border: 1px solid #eee;
+      background: #f5f5f7;
       border-radius: 16px;
       padding: 32px 28px;
-      transition: all 0.3s;
+      transition: transform 0.3s ease;
     }
-    .feature-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(29,47,78,0.1);
-      border-color: #5FB2C9;
-    }
-    .feature-icon {
-      font-size: 36px;
+
+    .section--alt .feature-card { background: #ffffff; }
+
+    .feature-card:hover { transform: translateY(-2px); }
+
+    .feature-card__icon {
+      width: 40px;
+      height: 40px;
       margin-bottom: 16px;
+      color: #1d1d1f;
     }
+
     .feature-card h3 {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
-      color: #1D2F4E;
-      margin-bottom: 10px;
+      color: #1d1d1f;
+      margin-bottom: 8px;
     }
+
     .feature-card p {
       font-size: 14px;
-      color: #666;
+      color: #86868b;
       line-height: 1.6;
     }
+
     .feature-tag {
       display: inline-block;
-      background: #e8f5e9;
-      color: #2e7d32;
+      background: rgba(0, 0, 0, 0.04);
+      color: #424245;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 500;
       padding: 4px 10px;
-      border-radius: 20px;
+      border-radius: 980px;
       margin-top: 12px;
     }
 
-    /* ── 자격증 안내 ── */
-    .certs {
-      background: #f0f4f8;
-      padding: 60px 24px;
-    }
-    .certs-inner {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .certs h2 {
-      text-align: center;
-      font-size: 28px;
-      font-weight: 800;
-      color: #1D2F4E;
-      margin-bottom: 36px;
-    }
+    /* -- Cert Cards -- */
     .cert-cards {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+      gap: 16px;
     }
+
     .cert-card {
-      background: #fff;
+      background: #ffffff;
       border-radius: 16px;
       padding: 32px;
       text-align: center;
-      border: 2px solid transparent;
-      transition: all 0.3s;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s ease;
     }
-    .cert-card:hover { border-color: #5FB2C9; }
-    .cert-card.health { border-top: 4px solid #1D2F4E; }
-    .cert-card.sports { border-top: 4px solid #047D5A; }
+
+    .cert-card:hover { transform: translateY(-2px); }
+
+    .cert-card__badge {
+      display: inline-block;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cert-card__badge--health { background: #1D2F4E; }
+    .cert-card__badge--sports { background: #059669; }
+
+    .cert-card__badge svg {
+      width: 24px;
+      height: 24px;
+      color: #ffffff;
+    }
+
     .cert-card h3 {
       font-size: 20px;
       font-weight: 700;
-      margin: 12px 0 8px;
+      color: #1d1d1f;
+      margin-bottom: 6px;
     }
-    .cert-card.health h3 { color: #1D2F4E; }
-    .cert-card.sports h3 { color: #047D5A; }
-    .cert-card .cert-emoji { font-size: 40px; }
-    .cert-card .cert-detail {
+
+    .cert-card__detail {
       font-size: 14px;
-      color: #666;
+      color: #86868b;
       line-height: 1.6;
-      margin-top: 8px;
+      margin-bottom: 16px;
     }
+
     .cert-subjects {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       justify-content: center;
-      margin-top: 16px;
-    }
-    .cert-subjects span {
-      background: #f0f4f8;
-      color: #555;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 20px;
     }
 
-    /* ── 사용 후기 느낌 ── */
-    .social-proof {
-      padding: 60px 24px;
-      max-width: 900px;
-      margin: 0 auto;
+    .cert-subjects span {
+      background: #f5f5f7;
+      color: #424245;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 980px;
     }
-    .social-proof h2 {
-      text-align: center;
-      font-size: 28px;
-      font-weight: 800;
-      color: #1D2F4E;
-      margin-bottom: 36px;
-    }
+
+    /* -- Testimonials -- */
     .proof-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
+
     .proof-card {
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 12px;
+      background: #f5f5f7;
+      border-radius: 16px;
       padding: 24px;
     }
-    .proof-card .stars { color: #f59e0b; font-size: 14px; margin-bottom: 10px; }
-    .proof-card .quote {
-      font-size: 14px;
-      color: #444;
-      line-height: 1.6;
+
+    .proof-card__stars {
+      font-size: 13px;
+      color: #f5a623;
       margin-bottom: 12px;
-    }
-    .proof-card .author {
-      font-size: 12px;
-      color: #999;
+      letter-spacing: 2px;
     }
 
-    /* ── CTA 섹션 ── */
-    .final-cta {
-      background: linear-gradient(135deg, #1D2F4E, #2a4a7a);
-      color: #fff;
-      text-align: center;
-      padding: 60px 24px;
-    }
-    .final-cta h2 {
-      font-size: 30px;
-      font-weight: 800;
+    .proof-card__quote {
+      font-size: 14px;
+      color: #424245;
+      line-height: 1.7;
       margin-bottom: 16px;
     }
-    .final-cta p {
-      font-size: 16px;
-      opacity: 0.85;
-      margin-bottom: 32px;
-    }
-    .final-cta a {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #5FB2C9;
-      color: #fff;
-      padding: 16px 40px;
-      border-radius: 12px;
-      font-size: 18px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-    .final-cta a:hover {
-      background: #4a9db5;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(95,178,201,0.4);
-    }
-    .final-cta .sub-text {
-      margin-top: 16px;
-      font-size: 14px;
-      opacity: 0.7;
+
+    .proof-card__author {
+      font-size: 13px;
+      color: #86868b;
+      font-weight: 500;
     }
 
-    /* ── 반응형 ── */
+    /* -- Final CTA -- */
+    .cta-section {
+      text-align: center;
+      padding: 80px 24px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .cta-section h2 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #1d1d1f;
+      margin-bottom: 12px;
+    }
+
+    .cta-section p {
+      font-size: 16px;
+      color: #86868b;
+      margin-bottom: 32px;
+    }
+
+    .cta-section__btn {
+      display: inline-block;
+      padding: 16px 40px;
+      background: #1d1d1f;
+      color: #ffffff;
+      border-radius: 980px;
+      font-size: 17px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .cta-section__btn:hover { opacity: 0.7; }
+
+    .cta-section__sub {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #aeaeb2;
+    }
+
+    /* -- Animation -- */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* -- Responsive -- */
     @media (max-width: 768px) {
-      .hero { padding: 60px 20px 48px; }
-      .hero h1 { font-size: 28px; }
-      .hero p { font-size: 15px; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-      .stat-number { font-size: 26px; }
+      .hero { padding: 90px 20px 60px; }
+      .hero__title { font-size: 32px; letter-spacing: -1px; }
+      .hero__desc { font-size: 16px; }
+      .stats__grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+      .stats__number { font-size: 26px; }
       .features-grid { grid-template-columns: 1fr; }
       .cert-cards { grid-template-columns: 1fr; }
       .proof-grid { grid-template-columns: 1fr; }
-      .final-cta h2 { font-size: 24px; }
+      .section__heading { font-size: 26px; }
+      .cta-section h2 { font-size: 26px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero__title { font-size: 28px; }
     }
   </style>
 
@@ -360,6 +401,7 @@
 </head>
 <body>
 
+  <!-- Header -->
   <header class="header" id="header">
     <a href="index.html" class="header__brand">
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
@@ -387,79 +429,78 @@
   </div>
 
   <main>
-    <!-- 히어로 -->
+    <!-- Hero -->
     <section class="hero">
-      <div class="hero-content">
-        <div class="hero-badge">2025년 최신 기출 업데이트 완료</div>
-        <h1>기출문제 <em>무료</em>로 풀고<br>한 번에 합격하자</h1>
-        <p>
-          건강운동관리사 · 2급 스포츠지도사<br>
-          2019~2025년 전과목 기출문제를<br>
-          회원가입만 하면 <strong>전부 무료</strong>로 풀 수 있습니다.
-        </p>
-        <a href="index.html" class="hero-cta">지금 바로 시작하기 →</a>
+      <div class="hero__badge">2025년 최신 기출 업데이트 완료</div>
+      <h1 class="hero__title">기출문제 <em>무료</em>로 풀고<br>한 번에 합격하자</h1>
+      <p class="hero__desc">
+        건강운동관리사 / 2급 스포츠지도사<br>
+        2019~2025년 전과목 기출문제를<br>
+        회원가입만 하면 <strong>전부 무료</strong>로 풀 수 있습니다.
+      </p>
+      <a href="index.html" class="hero__cta">지금 바로 시작하기</a>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+      <div class="stats__grid">
+        <div>
+          <div class="stats__number">2,000+</div>
+          <div class="stats__label">전체 기출문제</div>
+        </div>
+        <div>
+          <div class="stats__number">7년치</div>
+          <div class="stats__label">2019~2025년</div>
+        </div>
+        <div>
+          <div class="stats__number">18과목</div>
+          <div class="stats__label">전과목 지원</div>
+        </div>
+        <div>
+          <div class="stats__number">100%</div>
+          <div class="stats__label">무료</div>
+        </div>
       </div>
     </section>
 
-    <!-- 숫자 통계 -->
-    <section class="stats-bar">
-      <div class="stats-grid">
-        <div>
-          <div class="stat-number">2,000+</div>
-          <div class="stat-label">전체 기출문제</div>
-        </div>
-        <div>
-          <div class="stat-number">7년치</div>
-          <div class="stat-label">2019~2025년</div>
-        </div>
-        <div>
-          <div class="stat-number">18과목</div>
-          <div class="stat-label">전과목 지원</div>
-        </div>
-        <div>
-          <div class="stat-number">100%</div>
-          <div class="stat-label">무료</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 기능 소개 -->
-    <section class="features">
-      <h2>이런 기능이 전부 무료</h2>
-      <p class="features-subtitle">시험 준비에 필요한 모든 것을 한 곳에서</p>
+    <!-- Features -->
+    <section class="section">
+      <p class="section__eyebrow">Features</p>
+      <h2 class="section__heading">이런 기능이 전부 무료</h2>
+      <p class="section__sub">시험 준비에 필요한 모든 것을 한 곳에서</p>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">📝</div>
+          <svg class="feature-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           <h3>전과목 기출문제</h3>
-          <p>2019~2025년 공식 기출문제를 과목별·연도별로 풀 수 있습니다. 실제 시험과 동일한 4지선다 형식.</p>
+          <p>2019~2025년 공식 기출문제를 과목별, 연도별로 풀 수 있습니다. 실제 시험과 동일한 4지선다 형식.</p>
           <span class="feature-tag">전과목 무료</span>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">⚡</div>
+          <svg class="feature-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           <h3>즉시 자동 채점</h3>
           <p>문제를 풀면 바로 채점 결과와 정답을 확인. 틀린 문제는 상세 해설까지 제공합니다.</p>
           <span class="feature-tag">실시간 채점</span>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📊</div>
+          <svg class="feature-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           <h3>성적 분석</h3>
           <p>과목별 정답률, 취약 과목, 학습 추이를 한눈에. 어디가 부족한지 데이터로 파악하세요.</p>
           <span class="feature-tag">개인별 분석</span>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📒</div>
+          <svg class="feature-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
           <h3>오답노트</h3>
           <p>틀린 문제를 자동 저장. 시험 전에 오답만 모아서 집중 복습할 수 있습니다.</p>
           <span class="feature-tag">자동 저장</span>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🏆</div>
+          <svg class="feature-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
           <h3>모의고사</h3>
-          <p>실제 시험처럼 시간 제한 모의고사. 1교시·2교시 나눠서 실전 감각을 익히세요.</p>
+          <p>실제 시험처럼 시간 제한 모의고사. 1교시, 2교시 나눠서 실전 감각을 익히세요.</p>
           <span class="feature-tag">실전 연습</span>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📱</div>
+          <svg class="feature-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
           <h3>모바일 최적화</h3>
           <p>출퇴근길, 쉬는 시간에 스마트폰으로 바로 풀기. 어디서든 공부할 수 있습니다.</p>
           <span class="feature-tag">언제 어디서나</span>
@@ -467,15 +508,19 @@
       </div>
     </section>
 
-    <!-- 지원 자격증 -->
-    <section class="certs">
-      <div class="certs-inner">
-        <h2>지원하는 자격증</h2>
+    <!-- Certifications -->
+    <section class="section section--alt">
+      <div class="section__inner">
+        <p class="section__eyebrow">Certifications</p>
+        <h2 class="section__heading">지원하는 자격증</h2>
+        <p class="section__sub">체육지도자 자격증 시험 대비를 위한 전과목 기출문제</p>
         <div class="cert-cards">
-          <div class="cert-card health">
-            <div class="cert-emoji">🏥</div>
+          <div class="cert-card">
+            <div class="cert-card__badge cert-card__badge--health">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
             <h3>건강운동관리사</h3>
-            <p class="cert-detail">2019~2025년 · 8과목 · 모의고사 포함</p>
+            <p class="cert-card__detail">2019~2025년 / 8과목 / 모의고사 포함</p>
             <div class="cert-subjects">
               <span>운동생리학</span>
               <span>건강체력평가</span>
@@ -487,10 +532,12 @@
               <span>스포츠심리학</span>
             </div>
           </div>
-          <div class="cert-card sports">
-            <div class="cert-emoji">⚽</div>
+          <div class="cert-card">
+            <div class="cert-card__badge cert-card__badge--sports">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            </div>
             <h3>2급 스포츠지도사</h3>
-            <p class="cert-detail">2021~2025년 · 10과목</p>
+            <p class="cert-card__detail">2021~2025년 / 10과목</p>
             <div class="cert-subjects">
               <span>스포츠사회학</span>
               <span>스포츠교육학</span>
@@ -508,37 +555,40 @@
       </div>
     </section>
 
-    <!-- 후기 -->
-    <section class="social-proof">
-      <h2>합격생들의 한마디</h2>
+    <!-- Testimonials -->
+    <section class="section">
+      <p class="section__eyebrow">Testimonials</p>
+      <h2 class="section__heading">합격생들의 한마디</h2>
+      <p class="section__sub">실제 사용자 후기</p>
       <div class="proof-grid">
         <div class="proof-card">
-          <div class="stars">★★★★★</div>
-          <div class="quote">"기출문제 사이트 찾다가 발견했는데, 이게 무료라고? 채점이랑 오답노트까지 되니까 따로 정리할 필요가 없어요."</div>
-          <div class="author">— 건강운동관리사 합격생</div>
+          <div class="proof-card__stars">*****</div>
+          <div class="proof-card__quote">"기출문제 사이트 찾다가 발견했는데, 이게 무료라고? 채점이랑 오답노트까지 되니까 따로 정리할 필요가 없어요."</div>
+          <div class="proof-card__author">건강운동관리사 합격생</div>
         </div>
         <div class="proof-card">
-          <div class="stars">★★★★★</div>
-          <div class="quote">"출퇴근 지하철에서 폰으로 매일 한 과목씩 풀었어요. 성적 분석 보면서 약한 과목 집중했더니 합격!"</div>
-          <div class="author">— 생활스포츠지도사 합격생</div>
+          <div class="proof-card__stars">*****</div>
+          <div class="proof-card__quote">"출퇴근 지하철에서 폰으로 매일 한 과목씩 풀었어요. 성적 분석 보면서 약한 과목 집중했더니 합격!"</div>
+          <div class="proof-card__author">생활스포츠지도사 합격생</div>
         </div>
         <div class="proof-card">
-          <div class="stars">★★★★★</div>
-          <div class="quote">"모의고사 기능이 진짜 좋아요. 실제 시험이랑 똑같은 느낌으로 연습할 수 있어서 시험장에서 안 떨렸어요."</div>
-          <div class="author">— 건강운동관리사 합격생</div>
+          <div class="proof-card__stars">*****</div>
+          <div class="proof-card__quote">"모의고사 기능이 진짜 좋아요. 실제 시험이랑 똑같은 느낌으로 연습할 수 있어서 시험장에서 안 떨렸어요."</div>
+          <div class="proof-card__author">건강운동관리사 합격생</div>
         </div>
       </div>
     </section>
 
-    <!-- 최종 CTA -->
-    <section class="final-cta">
+    <!-- Final CTA -->
+    <section class="cta-section">
       <h2>지금 시작하면 합격이 가까워집니다</h2>
       <p>회원가입 30초, 기출문제 바로 풀기</p>
-      <a href="index.html">무료로 시작하기 →</a>
-      <div class="sub-text">가입비 없음 · 전과목 무료 · 광고 없음</div>
+      <a href="index.html" class="cta-section__btn">무료로 시작하기</a>
+      <div class="cta-section__sub">가입비 없음 / 전과목 무료 / 광고 없음</div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="footer__inner">
       <nav class="footer__links">
@@ -565,10 +615,6 @@
     </div>
   </footer>
 
-  
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (hamburger && mobileMenu) hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-  </script>
+  <script src="js/apple-header.js"></script>
 </body>
 </html>
