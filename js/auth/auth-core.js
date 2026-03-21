@@ -548,6 +548,7 @@ if (typeof window !== 'undefined') {
   window.handleLogout = handleLogout;
   window.handlePasswordReset = handlePasswordReset;
   window.initAuth = initAuth;
+  window.isAdmin = isAdmin;
 }
 
 // 기본 내보내기 (인스턴스 형태)
