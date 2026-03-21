@@ -12,7 +12,6 @@
       menu.classList.toggle('open');
     });
 
-    // 메뉴 바깥 클릭 시 닫기
     document.addEventListener('click', (e) => {
       if (menu.classList.contains('open') && !menu.contains(e.target) && !hamburger.contains(e.target)) {
         menu.classList.remove('open');
@@ -21,15 +20,17 @@
   }
 
   // 경로 prefix (하위 폴더 감지)
-  const isSubDir = window.location.pathname.includes('/exam/') ||
-    window.location.pathname.includes('/admin/') ||
-    window.location.pathname.includes('/notices/') ||
-    window.location.pathname.includes('/subjects') ||
-    window.location.pathname.includes('/years');
+  const path = window.location.pathname;
+  const isSubDir = path.includes('/exam/') || path.includes('/admin/') ||
+    path.includes('/notices/') || path.includes('/subjects') || path.includes('/years');
   const prefix = isSubDir ? '../' : '';
+
+  // 이미 업데이트했는지 추적
+  let authUpdated = false;
 
   // 로그인 상태 UI 업데이트
   function updateHeaderAuth(isLoggedIn) {
+    authUpdated = true;
     const loginBtn = document.getElementById('header-login-btn');
     const authSection = document.getElementById('menu-auth');
 
@@ -50,7 +51,6 @@
     // 햄버거 메뉴 내 계정 영역
     if (authSection) {
       if (isLoggedIn) {
-        // 관리자 확인
         const isAdminUser = typeof window.isAdmin === 'function' && window.isAdmin();
 
         let adminLinks = '';
@@ -75,10 +75,10 @@
         if (logoutBtn) {
           logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (typeof window.logout === 'function') {
-              window.logout();
-            } else if (typeof window.handleLogout === 'function') {
+            if (typeof window.handleLogout === 'function') {
               window.handleLogout();
+            } else if (typeof window.logout === 'function') {
+              window.logout();
             }
           });
         }
@@ -101,35 +101,35 @@
     }
   }
 
-  // loginStateChanged 이벤트
+  // loginStateChanged 이벤트 (auth-core.js에서 발생)
   window.addEventListener('loginStateChanged', (e) => {
     updateHeaderAuth(e.detail && e.detail.isLoggedIn);
   });
 
-  // 초기 상태 동기화
-  function syncInitialState() {
+  // 초기 상태 동기화 — auth 모듈 초기화 대기
+  function trySync() {
+    // 방법 1: isUserLoggedIn 함수 사용
     if (typeof window.isUserLoggedIn === 'function') {
       updateHeaderAuth(window.isUserLoggedIn());
+      return true;
+    }
+    // 방법 2: __authStateResolved 플래그 확인
+    if (window.__authStateResolved) {
+      updateHeaderAuth(!!window.__lastAuthState);
       return true;
     }
     return false;
   }
 
-  function startSync() {
-    if (syncInitialState()) return;
+  // 500ms 간격으로 최대 30번(15초) 시도
+  let attempts = 0;
+  const interval = setInterval(() => {
+    attempts++;
+    if (trySync() || attempts > 30) {
+      clearInterval(interval);
+    }
+  }, 500);
 
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (syncInitialState() || attempts > 20) {
-        clearInterval(interval);
-      }
-    }, 300);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startSync);
-  } else {
-    startSync();
-  }
+  // 즉시 한 번 시도
+  trySync();
 })();
