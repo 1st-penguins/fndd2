@@ -129,7 +129,7 @@
 }
 
 /* 푸터 스타일 (Linear Footer가 아닌 경우에만 적용) */
-footer:not(.linear-footer) {
+footer:not(.linear-footer):not(.footer) {
     background-color: var(--penguin-navy);
     color: var(--frost-white);
     padding: 40px 0 30px;
