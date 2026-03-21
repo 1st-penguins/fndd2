@@ -332,7 +332,10 @@ export function initAuthUI() {
 
   // 모달 생성 (지연 없이 즉시 생성하되 스타일로 제어)
   createLoginModal();
-  createLoginRequiredModal();
+  // 로그인 필요 모달은 restricted-content 또는 login-required-overlay가 있는 페이지에서만 생성
+  if (document.querySelector('.restricted-content, .login-required-overlay')) {
+    createLoginRequiredModal();
+  }
 
   // 로그인 버튼 이벤트 연결 (DOM이 준비된 후 실행되도록 보장)
   const attachEvents = () => {
