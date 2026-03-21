@@ -629,10 +629,8 @@ export function updateLoginUI() {
   // Body 클래스 토글 (CSS 제어용)
   document.body.classList.toggle('logged-in', isLoggedIn);
 
-  // 커스텀 이벤트 발생 (LinearHeader 등 다른 컴포넌트 알림용)
-  window.dispatchEvent(new CustomEvent('loginStateChanged', {
-    detail: { isLoggedIn: isLoggedIn }
-  }));
+  // loginStateChanged 이벤트는 auth-core.js에서 isAdmin 포함하여 발생시킴
+  // 여기서 중복 발생시키지 않음 (isAdmin 없이 발생하면 햄버거 메뉴 관리자 링크 누락)
 }
 
 /**
