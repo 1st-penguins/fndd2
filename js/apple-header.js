@@ -1,50 +1,74 @@
 /**
- * Apple-style Header — 로그인 상태 동기화 + 햄버거 메뉴
+ * Apple-style Header — 햄버거 메뉴 + 로그인 상태 동기화
  */
 (function () {
-  // 햄버거 메뉴 토글
   const hamburger = document.getElementById('hamburger');
-  const mobileMenu = document.getElementById('mobile-menu');
-  if (hamburger && mobileMenu) {
-    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  const menu = document.getElementById('mobile-menu');
+
+  // 햄버거 토글
+  if (hamburger && menu) {
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('open');
+    });
+
+    // 메뉴 바깥 클릭 시 닫기
+    document.addEventListener('click', (e) => {
+      if (menu.classList.contains('open') && !menu.contains(e.target) && !hamburger.contains(e.target)) {
+        menu.classList.remove('open');
+      }
+    });
   }
 
   // 로그인 상태 UI 업데이트
   function updateHeaderAuth(isLoggedIn) {
-    const loginBtn = document.getElementById('header-login-btn');
-    const mobileLoginBtn = document.getElementById('mobile-login-btn');
+    const authSection = document.getElementById('menu-auth');
+    if (!authSection) return;
 
     if (isLoggedIn) {
       const userName = typeof window.getCurrentUserName === 'function'
-        ? window.getCurrentUserName() : '마이페이지';
+        ? window.getCurrentUserName() : '사용자';
 
-      if (loginBtn) {
-        loginBtn.textContent = userName;
-        loginBtn.href = 'mypage.html';
-      }
-      if (mobileLoginBtn) {
-        mobileLoginBtn.textContent = userName;
-        mobileLoginBtn.href = 'mypage.html';
+      authSection.innerHTML = `
+        <a href="mypage.html" class="header__menu-auth-link">${userName}</a>
+        <a href="#" class="header__menu-auth-link header__menu-auth-link--logout" id="menu-logout">로그아웃</a>
+      `;
+
+      const logoutBtn = document.getElementById('menu-logout');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (typeof window.logout === 'function') {
+            window.logout();
+          } else if (typeof window.handleLogout === 'function') {
+            window.handleLogout();
+          }
+        });
       }
     } else {
+      authSection.innerHTML = `
+        <a href="#" class="header__menu-auth-link" id="menu-login">로그인</a>
+      `;
+
+      const loginBtn = document.getElementById('menu-login');
       if (loginBtn) {
-        loginBtn.textContent = '로그인';
-        loginBtn.href = '#';
-      }
-      if (mobileLoginBtn) {
-        mobileLoginBtn.textContent = '로그인';
-        mobileLoginBtn.href = '#';
+        loginBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          menu.classList.remove('open');
+          if (typeof window.showLoginModal === 'function') {
+            window.showLoginModal();
+          }
+        });
       }
     }
   }
 
-  // loginStateChanged 이벤트 리스너
+  // loginStateChanged 이벤트
   window.addEventListener('loginStateChanged', (e) => {
-    const isLoggedIn = e.detail && e.detail.isLoggedIn;
-    updateHeaderAuth(isLoggedIn);
+    updateHeaderAuth(e.detail && e.detail.isLoggedIn);
   });
 
-  // 초기 상태 동기화 — 여러 번 시도
+  // 초기 상태 동기화
   function syncInitialState() {
     if (typeof window.isUserLoggedIn === 'function') {
       updateHeaderAuth(window.isUserLoggedIn());
@@ -53,7 +77,6 @@
     return false;
   }
 
-  // DOM 로드 후 반복 체크 (Firebase Auth 초기화 대기)
   function startSync() {
     if (syncInitialState()) return;
 

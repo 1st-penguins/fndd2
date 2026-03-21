@@ -64,28 +64,17 @@
 .header__right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
+/* 로그인 pill 버튼 — 항상 숨김 (메뉴로 대체) */
 .header__login {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-secondary, #6e6e73);
-  padding: 5px 14px;
-  border-radius: 980px;
-  border: 1px solid var(--color-border, rgba(0,0,0,0.1));
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.header__login:hover {
-  color: var(--color-accent, #1D2F4E);
-  border-color: var(--color-accent, #1D2F4E);
-}
-
-/* Hamburger */
-.header__hamburger {
   display: none;
+}
+
+/* Hamburger — 항상 표시 */
+.header__hamburger {
+  display: block;
   background: none;
   border: none;
   cursor: pointer;
@@ -109,38 +98,72 @@
 .header__hamburger span:nth-child(2) { top: 7px; }
 .header__hamburger span:nth-child(3) { top: 14px; }
 
-/* Mobile Menu */
+/* Menu */
 .header__mobile-menu {
   display: none;
   position: fixed;
   top: 48px;
-  left: 0;
   right: 0;
+  width: 240px;
   background: rgba(255, 255, 255, 0.98);
-  padding: 12px 24px 16px;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  padding: 8px 0;
   z-index: 99;
   flex-direction: column;
-  gap: 4px;
-  border-bottom: 1px solid var(--color-separator, rgba(0,0,0,0.06));
+  border: 1px solid var(--color-separator, rgba(0,0,0,0.06));
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 .header__mobile-menu.open { display: flex; }
 
 .header__mobile-link {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: #1d1d1f;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 10px 20px;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: background 0.15s;
 }
 
-.header__mobile-link:last-child { border-bottom: none; }
-.header__mobile-link:hover { color: #2B4A78; }
+.header__mobile-link:hover { background: rgba(0, 0, 0, 0.04); }
 
+/* 메뉴 구분선 */
+.header__menu-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  margin: 4px 0;
+}
+
+/* 계정 영역 (마이페이지/로그아웃) */
+.header__menu-auth {
+  display: flex;
+  flex-direction: column;
+}
+
+.header__menu-auth-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+  padding: 10px 20px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.header__menu-auth-link:hover { background: rgba(0, 0, 0, 0.04); }
+
+.header__menu-auth-link--logout {
+  color: #86868b;
+}
+
+/* 모바일: 네비 숨기고 메뉴 전체 너비 */
 @media (max-width: 734px) {
   .header__nav { display: none; }
-  .header__login { display: none; }
-  .header__hamburger { display: block; }
+
+  .header__mobile-menu {
+    width: 100%;
+    border-radius: 0;
+    left: 0;
+  }
 }
