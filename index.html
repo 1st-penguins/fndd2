@@ -310,6 +310,8 @@
       .select__desc { margin-top: -20px; margin-bottom: 36px; }
     }
   </style>
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
 </head>
 <body>
 
@@ -423,10 +425,6 @@
   </footer>
 
   <script>
-    // 모바일 햄버거 메뉴
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobile-menu');
-    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
 
     // 배경 이미지 지연 로드
     const hero = document.getElementById('hero');

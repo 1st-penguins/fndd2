@@ -1445,6 +1445,8 @@
       }
     }
   </style>
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
 </head>
 <body>
 
@@ -1829,10 +1831,6 @@
   </footer>
 
   <script>
-    // 모바일 햄버거 메뉴
-    document.getElementById('hamburger').addEventListener('click', () => {
-      document.getElementById('mobile-menu').classList.toggle('open');
-    });
 
     // ── 과목 상세 뷰 (SPA 전환) ──
     const SUBJECTS = {
