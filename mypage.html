@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/design-tokens.css">
   <link rel="stylesheet" href="css/apple-header.css">
+  <link rel="stylesheet" href="css/login.css">
   <link rel="stylesheet" href="css/apple-footer.css">
   <link rel="stylesheet" href="css/layout.css">
 
@@ -139,6 +140,9 @@
       .purchase-card { flex-direction: column; text-align: center; }
     }
   </style>
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  <script type="module" src="js/auth/auth-ui.js"></script>
 </head>
 <body>
   <!-- Header -->
@@ -357,10 +361,6 @@
       content.style.display = 'block';
     }
   </script>
-  
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (hamburger && mobileMenu) hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-  </script>
+<script src="js/apple-header.js"></script>
 </body>
 </html>

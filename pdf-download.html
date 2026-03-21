@@ -12,7 +12,8 @@
   <!-- 외부 CSS 파일 연결 -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/design-tokens.css" />
-  <link rel="stylesheet" href="css/apple-header.css" />
+  <link rel="stylesheet" href="css/apple-header.css">
+  <link rel="stylesheet" href="css/login.css" />
   <link rel="stylesheet" href="css/apple-footer.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -191,6 +192,9 @@
       }
     }
   </style>
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  <script type="module" src="js/auth/auth-ui.js"></script>
 </head>
 <body>
   <header class="header" id="header">
@@ -290,12 +294,7 @@
       </div>
     </div>
   </footer>
-
-  
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (hamburger && mobileMenu) hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-  </script>
+<script src="js/apple-header.js"></script>
 
   <script type="module">
     import { auth, db } from './js/core/firebase-core.js';

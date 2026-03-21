@@ -9,7 +9,8 @@
   
   <link rel="stylesheet" href="../css/design-tokens.css" />
   <link rel="stylesheet" href="../css/base.css" />
-  <link rel="stylesheet" href="../css/apple-header.css" />
+  <link rel="stylesheet" href="../css/apple-header.css">
+  <link rel="stylesheet" href="../css/login.css" />
   <link rel="stylesheet" href="../css/apple-footer.css" />
   <link rel="stylesheet" href="../css/layout.css" />
   <link rel="stylesheet" href="../css/components.css" />
@@ -192,6 +193,9 @@
       }
     }
   </style>
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+  <script type="module" src="../js/auth/auth-ui.js"></script>
 </head>
 <body>
   <div class="admin-topbar" style="background:var(--penguin-navy,#1D2F4E);color:white;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;font-size:14px;">
@@ -361,11 +365,7 @@
       </div>
     </div>
   </footer>
-  
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (hamburger && mobileMenu) hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-  </script>
+<script src="../js/apple-header.js"></script>
 
   <script type="module">
     import { ensureFirebase, ensureAuthReady } from '../js/core/firebase-core.js';
