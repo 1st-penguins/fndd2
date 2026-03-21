@@ -1,5 +1,5 @@
 /**
- * Apple-style Header — 햄버거 메뉴 + 로그인 상태 동기화
+ * Apple-style Header — 햄버거 메뉴 + 로그인 상태 + 관리자 메뉴
  */
 (function () {
   const hamburger = document.getElementById('hamburger');
@@ -20,6 +20,14 @@
     });
   }
 
+  // 경로 prefix (하위 폴더 감지)
+  const isSubDir = window.location.pathname.includes('/exam/') ||
+    window.location.pathname.includes('/admin/') ||
+    window.location.pathname.includes('/notices/') ||
+    window.location.pathname.includes('/subjects') ||
+    window.location.pathname.includes('/years');
+  const prefix = isSubDir ? '../' : '';
+
   // 로그인 상태 UI 업데이트
   function updateHeaderAuth(isLoggedIn) {
     const loginBtn = document.getElementById('header-login-btn');
@@ -32,7 +40,7 @@
     if (loginBtn) {
       if (isLoggedIn) {
         loginBtn.textContent = userName;
-        loginBtn.href = 'mypage.html';
+        loginBtn.href = prefix + 'mypage.html';
       } else {
         loginBtn.textContent = '로그인';
         loginBtn.href = '#';
@@ -42,8 +50,24 @@
     // 햄버거 메뉴 내 계정 영역
     if (authSection) {
       if (isLoggedIn) {
+        // 관리자 확인
+        const isAdminUser = typeof window.isAdmin === 'function' && window.isAdmin();
+
+        let adminLinks = '';
+        if (isAdminUser) {
+          adminLinks = `
+            <div class="header__menu-divider"></div>
+            <a href="${prefix}admin/dashboard.html" class="header__menu-auth-link header__menu-auth-link--admin">대시보드</a>
+            <a href="${prefix}admin/statistics.html" class="header__menu-auth-link header__menu-auth-link--admin">통계</a>
+            <a href="${prefix}admin/notices.html" class="header__menu-auth-link header__menu-auth-link--admin">공지 관리</a>
+            <a href="${prefix}admin/user-lookup.html" class="header__menu-auth-link header__menu-auth-link--admin">회원 조회</a>
+            <a href="${prefix}admin/coupons.html" class="header__menu-auth-link header__menu-auth-link--admin">쿠폰 관리</a>
+          `;
+        }
+
         authSection.innerHTML = `
-          <a href="mypage.html" class="header__menu-auth-link">마이페이지</a>
+          <a href="${prefix}mypage.html" class="header__menu-auth-link">마이페이지</a>${adminLinks}
+          <div class="header__menu-divider"></div>
           <a href="#" class="header__menu-auth-link header__menu-auth-link--logout" id="menu-logout">로그아웃</a>
         `;
 
@@ -67,7 +91,7 @@
         if (menuLoginBtn) {
           menuLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            menu.classList.remove('open');
+            if (menu) menu.classList.remove('open');
             if (typeof window.showLoginModal === 'function') {
               window.showLoginModal();
             }

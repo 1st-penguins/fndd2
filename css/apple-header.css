@@ -167,6 +167,12 @@
 .header__menu-auth-link:hover { background: rgba(0, 0, 0, 0.04); }
 
 .header__menu-auth-link--logout {
+  color: #ff3b30;
+}
+
+/* 관리자 메뉴 링크 */
+.header__menu-auth-link--admin {
+  font-size: 13px;
   color: #86868b;
 }
 
