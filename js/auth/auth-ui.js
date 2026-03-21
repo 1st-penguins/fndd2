@@ -105,6 +105,7 @@ export function createLoginModal() {
   modal = document.createElement('div');
   modal.id = 'login-modal';
   modal.className = 'login-modal';
+  modal.style.display = 'none';
 
   // 모달 내용 설정 (미니멀 디자인 구조)
   modal.innerHTML = `
@@ -271,6 +272,7 @@ export function createLoginRequiredModal() {
   const modal = document.createElement('div');
   modal.id = 'login-required-modal';
   modal.className = 'login-modal';
+  modal.style.display = 'none';
 
   // 모달 내용 설정
   modal.innerHTML = `
