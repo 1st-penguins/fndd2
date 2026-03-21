@@ -67,9 +67,22 @@
   gap: 16px;
 }
 
-/* 로그인 pill 버튼 — 항상 숨김 (메뉴로 대체) */
+/* 로그인 pill 버튼 */
 .header__login {
-  display: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #6e6e73);
+  padding: 5px 14px;
+  border-radius: 980px;
+  border: 1px solid var(--color-border, rgba(0,0,0,0.1));
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.header__login:hover {
+  color: var(--color-accent, #1D2F4E);
+  border-color: var(--color-accent, #1D2F4E);
 }
 
 /* Hamburger — 항상 표시 */

@@ -22,43 +22,57 @@
 
   // 로그인 상태 UI 업데이트
   function updateHeaderAuth(isLoggedIn) {
+    const loginBtn = document.getElementById('header-login-btn');
     const authSection = document.getElementById('menu-auth');
-    if (!authSection) return;
 
-    if (isLoggedIn) {
-      const userName = typeof window.getCurrentUserName === 'function'
-        ? window.getCurrentUserName() : '사용자';
+    const userName = typeof window.getCurrentUserName === 'function'
+      ? window.getCurrentUserName() : '마이페이지';
 
-      authSection.innerHTML = `
-        <a href="mypage.html" class="header__menu-auth-link">${userName}</a>
-        <a href="#" class="header__menu-auth-link header__menu-auth-link--logout" id="menu-logout">로그아웃</a>
-      `;
-
-      const logoutBtn = document.getElementById('menu-logout');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (typeof window.logout === 'function') {
-            window.logout();
-          } else if (typeof window.handleLogout === 'function') {
-            window.handleLogout();
-          }
-        });
+    // 헤더 로그인 pill 버튼
+    if (loginBtn) {
+      if (isLoggedIn) {
+        loginBtn.textContent = userName;
+        loginBtn.href = 'mypage.html';
+      } else {
+        loginBtn.textContent = '로그인';
+        loginBtn.href = '#';
       }
-    } else {
-      authSection.innerHTML = `
-        <a href="#" class="header__menu-auth-link" id="menu-login">로그인</a>
-      `;
+    }
 
-      const loginBtn = document.getElementById('menu-login');
-      if (loginBtn) {
-        loginBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          menu.classList.remove('open');
-          if (typeof window.showLoginModal === 'function') {
-            window.showLoginModal();
-          }
-        });
+    // 햄버거 메뉴 내 계정 영역
+    if (authSection) {
+      if (isLoggedIn) {
+        authSection.innerHTML = `
+          <a href="mypage.html" class="header__menu-auth-link">마이페이지</a>
+          <a href="#" class="header__menu-auth-link header__menu-auth-link--logout" id="menu-logout">로그아웃</a>
+        `;
+
+        const logoutBtn = document.getElementById('menu-logout');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof window.logout === 'function') {
+              window.logout();
+            } else if (typeof window.handleLogout === 'function') {
+              window.handleLogout();
+            }
+          });
+        }
+      } else {
+        authSection.innerHTML = `
+          <a href="#" class="header__menu-auth-link" id="menu-login">로그인</a>
+        `;
+
+        const menuLoginBtn = document.getElementById('menu-login');
+        if (menuLoginBtn) {
+          menuLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            menu.classList.remove('open');
+            if (typeof window.showLoginModal === 'function') {
+              window.showLoginModal();
+            }
+          });
+        }
       }
     }
   }
