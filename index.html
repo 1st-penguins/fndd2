@@ -6,6 +6,9 @@
   <title>퍼스트펭귄 — 체육 자격증 기출문제</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/apple-header.css">
+  <link rel="stylesheet" href="css/apple-footer.css">
+  <link rel="stylesheet" href="css/login.css">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -24,174 +27,6 @@
     }
 
     a { text-decoration: none; color: inherit; }
-
-    /* ── Header (Glassmorphism) ── */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 max(20px, env(safe-area-inset-left));
-      background: rgba(255, 255, 255, 0.72);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
-      border-bottom: 1px solid var(--color-separator);
-      z-index: 100;
-      transition: background 0.3s;
-    }
-
-    .header--dark {
-      background: rgba(29, 47, 78, 0.85);
-      border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .header--dark .header__name { color: #fff; }
-    .header--dark .header__login { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.25); }
-    .header--dark .header__login:hover { color: #fff; border-color: #fff; }
-    .header--dark .header__nav-link { color: rgba(255,255,255,0.7); }
-    .header--dark .header__nav-link:hover { color: #fff; }
-
-    .header__brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .header__logo {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      object-fit: contain;
-      transition: filter 0.3s;
-    }
-
-    .header--dark .header__logo {
-      filter: brightness(0) invert(1);
-    }
-
-    .header__name {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      transition: color 0.3s;
-    }
-
-    .header__nav {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-    }
-
-    .header__nav-link {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-text-secondary);
-      transition: color 0.2s;
-    }
-
-    .header__nav-link:hover {
-      color: var(--color-text-primary);
-    }
-
-    .header__right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .header__login {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-text-secondary);
-      padding: 5px 14px;
-      border-radius: 980px;
-      border: 1px solid var(--color-border);
-      transition: all 0.2s;
-    }
-
-    .header__login:hover {
-      color: var(--color-accent);
-      border-color: var(--color-accent);
-    }
-
-    /* 모바일: 네비 숨기고 햄버거 */
-    .header__hamburger {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      width: 20px;
-      height: 16px;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .header__hamburger span {
-      display: block;
-      width: 100%;
-      height: 1.5px;
-      background: var(--color-text-primary);
-      position: absolute;
-      left: 0;
-      transition: all 0.25s ease;
-    }
-
-    .header--dark .header__hamburger span { background: #fff; }
-
-    .header__hamburger span:nth-child(1) { top: 0; }
-    .header__hamburger span:nth-child(2) { top: 7px; }
-    .header__hamburger span:nth-child(3) { top: 14px; }
-
-    /* 모바일 메뉴 */
-    /* 기본 (헤더 밝을 때) → 메뉴 어둡게 */
-    .header__mobile-menu {
-      display: none;
-      position: fixed;
-      top: 48px;
-      left: 0;
-      right: 0;
-      background: #1D2F4E;
-      padding: 12px 24px 16px;
-      z-index: 99;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .header__mobile-menu.open { display: flex; }
-
-    .header__mobile-link {
-      font-size: 15px;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.85);
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      transition: color 0.2s;
-    }
-
-    .header__mobile-link:last-child { border-bottom: none; }
-    .header__mobile-link:hover { color: #fff; }
-
-    /* 헤더 어두울 때 → 메뉴 밝게 */
-    .header--dark ~ .header__mobile-menu {
-      background: rgba(255, 255, 255, 0.98);
-    }
-    .header--dark ~ .header__mobile-menu .header__mobile-link {
-      color: #1d1d1f;
-      border-bottom-color: rgba(0, 0, 0, 0.06);
-    }
-    .header--dark ~ .header__mobile-menu .header__mobile-link:hover {
-      color: #2B4A78;
-    }
-
-    @media (max-width: 734px) {
-      .header__nav { display: none; }
-      .header__login { display: none; }
-      .header__hamburger { display: block; }
-    }
 
     /* ── Hero Section ── */
     .hero {
@@ -421,80 +256,6 @@
       transition: all 0.25s ease;
     }
 
-    /* ── Footer ── */
-    .footer {
-      background: #1D2F4E;
-      color: rgba(255, 255, 255, 0.56);
-      padding: 48px 24px 36px;
-    }
-
-    .footer__inner {
-      max-width: 980px;
-      margin: 0 auto;
-    }
-
-    .footer__links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px 28px;
-      margin-bottom: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .footer__link {
-      font-size: var(--text-xs);
-      color: rgba(255, 255, 255, 0.56);
-      transition: color 0.2s;
-    }
-
-    .footer__link:hover { color: rgba(255, 255, 255, 0.92); }
-
-    .footer__divider {
-      width: 1px;
-      height: 12px;
-      background: rgba(255, 255, 255, 0.16);
-      align-self: center;
-    }
-
-    .footer__meta {
-      font-size: 11px;
-      line-height: 1.8;
-      color: rgba(255, 255, 255, 0.36);
-      margin-bottom: 16px;
-    }
-
-    .footer__bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .footer__copyright {
-      font-size: var(--text-xs);
-      color: rgba(255, 255, 255, 0.36);
-    }
-
-    .footer__sns {
-      display: flex;
-      gap: 16px;
-    }
-
-    .footer__sns-link {
-      font-size: var(--text-xs);
-      color: rgba(255, 255, 255, 0.44);
-      transition: color 0.2s;
-    }
-
-    .footer__sns-link:hover { color: rgba(255, 255, 255, 0.92); }
-
-    @media (max-width: 734px) {
-      .footer { padding: 36px 20px 28px; }
-      .footer__bottom { flex-direction: column; align-items: flex-start; }
-    }
-
     /* ── Animations ── */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(24px); }
@@ -658,9 +419,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- login CSS -->
-  <link rel="stylesheet" href="css/login.css">
 
   <script>
     // 모바일 햄버거 메뉴
