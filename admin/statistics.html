@@ -197,20 +197,7 @@
   <script type="module" src="../js/auth/auth-core.js"></script>
   <script type="module" src="../js/auth/auth-ui.js"></script>
 </head>
-<body>
-  <div class="admin-topbar" style="background:var(--penguin-navy,#1D2F4E);color:white;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;font-size:14px;">
-    <span style="font-weight:700;">관리자 메뉴</span>
-    <nav style="display:flex;gap:16px;">
-      <a href="dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">대시보드</a>
-      <a href="user-lookup.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">사용자 조회</a>
-      <a href="analytics.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">학습분석</a>
-      <a href="notices.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">공지관리</a>
-      <a href="coupons.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">쿠폰관리</a>
-      <a href="statistics.html" style="color:white;text-decoration:none;font-weight:700;">통계</a>
-      <a href="../index.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">홈으로</a>
-    </nav>
-  </div>
-
+<body class="admin-page">
   <header class="header" id="header">
     <a href="../index.html" class="header__brand">
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
@@ -218,9 +205,9 @@
     </a>
     <nav class="header__nav">
       <a href="../notices.html" class="header__nav-link">공지사항</a>
-      <a href="../cft.html" class="header__nav-link">건운사</a>
-      <a href="../si1.html" class="header__nav-link">1급</a>
-      <a href="../si2.html" class="header__nav-link">2급</a>
+      <a href="../cft.html" class="header__nav-link header__nav-link--cert">건강운동관리사</a>
+      <a href="../si1.html" class="header__nav-link header__nav-link--cert">1급 스포츠지도사</a>
+      <a href="../si2.html" class="header__nav-link header__nav-link--cert">2급 스포츠지도사</a>
     </nav>
     <div class="header__right">
       <a href="#" class="header__login" id="header-login-btn">로그인</a>
@@ -231,13 +218,21 @@
   </header>
   <div class="header__mobile-menu" id="mobile-menu">
     <a href="../notices.html" class="header__mobile-link">공지사항</a>
-    <a href="../cft.html" class="header__mobile-link">건운사</a>
-    <a href="../si1.html" class="header__mobile-link">1급</a>
-    <a href="../si2.html" class="header__mobile-link">2급</a>
+    <a href="../cft.html" class="header__mobile-link">건강운동관리사</a>
+    <a href="../si1.html" class="header__mobile-link">1급 스포츠지도사</a>
+    <a href="../si2.html" class="header__mobile-link">2급 스포츠지도사</a>
     <div class="header__menu-divider"></div>
 
     <div class="header__menu-auth" id="menu-auth"></div>
   </div>
+  <nav class="admin-subnav">
+    <a href="dashboard.html" class="admin-subnav__link">대시보드</a>
+    <a href="user-lookup.html" class="admin-subnav__link">사용자 조회</a>
+    <a href="analytics.html" class="admin-subnav__link">학습분석</a>
+    <a href="notices.html" class="admin-subnav__link">공지관리</a>
+    <a href="coupons.html" class="admin-subnav__link">쿠폰관리</a>
+    <a href="statistics.html" class="admin-subnav__link admin-subnav__link--active">통계</a>
+  </nav>
 
   <main class="admin-container">
     <div class="page-header">

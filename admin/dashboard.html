@@ -8,16 +8,12 @@
   <link rel="canonical" href="https://the1stpeng.com/admin/dashboard.html" />
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/apple-header.css">
   <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;background:#f4f6f9;min-height:100vh}
-    .topbar{background:var(--penguin-navy,#1D2F4E);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
-    .topbar-title{font-size:17px;font-weight:700}
-    .topbar nav{display:flex;gap:16px;align-items:center}
-    .topbar a{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px}
-    .topbar a:hover{color:#fff}
-    .topbar a.active{color:#fff;font-weight:700}
     .dc{max-width:1400px;margin:24px auto;padding:0 20px}
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
     .stat-box{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
@@ -91,22 +87,44 @@
     .cal-day .cal-count{font-size:9px;color:#339af0;margin-top:1px}
     .cal-day.selected .cal-count{color:#a5d8ff}
     .cal-day.has-visitors{font-weight:600}
-    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.topbar{flex-direction:column;gap:8px}.cal-wrap{flex-direction:column}.cal-left{flex:unset}}
+    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.cal-wrap{flex-direction:column}.cal-left{flex:unset}}
   </style>
 </head>
-<body>
-  <div class="topbar">
-    <span class="topbar-title">관리자 대시보드</span>
-    <nav>
-      <a href="dashboard.html" class="active">대시보드</a>
-      <a href="user-lookup.html">사용자 조회</a>
-      <a href="analytics.html">학습분석</a>
-      <a href="notices.html">공지관리</a>
-      <a href="coupons.html">쿠폰관리</a>
-      <a href="statistics.html">통계</a>
-      <a href="../index.html">홈으로</a>
+<body class="admin-page">
+  <header class="header" id="header">
+    <a href="../index.html" class="header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
+      <span class="header__name">퍼스트펭귄</span>
+    </a>
+    <nav class="header__nav">
+      <a href="../notices.html" class="header__nav-link">공지사항</a>
+      <a href="../cft.html" class="header__nav-link header__nav-link--cert">건강운동관리사</a>
+      <a href="../si1.html" class="header__nav-link header__nav-link--cert">1급 스포츠지도사</a>
+      <a href="../si2.html" class="header__nav-link header__nav-link--cert">2급 스포츠지도사</a>
     </nav>
+    <div class="header__right">
+      <a href="#" class="header__login" id="header-login-btn">로그인</a>
+      <button class="header__hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <div class="header__mobile-menu" id="mobile-menu">
+    <a href="../notices.html" class="header__mobile-link">공지사항</a>
+    <a href="../cft.html" class="header__mobile-link">건강운동관리사</a>
+    <a href="../si1.html" class="header__mobile-link">1급 스포츠지도사</a>
+    <a href="../si2.html" class="header__mobile-link">2급 스포츠지도사</a>
+    <div class="header__menu-divider"></div>
+    <div class="header__menu-auth" id="menu-auth"></div>
   </div>
+  <nav class="admin-subnav">
+    <a href="dashboard.html" class="admin-subnav__link admin-subnav__link--active">대시보드</a>
+    <a href="user-lookup.html" class="admin-subnav__link">사용자 조회</a>
+    <a href="analytics.html" class="admin-subnav__link">학습분석</a>
+    <a href="notices.html" class="admin-subnav__link">공지관리</a>
+    <a href="coupons.html" class="admin-subnav__link">쿠폰관리</a>
+    <a href="statistics.html" class="admin-subnav__link">통계</a>
+  </nav>
 
   <div class="dc">
     <!-- 통계 카드 -->
@@ -747,5 +765,6 @@
 
     await load();
   </script>
+<script src="../js/apple-header.js"></script>
 </body>
 </html>
