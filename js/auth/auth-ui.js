@@ -52,7 +52,8 @@ export function showLoginModal() {
 
   const modal = document.getElementById('login-modal');
   if (modal) {
-    // show 클래스로만 제어 (인라인 style 사용 안 함)
+    // 인라인 display 제거 후 show 클래스 추가
+    modal.style.removeProperty('display');
     requestAnimationFrame(() => {
       modal.classList.add('show');
     });
@@ -63,9 +64,9 @@ export function showLoginModal() {
  * 로그인 모달 닫기
  */
 export function closeLoginModal() {
-  // show 클래스가 있는 모든 모달 닫기
   document.querySelectorAll('.login-modal.show').forEach(modal => {
     modal.classList.remove('show');
+    modal.style.display = 'none';
   });
 }
 

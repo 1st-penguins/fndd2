@@ -323,7 +323,7 @@
 
 /* 활성화 상태 (JS로 show 클래스 추가 시) */
 .login-modal.show {
-  display: flex !important;
+  display: flex;
   opacity: 1;
 }
 
