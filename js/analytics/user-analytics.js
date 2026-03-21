@@ -67,7 +67,7 @@ export function analyzeWeaknesses(attempts, mockExamResults = [], certificateTyp
         subjectStats[subject] = {
           certificateType,
           subject,
-          displayName: getDisplaySubjectName(certificateType, subject),
+          displayName: getDisplaySubjectName(certificateType, subject, false),
           total: 0,
           incorrect: 0
         };
@@ -116,7 +116,7 @@ export function analyzeWeaknesses(attempts, mockExamResults = [], certificateTyp
           subjectStats[subject] = {
             certificateType,
             subject,
-            displayName: getDisplaySubjectName(certificateType, subject),
+            displayName: getDisplaySubjectName(certificateType, subject, false),
             total: 0,
             incorrect: 0
           };

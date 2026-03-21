@@ -304,12 +304,20 @@ body .option-button:focus-visible {
 
 body .option-button.selected:focus,
 body .option-button.selected:focus-visible {
-  border-color: #6e6e73;
+  border-color: #2B4A78;
+}
+
+/* 북마크 버튼 */
+body .bookmark-btn.active {
+  background: #2B4A78;
+}
+body .bookmark-btn.active:hover {
+  background: #1D2F4E;
 }
 
 body .option-button.selected {
-  background: #6e6e73;
-  border-color: #6e6e73;
+  background: #2B4A78;
+  border-color: #2B4A78;
   color: #fff;
   transform: none;
   box-shadow: none;
@@ -417,6 +425,7 @@ body .progress-container {
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
   padding: 16px 20px;
   margin: 0;
+  z-index: 200;
 }
 
 body .progress-header {
@@ -522,24 +531,24 @@ body .indicator:hover:not(.current) {
 /* 현재 문제: 테두리 강조 */
 body .indicator.current {
   background: transparent;
-  border: 2px solid #6e6e73;
-  color: #6e6e73;
+  border: 2px solid #2B4A78;
+  color: #2B4A78;
   font-weight: 700;
   font-size: 12px;
 }
 
 /* 푼 문제: 배경 채움 */
 body .indicator.answered:not(.correct):not(.incorrect) {
-  background: #aeaeb2;
-  border-color: #aeaeb2;
+  background: rgba(43, 74, 120, 0.35);
+  border-color: rgba(43, 74, 120, 0.35);
   color: #fff;
   font-weight: 600;
 }
 
 /* 현재 + 푼 문제 */
 body .indicator.current.answered:not(.correct):not(.incorrect) {
-  background: #6e6e73;
-  border: 2px solid #6e6e73;
+  background: #2B4A78;
+  border: 2px solid #2B4A78;
   color: #fff;
   font-weight: 700;
   font-size: 12px;
@@ -790,7 +799,7 @@ body .incorrect-feedback {
 
 /* ── Footer ── */
 .fp-footer {
-  background: #1d1d1f;
+  background: #1D2F4E;
   color: rgba(255, 255, 255, 0.56);
   padding: 48px 24px 36px;
 }

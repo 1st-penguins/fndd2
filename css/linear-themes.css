@@ -37,10 +37,10 @@
   --color-line-tint: #f8f9fa;
   
   /* Brand Colors (Same for both themes) */
-  --color-brand: #5e6ad2;
-  --color-accent: #7170ff;
-  --color-accent-hover: #828fff;
-  --color-accent-tint: #f0f0ff;
+  --color-brand: #1D2F4E;
+  --color-accent: #2B4A78;
+  --color-accent-hover: #162640;
+  --color-accent-tint: #f0f3f7;
   
   /* Text on Brand Background */
   --color-text-on-brand: #ffffff;

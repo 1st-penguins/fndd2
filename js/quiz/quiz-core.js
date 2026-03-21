@@ -399,9 +399,9 @@ export async function initializeQuiz() {
     let dataFolder = window.QUIZ_DATA_FOLDER ? `${window.QUIZ_DATA_FOLDER}/` : '';
     if (!dataFolder) {
       const pathname = window.location.pathname;
-      if (pathname.includes('-sports1/')) {
+      if (pathname.includes('-sports1/') || pathname.includes('sports1/')) {
         dataFolder = 'sports1/';
-      } else if (pathname.includes('exam-sports') || pathname.includes('subjects-sports')) {
+      } else if (pathname.includes('-sports/') || pathname.includes('exam-sports') || pathname.includes('subjects-sports')) {
         dataFolder = 'sports/';
       }
     }
@@ -2242,7 +2242,7 @@ export function showResults() {
     
     <div class="results-actions">
       <button onclick="reviewQuiz()" class="action-button review-button">오답 리뷰</button>
-      <button onclick="location.href='../index.html#analytics-tab'" class="action-button home-button">홈으로</button>
+      <button onclick="(function(){var p=location.pathname;location.href=p.includes('-sports1')?'../si1.html':p.includes('-sports')?'../si2.html':'../cft.html'})()" class="action-button home-button">홈으로</button>
     </div>
   `;
 

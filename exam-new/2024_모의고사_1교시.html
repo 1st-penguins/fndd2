@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2024 모의고사 1교시 기출문제 | 건강운동관리사(건운사) | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="canonical" href="https://the1stpeng.com/exam-new/2024_모의고사_1교시.html">
+  <meta name="description" content="2024년 건강운동관리사 모의고사 1교시 기출문제를 무료로 풀어보세요. 즉시 채점과 상세 해설을 제공합니다.">
+
+  <!-- PWA 및 테마 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1D2F4E">
+
+  <!-- Firebase 리소스 힌트 -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+
+  <!-- 디자인 토큰 + 퀴즈 기능 CSS -->
+  <link rel="stylesheet" href="../css/design-tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages/quiz.css">
+  <link rel="stylesheet" href="../css/login.css">
+
+  <!-- 개발 모드 설정 -->
+  <script type="module" src="../js/config/dev-config.js"></script>
+
+  <!-- Firebase 모듈 (순서 중요!) -->
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  <script type="module" src="../js/auth/auth-ui.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+
+  <!-- 데이터 관련 모듈 -->
+  <script type="module" src="../js/data/quiz-repository.js"></script>
+
+  <!-- 퀴즈 관련 모듈 -->
+  <script type="module" src="../js/quiz/quiz-core.js"></script>
+  <script type="module" src="../js/quiz/quiz-ui.js"></script>
+
+  <!-- 모의고사 스크립트 -->
+  <script type="module" src="../js/quiz/mock-exam.js?v=2026031305"></script>
+
+  <!-- 인라인 이벤트 핸들러 보호 스크립트 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+
+      if (isLoggedIn) {
+        document.querySelectorAll('.restricted-content').forEach(function(el) {
+          el.classList.remove('content-blurred');
+          el.style.filter = 'none';
+          el.style.pointerEvents = 'auto';
+        });
+      } else {
+        document.querySelectorAll('.restricted-content').forEach(function(el) {
+          el.classList.add('content-blurred');
+          el.style.filter = 'blur(5px)';
+          el.style.pointerEvents = 'none';
+        });
+
+        setTimeout(function() {
+          if (typeof window.showLoginModal === 'function') {
+            window.showLoginModal();
+          } else {
+            var modal = document.getElementById('login-required-modal');
+            if (modal) modal.style.display = 'flex';
+          }
+        }, 300);
+      }
+
+      if (typeof closeLoginModal !== 'function') {
+        window.closeLoginModal = function() {
+          var modal = document.getElementById('login-required-modal');
+          if (modal) modal.style.display = 'none';
+        };
+      }
+
+      if (typeof loginAndCloseModal !== 'function') {
+        window.loginAndCloseModal = function() {
+          var modal = document.getElementById('login-required-modal');
+          if (modal) {
+            var modalContent = modal.querySelector('.login-modal-content');
+            if (modalContent) {
+              modalContent.innerHTML =
+                '<span class="login-modal-close" onclick="closeLoginModal()">&times;</span>' +
+                '<h3>로그인</h3>' +
+                '<div class="login-form">' +
+                  '<input type="email" id="login-email" placeholder="이메일" class="login-input">' +
+                  '<input type="password" id="login-password" placeholder="비밀번호" class="login-input">' +
+                  '<button class="login-now-button" onclick="firebaseEmailLogin()">로그인</button>' +
+                  '<button class="login-with-google" onclick="firebaseGoogleLogin()">' +
+                    '<span>G</span> Google로 로그인' +
+                  '</button>' +
+                  '<p class="login-option-text">계정이 없으신가요? <a href="#" onclick="showSignupForm()">회원가입</a></p>' +
+                '</div>';
+            }
+            modal.style.display = 'flex';
+          }
+        };
+      }
+    });
+  </script>
+
+  <script src="../js/logger.js"></script>
+  <script src="../js/mobile-viewport-fix.js"></script>
+
+  <!-- 새 디자인 CSS (기존 CSS 뒤에 로드하여 오버라이드) -->
+  <link rel="stylesheet" href="../css/pages/quiz-new.css">
+
+  <!-- 과목 탭 인라인 스타일 -->
+  <style>
+    .subject-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+      padding: 0;
+    }
+
+    .subject-tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 14px;
+      background: #f5f5f7;
+      color: #6e6e73;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.4;
+    }
+
+    .subject-tab:hover {
+      background: #e8e8ed;
+      color: #1d1d1f;
+    }
+
+    .subject-tab.active {
+      background: #1d1d1f;
+      color: #ffffff;
+    }
+
+    /* 문제 번호 왼쪽, 과목명 오른쪽 */
+    body .question-number {
+      position: absolute !important;
+      top: 16px !important;
+      left: 24px !important;
+    }
+
+    .subject-badge,
+    .subject-badge[style] {
+      all: unset !important;
+      position: absolute !important;
+      top: 16px !important;
+      right: 60px !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #aeaeb2 !important;
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+
+    @media (max-width: 768px) {
+      .subject-badge,
+      .subject-badge[style] {
+        right: 48px !important;
+        font-size: 11px !important;
+      }
+    }
+
+    /* 인디케이터: 과목별 한 줄 */
+    #question-indicators {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+    }
+
+    .indicator-subject-card {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+
+    .indicator-subject-label {
+      display: block !important;
+      flex-shrink: 0 !important;
+      width: 70px !important;
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: #86868b !important;
+      border: none !important;
+      border-left: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      text-align: left !important;
+      white-space: nowrap !important;
+    }
+
+    .indicator-subject-grid {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 4px !important;
+      flex: 1 !important;
+    }
+
+    #question-indicators .indicator {
+      width: 24px !important;
+      height: 24px !important;
+      font-size: 10px !important;
+    }
+
+    @media (max-width: 768px) {
+      .indicator-subject-card {
+        flex-wrap: wrap !important;
+      }
+      .indicator-subject-label {
+        width: 100% !important;
+        margin-bottom: 2px !important;
+      }
+      #question-indicators .indicator {
+        width: 26px !important;
+        height: 26px !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #question-indicators {
+        grid-template-columns: repeat(10, 28px) !important;
+      }
+    }
+
+    @media (max-width: 400px) {
+      #question-indicators {
+        grid-template-columns: repeat(10, 1fr) !important;
+        gap: 4px !important;
+      }
+      #question-indicators .indicator {
+        width: 100% !important;
+        aspect-ratio: 1 !important;
+        height: auto !important;
+        font-size: 10px !important;
+      }
+    }
+
+    #question-indicators .indicator {
+      width: 28px !important;
+      height: 28px !important;
+      border-radius: 9999px !important;
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      border: 1.5px solid #e8e8ed !important;
+      background: transparent !important;
+      color: #aeaeb2 !important;
+    }
+
+    #question-indicators .indicator.current {
+      border: 2px solid #2B4A78 !important;
+      color: #2B4A78 !important;
+      font-weight: 700 !important;
+      background: transparent !important;
+    }
+
+    #question-indicators .indicator.answered:not(.correct):not(.incorrect) {
+      background: rgba(43, 74, 120, 0.35) !important;
+      border-color: rgba(43, 74, 120, 0.35) !important;
+      color: #fff !important;
+    }
+
+    #question-indicators .indicator.current.answered:not(.correct):not(.incorrect) {
+      background: #2B4A78 !important;
+      border-color: #2B4A78 !important;
+      color: #fff !important;
+    }
+
+    #question-indicators .indicator.correct {
+      background: rgba(52, 199, 89, 0.15) !important;
+      border-color: rgba(52, 199, 89, 0.4) !important;
+      color: #2d9f4f !important;
+    }
+
+    #question-indicators .indicator.incorrect {
+      background: rgba(255, 59, 48, 0.1) !important;
+      border-color: rgba(255, 59, 48, 0.3) !important;
+      color: #d64040 !important;
+    }
+
+    /* ── 북마크 버튼 ── */
+    .bookmark-btn.active {
+      background: #2B4A78 !important;
+    }
+    .bookmark-btn:hover {
+      background: #86868b !important;
+    }
+    .bookmark-btn.active:hover {
+      background: #1D2F4E !important;
+    }
+
+    /* ── 네비게이션 버튼 ── */
+    body .nav-button {
+      border-radius: 10px !important;
+    }
+    body .prev-button:hover:not(.disabled):not(:disabled),
+    body .next-button:hover:not(.disabled):not(:disabled) {
+      background: #2B4A78 !important;
+      color: #fff !important;
+      border-color: #2B4A78 !important;
+    }
+    body .check-button {
+      background: #2B4A78 !important;
+      color: #fff !important;
+      border: none !important;
+    }
+    body .check-button:hover:not(.disabled) {
+      background: #1D2F4E !important;
+    }
+
+    /* ── 오답 리뷰 모드 배너 ── */
+    .review-mode-message {
+      background: rgba(43, 74, 120, 0.06) !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 12px !important;
+    }
+    .review-mode-title {
+      color: #2B4A78 !important;
+    }
+    .review-mode-info {
+      color: #86868b !important;
+    }
+
+    /* ── 리뷰 종료 버튼 ── */
+    .exit-review-button {
+      background: #f5f5f7 !important;
+      color: #1d1d1f !important;
+      border: none !important;
+      border-radius: 10px !important;
+      box-shadow: none !important;
+      font-size: 14px !important;
+      padding: 10px 24px !important;
+      transition: background 0.2s !important;
+    }
+    .exit-review-button:hover {
+      background: #e8e8ed !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .exit-review-button::before {
+      content: '' !important;
+      margin: 0 !important;
+    }
+
+    /* ── 타이머 (문제번호와 과목명 사이) ── */
+    .mock-timer {
+      position: absolute !important;
+      top: 16px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      color: #86868b !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+    @media (max-width: 768px) {
+      .mock-timer {
+        top: 12px !important;
+        font-size: 11px !important;
+      }
+    }
+
+    /* ── 결과 화면 리디자인 ── */
+    .results-summary {
+      animation: none !important;
+    }
+    .results-summary::before {
+      display: none !important;
+    }
+    .results-container {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 32px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .results-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: #1d1d1f !important;
+      text-align: center;
+      margin-bottom: 24px !important;
+      padding-bottom: 16px !important;
+      border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+    }
+
+    .score-overview {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 28px;
+    }
+    .total-score, .time-info {
+      text-align: center;
+    }
+    .score-label, .time-label {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #86868b !important;
+      margin-bottom: 6px !important;
+      text-transform: none !important;
+      letter-spacing: 0 !important;
+    }
+    .score-value {
+      font-size: 28px !important;
+      font-weight: 700 !important;
+      color: #1d1d1f !important;
+    }
+    .score-max {
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      color: #86868b !important;
+    }
+    .score-count {
+      font-size: 13px;
+      color: #86868b;
+      margin-top: 4px;
+    }
+    .time-value {
+      font-size: 28px !important;
+      font-weight: 700 !important;
+      color: #1d1d1f !important;
+    }
+
+    .subject-scores-section {
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      color: #1d1d1f !important;
+      margin-bottom: 12px !important;
+      padding: 0 !important;
+      background: none !important;
+      border: none !important;
+      text-align: left !important;
+    }
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .subject-card {
+      background: #f5f5f7;
+      border-radius: 12px;
+      padding: 16px;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .subject-card:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .subject-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #86868b;
+      margin-bottom: 2px;
+    }
+    .subject-name-small {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+    }
+    .subject-score {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .subject-score.score-high { color: rgba(43, 74, 120, 0.6) !important; }
+    .subject-score.score-medium { color: rgba(43, 74, 120, 0.6) !important; }
+    .subject-score.score-low { color: #aeaeb2 !important; }
+    .subject-detail {
+      font-size: 12px;
+      color: #86868b;
+      margin-bottom: 10px;
+    }
+    .review-subject-button {
+      display: block !important;
+      width: 100% !important;
+      padding: 8px !important;
+      background: #fff !important;
+      border: 1px solid rgba(0,0,0,0.08) !important;
+      border-radius: 8px !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #1d1d1f !important;
+      cursor: pointer !important;
+      transition: background 0.2s !important;
+      box-shadow: none !important;
+      transform: none !important;
+      margin-top: 6px !important;
+    }
+    .review-subject-button:hover {
+      background: #e8e8ed !important;
+      transform: none !important;
+      box-shadow: none !important;
+      color: #1d1d1f !important;
+    }
+    .review-subject-count {
+      font-size: 11px;
+      font-weight: 400;
+      color: #86868b;
+    }
+
+    .results-message {
+      background: #f5f5f7 !important;
+      color: #1d1d1f !important;
+      border-radius: 12px !important;
+      padding: 16px 20px !important;
+      margin: 20px 0 !important;
+      box-shadow: none !important;
+      font-weight: 500 !important;
+      font-size: 14px !important;
+      text-align: center !important;
+    }
+    .results-message::before { display: none !important; }
+    .results-message p { color: #6e6e73 !important; }
+
+    .results-actions {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px !important;
+      flex-wrap: wrap;
+    }
+    .action-button {
+      padding: 10px 24px !important;
+      border-radius: 10px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      box-shadow: none !important;
+      min-width: auto !important;
+      border: none !important;
+    }
+    .action-button:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .action-button::before { display: none !important; }
+    .review-button {
+      background: #2B4A78 !important;
+      color: #fff !important;
+    }
+    .review-button:hover {
+      background: #1D2F4E !important;
+    }
+    .action-button:not(.review-button) {
+      background: #f5f5f7 !important;
+      color: #1d1d1f !important;
+    }
+    .action-button:not(.review-button):hover {
+      background: #e8e8ed !important;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .results-container { padding: 20px 16px; }
+      .subject-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 6px; }
+      .subject-card { padding: 10px !important; }
+      .subject-label { font-size: 10px !important; margin-bottom: 0 !important; }
+      .subject-name-small { font-size: 12px !important; margin-bottom: 4px !important; }
+      .subject-score { font-size: 15px !important; margin-bottom: 0 !important; }
+      .subject-detail { font-size: 10px !important; margin-bottom: 6px !important; }
+      .review-subject-button { font-size: 10px !important; padding: 5px !important; margin-top: 4px !important; }
+      .review-subject-count { font-size: 9px !important; }
+      .score-overview { gap: 24px; }
+    }
+
+    /* ── 정오표 모달 리디자인 ── */
+    .mockexam-scorecard-modal {
+      background: rgba(0,0,0,0.4) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+    }
+    .mockexam-scorecard-content {
+      background: #fff !important;
+      border-radius: 16px !important;
+      border: none !important;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.16) !important;
+      max-width: 640px !important;
+      padding: 24px !important;
+    }
+    .mockexam-scorecard-content h3 {
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      color: #1d1d1f !important;
+      text-align: center !important;
+      margin-bottom: 16px !important;
+    }
+    .modal-close-button {
+      background: #f5f5f7 !important;
+      border: none !important;
+      border-radius: 50% !important;
+      width: 28px !important;
+      height: 28px !important;
+      font-size: 16px !important;
+      color: #86868b !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .modal-close-button:hover { background: #e8e8ed !important; }
+
+    /* 정오표 요약 — 인라인 스타일 오버라이드 */
+    .scorecard-summary .scorecard-container > div[style] {
+      border: 1px solid rgba(0,0,0,0.06) !important;
+      border-radius: 12px !important;
+      box-shadow: none !important;
+    }
+    .scorecard-summary .scorecard-container > div[style] > div[style*="color: #4b89dc"] {
+      color: #1d1d1f !important;
+    }
+    .scorecard-summary .scorecard-container div[style*="font-size: 34px"] {
+      color: #1d1d1f !important;
+    }
+    .scorecard-summary .scorecard-container div[style*="background: #4b89dc"],
+    .scorecard-summary .scorecard-container div[style*="background-color: #d9534f"],
+    .scorecard-summary .scorecard-container div[style*="background-color: #4b89dc"] {
+      background: #2B4A78 !important;
+      background-color: #2B4A78 !important;
+    }
+    .scorecard-summary .scorecard-container div[style*="color: #d9534f"] {
+      color: #aeaeb2 !important;
+    }
+    .scorecard-summary .scorecard-container div[style*="background: #f9f9f9"] {
+      background: #f5f5f7 !important;
+      border-radius: 10px !important;
+      box-shadow: none !important;
+    }
+
+    /* 정오표 탭 */
+    .scorecard-tabs {
+      display: flex !important;
+      gap: 4px !important;
+      margin: 16px 0 12px !important;
+      overflow-x: auto !important;
+      padding-bottom: 4px !important;
+    }
+    .scorecard-tabs .tab-button {
+      padding: 6px 12px !important;
+      background: #f5f5f7 !important;
+      color: #86868b !important;
+      border: none !important;
+      border-radius: 8px !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      transition: all 0.2s !important;
+    }
+    .scorecard-tabs .tab-button:hover {
+      background: #e8e8ed !important;
+      color: #1d1d1f !important;
+    }
+    .scorecard-tabs .tab-button.active {
+      background: #2B4A78 !important;
+      color: #fff !important;
+    }
+
+    /* 정오표 테이블 */
+    .scorecard-table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      font-size: 13px !important;
+    }
+    .scorecard-table th[style] {
+      background: #f5f5f7 !important;
+      border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+      color: #86868b !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      padding: 8px !important;
+    }
+    .scorecard-table td[style] {
+      padding: 8px !important;
+      border-bottom: 1px solid rgba(0,0,0,0.04) !important;
+      font-size: 13px !important;
+      color: #1d1d1f !important;
+    }
+    .scorecard-table td[style*="color: #F44336"] {
+      color: #aeaeb2 !important;
+    }
+    .scorecard-table td[style*="color: #4CAF50"] {
+      color: #1d1d1f !important;
+    }
+    .scorecard-table .correct-row:hover td {
+      background: rgba(43,74,120,0.04) !important;
+    }
+    .scorecard-table .incorrect-row:hover td {
+      background: #fafafa !important;
+    }
+
+    /* 과목 탭 색상 제거 */
+    .subject-tab {
+      background: #f5f5f7 !important;
+      color: #6e6e73 !important;
+      border: none !important;
+    }
+    .subject-tab:hover {
+      background: #e8e8ed !important;
+      color: #1d1d1f !important;
+    }
+    .subject-tab.active {
+      background: #2B4A78 !important;
+      color: #fff !important;
+    }
+
+    @media (max-width: 480px) {
+      .subject-tabs {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 4px !important;
+      }
+      .subject-tab[data-subject="all"] {
+        grid-column: 1 / -1 !important;
+      }
+      .subject-tab:not([data-subject="all"]) {
+        /* 2x2 시작 */
+      }
+      .subject-tabs {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .subject-tab[data-subject="all"] {
+        grid-column: 1 / -1 !important;
+      }
+      .subject-tab {
+        font-size: 12px !important;
+        padding: 8px 10px !important;
+        text-align: center !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 로그인 필요 알림 모달 -->
+  <div id="login-required-modal" class="login-modal">
+    <div class="login-modal-content">
+      <span class="login-modal-close" onclick="closeLoginModal()">&times;</span>
+      <h3>로그인이 필요합니다</h3>
+      <p>모의고사를 풀려면 로그인이 필요합니다.</p>
+      <button class="login-now-button" onclick="loginAndCloseModal()">지금 로그인하기</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="fp-header">
+    <a href="../index.html" class="fp-header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="fp-header__logo">
+      <span class="fp-header__name">퍼스트펭귄</span>
+    </a>
+    <div class="fp-header__right">
+      <a href="#" class="fp-header__login" id="header-login-btn">로그인</a>
+      <button class="fp-header__hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="fp-header__mobile-menu" id="mobile-menu">
+    <a href="#" class="fp-header__mobile-link" id="mobile-login-btn">로그인</a>
+  </div>
+
+  <!-- Page Title -->
+  <section class="page-title-section">
+    <a href="../cft.html" class="page-title-section__back" id="back-link">&larr; 모의고사</a>
+    <h1 class="page-title-section__text">2024년 모의고사 1교시</h1>
+    <p class="page-title-section__meta">총 80문항</p>
+  </section>
+
+  <!-- 퀴즈 콘텐츠 -->
+  <main style="padding-top: 20px;">
+
+    <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+
+      <!-- 과목 탭 영역 -->
+      <div class="mock-exam-subjects">
+        <div class="subject-tabs">
+          <button class="subject-tab active" data-subject="all">전체 문제</button>
+          <button class="subject-tab" data-subject="운동생리학">운동생리학</button>
+          <button class="subject-tab" data-subject="건강체력평가">건강체력평가</button>
+          <button class="subject-tab" data-subject="운동처방론">운동처방론</button>
+          <button class="subject-tab" data-subject="운동부하검사">운동부하검사</button>
+        </div>
+      </div>
+
+      <!-- 진행바 영역 -->
+      <div class="progress-container">
+        <div class="progress-header">
+          <div class="progress-info">
+            <div>진행 상황</div>
+            <div class="progress-count" id="progress-count">1 / 80</div>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress" id="progress-bar"></div>
+        </div>
+        <div class="question-indicators-container">
+          <div class="question-indicators" id="question-indicators"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content restricted-content" style="padding-top: 44px;">
+      <div class="container">
+        <div id="quiz-container">
+          <div class="quiz-container">
+            <div class="question-number">문제 1</div>
+            <span class="mock-timer" id="timer">80:00</span>
+            <div class="subject-badge" id="subject-badge">운동생리학</div>
+            <div id="question-container" class="question-image-container"></div>
+            <div class="option-buttons" id="option-buttons">
+              <button class="option-button" data-option="0">1</button>
+              <button class="option-button" data-option="1">2</button>
+              <button class="option-button" data-option="2">3</button>
+              <button class="option-button" data-option="3">4</button>
+            </div>
+            <div id="feedback" class="answer-feedback"></div>
+          </div>
+        </div>
+
+        <div class="navigation-buttons">
+          <button id="prev-button" class="nav-button prev-button" disabled>
+            <span>이전</span>
+          </button>
+          <button id="check-button" class="nav-button check-button">
+            <span>정답 보기</span>
+          </button>
+          <button id="next-button" class="nav-button next-button">
+            <span>다음</span>
+          </button>
+          <button id="submit-button" class="nav-button check-button" style="display: none;">
+            <span>결과 확인</span>
+          </button>
+        </div>
+
+        <div id="results-summary" class="results-summary"></div>
+      </div>
+    </div>
+
+    <!-- Firebase 인증 상태 감지 -->
+    <script type="module">
+      import { ensureFirebase } from "../js/core/firebase-core.js";
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const { auth } = await ensureFirebase();
+          const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js");
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              localStorage.setItem("userLoggedIn", "true");
+              localStorage.setItem("userName", user.displayName || user.email || "사용자");
+
+              document.querySelectorAll('.restricted-content').forEach(el => {
+                el.classList.remove('content-blurred');
+                el.style.filter = 'none';
+                el.style.pointerEvents = 'auto';
+              });
+
+              const modal = document.getElementById('login-required-modal');
+              if (modal) modal.style.display = 'none';
+            } else {
+              localStorage.removeItem("userLoggedIn");
+              localStorage.removeItem("userName");
+
+              document.querySelectorAll('.restricted-content').forEach(el => {
+                el.classList.add('content-blurred');
+                el.style.filter = 'blur(5px)';
+                el.style.pointerEvents = 'none';
+              });
+
+              const modal = document.getElementById('login-required-modal');
+              if (modal) modal.style.display = 'flex';
+            }
+          });
+        } catch (e) {
+          console.error("Firebase 인증 초기화 실패:", e);
+        }
+      });
+    </script>
+
+  </main>
+
+  <!-- Footer -->
+  <div class="fp-footer">
+    <div class="fp-footer__inner">
+      <nav class="fp-footer__links">
+        <a href="../cft.html" class="fp-footer__link">건강운동관리사</a>
+        <a href="../si1.html" class="fp-footer__link">1급 스포츠지도사</a>
+        <a href="../si2.html" class="fp-footer__link">2급 스포츠지도사</a>
+        <span class="fp-footer__divider"></span>
+        <a href="/terms.html" class="fp-footer__link">이용약관</a>
+        <a href="/privacy-policy.html" class="fp-footer__link">개인정보처리방침</a>
+        <a href="/company-info.html" class="fp-footer__link">사업자정보</a>
+      </nav>
+      <p class="fp-footer__meta">
+        퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+        주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+      </p>
+      <div class="fp-footer__bottom">
+        <span class="fp-footer__copyright">&copy; 2025 퍼스트펭귄. All rights reserved.</span>
+        <div class="fp-footer__sns">
+          <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="fp-footer__sns-link">Instagram</a>
+          <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="fp-footer__sns-link">YouTube</a>
+          <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="fp-footer__sns-link">KakaoTalk</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 햄버거 메뉴 + 로그인 모달 -->
+  <script>
+    document.getElementById('hamburger').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('open');
+    });
+  </script>
+  <script type="module">
+    import { showLoginModal } from '../js/auth/auth-ui.js';
+    import { ensureFirebase } from '../js/core/firebase-core.js';
+
+    document.getElementById('header-login-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      showLoginModal();
+    });
+    document.getElementById('mobile-login-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      showLoginModal();
+    });
+
+    (async () => {
+      try {
+        const { auth } = await ensureFirebase();
+        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+        onAuthStateChanged(auth, (user) => {
+          const headerBtn = document.getElementById('header-login-btn');
+          const mobileBtn = document.getElementById('mobile-login-btn');
+          if (user) {
+            const name = user.displayName || user.email?.split('@')[0] || '마이페이지';
+            headerBtn.textContent = name;
+            headerBtn.href = '../mypage.html';
+            headerBtn.onclick = null;
+            mobileBtn.textContent = '마이페이지';
+            mobileBtn.href = '../mypage.html';
+            mobileBtn.onclick = null;
+          }
+        });
+      } catch (e) { console.error(e); }
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,278 +1,206 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2021년 기출문제 - 퍼스트펭귄 2급 스포츠지도사</title>
-  <link rel="canonical" href="https://the1stpeng.com/years-sports/year_2021.html" />
-  <meta name="description" content="2021년 2급 스포츠지도사 시험 전 과목 기출문제를 무료로 풀어보세요. 모의고사 형식으로 실전 연습이 가능합니다.">
+  <title>2021년 기출문제 | 2급 스포츠지도사 | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="canonical" href="https://the1stpeng.com/years-sports/year_2021.html">
+  <meta name="description" content="2021년 2급 스포츠지도사 시험 전 과목 기출문제를 풀어보세요.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="2021년 2급 스포츠지도사 기출문제 | 전 과목 | 퍼스트펭귄">
-  <meta property="og:description" content="2021년 2급 스포츠지도사 시험 전 과목 기출문제를 무료로 풀어보세요. 모의고사 형식으로 실전 연습이 가능합니다.">
+  <meta property="og:title" content="2021년 2급 스포츠지도사 기출문제 | 퍼스트펭귄">
+  <meta property="og:description" content="2021년 2급 스포츠지도사 시험 전 과목 기출문제를 풀어보세요.">
   <meta property="og:url" content="https://the1stpeng.com/years-sports/year_2021.html">
   <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="2021년 2급 스포츠지도사 기출문제 | 전 과목 | 퍼스트펭귄">
-  <meta name="twitter:description" content="2021년 2급 스포츠지도사 시험 전 과목 기출문제를 무료로 풀어보세요. 모의고사 형식으로 실전 연습이 가능합니다.">
-
-  <!-- 외부 CSS 파일 연결 -->
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/linear-header.css">
-  <link rel="stylesheet" href="../css/linear-footer.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="../css/pages/subject.css">
-  <link rel="stylesheet" href="../css/pages/page-header.css">
-  <link rel="stylesheet" href="../css/login.css">
-
-  <!-- PWA 및 테마 -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#1D2F4E">
-
-  <!-- 구글 폰트 -->
-
-  <!-- Firebase 리소스 힌트 -->
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="//www.gstatic.com">
-  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-  <link rel="dns-prefetch" href="//firestore.googleapis.com">
-
-  <script src="../js/logger.js"></script>
-
-  <!-- Firebase 및 로그인 관리 스크립트 -->
-  <script type="module" src="../js/config/dev-config.js"></script>
-  <script type="module" src="../js/core/firebase-core.js"></script>
-  <script type="module" src="../js/auth/auth-core.js"></script>
-  <script type="module" src="../js/auth/auth-ui.js"></script>
-  <script type="module" src="../js/auth/auth-utils.js"></script>
-  <script type="module" src="../js/utils/ui-utils.js"></script>
-
-  <!-- 브라우저 리다이렉트 스크립트 -->
-  <script type="module">
-    import { initBrowserRedirect } from "/js/utils/browser-redirect.js";
-    initBrowserRedirect();
-  </script>
-
-  <!-- 페이지 전용 스크립트 -->
-  <script type="module" src="../js/years/year-page.js"></script>
-
-  <!-- Linear Header -->
-  <script src="../js/linear-header.js"></script>
-  <script type="module" src="../js/dev-mode-toggle.js"></script>
+  <link rel="stylesheet" href="../css/design-tokens.css">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-family: var(--font-sans); background: #ffffff; color: var(--color-text-primary); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; }
+    .header { position: fixed; top: 0; left: 0; right: 0; height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 max(1.5rem, 5vw); background: rgba(255,255,255,0.72); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,0.06); z-index: 300; }
+    .header__brand { display: flex; align-items: center; gap: 12px; }
+    .header__logo { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; }
+    .header__name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; color: #1d1d1f; }
+    .header__right { display: flex; align-items: center; gap: 20px; }
+    .header__login { font-size: 14px; font-weight: 500; color: #6e6e73; padding: 4px 16px; border-radius: 9999px; border: 1px solid #d2d2d7; transition: all 0.2s ease; }
+    .header__login:hover { color: #2B4A78; border-color: #2B4A78; }
+    .header__hamburger { display: none; background: none; border: none; cursor: pointer; width: 20px; height: 16px; position: relative; flex-shrink: 0; }
+    .header__hamburger span { display: block; width: 100%; height: 1.5px; background: #1d1d1f; position: absolute; left: 0; transition: all 0.25s ease; }
+    .header__hamburger span:nth-child(1) { top: 0; }
+    .header__hamburger span:nth-child(2) { top: 7px; }
+    .header__hamburger span:nth-child(3) { top: 14px; }
+    .header__mobile-menu { display: none; position: fixed; top: 48px; left: 0; right: 0; background: rgba(255,255,255,0.98); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,0.06); padding: 12px 24px 16px; z-index: 299; flex-direction: column; gap: 4px; }
+    .header__mobile-menu.open { display: flex; }
+    .header__mobile-link { font-size: 15px; font-weight: 500; color: #1d1d1f; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06); transition: color 0.2s; }
+    .header__mobile-link:last-child { border-bottom: none; }
+    .header__mobile-link:hover { color: #2B4A78; }
+    @media (max-width: 768px) { .header__login { display: none; } .header__hamburger { display: block; } }
+    .page-title { padding: calc(48px + 48px) max(1.5rem, 5vw) 12px; }
+    .page-title__back { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-sm); color: #2B4A78; margin-bottom: 12px; transition: opacity 0.2s; }
+    .page-title__back:hover { opacity: 0.7; }
+    .page-title__text { font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.022em; color: var(--color-text-primary); line-height: 1.1; }
+    .page-title__meta { font-size: var(--text-sm); color: var(--color-text-tertiary); margin-top: 8px; }
+    .content { flex: 1; max-width: 980px; width: 100%; margin: 0 auto; padding: 24px max(1.5rem, 5vw) 80px; }
+    .section-label { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; margin-top: 32px; }
+    .section-label:first-child { margin-top: 0; }
+    .year-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .year-card { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; background: var(--color-bg-secondary); border-radius: 14px; transition: all 0.25s ease; cursor: pointer; }
+    .year-card:hover { background: var(--color-bg-elevated); box-shadow: 0 4px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .year-card:hover .year-card__name { color: #2B4A78; }
+    .year-card:hover .year-card__arrow { color: #2B4A78; transform: translateX(4px); }
+    .year-card__info { display: flex; flex-direction: column; gap: 4px; }
+    .year-card__name { font-size: var(--text-base); font-weight: 600; color: var(--color-text-primary); letter-spacing: -0.022em; transition: color 0.2s; }
+    .year-card__meta { font-size: var(--text-xs); color: var(--color-text-tertiary); }
+    .year-card__arrow { font-size: var(--text-lg); color: var(--color-text-quaternary); transition: all 0.25s ease; flex-shrink: 0; }
+    .footer { background: #1D2F4E; color: rgba(255,255,255,0.56); padding: 48px 24px 36px; }
+    .footer__inner { max-width: 980px; margin: 0 auto; }
+    .footer__links { display: flex; flex-wrap: wrap; gap: 16px 28px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .footer__link { font-size: 12px; color: rgba(255,255,255,0.56); transition: color 0.2s; }
+    .footer__link:hover { color: rgba(255,255,255,0.92); }
+    .footer__divider { width: 1px; height: 12px; background: rgba(255,255,255,0.16); align-self: center; }
+    .footer__meta { font-size: 11px; line-height: 1.8; color: rgba(255,255,255,0.36); margin-bottom: 16px; }
+    .footer__bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .footer__copyright { font-size: 12px; color: rgba(255,255,255,0.36); }
+    .footer__sns { display: flex; gap: 16px; }
+    .footer__sns-link { font-size: 12px; color: rgba(255,255,255,0.44); transition: color 0.2s; }
+    .footer__sns-link:hover { color: rgba(255,255,255,0.92); }
+    @media (max-width: 768px) {
+      .page-title { padding: calc(48px + 32px) 20px 12px; }
+      .page-title__text { font-size: var(--text-2xl); }
+      .content { padding: 20px 20px 64px; }
+      .year-grid { grid-template-columns: 1fr; gap: 8px; }
+      .year-card { padding: 18px 20px; }
+      .footer { padding: 36px 20px 28px; }
+      .footer__bottom { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
 </head>
-
 <body>
-  <!-- 펭귄 장식 -->
-  <div class="penguin-ocean">
-    <div class="penguin-decoration penguin-top-right penguin-float">
-      <img src="../images/firstpenguin-logo.png" alt="펭귄 장식" />
-    </div>
-    <div class="penguin-decoration penguin-bottom-left penguin-float">
-      <img src="../images/firstpenguin-logo.png" alt="펭귄 장식" />
-    </div>
-  </div>
 
-  <!-- Linear Header -->
-  <header class="linear-header">
-    <div class="linear-header__container">
-      <a href="../index.html" class="linear-header__brand">
-        <div class="linear-header__logo">
-          <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄 로고" />
-        </div>
-        <span class="linear-header__brand-text">퍼스트펭귄</span>
-        <span class="cert-badge" id="header-cert-badge">생활스포츠지도사</span>
-      </a>
-
-      <nav class="linear-header__nav">
-        <ul class="linear-header__nav-list">
-          <li class="linear-header__nav-item">
-            <a href="../index.html" class="linear-header__nav-link">홈</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-          </li>
-          <li class="linear-header__nav-item">
-            <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="linear-header__auth">
-        <a href="#" class="linear-header__nav-link" data-action="show-login" id="login-link">로그인</a>
-        <div id="user-profile-container" style="display: none;">
-          <a href="../mypage.html" class="linear-header__user-profile" style="text-decoration:none;color:inherit;">
-            <span id="user-name" class="linear-header__user-name"></span>
-          </a>
-          <a href="#" class="linear-header__nav-link" data-action="logout">로그아웃</a>
-        </div>
-      </div>
-
-      <div class="linear-header__actions">
-        <div id="dev-mode-toggle" class="dev-mode-toggle" style="display: none;">
-          <button id="dev-mode-btn" class="dev-mode-btn">
-            <span class="dev-mode-indicator"></span>
-            DEV
-          </button>
-        </div>
-        <button class="linear-header__mobile-toggle" id="mobile-toggle">
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-          <span class="linear-header__mobile-toggle-line"></span>
-        </button>
-      </div>
-    </div>
-
-    <div class="linear-header__mobile-menu" id="mobile-menu">
-      <a href="../index.html" class="linear-header__nav-link">홈</a>
-      <a href="../notices.html" class="linear-header__nav-link">공지사항</a>
-      <a href="../index.html#quiz-tab" class="linear-header__nav-link">문제풀기</a>
-      <a href="../index.html#lecture-tab" class="linear-header__nav-link">강의</a>
-      <div class="mobile-menu-auth">
-        <a href="#" class="linear-header__nav-link" data-action="show-login" id="mobile-login-link">로그인</a>
-        <div id="mobile-user-profile-container" style="display: none;">
-          <a href="../mypage.html" class="linear-header__nav-link">마이페이지</a>
-          <a href="#" class="linear-header__nav-link" data-action="logout" id="mobile-logout-link">로그아웃</a>
-        </div>
-      </div>
+  <header class="header">
+    <a href="../index.html" class="header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
+      <span class="header__name">퍼스트펭귄</span>
+    </a>
+    <div class="header__right">
+      <a href="#" class="header__login" id="header-login-btn">로그인</a>
+      <button class="header__hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
   </header>
+  <div class="header__mobile-menu" id="mobile-menu">
+    <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
+  </div>
 
-  <!-- 페이지 제목 섹션 -->
-  <section class="page-header">
-    <div class="container">
-      <a href="../index.html" class="back-link">
-        <span class="back-arrow">←</span>
-        <span>목록으로</span>
-      </a>
-      <div class="page-title">
-        <h1>2021년 기출문제</h1>
-        <div class="page-subtitle-fixed">과목별 문제 모음</div>
-      </div>
-    </div>
+  <section class="page-title">
+    <a href="../si2.html" class="page-title__back">&larr; 2급 스포츠지도사</a>
+    <h1 class="page-title__text">2021년 기출문제</h1>
+    <p class="page-title__meta">2급 스포츠지도사 &middot; 전 과목</p>
   </section>
 
-  <main class="main-content restricted-content">
-    <div class="container">
-      <div class="subject-intro">
-        <h2>2021년 2급 스포츠지도사 기출문제</h2>
-        <p class="subject-description">
-          2021년도 2급 스포츠지도사 자격시험<br>
-          과목별 기출문제를 직접 풀어볼 수 있습니다.<br>
-          모든 문제는 국민체육진흥공단 공식 기출문제입니다.
-        </p>
-        <small class="source-note">출처: 국민체육진흥공단</small>
-      </div>
-
-      <!-- 기본과목 -->
-      <div class="subject-section">
-        <h3 class="section-title">기본과목</h3>
-        <ul class="years-list">
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_스포츠사회학.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_스포츠사회학.html?prev=year&year=2021'">
-            <div class="year-header">스포츠사회학</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_스포츠사회학.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_스포츠교육학.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_스포츠교육학.html?prev=year&year=2021'">
-            <div class="year-header">스포츠교육학</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_스포츠교육학.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_스포츠심리학.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_스포츠심리학.html?prev=year&year=2021'">
-            <div class="year-header">스포츠심리학</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_스포츠심리학.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_한국체육사.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_한국체육사.html?prev=year&year=2021'">
-            <div class="year-header">한국체육사</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_한국체육사.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_운동생리학.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_운동생리학.html?prev=year&year=2021'">
-            <div class="year-header">운동생리학</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_운동생리학.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_운동역학.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_운동역학.html?prev=year&year=2021'">
-            <div class="year-header">운동역학</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_운동역학.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_스포츠윤리.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_스포츠윤리.html?prev=year&year=2021'">
-            <div class="year-header">스포츠윤리</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_스포츠윤리.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- 전문과목 -->
-      <div class="subject-section">
-        <h3 class="section-title">전문과목</h3>
-        <ul class="years-list">
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_특수체육론.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_특수체육론.html?prev=year&year=2021'">
-            <div class="year-header">특수체육론</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_특수체육론.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_유아체육론.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_유아체육론.html?prev=year&year=2021'">
-            <div class="year-header">유아체육론</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_유아체육론.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-          <li class="year-item restricted-link" data-href="../exam-sports/2021_노인체육론.html?prev=year&year=2021"
-            onclick="window.location.href='../exam-sports/2021_노인체육론.html?prev=year&year=2021'">
-            <div class="year-header">노인체육론</div>
-            <div class="year-content">
-              <div class="question-count">문제 수: 20문항</div>
-              <a href="javascript:void(0)" class="start-button"
-                onclick="window.location.href='../exam-sports/2021_노인체육론.html?prev=year&year=2021'; return false;">풀어보기</a>
-            </div>
-          </li>
-        </ul>
-      </div>
+  <main class="content">
+    <div class="year-grid">
+      <a href="../exam-new-sports/2021_스포츠사회학.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">스포츠사회학</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_스포츠교육학.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">스포츠교육학</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_스포츠심리학.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">스포츠심리학</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_한국체육사.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">한국체육사</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_운동생리학.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">운동생리학</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_운동역학.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">운동역학</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_스포츠윤리.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">스포츠윤리</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_특수체육론.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">특수체육론</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_유아체육론.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">유아체육론</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2021_노인체육론.html?prev=year&year=2021" class="year-card">
+        <div class="year-card__info">
+          <span class="year-card__name">노인체육론</span>
+          <span class="year-card__meta">20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
     </div>
   </main>
 
-  <!-- Linear Footer -->
-  <footer class="linear-footer"></footer>
-</body>
+  <footer class="footer">
+    <div class="footer__inner">
+      <nav class="footer__links">
+        <a href="../cft.html" class="footer__link">건강운동관리사</a>
+        <a href="../si1.html" class="footer__link">1급 스포츠지도사</a>
+        <a href="../si2.html" class="footer__link">2급 스포츠지도사</a>
+        <span class="footer__divider"></span>
+        <a href="/terms.html" class="footer__link">이용약관</a>
+        <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
+        <a href="/company-info.html" class="footer__link">사업자정보</a>
+      </nav>
+      <p class="footer__meta">
+        퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+        주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+      </p>
+      <div class="footer__bottom">
+        <span class="footer__copyright">&copy; 2025 퍼스트펭귄. All rights reserved.</span>
+        <div class="footer__sns">
+          <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="footer__sns-link">Instagram</a>
+          <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="footer__sns-link">YouTube</a>
+          <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="footer__sns-link">KakaoTalk</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
+  <script>document.getElementById('hamburger').addEventListener('click', () => { document.getElementById('mobile-menu').classList.toggle('open'); });</script>
+
+</body>
 </html>

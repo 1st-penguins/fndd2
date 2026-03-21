@@ -71,21 +71,6 @@
       color: #1d1d1f;
     }
 
-    .header__nav {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-    }
-
-    .header__nav-link {
-      font-size: 13px;
-      font-weight: 500;
-      color: #6e6e73;
-      transition: color 0.2s;
-    }
-
-    .header__nav-link:hover { color: #1d1d1f; }
-
     .header__right {
       display: flex;
       align-items: center;
@@ -163,7 +148,6 @@
     .header__mobile-link:hover { color: #2B4A78; }
 
     @media (max-width: 768px) {
-      .header__nav { display: none; }
       .header__login { display: none; }
       .header__hamburger { display: block; }
     }
@@ -263,7 +247,7 @@
 
     /* ── Footer ── */
     .footer {
-      background: #1d1d1f;
+      background: #1D2F4E;
       color: rgba(255, 255, 255, 0.56);
       padding: 48px 24px 36px;
     }
@@ -361,80 +345,72 @@
 <body>
 
   <header class="header">
-    <a href="../landing.html" class="header__brand">
+    <a href="../index.html" class="header__brand">
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
       <span class="header__name">퍼스트펭귄</span>
     </a>
-    <nav class="header__nav">
-      <a href="../es.html" class="header__nav-link">건강운동관리사</a>
-      <a href="../sports1.html" class="header__nav-link">1급 스포츠지도사</a>
-      <a href="../sports2.html" class="header__nav-link">2급 스포츠지도사</a>
-    </nav>
     <div class="header__right">
-      <a href="../login.html" class="header__login">로그인</a>
+      <a href="#" class="header__login" id="header-login-btn">로그인</a>
       <button class="header__hamburger" id="hamburger" aria-label="메뉴">
         <span></span><span></span><span></span>
       </button>
     </div>
   </header>
   <div class="header__mobile-menu" id="mobile-menu">
-    <a href="../es.html" class="header__mobile-link">건강운동관리사</a>
-    <a href="../sports1.html" class="header__mobile-link">1급 스포츠지도사</a>
-    <a href="../sports2.html" class="header__mobile-link">2급 스포츠지도사</a>
-    <a href="../login.html" class="header__mobile-link">로그인</a>
+    <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
   </div>
 
   <section class="page-title">
-    <a href="../es.html" class="page-title__back">← 건강운동관리사</a>
+    <a href="../cft.html" class="page-title__back">← 건강운동관리사</a>
     <h1 class="page-title__text">운동생리학</h1>
     <p class="page-title__meta">Exercise Physiology · 1교시 · 20문항</p>
   </section>
 
   <main class="content">
     <div class="year-grid">
-      <a href="../exam/2025_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
+      <a href="../exam-new/2025_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
         <div class="year-card__info">
           <span class="year-card__name">2025년</span>
           <span class="year-card__meta">최신 기출문제 · 20문항</span>
         </div>
         <span class="year-card__arrow">→</span>
       </a>
-      <a href="../exam/2024_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
+      <a href="../exam-new/2024_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
         <div class="year-card__info">
           <span class="year-card__name">2024년</span>
           <span class="year-card__meta">기출문제 · 20문항</span>
         </div>
         <span class="year-card__arrow">→</span>
       </a>
-      <a href="../exam/2023_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
+      <a href="../exam-new/2023_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
         <div class="year-card__info">
           <span class="year-card__name">2023년</span>
           <span class="year-card__meta">기출문제 · 20문항</span>
         </div>
         <span class="year-card__arrow">→</span>
       </a>
-      <a href="../exam/2022_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
+      <a href="../exam-new/2022_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
         <div class="year-card__info">
           <span class="year-card__name">2022년</span>
           <span class="year-card__meta">기출문제 · 20문항</span>
         </div>
         <span class="year-card__arrow">→</span>
       </a>
-      <a href="../exam/2021_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
+      <a href="../exam-new/2021_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
         <div class="year-card__info">
           <span class="year-card__name">2021년</span>
           <span class="year-card__meta">기출문제 · 20문항</span>
         </div>
         <span class="year-card__arrow">→</span>
       </a>
-      <a href="../exam/2020_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
+      <a href="../exam-new/2020_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
         <div class="year-card__info">
           <span class="year-card__name">2020년</span>
           <span class="year-card__meta">기출문제 · 20문항</span>
         </div>
         <span class="year-card__arrow">→</span>
       </a>
-      <a href="../exam/2019_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
+      <a href="../exam-new/2019_운동생리학.html?prev=subject&subject=운동생리학" class="year-card">
         <div class="year-card__info">
           <span class="year-card__name">2019년</span>
           <span class="year-card__meta">기출문제 · 20문항</span>
@@ -447,9 +423,9 @@
   <footer class="footer">
     <div class="footer__inner">
       <nav class="footer__links">
-        <a href="../es.html" class="footer__link">건강운동관리사</a>
-        <a href="../sports1.html" class="footer__link">1급 스포츠지도사</a>
-        <a href="../sports2.html" class="footer__link">2급 스포츠지도사</a>
+        <a href="../cft.html" class="footer__link">건강운동관리사</a>
+        <a href="../si1.html" class="footer__link">1급 스포츠지도사</a>
+        <a href="../si2.html" class="footer__link">2급 스포츠지도사</a>
         <span class="footer__divider"></span>
         <a href="/terms.html" class="footer__link">이용약관</a>
         <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>

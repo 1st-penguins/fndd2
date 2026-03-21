@@ -83,7 +83,9 @@ function startSecurityInterception() {
         originalStartQuiz(year, subject);
       } else {
         // Fallback
-        window.location.href = `../exam-sports/${year}_${subject}.html`;
+        const p = window.location.pathname;
+        const dir = p.includes('-sports1') ? 'exam-new-sports1' : p.includes('-sports') ? 'exam-new-sports' : 'exam-new';
+        window.location.href = `../${dir}/${year}_${subject}.html`;
       }
     } else {
       showLoginModal();
@@ -96,7 +98,9 @@ function startSecurityInterception() {
       if (typeof originalStartMockExam === 'function') {
         originalStartMockExam(year, hour);
       } else {
-        window.location.href = `../exam-sports/${year}_모의고사_${hour}교시.html`;
+        const p = window.location.pathname;
+        const dir = p.includes('-sports1') ? 'exam-new-sports1' : p.includes('-sports') ? 'exam-new-sports' : 'exam-new';
+        window.location.href = `../${dir}/${year}_모의고사_${hour}교시.html`;
       }
     } else {
       showLoginModal();

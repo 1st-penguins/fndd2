@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2020 기능해부학 기출문제 | 건강운동관리사(건운사) | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="canonical" href="https://the1stpeng.com/exam/2025_운동생리학.html">
+  <meta name="description" content="2020년 건강운동관리사 기능해부학 기출문제를 무료로 풀어보세요. 즉시 채점과 상세 해설을 제공합니다.">
+
+  <!-- PWA 및 테마 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1D2F4E">
+
+  <!-- Firebase 리소스 힌트 -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+
+  <!-- 디자인 토큰 + 퀴즈 기능 CSS -->
+  <link rel="stylesheet" href="../css/design-tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages/quiz.css">
+  <!-- indicators.css 제거: quiz-new.css에서 인디케이터 직접 관리 -->
+  <link rel="stylesheet" href="../css/login.css">
+  <!-- mobile-ux-improvements.css 제거: 전역 button/a 스타일이 새 헤더와 충돌 -->
+  <!-- quiz-new.css에서 필요한 버튼 스타일을 직접 관리 -->
+
+  <!-- 개발 모드 설정 -->
+  <script type="module" src="../js/config/dev-config.js"></script>
+
+  <!-- Firebase 관련 스크립트 -->
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  <script type="module" src="../js/auth/auth-ui.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+
+  <script src="../js/logger.js"></script>
+  <script src="../js/mobile-viewport-fix.js"></script>
+
+  <!-- 새 디자인 CSS (기존 CSS 뒤에 로드하여 오버라이드) -->
+  <link rel="stylesheet" href="../css/pages/quiz-new.css">
+
+  <!-- 인라인 스타일 없음 — 모두 quiz-new.css에서 관리 -->
+</head>
+
+<body>
+
+  <!-- Header -->
+  <div class="fp-header">
+    <a href="../index.html" class="fp-header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="fp-header__logo">
+      <span class="fp-header__name">퍼스트펭귄</span>
+    </a>
+    <div class="fp-header__right">
+      <a href="#" class="fp-header__login" id="header-login-btn">로그인</a>
+      <button class="fp-header__hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="fp-header__mobile-menu" id="mobile-menu">
+    <a href="#" class="fp-header__mobile-link" id="mobile-login-btn">로그인</a>
+  </div>
+
+  <!-- Page Title -->
+  <section class="page-title-section">
+    <a href="../cft.html" class="page-title-section__back" id="back-link">← 기능해부학</a>
+    <h1 class="page-title-section__text">2020년 기능해부학</h1>
+    <p class="page-title-section__meta">기출문제 · 20문항 · 제한시간 20분</p>
+  </section>
+
+  <!-- 퀴즈 콘텐츠 (기존 구조 그대로) -->
+  <main style="padding-top: 20px;">
+
+    <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+      <div class="progress-container">
+        <div class="progress-header">
+          <div class="progress-info">
+            <div>진행 상황</div>
+            <div class="progress-count" id="progress-count">1 / 20</div>
+          </div>
+          <div class="timer-container">
+            <div class="timer">
+              <span class="timer-icon">⏱️</span>
+              <span id="timer">20:00</span>
+            </div>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress" id="progress-bar"></div>
+        </div>
+        <div class="question-indicators-container">
+          <div class="question-indicators" id="question-indicators"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content restricted-content" style="padding-top: 44px;">
+      <div class="container">
+        <div id="quiz-container">
+          <div class="quiz-container">
+            <div class="question-number">문제 1</div>
+            <div id="question-container" class="question-image-container"></div>
+            <div class="option-buttons" id="option-buttons">
+              <button class="option-button" onclick="selectOption(0)">1</button>
+              <button class="option-button" onclick="selectOption(1)">2</button>
+              <button class="option-button" onclick="selectOption(2)">3</button>
+              <button class="option-button" onclick="selectOption(3)">4</button>
+            </div>
+            <div id="feedback" class="answer-feedback"></div>
+          </div>
+        </div>
+
+        <div class="navigation-buttons">
+          <button id="prev-button" class="nav-button prev-button" disabled>
+            <span>이전</span>
+          </button>
+          <button id="check-button" class="nav-button check-button" onclick="showCurrentAnswer()">
+            <span>정답 보기</span>
+          </button>
+          <button id="next-button" class="nav-button next-button">
+            <span>다음</span>
+          </button>
+          <button id="submit-button" class="nav-button check-button" style="display: none;">
+            <span>결과 확인</span>
+          </button>
+        </div>
+
+        <div id="results-summary" class="results-summary"></div>
+      </div>
+    </div>
+
+    <!-- 퀴즈 로직 -->
+    <script type="module">
+      import {
+        initializeQuiz, loadQuestion, selectOption, checkAnswer, calculateScore,
+        getIncorrectQuestions, goToNextQuestion, goToPreviousQuestion,
+        submitQuiz
+      } from '../js/quiz/quiz-core.js';
+      import { recordQuizData, initAutoSave } from '../js/quiz/quiz-data-recorder.js';
+
+      window.selectOption = (optionIndex) => {
+        selectOption(optionIndex);
+      };
+
+      window.checkAnswer = () => {
+        const result = checkAnswer();
+        if (result.status === 'no-answer') {
+          alert('답을 선택해주세요.');
+          return;
+        }
+
+        const feedback = document.getElementById('feedback');
+        feedback.className = `answer-feedback ${result.isCorrect ? 'correct-feedback' : 'incorrect-feedback'}`;
+        feedback.innerHTML = `
+        <div class="feedback-title">
+          <span class="feedback-icon">${result.isCorrect ? '✔' : '✗'}</span>
+          <span>${result.isCorrect ? '정답입니다!' : '오답입니다!'}</span>
+        </div>
+        ${!result.isCorrect ? `<div class="correct-answer">정답: ${result.correctAnswer + 1}번</div>` : ''}
+        <div class="explanation">${result.explanation}</div>
+      `;
+        feedback.style.display = 'block';
+
+        const indicators = document.querySelectorAll('.indicator');
+        if (indicators && window.currentQuestionIndex !== undefined && indicators[window.currentQuestionIndex]) {
+          indicators[window.currentQuestionIndex].classList.remove('correct', 'incorrect');
+          indicators[window.currentQuestionIndex].classList.add(result.isCorrect ? 'correct' : 'incorrect');
+        }
+
+        recordQuizData(result);
+        return result;
+      };
+
+      window.goToNextQuestion = goToNextQuestion;
+      window.goToPreviousQuestion = goToPreviousQuestion;
+      window.submitQuiz = submitQuiz;
+      window.showCurrentAnswer = () => {
+        const result = checkAnswer();
+        if (result.status === 'no-answer') {
+          alert('답을 선택해주세요.');
+          return;
+        }
+
+        const feedback = document.getElementById('feedback');
+        feedback.className = `answer-feedback ${result.isCorrect ? 'correct-feedback' : 'incorrect-feedback'}`;
+        feedback.innerHTML = `
+        <div class="feedback-title">
+          <span class="feedback-icon">${result.isCorrect ? '✔' : '✗'}</span>
+          <span>${result.isCorrect ? '정답입니다!' : '오답입니다!'}</span>
+        </div>
+        ${!result.isCorrect ? `<div class="correct-answer">정답: ${result.correctAnswer + 1}번</div>` : ''}
+        <div class="explanation">${result.explanation}</div>
+      `;
+        feedback.style.display = 'block';
+        recordQuizData(result);
+      };
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          await initializeQuiz();
+          initAutoSave();
+        } catch (error) {
+          console.error('퀴즈 초기화 실패:', error);
+          alert('퀴즈를 로드하는 중 오류가 발생했습니다. 페이지를 새로고침해 주세요.');
+        }
+      });
+    </script>
+
+    <!-- 뒤로가기 설정 -->
+    <script>
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const prev = params.get('prev');
+        const backLink = document.getElementById('back-link');
+        if (prev === 'year') {
+          const year = params.get('year');
+          backLink.href = `../years/year_${year || '2025'}.html`;
+          backLink.textContent = `← ${year || '2025'}년`;
+        }
+      })();
+    </script>
+
+    <!-- Firebase 인증 상태 감지 -->
+    <script type="module">
+      import { ensureFirebase } from "../js/core/firebase-core.js";
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const { auth } = await ensureFirebase();
+          const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js");
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              localStorage.setItem("userLoggedIn", "true");
+              localStorage.setItem("userName", user.displayName || user.email || "사용자");
+            } else {
+              localStorage.removeItem("userLoggedIn");
+              localStorage.removeItem("userName");
+            }
+          });
+        } catch (e) {
+          console.error("Firebase 인증 초기화 실패:", e);
+        }
+      });
+    </script>
+
+  </main>
+
+  <!-- Footer -->
+  <div class="fp-footer">
+    <div class="fp-footer__inner">
+      <nav class="fp-footer__links">
+        <a href="../cft.html" class="fp-footer__link">건강운동관리사</a>
+        <a href="../si1.html" class="fp-footer__link">1급 스포츠지도사</a>
+        <a href="../si2.html" class="fp-footer__link">2급 스포츠지도사</a>
+        <span class="fp-footer__divider"></span>
+        <a href="/terms.html" class="fp-footer__link">이용약관</a>
+        <a href="/privacy-policy.html" class="fp-footer__link">개인정보처리방침</a>
+        <a href="/company-info.html" class="fp-footer__link">사업자정보</a>
+      </nav>
+      <p class="fp-footer__meta">
+        퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+        주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+      </p>
+      <div class="fp-footer__bottom">
+        <span class="fp-footer__copyright">© 2025 퍼스트펭귄. All rights reserved.</span>
+        <div class="fp-footer__sns">
+          <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="fp-footer__sns-link">Instagram</a>
+          <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="fp-footer__sns-link">YouTube</a>
+          <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="fp-footer__sns-link">KakaoTalk</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 햄버거 메뉴 + 로그인 모달 -->
+  <script>
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('open');
+    });
+  </script>
+  <script type="module">
+    import { showLoginModal } from '../js/auth/auth-ui.js';
+    import { ensureFirebase } from '../js/core/firebase-core.js';
+
+    document.getElementById('header-login-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      showLoginModal();
+    });
+    document.getElementById('mobile-login-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      showLoginModal();
+    });
+
+    (async () => {
+      try {
+        const { auth } = await ensureFirebase();
+        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+        onAuthStateChanged(auth, (user) => {
+          const headerBtn = document.getElementById('header-login-btn');
+          const mobileBtn = document.getElementById('mobile-login-btn');
+          if (user) {
+            const name = user.displayName || user.email?.split('@')[0] || '마이페이지';
+            headerBtn.textContent = name;
+            headerBtn.href = '../mypage.html';
+            headerBtn.onclick = null;
+            mobileBtn.textContent = '마이페이지';
+            mobileBtn.href = '../mypage.html';
+            mobileBtn.onclick = null;
+          }
+        });
+      } catch (e) { console.error(e); }
+    })();
+  </script>
+
+</body>
+</html>

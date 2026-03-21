@@ -2309,8 +2309,12 @@ async function renderFilteredQuestionSets(typeFilter, subjectFilter, yearFilter,
           (sessionData.certType ? sessionData.certType === certFilter :
             (certFilter === 'health')); // certType 없는 기존 데이터는 건강운동관리사로 간주
 
-        // 세션 카드 표시 여부 결정 (필터 + 시도 기록 유무)
-        const shouldShowCard = (typeMatches && subjectMatches && yearMatches && certMatches);
+        // 미완료 + 10% 미만 + 24시간 경과 세션은 숨기기 (데이터 오염 방지)
+        const completionRate = totalQuestions > 0 ? (completed / totalQuestions) : 0;
+        const isAbandoned = completionRate < 0.1 && !isWithin24h && completed < totalQuestions;
+
+        // 세션 카드 표시 여부 결정 (필터 + 시도 기록 유무 + 방치 세션 제외)
+        const shouldShowCard = (typeMatches && subjectMatches && yearMatches && certMatches && !isAbandoned);
 
         if (shouldShowCard) {
           // 세션 타입도 제목과 동일한 정규화 결과 사용
@@ -3722,7 +3726,7 @@ function renderWeakAreasTab() {
   // HTML 생성 - '과목별 학습 현황' 스타일 (리스트 형태)
   let html = `
     <div class="stats-card">
-      <div class="stats-header">📊 학습 약점 분석</div>
+      <div class="stats-header">학습 약점 분석</div>
       <div class="stats-section">
         <div class="weakness-intro" style="margin-bottom: 24px; color: var(--text-secondary); font-size: 0.95rem;">
           <p>오답률이 높은 순서대로 정렬되었습니다. 빨간색 게이지가 긴 과목을 우선적으로 복습하세요.</p>
@@ -3736,7 +3740,7 @@ function renderWeakAreasTab() {
     const correctCount = total - incorrect;
     
     // 이모지 제거 (약점 분석에서는 이모지 표시 안 함)
-    const nameWithoutEmoji = displayName.replace(/^[\u{1F300}-\u{1F9FF}]+\s*/u, '');
+    const nameWithoutEmoji = displayName.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]+\s*/u, '').trim();
     
     // 오답률에 따른 색상 조정 (더 부드러운 색상)
     const getSoftColor = (rate) => {

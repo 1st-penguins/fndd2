@@ -147,16 +147,14 @@
     .header__hamburger span:nth-child(3) { top: 14px; }
 
     /* 모바일 메뉴 */
+    /* 기본 (헤더 밝을 때) → 메뉴 어둡게 */
     .header__mobile-menu {
       display: none;
       position: fixed;
       top: 48px;
       left: 0;
       right: 0;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
-      border-bottom: 1px solid var(--color-separator);
+      background: #1D2F4E;
       padding: 12px 24px 16px;
       z-index: 99;
       flex-direction: column;
@@ -165,22 +163,29 @@
 
     .header__mobile-menu.open { display: flex; }
 
-    .header--dark ~ .header__mobile-menu {
-      background: rgba(29, 47, 78, 0.95);
-      border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-
     .header__mobile-link {
       font-size: 15px;
       font-weight: 500;
-      color: var(--color-text-primary);
+      color: rgba(255, 255, 255, 0.85);
       padding: 12px 0;
-      border-bottom: 1px solid var(--color-separator);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       transition: color 0.2s;
     }
 
     .header__mobile-link:last-child { border-bottom: none; }
-    .header__mobile-link:hover { color: #2B4A78; }
+    .header__mobile-link:hover { color: #fff; }
+
+    /* 헤더 어두울 때 → 메뉴 밝게 */
+    .header--dark ~ .header__mobile-menu {
+      background: rgba(255, 255, 255, 0.98);
+    }
+    .header--dark ~ .header__mobile-menu .header__mobile-link {
+      color: #1d1d1f;
+      border-bottom-color: rgba(0, 0, 0, 0.06);
+    }
+    .header--dark ~ .header__mobile-menu .header__mobile-link:hover {
+      color: #2B4A78;
+    }
 
     @media (max-width: 734px) {
       .header__nav { display: none; }
@@ -198,7 +203,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 120px 24px 80px;
+      padding: 120px 24px 140px;
       background:
         linear-gradient(135deg,
           rgba(10, 18, 30, 0.75) 0%,
@@ -244,11 +249,11 @@
     }
 
     .hero__subtitle {
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.75);
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.7);
       margin-bottom: 10px;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.04em;
       animation: fadeInUp 0.8s ease-out 0.3s both;
     }
 
@@ -403,7 +408,7 @@
 
     /* ── Footer ── */
     .footer {
-      background: #1d1d1f;
+      background: #1D2F4E;
       color: rgba(255, 255, 255, 0.56);
       padding: 48px 24px 36px;
     }
@@ -538,11 +543,6 @@
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
       <span class="header__name">퍼스트펭귄</span>
     </a>
-    <nav class="header__nav">
-      <a href="es.html" class="header__nav-link">건강운동관리사</a>
-      <a href="sports1.html" class="header__nav-link">1급 스포츠지도사</a>
-      <a href="sports2.html" class="header__nav-link">2급 스포츠지도사</a>
-    </nav>
     <div class="header__right">
       <a href="#" class="header__login" id="header-login-btn">로그인</a>
       <button class="header__hamburger" id="hamburger" aria-label="메뉴">
@@ -551,9 +551,6 @@
     </div>
   </header>
   <div class="header__mobile-menu" id="mobile-menu">
-    <a href="es.html" class="header__mobile-link">건강운동관리사</a>
-    <a href="sports1.html" class="header__mobile-link">1급 스포츠지도사</a>
-    <a href="sports2.html" class="header__mobile-link">2급 스포츠지도사</a>
     <a href="#" class="header__mobile-link" id="mobile-login-btn">로그인</a>
   </div>
 
@@ -566,7 +563,7 @@
       스포츠 자격증<br>기출문제 플랫폼
     </h1>
 
-    <p class="hero__subtitle">건강운동관리사 | 1급 스포츠지도사 | 2급 스포츠지도사</p>
+    <p class="hero__subtitle">건강운동관리사 | 1급 · 2급 스포츠지도사</p>
 
     <p class="hero__features">기출문제 · 해설 · 오답분석</p>
 
@@ -575,7 +572,7 @@
     </div>
 
     <a href="#select" class="hero__scroll">
-      더 알아보기
+      Dive In
       <div class="hero__scroll-icon">↓</div>
     </a>
   </section>
@@ -587,15 +584,15 @@
     <p class="select__desc">어떤 시험을 준비하고 있나요?</p>
 
     <div class="select__cards">
-      <a href="es.html" class="exam-card">
+      <a href="cft.html" class="exam-card">
         <span class="exam-card__name">건강운동관리사</span>
         <span class="exam-card__arrow">→</span>
       </a>
-      <a href="sports1.html" class="exam-card">
+      <a href="si1.html" class="exam-card">
         <span class="exam-card__name">1급 스포츠지도사</span>
         <span class="exam-card__arrow">→</span>
       </a>
-      <a href="sports2.html" class="exam-card">
+      <a href="si2.html" class="exam-card">
         <span class="exam-card__name">2급 스포츠지도사</span>
         <span class="exam-card__arrow">→</span>
       </a>
@@ -606,9 +603,9 @@
   <footer class="footer">
     <div class="footer__inner">
       <nav class="footer__links">
-        <a href="es.html" class="footer__link">건강운동관리사</a>
-        <a href="sports1.html" class="footer__link">1급 스포츠지도사</a>
-        <a href="sports2.html" class="footer__link">2급 스포츠지도사</a>
+        <a href="cft.html" class="footer__link">건강운동관리사</a>
+        <a href="si1.html" class="footer__link">1급 스포츠지도사</a>
+        <a href="si2.html" class="footer__link">2급 스포츠지도사</a>
         <span class="footer__divider"></span>
         <a href="/terms.html" class="footer__link">이용약관</a>
         <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
@@ -658,17 +655,19 @@
     import { showLoginModal } from './js/auth/auth-ui.js';
     import { ensureFirebase } from './js/core/firebase-core.js';
 
-    // 로그인 버튼 → 모달
+    let isLoggedIn = false;
+
     document.getElementById('header-login-btn').addEventListener('click', (e) => {
       e.preventDefault();
-      showLoginModal();
+      if (!isLoggedIn) showLoginModal();
+      else window.location.href = 'mypage.html';
     });
     document.getElementById('mobile-login-btn').addEventListener('click', (e) => {
       e.preventDefault();
-      showLoginModal();
+      if (!isLoggedIn) showLoginModal();
+      else window.location.href = 'mypage.html';
     });
 
-    // 로그인 상태 감지 → 버튼 전환
     (async () => {
       try {
         const { auth } = await ensureFirebase();
@@ -677,13 +676,14 @@
           const headerBtn = document.getElementById('header-login-btn');
           const mobileBtn = document.getElementById('mobile-login-btn');
           if (user) {
+            isLoggedIn = true;
             const name = user.displayName || user.email?.split('@')[0] || '마이페이지';
             headerBtn.textContent = name;
-            headerBtn.href = 'mypage.html';
-            headerBtn.onclick = null;
             mobileBtn.textContent = '마이페이지';
-            mobileBtn.href = 'mypage.html';
-            mobileBtn.onclick = null;
+          } else {
+            isLoggedIn = false;
+            headerBtn.textContent = '로그인';
+            mobileBtn.textContent = '로그인';
           }
         });
       } catch (e) { console.error(e); }

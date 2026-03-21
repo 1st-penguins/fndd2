@@ -10,9 +10,10 @@
 
 ## 2. 새로 만드는 파일
 - landing.html → 자격증 선택 랜딩 (완료)
-- es.html → 건강운동관리사 (진행중)
-- sports1.html → 1급 스포츠지도사
-- sports2.html → 2급 스포츠지도사
+- cft.html → 건강운동관리사 (Certified Fitness Trainer)
+- si1.html → 1급 스포츠지도사 (Sports Instructor Level 1)
+- si2.html → 2급 스포츠지도사 (Sports Instructor Level 2)
+- es.html → 레거시 (cft.html로 이전)
 
 ## 3. 디자인 시스템 (애플 스타일)
 

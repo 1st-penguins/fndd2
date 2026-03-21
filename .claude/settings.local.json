@@ -78,7 +78,11 @@
       "Bash(sed -i \"s/''data\\\\/sports'': ''2급 스포츠지도사''/''data\\\\/sports'': ''생활스포츠지도사''/g\" js/notice/notice-question-modal.js)",
       "Bash(sed -i \"s/2급 스포츠지도사 <span/생활스포츠지도사 <span/g\" js/quiz/bookmark-ui.js js/quiz/wrong-note-ui.js)",
       "Bash(sed -i \"s/>2급 스포츠지도사</>생활스포츠지도사</g\" admin/statistics.html search-by-tags.html)",
-      "Bash(sed -i 's/— 2급 스포츠지도사 합격생/— 생활스포츠지도사 합격생/g' about.html)"
+      "Bash(sed -i 's/— 2급 스포츠지도사 합격생/— 생활스포츠지도사 합격생/g' about.html)",
+      "Bash(bun --version)",
+      "Bash(claude --version)",
+      "Read(//c/tmp/**)",
+      "Bash(\"C:/Users/sapsk/Desktop/fndd2/_gen.py\")"
     ]
   }
 }

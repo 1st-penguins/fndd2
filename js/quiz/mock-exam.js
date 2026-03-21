@@ -3,7 +3,8 @@
 
 import { db, auth, ensureFirebase } from '../core/firebase-core.js';
 import { collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-import { saveBookmark, removeBookmark, isBookmarked } from './bookmark-service.js';
+import { isBookmarked } from './bookmark-service.js';
+import { doc as firestoreDoc, setDoc, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 // 전역 변수에서 sessionManager 가져오기
 const sessionManager = window.sessionManager;
@@ -68,7 +69,7 @@ function _renderMockBookmarkButton(question, displayNumber) {
   const existing = qNumEl.parentElement?.querySelector('.bookmark-btn');
   if (existing) existing.remove();
 
-  const userId = auth?.currentUser?.uid || localStorage.getItem('userId');
+  const userId = auth?.currentUser?.uid;
   if (!userId) return;
 
   const questionId = _getMockQuestionId(question, displayNumber);
@@ -91,17 +92,34 @@ function _renderMockBookmarkButton(question, displayNumber) {
 
   btn.addEventListener('click', async (e) => {
     e.stopPropagation();
+    const currentUserId = auth?.currentUser?.uid;
+    if (!currentUserId) return;
     const marked = _mockBookmarkCache.get(questionId) || false;
+    const docId = `${currentUserId}_${questionId}`;
     try {
       if (marked) {
-        await removeBookmark(userId, questionId);
+        await deleteDoc(firestoreDoc(db, 'bookmarks', docId));
         _mockBookmarkCache.set(questionId, false);
         btn.textContent = '☆';
         btn.classList.remove('active');
       } else {
         const certType = getActiveCertificateType();
-        const examName = `${year}년 모의고사 ${hour}교시`;
-        await saveBookmark(userId, { ...question, id: questionId }, examName, question.subject, certType);
+        await setDoc(firestoreDoc(db, 'bookmarks', docId), {
+          userId: currentUserId,
+          questionId,
+          examName: `${year}년 모의고사 ${hour}교시`,
+          section: question.subject || '',
+          certType: certType || 'health-manager',
+          bookmarkedAt: serverTimestamp(),
+          questionData: {
+            question: question.question || '',
+            options: question.options || [],
+            correctAnswer: question.correctAnswer,
+            explanation: question.explanation || '',
+            subject: question.subject || '',
+            year: String(year),
+          }
+        }, { merge: true });
         _mockBookmarkCache.set(questionId, true);
         btn.textContent = '★';
         btn.classList.add('active');
@@ -1554,6 +1572,10 @@ function initQuestionIndicators() {
     // 인디케이터 그리드
     const grid = document.createElement('div');
     grid.className = 'indicator-subject-grid';
+    // 모바일에서 10열 그리드 강제 적용
+    if (window.innerWidth <= 768) {
+      grid.style.cssText = 'display:grid!important;grid-template-columns:repeat(10,1fr)!important;gap:2px!important;';
+    }
 
     group.questions.forEach(({ question, index: i }) => {
       const indicator = document.createElement('div');
@@ -1964,7 +1986,15 @@ async function waitForMockExamSave(timeoutMs = 6000) {
 
 async function goHomeAfterSave() {
   await waitForMockExamSave();
-  window.location.href = '../index.html';
+  // 현재 경로에서 자격증 페이지로 복귀
+  const path = window.location.pathname;
+  if (path.includes('-sports1')) {
+    window.location.href = '../si1.html';
+  } else if (path.includes('-sports')) {
+    window.location.href = '../si2.html';
+  } else {
+    window.location.href = '../cft.html';
+  }
 }
 
 /**
@@ -2860,7 +2890,7 @@ function createSubjectCards(subjectResults) {
         <div class="subject-detail">${result.correct}/${result.totalQuestions}문제</div>
         ${result.incorrect && result.incorrect.length > 0 ?
         `<button data-action="review-subject" data-subject="${subject}" class="review-subject-button">
-            오답 확인 (${result.incorrect.length}문제)
+            오답 확인<br><span class="review-subject-count">(${result.incorrect.length}문제)</span>
            </button>` :
         `<div class="perfect-subject">모두 정답!</div>`
       }
@@ -3032,7 +3062,7 @@ function showResults() {
   } else {
     // 틀린 문제가 있는 경우
     resultsActions.innerHTML = `
-      <button data-action="review" class="action-button review-button">오답 리뷰</button>
+      <button data-action="review" class="action-button review-button">전체 오답 리뷰</button>
       <div class="action-buttons">
         <button data-action="go-home" class="action-button">홈으로</button>
       </div>
@@ -3495,7 +3525,7 @@ function addReviewModeUI(incorrectCount, subject = '전체') {
   const reviewMessage = document.createElement('div');
   reviewMessage.className = 'review-mode-message';
   reviewMessage.innerHTML = `
-    <div class="review-mode-title">📝 오답 리뷰 모드</div>
+    <div class="review-mode-title">오답 리뷰 모드</div>
     <div class="review-mode-info">틀린 ${incorrectCount}문제를 확인하세요 (1/${incorrectCount})</div>
   `;
 
