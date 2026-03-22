@@ -582,7 +582,7 @@
 .detail-buy-btn {
   width: 100%;
   padding: 18px;
-  background: #0071e3;
+  background: var(--penguin-navy, #1D2F4E);
   color: white;
   border: none;
   border-radius: 12px;
@@ -594,7 +594,7 @@
 }
 
 .detail-buy-btn:hover {
-  background: #0077ed;
+  background: #2a4366;
   transform: scale(1.01);
 }
 
