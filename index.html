@@ -33,7 +33,7 @@
       color: var(--color-text-primary);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      scroll-behavior: smooth;
+      /* scroll-behavior: smooth — 모바일 튕김 방지를 위해 제거 */
     }
 
     body {
@@ -515,6 +515,8 @@
       .story__history-img--wide { width: 100px; height: 70px; }
       .story__history { gap: 8px; }
       .story__history-arrow { font-size: 14px; }
+      .story__depth { display: none; }
+      .story__section { min-height: auto; }
       .story__history { gap: 12px; }
 
       .select { padding: 80px 20px; }
@@ -737,7 +739,7 @@
         <p class="story__text--small" style="color:rgba(255,255,255,0.35); margin-top:12px;">(개인차 있음)</p>
 
         <div style="margin-top:160px;">
-          <p style="font-size:clamp(var(--text-3xl), 8vw, var(--text-6xl));font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1.1;">Fear Not, Deep Dive.</p>
+          <p style="font-size:clamp(var(--text-2xl), 6vw, var(--text-4xl));font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1.1;">Fear Not, Deep Dive.</p>
           <p class="story__text" style="color:rgba(255,255,255,0.4);margin-top:16px;">그래도 그냥 뛰어드세요.</p>
         </div>
       </div>
