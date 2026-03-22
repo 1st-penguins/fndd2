@@ -402,7 +402,7 @@ function createNoticeItem(notice, options) {
   // 배지 HTML — [카테고리] 대괄호 스타일
   let badgeTag = '';
   if (options.showBadges && notice.badge) {
-    badgeTag = `<span class="notice-badge">${notice.badge}</span>`;
+    badgeTag = `<span class="notice-badge" data-category="${notice.badge}">${notice.badge}</span>`;
   }
 
   return `
