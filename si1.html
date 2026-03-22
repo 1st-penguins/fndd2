@@ -1918,6 +1918,13 @@
       });
     });
 
+    // URL 해시로 탭 자동 전환 (#tab-lecture, #tab-mock 등)
+    const hashTab = location.hash.match(/^#tab-(.+)/);
+    if (hashTab) {
+      const target = document.querySelector(`.tabs__item[data-tab="${hashTab[1]}"]`);
+      if (target) target.click();
+    }
+
     // 과목별/연도별 토글
     const toggleBtns = document.querySelectorAll('.toggle__btn');
     const grids = document.querySelectorAll('.card-grid');

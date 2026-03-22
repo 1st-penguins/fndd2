@@ -429,7 +429,7 @@
       // 렌더
       const contentEl = document.getElementById('detail-content');
       contentEl.innerHTML = `
-        <a href="index.html#lecture-tab" class="detail-back">← 상점으로</a>
+        <a href="${product.category === 'sports' ? 'si2.html' : product.category === 'sports1' ? 'si1.html' : 'cft.html'}#tab-lecture" class="detail-back">← 강의 목록</a>
 
         <div class="detail-top">
           <div class="detail-thumb">${thumbHtml}</div>
