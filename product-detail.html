@@ -254,10 +254,8 @@
 
     function renderDetail(product, episodes, bundleProducts, purchased, progressMap = {}, expired = false) {
       const TYPE_LABELS = { video: '강의', pdf: '자료', ppt: '자료', bundle: '패키지' };
-      const TYPE_ICONS = { video: '🎬', pdf: '📄', ppt: '📊', bundle: '📦' };
 
       const typeLabel = TYPE_LABELS[product.type] || product.type;
-      const typeIcon = TYPE_ICONS[product.type] || '📦';
       const badgeClass = `detail-badge--${product.type}`;
 
       // 썸네일
@@ -265,22 +263,23 @@
       if (product.thumbnailUrl) {
         thumbHtml = `<img src="${product.thumbnailUrl}" alt="${product.title}">`;
       } else {
-        thumbHtml = `<div class="detail-thumb__placeholder">${typeIcon}</div>`;
+        thumbHtml = `<div class="detail-thumb__placeholder">${typeLabel}</div>`;
       }
 
       // 메타
-      let metaHtml = '';
+      let metaParts = [];
       if (product.type === 'video') {
-        if (episodes.length) metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">📹</span> ${episodes.length}강</div>`;
-        if (product.totalDuration) metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">⏱</span> ${product.totalDuration}</div>`;
+        if (episodes.length) metaParts.push(`${episodes.length}강`);
+        if (product.totalDuration) metaParts.push(product.totalDuration);
       }
       if (product.type === 'pdf' || product.type === 'ppt') {
-        if (product.pages) metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">📄</span> ${product.pages}쪽</div>`;
-        if (product.fileSize) metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">💾</span> ${product.fileSize}</div>`;
+        if (product.pages) metaParts.push(`${product.pages}쪽`);
+        if (product.fileSize) metaParts.push(product.fileSize);
       }
       if (product.type === 'bundle' && bundleProducts.length) {
-        metaHtml += `<div class="detail-meta__item"><span class="detail-meta__icon">📦</span> ${bundleProducts.length}개 상품 포함</div>`;
+        metaParts.push(`${bundleProducts.length}개 상품 포함`);
       }
+      const metaHtml = metaParts.length ? `<div class="detail-meta__item">${metaParts.join(' · ')}</div>` : '';
 
       // 가격
       const priceText = product.price === 0 ? '무료' : product.price.toLocaleString() + '원';
@@ -299,21 +298,21 @@
       let actionBtn;
       if (expired) {
         const purchaseUrl = `lecture-purchase.html?id=${product.id}&price=${product.price}&title=${encodeURIComponent(product.title)}&type=${product.type}`;
-        actionBtn = `<div style="margin-bottom:8px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#9a3412;">⏰ 이용 기간이 만료되었습니다. 재구매 후 이용 가능합니다.</div>
-          <button class="detail-buy-btn" onclick="location.href='${purchaseUrl}'">${product.price.toLocaleString()}원 재구매하기</button>`;
+        actionBtn = `<div style="margin-bottom:8px;padding:10px 14px;background:#f5f5f7;border-radius:12px;font-size:13px;color:#86868b;">이용 기간이 만료되었습니다. 재구매 후 이용 가능합니다.</div>
+          <button class="detail-buy-btn" onclick="location.href='${purchaseUrl}'">재구매하기</button>`;
       } else if (purchased) {
         if (product.type === 'video') {
-          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='lecture-play.html?id=${product.id}'">▶ 강의 보기</button>`;
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='lecture-play.html?id=${product.id}'">강의 보기</button>`;
         } else if (product.type === 'pdf' || product.type === 'ppt') {
-          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'">📥 다운로드</button>`;
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'">다운로드</button>`;
         } else {
-          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='index.html#lecture-tab'">구매완료 — 상점으로</button>`;
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='index.html#lecture-tab'">구매완료</button>`;
         }
       } else if (product.price === 0) {
         if (product.type === 'video') {
-          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='lecture-play.html?id=${product.id}'">▶ 무료 시청하기</button>`;
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='lecture-play.html?id=${product.id}'">무료 시청하기</button>`;
         } else {
-          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'">📥 무료 다운로드</button>`;
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'">무료 다운로드</button>`;
         }
       } else {
         const purchaseUrl = `lecture-purchase.html?id=${product.id}&price=${product.price}&title=${encodeURIComponent(product.title)}&type=${product.type}`;
@@ -332,15 +331,15 @@
         const overallProgress = episodes.length > 0 ? Math.round((completedCount / episodes.length) * 100) : 0;
 
         const episodeItems = episodes.map(ep => {
-          const freeTag = ep.isFree ? `<span class="episode-free">무료</span>` : `<span class="episode-lock">🔒</span>`;
+          const freeTag = ep.isFree ? `<span class="episode-free">무료</span>` : `<span class="episode-lock" style="color:#d2d2d7;font-size:13px;">잠금</span>`;
           const canPlay = purchased || ep.isFree;
           const clickAttr = canPlay
             ? `onclick="location.href='lecture-play.html?id=${productId}&ep=${ep.episode}'" style="cursor:pointer;"`
             : '';
           const prog = progressMap[ep.episode || ep.episodeNumber];
           const isCompleted = prog && prog.progress >= 90;
-          const progressBadge = isCompleted ? '<span style="color:#2b8a3e;font-size:13px;font-weight:700;">✅</span>'
-            : prog && prog.progress > 0 ? `<span style="color:#868e96;font-size:11px;">${prog.progress}%</span>` : '';
+          const progressBadge = isCompleted ? '<span style="color:#34c759;font-size:12px;font-weight:600;">완료</span>'
+            : prog && prog.progress > 0 ? `<span style="color:#86868b;font-size:12px;">${prog.progress}%</span>` : '';
 
           return `
             <li class="episode-item" ${clickAttr}>
@@ -356,13 +355,13 @@
         }).join('');
 
         const progressBarHtml = purchased && episodes.length > 0 ? `
-          <div style="margin-bottom:16px;padding:12px 16px;background:#f8f9fa;border-radius:8px;">
-            <div style="display:flex;justify-content:space-between;font-size:13px;color:#495057;margin-bottom:6px;">
+          <div style="margin-bottom:16px;padding:14px 16px;background:#f5f5f7;border-radius:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#86868b;margin-bottom:8px;">
               <span>전체 진도율</span>
-              <span>${completedCount}/${episodes.length}강 완료 (${overallProgress}%)</span>
+              <span style="font-weight:600;color:#1d1d1f;">${completedCount}/${episodes.length}강 완료 (${overallProgress}%)</span>
             </div>
-            <div style="width:100%;height:6px;background:#e9ecef;border-radius:3px;overflow:hidden;">
-              <div style="height:100%;width:${overallProgress}%;background:var(--penguin-skyblue);border-radius:3px;transition:width 0.3s;"></div>
+            <div style="width:100%;height:4px;background:#e5e5e5;border-radius:2px;overflow:hidden;">
+              <div style="height:100%;width:${overallProgress}%;background:#1d1d1f;border-radius:2px;transition:width 0.3s;"></div>
             </div>
           </div>` : '';
 
@@ -379,10 +378,8 @@
       let bundleSection = '';
       if (product.type === 'bundle' && bundleProducts.length) {
         const bundleItems = bundleProducts.map(bp => {
-          const icon = TYPE_ICONS[bp.type] || '📦';
           return `
             <li class="bundle-item">
-              <span class="bundle-item__icon">${icon}</span>
               <span class="bundle-item__title">${bp.title}</span>
             </li>
           `;
@@ -410,17 +407,24 @@
       // 환불 안내
       let refundHtml = '';
       if (product.price > 0) {
-        let refundText = '';
+        let refundItems = '';
         if (product.type === 'video') {
-          refundText = '이용기간: 구매일로부터 6개월 / 1강이라도 재생한 경우: 환불 불가 / 미재생 + 구매일로부터 7일 이내: 전액 환불 / 미재생 + 7일 초과: 환불 불가';
+          refundItems = `
+            <li>이용기간: 구매일로부터 6개월</li>
+            <li>1강이라도 재생한 경우 <strong>환불 불가</strong></li>
+            <li>미재생 + 구매일로부터 7일 이내: 전액 환불</li>`;
         } else if (product.type === 'pdf' || product.type === 'ppt') {
-          refundText = '다운로드한 경우: 환불 불가 / 미다운로드 + 구매일로부터 7일 이내: 전액 환불 / 미다운로드 + 7일 초과: 환불 불가';
+          refundItems = `
+            <li>다운로드한 경우 <strong>환불 불가</strong></li>
+            <li>미다운로드 + 구매일로부터 7일 이내: 전액 환불</li>`;
         }
-        if (refundText) {
+        if (refundItems) {
           refundHtml = `
-            <div class="detail-refund">
-              <div class="detail-refund__title">환불 안내</div>
-              <div class="detail-refund__text">${refundText}</div>
+            <div class="detail-section">
+              <h3 class="detail-section__title">환불 안내</h3>
+              <ul style="padding-left:18px;font-size:13px;color:#86868b;line-height:2;">${refundItems}
+                <li>상세 규정은 <a href="terms.html" style="color:#86868b;text-decoration:underline;">이용약관 제9조</a> 참고</li>
+              </ul>
             </div>
           `;
         }
