@@ -414,9 +414,9 @@
    ============================================================ */
 
 .detail-container {
-  max-width: 900px;
-  margin: 80px auto 60px;
-  padding: 0 16px;
+  max-width: 960px;
+  margin: 72px auto 60px;
+  padding: 0 24px;
 }
 
 .detail-back {
@@ -439,23 +439,22 @@
 .detail-top {
   display: grid;
   grid-template-columns: 1fr;
+  align-items: start;
   gap: 28px;
-  margin-bottom: 28px;
+  margin-bottom: 36px;
 }
 
 .detail-thumb {
   width: 100%;
-  aspect-ratio: 3 / 2;
-  border-radius: var(--radius-sm);
+  border-radius: 16px;
   overflow: hidden;
-  background: linear-gradient(135deg, #e8ecf1 0%, #f5f7fa 100%);
-  box-shadow: var(--shadow-sm);
+  background: #f5f5f7;
 }
 
 .detail-thumb img {
   width: 100%;
   height: auto;
-  object-fit: contain;
+  display: block;
 }
 
 .detail-thumb__placeholder {
@@ -538,8 +537,8 @@
 
 /* 가격 영역 */
 .detail-price-box {
-  background: #f8f9fa;
-  border-radius: var(--radius-sm);
+  background: #f5f5f7;
+  border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
 }
@@ -581,68 +580,70 @@
 /* 구매 버튼 */
 .detail-buy-btn {
   width: 100%;
-  padding: 16px;
-  background: var(--penguin-navy);
+  padding: 18px;
+  background: #0071e3;
   color: white;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(29, 47, 78, 0.2);
+  letter-spacing: -0.01em;
 }
 
 .detail-buy-btn:hover {
-  background: var(--penguin-skyblue);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(95, 178, 201, 0.3);
+  background: #0077ed;
+  transform: scale(1.01);
+}
+
+.detail-buy-btn:active {
+  transform: scale(0.99);
 }
 
 .detail-buy-btn:disabled {
-  background: #adb5bd;
+  background: #d2d2d7;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
 /* 이미 구매한 경우 */
 .detail-purchased-btn {
   width: 100%;
-  padding: 16px;
-  background: #059669;
+  padding: 18px;
+  background: #1d1d1f;
   color: white;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.2);
+  letter-spacing: -0.01em;
 }
 
 .detail-purchased-btn:hover {
-  background: #047857;
-  transform: translateY(-2px);
+  background: #424245;
+  transform: scale(1.01);
 }
 
 /* 상세 설명 카드 */
 .detail-section {
   background: #FFFFFF;
-  border-radius: var(--radius-sm);
+  border-radius: 16px;
   padding: 28px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   margin-bottom: 20px;
-  border: 1px solid rgba(29, 47, 78, 0.04);
+  border: 1px solid rgba(0,0,0,0.06);
 }
 
 .detail-section__title {
   font-size: 18px;
   font-weight: 700;
-  color: var(--penguin-navy);
+  color: #1d1d1f;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 .detail-section__content {
@@ -773,11 +774,7 @@
 @media (min-width: 768px) {
   .detail-top {
     grid-template-columns: 1fr 1fr;
-    gap: 36px;
-  }
-
-  .detail-container {
-    padding: 0 24px;
+    gap: 40px;
   }
 
   .detail-title {
