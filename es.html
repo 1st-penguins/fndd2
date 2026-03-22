@@ -2248,29 +2248,35 @@
     });
 
     // ── 학습진행률 데이터 로드 ──
-    async function loadProgressData() {
+    let _cachedAuthUser = null;
+    let _authReady = false;
+    (async () => {
       try {
         const { ensureFirebase } = await import('./js/core/firebase-core.js');
         const { auth } = await ensureFirebase();
+        if (auth.currentUser) { _cachedAuthUser = auth.currentUser; _authReady = true; return; }
+        if (!window.__authStateResolved) {
+          await new Promise(r => {
+            const h = () => { window.removeEventListener('loginStateChanged', h); r(); };
+            window.addEventListener('loginStateChanged', h);
+            setTimeout(() => { window.removeEventListener('loginStateChanged', h); r(); }, 3000);
+          });
+        }
+        _cachedAuthUser = auth.currentUser;
+        _authReady = true;
+      } catch(e) { _authReady = true; }
+    })();
 
-        let user = auth.currentUser;
-        if (!user && !window.__authStateResolved) {
-          user = await new Promise((resolve) => {
-            const handler = (e) => {
-              window.removeEventListener('loginStateChanged', handler);
-              clearTimeout(timer);
-              if (e.detail?.isLoggedIn) resolve(auth.currentUser);
-              else resolve(null);
-            };
-            const timer = setTimeout(() => {
-              window.removeEventListener('loginStateChanged', handler);
-              resolve(auth.currentUser);
-            }, 5000);
-            window.addEventListener('loginStateChanged', handler);
+    async function loadProgressData() {
+      try {
+        if (!_authReady) {
+          await new Promise(r => {
+            const check = setInterval(() => { if (_authReady) { clearInterval(check); r(); } }, 100);
+            setTimeout(() => { clearInterval(check); r(); }, 2000);
           });
         }
 
-        if (!user) {
+        if (!_cachedAuthUser) {
           document.getElementById('progress-tab').style.display = 'none';
           document.getElementById('progress-login-notice').style.display = 'block';
           return;
@@ -2319,7 +2325,7 @@
           if (name && year) {
             item.style.cursor = 'pointer';
             item.style.transition = 'all 0.2s ease';
-            item.onclick = () => window.location.href = `exam/${year}_${name}.html`;
+            item.onclick = () => window.location.href = `exam-new/${year}_${name}.html`;
             item.onmouseenter = () => { item.style.transform = 'translateY(-2px)'; item.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)'; };
             item.onmouseleave = () => { item.style.transform = ''; item.style.boxShadow = ''; };
           }
