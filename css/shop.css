@@ -191,7 +191,7 @@
 
 .shop-card__badge--pdf,
 .shop-card__badge--ppt {
-  background: rgba(5, 150, 105, 0.85);
+  background: rgba(234, 88, 12, 0.85);
   color: white;
 }
 
@@ -492,7 +492,7 @@
 
 .detail-badge--pdf,
 .detail-badge--ppt {
-  background: #059669;
+  background: #ea580c;
   color: white;
 }
 

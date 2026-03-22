@@ -11,7 +11,7 @@ let auth = null;
 
 // 타입 라벨 매핑
 const TYPE_LABELS = {
-  video: '인강',
+  video: '강의',
   pdf: '자료',
   ppt: '자료',
   bundle: '패키지'
