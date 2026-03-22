@@ -75,7 +75,7 @@
   padding: 9px 22px;
   border: 1px solid rgba(29, 47, 78, 0.1);
   background: #FFFFFF;
-  color: var(--deep-sea-gray);
+  color: var(--deep-sea-gray, #6F7C8B);
   border-radius: 9999px;
   font-family: inherit;
   font-weight: 600;
@@ -93,15 +93,15 @@
 .shop-filter-btn:hover {
   background: #F8F9FA;
   border-color: rgba(95, 178, 201, 0.5);
-  color: var(--penguin-navy);
+  color: var(--penguin-navy, #1D2F4E);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(95, 178, 201, 0.15);
 }
 
 .shop-filter-btn.active {
-  background: var(--penguin-navy);
+  background: var(--penguin-navy, #1D2F4E);
   color: #FFFFFF;
-  border-color: var(--penguin-navy);
+  border-color: var(--penguin-navy, #1D2F4E);
   box-shadow: 0 4px 12px rgba(29, 47, 78, 0.2);
   transform: translateY(-1px);
 }
@@ -165,7 +165,7 @@
   align-items: center;
   justify-content: center;
   font-size: 48px;
-  background: linear-gradient(135deg, var(--penguin-navy) 0%, var(--penguin-skyblue) 100%);
+  background: linear-gradient(135deg, var(--penguin-navy, #1D2F4E) 0%, var(--penguin-skyblue, #5FB2C9) 100%);
   color: rgba(255, 255, 255, 0.8);
 }
 
@@ -227,7 +227,7 @@
 .shop-card__title {
   font-size: 15px;
   font-weight: 700;
-  color: var(--penguin-navy);
+  color: var(--penguin-navy, #1D2F4E);
   margin-bottom: 6px;
   line-height: 1.4;
   display: -webkit-box;
@@ -238,7 +238,7 @@
 
 .shop-card__desc {
   font-size: 13px;
-  color: var(--deep-sea-gray);
+  color: var(--deep-sea-gray, #6F7C8B);
   margin-bottom: 12px;
   line-height: 1.5;
   display: -webkit-box;
@@ -273,7 +273,7 @@
 .shop-card__price {
   font-size: 18px;
   font-weight: 800;
-  color: var(--penguin-navy);
+  color: var(--penguin-navy, #1D2F4E);
 }
 
 .shop-card__price--free {
@@ -296,7 +296,7 @@
 .shop-empty {
   text-align: center;
   padding: 60px 20px;
-  color: var(--deep-sea-gray);
+  color: var(--deep-sea-gray, #6F7C8B);
 }
 
 .shop-empty__icon {
@@ -314,14 +314,14 @@
 .shop-loading {
   text-align: center;
   padding: 60px 20px;
-  color: var(--deep-sea-gray);
+  color: var(--deep-sea-gray, #6F7C8B);
 }
 
 .shop-loading__spinner {
   width: 36px;
   height: 36px;
   border: 3px solid #e9ecef;
-  border-top-color: var(--penguin-skyblue);
+  border-top-color: var(--penguin-skyblue, #5FB2C9);
   border-radius: 50%;
   animation: shopSpin 0.8s linear infinite;
   margin: 0 auto 16px;
@@ -423,7 +423,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--penguin-navy);
+  color: var(--penguin-navy, #1D2F4E);
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
@@ -432,7 +432,7 @@
 }
 
 .detail-back:hover {
-  color: var(--penguin-skyblue);
+  color: var(--penguin-skyblue, #5FB2C9);
 }
 
 /* 상단 영역 (썸네일 + 기본정보) */
@@ -464,7 +464,7 @@
   align-items: center;
   justify-content: center;
   font-size: 80px;
-  background: linear-gradient(135deg, var(--penguin-navy) 0%, var(--penguin-skyblue) 100%);
+  background: linear-gradient(135deg, var(--penguin-navy, #1D2F4E) 0%, var(--penguin-skyblue, #5FB2C9) 100%);
   color: rgba(255, 255, 255, 0.7);
 }
 
@@ -485,7 +485,7 @@
 }
 
 .detail-badge--video {
-  background: var(--penguin-navy);
+  background: var(--penguin-navy, #1D2F4E);
   color: white;
 }
 
@@ -503,14 +503,14 @@
 .detail-title {
   font-size: 26px;
   font-weight: 800;
-  color: var(--penguin-navy);
+  color: var(--penguin-navy, #1D2F4E);
   line-height: 1.3;
   margin-bottom: 10px;
 }
 
 .detail-desc {
   font-size: 15px;
-  color: var(--deep-sea-gray);
+  color: var(--deep-sea-gray, #6F7C8B);
   line-height: 1.6;
   margin-bottom: 20px;
 }
@@ -528,7 +528,7 @@
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: var(--deep-sea-gray);
+  color: var(--deep-sea-gray, #6F7C8B);
 }
 
 .detail-meta__icon {
@@ -553,7 +553,7 @@
 .detail-price {
   font-size: 32px;
   font-weight: 800;
-  color: var(--penguin-navy);
+  color: var(--penguin-navy, #1D2F4E);
 }
 
 .detail-price--free {
@@ -684,7 +684,7 @@
   justify-content: center;
   font-size: 13px;
   font-weight: 700;
-  color: var(--penguin-navy);
+  color: var(--penguin-navy, #1D2F4E);
 }
 
 .episode-info {
