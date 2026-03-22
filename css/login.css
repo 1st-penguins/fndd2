@@ -32,23 +32,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--penguin-navy);
+  background: #0071e3;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 10px 20px;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(29, 47, 78, 0.2);
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .login-button:hover {
-  background: var(--penguin-skyblue);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(95, 178, 201, 0.3);
+  background: #0077ed;
 }
 
 .login-icon {
@@ -98,14 +95,14 @@
   align-items: center;
   justify-content: center;
   background: white;
-  color: var(--deep-sea-gray, #6F7C8B);
-  border: 1px solid rgba(29, 47, 78, 0.15);
-  border-radius: 8px;
+  color: #86868b;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
   padding: 10px 18px;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
   min-height: 40px;
 }

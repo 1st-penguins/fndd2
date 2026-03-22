@@ -83,8 +83,8 @@
 }
 
 .fp-header__login:hover {
-  color: #2B4A78;
-  border-color: #2B4A78;
+  color: var(--penguin-navy, #1D2F4E);
+  border-color: var(--penguin-navy, #1D2F4E);
 }
 
 .fp-header__hamburger {
@@ -153,7 +153,7 @@
 }
 
 .fp-header__mobile-link:hover {
-  color: #2B4A78;
+  color: var(--penguin-navy, #1D2F4E);
 }
 
 @media (max-width: 768px) {
@@ -177,7 +177,7 @@
   gap: 4px;
   font-size: 14px;
   font-weight: 500;
-  color: #2B4A78;
+  color: var(--penguin-navy, #1D2F4E);
   text-decoration: none;
   margin-bottom: 12px;
   transition: opacity 0.2s;
@@ -304,20 +304,20 @@ body .option-button:focus-visible {
 
 body .option-button.selected:focus,
 body .option-button.selected:focus-visible {
-  border-color: #2B4A78;
+  border-color: var(--penguin-navy, #1D2F4E);
 }
 
 /* 북마크 버튼 */
 body .bookmark-btn.active {
-  background: #2B4A78;
+  background: var(--penguin-navy, #1D2F4E);
 }
 body .bookmark-btn.active:hover {
   background: #1D2F4E;
 }
 
 body .option-button.selected {
-  background: #2B4A78;
-  border-color: #2B4A78;
+  background: var(--penguin-navy, #1D2F4E);
+  border-color: var(--penguin-navy, #1D2F4E);
   color: #fff;
   transform: none;
   box-shadow: none;
@@ -531,8 +531,8 @@ body .indicator:hover:not(.current) {
 /* 현재 문제: 테두리 강조 */
 body .indicator.current {
   background: transparent;
-  border: 2px solid #2B4A78;
-  color: #2B4A78;
+  border: 2px solid var(--penguin-navy, #1D2F4E);
+  color: var(--penguin-navy, #1D2F4E);
   font-weight: 700;
   font-size: 12px;
 }
@@ -547,8 +547,8 @@ body .indicator.answered:not(.correct):not(.incorrect) {
 
 /* 현재 + 푼 문제 */
 body .indicator.current.answered:not(.correct):not(.incorrect) {
-  background: #2B4A78;
-  border: 2px solid #2B4A78;
+  background: var(--penguin-navy, #1D2F4E);
+  border: 2px solid var(--penguin-navy, #1D2F4E);
   color: #fff;
   font-weight: 700;
   font-size: 12px;
