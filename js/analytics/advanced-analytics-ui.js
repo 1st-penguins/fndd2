@@ -163,7 +163,7 @@ export function renderWeakQuestions(attempts) {
 
         <button
           class="weak-question-btn"
-          onclick="window.location.href='exam/quiz.html?year=${q.year}&subject=${encodeURIComponent(q.subject)}&question=${q.number}'">
+          onclick="window.location.href='exam-new/quiz.html?year=${q.year}&subject=${encodeURIComponent(q.subject)}&question=${q.number}'">
           다시 풀기
         </button>
       </div>
@@ -231,7 +231,7 @@ export function renderReviewRecommendations(attempts) {
         </div>
         <div class="review-status">${statusBadge}${intervalLabel}</div>
         <a
-          href="exam/quiz.html?year=${q.year}&subject=${encodeURIComponent(q.subject)}&question=${q.number}"
+          href="exam-new/quiz.html?year=${q.year}&subject=${encodeURIComponent(q.subject)}&question=${q.number}"
           class="review-btn">
           복습하기
         </a>

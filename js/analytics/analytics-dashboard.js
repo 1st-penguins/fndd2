@@ -1448,10 +1448,10 @@ function renderHomeReviewRecommendations() {
     // 링크 생성 (문제 페이지로 이동)
     // index.html#quiz-tab을 통해 퀴즈 탭으로 이동하고, 특정 문제를 로드하도록 해야 함.
     // 여기서는 단순화를 위해 URL 해시 변경 방식 사용 (기존 구조 호환)
-    const link = `javascript:window.location.href='exam/${year}_${subject}.html#question-${number}'`;
+    const link = `javascript:window.location.href='exam-new/${year}_${subject}.html#question-${number}'`;
 
     html += `
-      <a href="./exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${number}" class="question-card priority-high">
+      <a href="./exam-new/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${number}" class="question-card priority-high">
         <div class="q-header">
           <span>${year}년 기출</span>
           <span class="q-badge badge-wrong">오답</span>
@@ -3647,7 +3647,7 @@ function createQuestionCard(attempt, uniqueAttempts, sessionData) {
     const subject = sessionData.subject || (attempt.questionData?.subject) || '';
 
     // URL 생성 (통일: quiz.html 사용)
-    const url = `exam/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${questionNumber}`;
+    const url = `exam-new/quiz.html?year=${year}&subject=${encodeURIComponent(subject)}&number=${questionNumber}`;
 
     window.location.href = url;
   });
@@ -5379,8 +5379,8 @@ function renderQuestionCard(stat) {
 
   // 문제 페이지 URL 생성
   const questionUrl = stat.isFromMockExam
-    ? `../exam/${stat.year}_모의고사_${stat.mockExamPart || '1'}교시.html?question=${stat.number}`
-    : `../exam/${stat.year}_${decodedSubject}.html?question=${stat.number}`;
+    ? `../exam-new/${stat.year}_모의고사_${stat.mockExamPart || '1'}교시.html?question=${stat.number}`
+    : `../exam-new/${stat.year}_${decodedSubject}.html?question=${stat.number}`;
   const mostWrongOption = getMostSelectedWrongOption(stat);
   const avgTimeSpent = stat.total > 0 && stat.totalTimeSpent > 0
     ? Math.round(stat.totalTimeSpent / stat.total)

@@ -21,7 +21,7 @@
 
   // 경로 prefix (하위 폴더 감지)
   const path = window.location.pathname;
-  const isSubDir = path.includes('/exam/') || path.includes('/admin/') ||
+  const isSubDir = path.includes('/exam/') || path.includes('/exam-new') || path.includes('/admin/') ||
     path.includes('/notices/') || path.includes('/subjects') || path.includes('/years');
   const prefix = isSubDir ? '../' : '';
 

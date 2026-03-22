@@ -739,7 +739,7 @@ function saveInlineTag() {
  */
 function openQuestion(year, subject, questionIndex) {
   const encodedSubject = encodeURIComponent(subject);
-  window.location.href = `exam/quiz.html?year=${year}&subject=${encodedSubject}&q=${questionIndex + 1}`;
+  window.location.href = `exam-new/quiz.html?year=${year}&subject=${encodedSubject}&q=${questionIndex + 1}`;
 }
 
 /**

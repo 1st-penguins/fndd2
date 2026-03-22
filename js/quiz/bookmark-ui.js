@@ -386,7 +386,7 @@ function handleStartQuiz() {
   }));
 
   sessionStorage.setItem('wrongReviewQuestions', JSON.stringify(quizData));
-  window.location.href = `exam/quiz.html?mode=wrong-review&count=${quizData.length}`;
+  window.location.href = `exam-new/quiz.html?mode=wrong-review&count=${quizData.length}`;
 }
 
 // ── 상세 모달 ──
