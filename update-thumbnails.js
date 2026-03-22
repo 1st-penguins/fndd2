@@ -18,7 +18,7 @@ const thumbnailMap = {
   'health-pathology-lecture': '/images/products/patho-lecture.jpg',
   'health-prescription-lecture': '/images/products/prescript-lecture.jpg',
   'health-fitness-eval-lecture': '/images/products/health-lecture.jpg',
-  // 레거시 ID (혹시 남아있을 경우)
+  // 레거시 강의 ID
   'video_anatomy': '/images/products/anatomy-lecture.jpg',
   'video_injury': '/images/products/injury-lecture.jpg',
   'video_physio': '/images/products/physio-lecture.jpg',
@@ -27,6 +27,24 @@ const thumbnailMap = {
   'video_patho': '/images/products/patho-lecture.jpg',
   'video_prescript': '/images/products/prescript-lecture.jpg',
   'video_health': '/images/products/health-lecture.jpg',
+  // 요약본 (새 ID 체계)
+  'health-anatomy-summary': '/images/products/anatomy-pdf.jpg',
+  'health-injury-summary': '/images/products/injury-pdf.jpg',
+  'health-physiology-summary': '/images/products/physio-pdf.jpg',
+  'health-stress-test-summary': '/images/products/load-pdf.jpg',
+  'health-pathology-summary': '/images/products/patho-pdf.jpg',
+  'health-sports-psych-summary': '/images/products/psycho-pdf.jpg',
+  'health-prescription-summary': '/images/products/prescript-pdf.jpg',
+  'health-fitness-eval-summary': '/images/products/health-pdf.jpg',
+  // 레거시 요약본 ID
+  'pdf_anatomy': '/images/products/anatomy-pdf.jpg',
+  'pdf_injury': '/images/products/injury-pdf.jpg',
+  'pdf_physio': '/images/products/physio-pdf.jpg',
+  'pdf_load': '/images/products/load-pdf.jpg',
+  'pdf_patho': '/images/products/patho-pdf.jpg',
+  'pdf_psycho': '/images/products/psycho-pdf.jpg',
+  'pdf_prescript': '/images/products/prescript-pdf.jpg',
+  'pdf_health': '/images/products/health-pdf.jpg',
 };
 
 async function updateThumbnails() {

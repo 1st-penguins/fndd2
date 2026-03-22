@@ -4,7 +4,8 @@ Allow: /
 
 # 관리자·내부 도구는 색인 제외
 Disallow: /admin/
-Disallow: /admin-notices.html
 Disallow: /admin-tags.html
+Disallow: /seed-products.html
+Disallow: /index-legacy.html
 
 Sitemap: https://the1stpeng.com/sitemap.xml
