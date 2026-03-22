@@ -128,8 +128,7 @@ service cloud.firestore {
     // 📦 구매 및 권한 (Purchases) (Pro Feature)
     // ============================================
     match /purchases/{purchaseId} {
-      // 본인의 구매 내역만 읽기/생성 가능
-      // 문서가 존재하지 않을 때도 get()이 가능하도록 resource == null 체크 추가
+      // 본인의 구매 내역만 읽기/생성 가능 (resource == null: 구매 여부 확인 시 문서 미존재 허용)
       allow read: if isLoggedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin(); // 사용자는 구매 내역 수정 불가

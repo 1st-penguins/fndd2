@@ -659,8 +659,8 @@
         videoSessionProductId: productId
       }, { merge: true });
 
-      // 30초마다 토큰 검증
-      sessionCheckInterval = setInterval(() => checkSession(uid), 30000);
+      // 10초마다 토큰 검증
+      sessionCheckInterval = setInterval(() => checkSession(uid), 10000);
 
       // 페이지 이탈 시 세션 정리
       window.addEventListener('beforeunload', () => clearVideoSession(uid));
