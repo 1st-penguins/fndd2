@@ -1936,8 +1936,25 @@
     // ── 학습진행률 데이터 로드 ──
     async function loadProgressData() {
       try {
-        const { ensureAuthReady } = await import('./js/core/firebase-core.js');
-        const user = await ensureAuthReady();
+        const { ensureFirebase } = await import('./js/core/firebase-core.js');
+        const { auth } = await ensureFirebase();
+
+        let user = auth.currentUser;
+        if (!user && !window.__authStateResolved) {
+          user = await new Promise((resolve) => {
+            const handler = (e) => {
+              window.removeEventListener('loginStateChanged', handler);
+              clearTimeout(timer);
+              if (e.detail?.isLoggedIn) resolve(auth.currentUser);
+              else resolve(null);
+            };
+            const timer = setTimeout(() => {
+              window.removeEventListener('loginStateChanged', handler);
+              resolve(auth.currentUser);
+            }, 5000);
+            window.addEventListener('loginStateChanged', handler);
+          });
+        }
 
         if (!user) {
           document.getElementById('progress-tab').style.display = 'none';
