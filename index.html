@@ -430,14 +430,17 @@
 
     .story__history-img {
       width: 120px;
-      height: 160px;
-      object-fit: contain;
+      height: 120px;
+      object-fit: cover;
+      object-position: center 30%;
+      border-radius: 12px;
     }
 
     .story__history-img--wide {
       width: 180px;
       height: 120px;
       object-fit: cover;
+      object-position: center;
       border-radius: 8px;
     }
 
@@ -511,7 +514,7 @@
       .story__section { padding: 80px 20px; }
       .story__quote { font-size: var(--text-2xl); }
       .story__text { font-size: var(--text-base); }
-      .story__history-img { width: 70px; height: 95px; }
+      .story__history-img { width: 80px; height: 80px; }
       .story__history-img--wide { width: 100px; height: 70px; }
       .story__history { gap: 8px; }
       .story__history-arrow { font-size: 14px; }
