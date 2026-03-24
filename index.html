@@ -438,19 +438,19 @@
     }
 
     .story__label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #86868b;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 32px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1d1d1f;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
     }
 
     .story__caption {
-      font-size: var(--text-base);
+      font-size: var(--text-sm);
       color: #86868b;
-      margin-top: 24px;
-      line-height: 1.6;
+      margin-top: 28px;
+      line-height: 1.7;
+      font-weight: 500;
     }
 
     .story__section--dark .story__caption {
@@ -460,10 +460,9 @@
     /* 이미지 히스토리 */
     .story__history {
       display: flex;
-      align-items: flex-start;
       justify-content: center;
-      gap: 20px;
-      margin-top: 40px;
+      gap: 24px;
+      margin-top: 32px;
       flex-wrap: nowrap;
     }
 
@@ -471,30 +470,52 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      width: 180px;
+    }
+
+    .story__history-img-wrap {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .story__history-img {
-      width: 120px;
-      height: 120px;
+      width: 160px;
+      height: 160px;
       object-fit: contain;
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e8e8e8;
+      border-radius: 16px;
     }
 
     .story__history-img--wide {
-      width: 180px;
-      height: 120px;
+      width: 240px;
+      height: 160px;
       object-fit: cover;
       object-position: center;
-      border-radius: 8px;
+      border-radius: 12px;
+    }
+
+    .story__history-item--wide {
+      width: 240px;
     }
 
     .story__history-num {
       font-size: 12px;
-      font-weight: 600;
-      color: #86868b;
+      font-weight: 500;
+      color: #6e6e73;
+      line-height: 1.5;
+      text-align: center;
+      margin-top: 14px;
+      min-height: 36px;
+    }
+
+    .story__history-arrow-wrap {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
     }
 
     /* 화살표: 이미지 높이(120px)의 중앙에 위치 */
@@ -504,6 +525,73 @@
       flex-shrink: 0;
       line-height: 1;
       margin-top: 50px; /* 120px / 2 - arrow size / 2 */
+    }
+
+    /* 강사 소개 */
+    .story__team {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 32px;
+    }
+
+    .story__team-member {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .story__team-img {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #f0f0f0;
+      border: 3px solid #e8e8e8;
+    }
+
+    .story__team-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1d1d1f;
+      margin-top: 8px;
+    }
+
+    .story__team-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6e6e73;
+      text-align: center;
+    }
+
+    .story__team-link {
+      display: inline-block;
+      margin-top: 28px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1D2F4E;
+      text-decoration: none;
+      padding: 10px 28px;
+      border: 1.5px solid #d2d2d7;
+      border-radius: 100px;
+      transition: all 0.2s;
+    }
+
+    .story__team-link:hover {
+      background: #1D2F4E;
+      border-color: #1D2F4E;
+      color: #fff;
+    }
+
+    /* 뛰어드세요 강조 */
+    .story__dive-cta {
+      font-size: clamp(var(--text-2xl), 5vw, var(--text-4xl));
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.3;
+      margin-top: 32px;
+      color: #1D2F4E;
     }
 
     /* 텍스트 흐름 섹션 */
@@ -571,6 +659,8 @@
       .story__history-arrow { font-size: 11px; margin-top: 28px; }
       .story__history-num { font-size: 10px; line-height: 1.4; }
       .story__depth { display: none; }
+      .story__team { gap: 32px; }
+      .story__team-img { width: 110px; height: 110px; }
 
       .story__ocean { padding: 60px 20px 120px; }
 
@@ -704,7 +794,8 @@
           <p class="story__text story__text--muted">있어도 별로였어요.</p>
           <p class="story__text story__text--muted">별로인데 비쌌어요.</p>
           <p class="story__text" style="margin-top:20px;">그래서 만들었어요.</p>
-          <p class="story__text story__text--muted">코딩도 모르면서요.</p>
+          <p class="story__text">직접 만들면 되잖아요.</p>
+          <p class="story__text story__text--muted">코딩은 모르지만요.</p>
         </div>
 
         <!-- 로고의 역사 -->
@@ -712,17 +803,23 @@
         <p class="story__caption" style="margin-top:0;">로고도 없었어요. 처음엔.</p>
         <div class="story__history">
           <div class="story__history-item">
-            <img src="images/about/logo1.jpg" alt="로고 v1" class="story__history-img">
+            <div class="story__history-img-wrap">
+              <img src="images/about/logo1.jpg" alt="로고 v1" class="story__history-img">
+            </div>
             <span class="story__history-num">그림판으로 그렸어요.<br>마우스로요.</span>
           </div>
-          <span class="story__history-arrow">→</span>
+          <div class="story__history-arrow-wrap"><span class="story__history-arrow">→</span></div>
           <div class="story__history-item">
-            <img src="images/about/logo2.jpg" alt="로고 v2" class="story__history-img">
+            <div class="story__history-img-wrap">
+              <img src="images/about/logo2.jpg" alt="로고 v2" class="story__history-img">
+            </div>
             <span class="story__history-num">나름 고쳤어요.<br>본인 기준엔 많이요.</span>
           </div>
-          <span class="story__history-arrow">→</span>
+          <div class="story__history-arrow-wrap"><span class="story__history-arrow">→</span></div>
           <div class="story__history-item">
-            <img src="images/about/logo3.jpg" alt="현재 로고" class="story__history-img">
+            <div class="story__history-img-wrap">
+              <img src="images/about/logo3.jpg" alt="현재 로고" class="story__history-img">
+            </div>
             <span class="story__history-num">지금은 이래요.</span>
           </div>
         </div>
@@ -732,22 +829,28 @@
         <p class="story__label" style="margin-top:80px;">플랫폼의 역사</p>
         <p class="story__caption" style="margin-top:0;">사이트도 없었어요. 처음엔.</p>
         <div class="story__history">
-          <div class="story__history-item">
-            <img src="images/about/home1.jpg" alt="사이트 v1" class="story__history-img story__history-img--wide">
+          <div class="story__history-item story__history-item--wide">
+            <div class="story__history-img-wrap">
+              <img src="images/about/home1.jpg" alt="사이트 v1" class="story__history-img story__history-img--wide">
+            </div>
             <span class="story__history-num">코딩이 뭔지도 몰랐어요.<br>유튜브 보면서 만들었어요.</span>
           </div>
-          <span class="story__history-arrow">→</span>
-          <div class="story__history-item">
-            <img src="images/about/home2.jpg" alt="사이트 v2" class="story__history-img story__history-img--wide">
+          <div class="story__history-arrow-wrap"><span class="story__history-arrow">→</span></div>
+          <div class="story__history-item story__history-item--wide">
+            <div class="story__history-img-wrap">
+              <img src="images/about/home2.jpg" alt="사이트 v2" class="story__history-img story__history-img--wide">
+            </div>
             <span class="story__history-num">조금씩 알게 됐어요.<br>Claude한테 물어보면서요.</span>
           </div>
-          <span class="story__history-arrow">→</span>
-          <div class="story__history-item">
-            <img src="images/about/home3.jpg" alt="현재 사이트" class="story__history-img story__history-img--wide">
+          <div class="story__history-arrow-wrap"><span class="story__history-arrow">→</span></div>
+          <div class="story__history-item story__history-item--wide">
+            <div class="story__history-img-wrap">
+              <img src="images/about/home3.jpg" alt="현재 사이트" class="story__history-img story__history-img--wide">
+            </div>
             <span class="story__history-num">지금은 이래요.</span>
           </div>
         </div>
-        <p class="story__caption">꽤 괜찮지 않나요?<br>기능도 꽤 많아요. 진짜로요.</p>
+        <p class="story__caption">유튜브에서 여기까지 왔어요.<br>아직도 매일 고치고 있어요. 그게 좋아서요.</p>
 
         <!-- 마무리 텍스트 -->
         <div style="margin-top:80px;">
@@ -758,10 +861,28 @@
           <p class="story__text">완벽한 게 어딨어요. 그냥 하는 거지.</p>
         </div>
 
+        <!-- 강사 소개 -->
+        <div style="margin-top:80px;">
+          <p class="story__label">그냥 한 사람들</p>
+          <div class="story__team">
+            <div class="story__team-member">
+              <img src="images/about/member1.jpg" alt="강민지" class="story__team-img">
+              <p class="story__team-name">강민지</p>
+              <p class="story__team-title">대표 · 건강운동관리사</p>
+            </div>
+            <div class="story__team-member">
+              <img src="images/about/member2.jpg" alt="박성수" class="story__team-img">
+              <p class="story__team-name">박성수</p>
+              <p class="story__team-title">건강운동관리사</p>
+            </div>
+          </div>
+          <a href="about.html" class="story__team-link">소개 한 번 해볼게요</a>
+        </div>
+
         <div style="margin-top:48px;">
           <p class="story__text">저희는 이미 뛰어들었어요.</p>
-          <p class="story__text story__text--muted">여기 물 꽤 차가워요.</p>
-          <p class="story__quote" style="margin-top:24px;">그래도 그냥 뛰어드세요.</p>
+          <p class="story__text story__text--muted">근데 물이 꽤 차가워요.</p>
+          <p class="story__dive-cta">그래도 그냥 뛰어보세요.</p>
         </div>
 
       </div>
@@ -816,6 +937,7 @@
         <a href="si1.html" class="footer__link">1급 스포츠지도사</a>
         <a href="si2.html" class="footer__link">2급 스포츠지도사</a>
         <span class="footer__divider"></span>
+        <a href="/about.html" class="footer__link">소개</a>
         <a href="/terms.html" class="footer__link">이용약관</a>
         <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
         <a href="/company-info.html" class="footer__link">사업자정보</a>

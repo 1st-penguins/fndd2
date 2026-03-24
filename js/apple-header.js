@@ -44,7 +44,17 @@
         loginBtn.href = prefix + 'mypage.html';
       } else {
         loginBtn.textContent = '로그인';
-        loginBtn.href = '#';
+        loginBtn.href = prefix + 'login.html';
+        loginBtn.onclick = function(e) {
+          if (typeof window.showLoginModal === 'function') {
+            e.preventDefault();
+            window.showLoginModal();
+          } else if (typeof window.lazyAuthAndShowLoginModal === 'function') {
+            e.preventDefault();
+            window.lazyAuthAndShowLoginModal();
+          }
+          // 모달 함수가 없으면 login.html로 이동
+        };
       }
     }
 
