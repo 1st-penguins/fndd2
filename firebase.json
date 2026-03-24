@@ -18,6 +18,15 @@
       "**/*.md",
       "functions/**"
     ],
+    "redirects": [
+      { "source": "/exam/**", "destination": "/exam-new/:splat", "type": 301 },
+      { "source": "/exam-sports/**", "destination": "/exam-new-sports/:splat", "type": 301 },
+      { "source": "/quiz/**", "destination": "/exam-new/:splat", "type": 301 },
+      { "source": "/mock-exam/**", "destination": "/exam-new/:splat", "type": 301 },
+      { "source": "/about", "destination": "/about.html", "type": 301 },
+      { "source": "/es.html", "destination": "/cft.html", "type": 301 },
+      { "source": "/landing.html", "destination": "/index.html", "type": 301 }
+    ],
     "rewrites": [
       { "source": "/notices", "destination": "/notices.html" },
       { "source": "/terms", "destination": "/terms.html" },
