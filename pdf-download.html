@@ -347,9 +347,11 @@
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         showError('로그인이 필요합니다.');
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 2000);
+        if (typeof window.showLoginModal === 'function') {
+          setTimeout(() => window.showLoginModal(), 300);
+        } else {
+          setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+        }
         return;
       }
       

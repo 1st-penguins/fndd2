@@ -45,66 +45,7 @@
   <!-- 모의고사 스크립트 -->
   <script type="module" src="../js/quiz/mock-exam.js?v=2026031305"></script>
 
-  <!-- 인라인 이벤트 핸들러 보호 스크립트 -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-
-      if (isLoggedIn) {
-        document.querySelectorAll('.restricted-content').forEach(function(el) {
-          el.classList.remove('content-blurred');
-          el.style.filter = 'none';
-          el.style.pointerEvents = 'auto';
-        });
-      } else {
-        document.querySelectorAll('.restricted-content').forEach(function(el) {
-          el.classList.add('content-blurred');
-          el.style.filter = 'blur(5px)';
-          el.style.pointerEvents = 'none';
-        });
-
-        setTimeout(function() {
-          if (typeof window.showLoginModal === 'function') {
-            window.showLoginModal();
-          } else {
-            var modal = document.getElementById('login-required-modal');
-            if (modal) modal.style.display = 'flex';
-          }
-        }, 300);
-      }
-
-      if (typeof closeLoginModal !== 'function') {
-        window.closeLoginModal = function() {
-          var modal = document.getElementById('login-required-modal');
-          if (modal) modal.style.display = 'none';
-        };
-      }
-
-      if (typeof loginAndCloseModal !== 'function') {
-        window.loginAndCloseModal = function() {
-          var modal = document.getElementById('login-required-modal');
-          if (modal) {
-            var modalContent = modal.querySelector('.login-modal-content');
-            if (modalContent) {
-              modalContent.innerHTML =
-                '<span class="login-modal-close" onclick="closeLoginModal()">&times;</span>' +
-                '<h3>로그인</h3>' +
-                '<div class="login-form">' +
-                  '<input type="email" id="login-email" placeholder="이메일" class="login-input">' +
-                  '<input type="password" id="login-password" placeholder="비밀번호" class="login-input">' +
-                  '<button class="login-now-button" onclick="firebaseEmailLogin()">로그인</button>' +
-                  '<button class="login-with-google" onclick="firebaseGoogleLogin()">' +
-                    '<span>G</span> Google로 로그인' +
-                  '</button>' +
-                  '<p class="login-option-text">계정이 없으신가요? <a href="#" onclick="showSignupForm()">회원가입</a></p>' +
-                '</div>';
-            }
-            modal.style.display = 'flex';
-          }
-        };
-      }
-    });
-  </script>
+  <!-- 인증은 mock-exam.js에서 처리 (레거시 인라인 스크립트 제거됨) -->
 
   <script src="../js/logger.js"></script>
   <script src="../js/mobile-viewport-fix.js"></script>
@@ -741,15 +682,7 @@
 
 <body>
 
-  <!-- 로그인 필요 알림 모달 -->
-  <div id="login-required-modal" class="login-modal">
-    <div class="login-modal-content">
-      <span class="login-modal-close" onclick="closeLoginModal()">&times;</span>
-      <h3>로그인이 필요합니다</h3>
-      <p>모의고사를 풀려면 로그인이 필요합니다.</p>
-      <button class="login-now-button" onclick="loginAndCloseModal()">지금 로그인하기</button>
-    </div>
-  </div>
+  <!-- 로그인 모달: auth-ui.js의 showLoginModal() 사용 -->
 
   <!-- Header -->
   <div class="fp-header">
@@ -845,46 +778,7 @@
       </div>
     </div>
 
-    <!-- Firebase 인증 상태 감지 -->
-    <script type="module">
-      import { ensureFirebase } from "../js/core/firebase-core.js";
-
-      document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          const { auth } = await ensureFirebase();
-          const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js");
-          onAuthStateChanged(auth, (user) => {
-            if (user) {
-              localStorage.setItem("userLoggedIn", "true");
-              localStorage.setItem("userName", user.displayName || user.email || "사용자");
-
-              document.querySelectorAll('.restricted-content').forEach(el => {
-                el.classList.remove('content-blurred');
-                el.style.filter = 'none';
-                el.style.pointerEvents = 'auto';
-              });
-
-              const modal = document.getElementById('login-required-modal');
-              if (modal) modal.style.display = 'none';
-            } else {
-              localStorage.removeItem("userLoggedIn");
-              localStorage.removeItem("userName");
-
-              document.querySelectorAll('.restricted-content').forEach(el => {
-                el.classList.add('content-blurred');
-                el.style.filter = 'blur(5px)';
-                el.style.pointerEvents = 'none';
-              });
-
-              const modal = document.getElementById('login-required-modal');
-              if (modal) modal.style.display = 'flex';
-            }
-          });
-        } catch (e) {
-          console.error("Firebase 인증 초기화 실패:", e);
-        }
-      });
-    </script>
+    <!-- Firebase 인증: mock-exam.js + auth-core.js에서 처리 -->
 
   </main>
 

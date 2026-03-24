@@ -123,6 +123,15 @@ export async function initAuth() {
         if (typeof window.updateTagSearchLinkVisibility === 'function') {
           window.updateTagSearchLinkVisibility();
         }
+
+        // 비로그인 + 제한된 콘텐츠가 있는 페이지면 즉시 로그인 모달 표시
+        const hasRestrictedContent = document.querySelector('.restricted-content');
+        if (hasRestrictedContent && typeof window.showLoginModal === 'function') {
+          // 약간의 딜레이로 DOM 렌더링 후 표시
+          setTimeout(() => {
+            window.showLoginModal();
+          }, 300);
+        }
       }
 
       // UI 업데이트 (updateLoginUI가 내부적으로 restrictedContent + overlays 모두 처리)

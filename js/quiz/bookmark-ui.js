@@ -54,6 +54,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           <p>로그인이 필요한 서비스입니다.</p>
         </div>
       `;
+      // 비로그인 시 로그인 모달 즉시 표시
+      if (typeof window.showLoginModal === 'function') {
+        setTimeout(() => window.showLoginModal(), 300);
+      }
     }
   });
 

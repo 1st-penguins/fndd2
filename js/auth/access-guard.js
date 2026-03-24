@@ -42,12 +42,17 @@ export function syncLoginOverlays(root = document) {
   root.body?.classList.toggle("logged-in", isLoggedIn);
 
   overlays.forEach((overlay) => {
-    // UX 요청: 로그인 전에도 콘텐츠 오버레이는 노출하지 않음.
-    // 접근 제한은 restricted-link 클릭 가드에서만 처리.
-    overlay.style.display = "none";
-    overlay.style.visibility = "hidden";
-    overlay.style.opacity = "0";
-    overlay.style.pointerEvents = "none";
+    if (isLoggedIn) {
+      overlay.style.display = "none";
+      overlay.style.visibility = "hidden";
+      overlay.style.opacity = "0";
+      overlay.style.pointerEvents = "none";
+    } else {
+      overlay.style.display = "flex";
+      overlay.style.visibility = "visible";
+      overlay.style.opacity = "1";
+      overlay.style.pointerEvents = "auto";
+    }
   });
 }
 

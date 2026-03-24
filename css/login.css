@@ -121,35 +121,29 @@
 .content-blurred {
   filter: blur(4px);
   opacity: 0.7;
-  pointer-events: auto;
+  pointer-events: none;
   position: relative;
   transition: all 0.3s ease;
-}
-
-.content-blurred:hover {
-  filter: blur(3px);
-  opacity: 0.8;
+  user-select: none;
 }
 
 .content-blurred::before {
-  content: "🔒 로그인 필요";
+  content: "🔒 로그인 후 이용 가능";
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(29, 47, 78, 0.8);
+  background-color: rgba(29, 47, 78, 0.85);
   color: white;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 20px;
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
   z-index: 2;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.content-blurred:hover::before {
   opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 /* (중복 .login-modal 정의 제거됨 — 332번 줄의 정의를 사용) */
@@ -568,19 +562,14 @@
   text-align: left;
 }
 
-/* 제한된 콘텐츠 스타일 */
+/* 제한된 콘텐츠 스타일 (중복 정의 — 121줄 참조) */
 .content-blurred {
   filter: blur(4px);
   opacity: 0.7;
-  pointer-events: auto;
-  /* 마우스 이벤트 허용 (오버레이 클릭 위해) */
+  pointer-events: none;
   position: relative;
   transition: all 0.3s ease;
   user-select: none;
-}
-
-.content-blurred .login-required-overlay {
-  cursor: pointer;
 }
 
 /* 모바일 반응형 */

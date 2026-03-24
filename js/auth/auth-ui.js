@@ -651,42 +651,26 @@ export function updateRestrictedContent(isLoggedIn) {
     } else {
       el.classList.add('content-blurred');
       el.style.filter = '';
-      el.style.pointerEvents = 'auto';
+      el.style.pointerEvents = 'none';
     }
   });
 
-  // 🚀 로그인 오버레이 클릭 이벤트 활성화 (모바일 UX 개선)
+  // 블러된 콘텐츠 클릭 시 로그인 모달 표시
   if (!effectiveLoggedIn) {
-    document.querySelectorAll('.login-required-overlay').forEach(overlay => {
-      // 오버레이 자체 클릭 시 로그인 모달 표시
-      overlay.style.cursor = 'pointer';
-
-      // 기존 리스너 제거 방식 대신, 속성으로 플래그를 확인하여 중복 등록 방지
-      if (!overlay.dataset.clickListenerAttached) {
-        overlay.dataset.clickListenerAttached = 'true';
-
-        overlay.addEventListener('click', (e) => {
-          // 버튼 클릭이 아닐 때만 작동 (버튼 자체 클릭과 충돌 방지)
-          if (!e.target.closest('button') && !e.target.closest('a')) {
+    restrictedElements.forEach(el => {
+      if (!el.dataset.blurClickBound) {
+        el.dataset.blurClickBound = 'true';
+        // ::before 영역(로그인 뱃지) 클릭 감지를 위해 부모에 이벤트 위임
+        el.addEventListener('click', (e) => {
+          if (el.classList.contains('content-blurred')) {
             showLoginModal();
           }
-        });
-
-        // 오버레이 내부의 모든 버튼에도 로그인 모달 연결 (인라인 onclick 무시, 안전장치)
-        const loginBtns = overlay.querySelectorAll('.btn-primary, .login-now-button');
-        loginBtns.forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            showLoginModal();
-          });
         });
       }
     });
   }
 
   setupRestrictedLinkDelegation(document);
-  syncLoginOverlays(document);
 }
 
 /**

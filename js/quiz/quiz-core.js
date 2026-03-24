@@ -3,6 +3,7 @@
 import { recordAttempt, batchRecordAttempts } from "../data/quiz-repository.js";
 import { formatTimeFromSeconds } from "../utils/date-utils.js";
 import { isUserLoggedIn } from "../auth/auth-utils.js";
+import { requireAuth } from "../auth/require-auth.js";
 import { sessionManager } from '../data/session-manager.js';
 import { auth } from "../core/firebase-core.js";
 import { saveWrongAnswer, markAsResolved } from "./wrong-note-service.js";
@@ -301,6 +302,26 @@ function showResumeBanner(data) {
 // 버전: v2.1.0 - 캐시 무효화
 export async function initializeQuiz() {
   try {
+    // 로그인 필수 — 비로그인 시 퀴즈 로딩 자체를 차단
+    const user = await requireAuth();
+    if (!user) {
+      // 전체 main 영역을 로그인 안내로 대체
+      const mainEl = document.querySelector('main');
+      if (mainEl) {
+        mainEl.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;min-height:60vh;background:#fff;">
+            <div style="text-align:center;padding:60px 20px;">
+              <div style="width:64px;height:64px;margin:0 auto 20px;background:#f5f5f7;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <p style="font-size:20px;font-weight:700;color:#1d1d1f;margin-bottom:6px;">로그인이 필요합니다</p>
+              <p style="font-size:14px;color:#86868b;">문제풀이를 위해 먼저 로그인해주세요.</p>
+            </div>
+          </div>`;
+      }
+      return;
+    }
+
     window.Logger?.debug('퀴즈 초기화 시작');
 
     // URL 파라미터 확인 (이어서 풀기 모드 체크)
@@ -1026,6 +1047,12 @@ function extractTagsFromExplanation(explanation) {
  * @returns {Array} 업데이트된 답변 배열
  */
 export function selectOption(optionIndex, questionIndex = currentQuestionIndex, answers = userAnswers) {
+  // 비로그인 차단
+  if (!isUserLoggedIn()) {
+    if (typeof window.showLoginModal === 'function') window.showLoginModal();
+    return answers;
+  }
+
   // 사용자가 선택한 실제 인덱스를 저장
   // optionIndex는 0부터 시작하는 인덱스로 전달됨 (UI에서는 1부터 시작)
   answers[questionIndex] = optionIndex;
@@ -1061,6 +1088,12 @@ export function selectOption(optionIndex, questionIndex = currentQuestionIndex, 
  * @returns {Object} 정답 확인 결과
  */
 export function checkAnswer() {
+  // 비로그인 차단
+  if (!isUserLoggedIn()) {
+    if (typeof window.showLoginModal === 'function') window.showLoginModal();
+    return { status: 'error', message: '로그인이 필요합니다.' };
+  }
+
   if (!questions || currentQuestionIndex === null) {
     console.error('문제가 로드되지 않았습니다.');
     return { status: 'error', message: '문제가 로드되지 않았습니다.' };

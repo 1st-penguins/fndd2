@@ -447,6 +447,10 @@
     if (!user) {
       document.getElementById('mypage-loading').style.display = 'none';
       document.getElementById('mypage-login').style.display = 'block';
+      // 비로그인 시 로그인 모달 즉시 표시
+      if (typeof window.showLoginModal === 'function') {
+        setTimeout(() => window.showLoginModal(), 300);
+      }
     } else {
       await loadMypage(user);
     }

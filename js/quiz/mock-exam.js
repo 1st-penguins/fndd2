@@ -1,10 +1,11 @@
 // mock-exam.js — ESM 모듈 (IIFE에서 전환됨)
 // 버전: v3.0.0 - ESM 전환
 
-import { db, auth, ensureFirebase } from '../core/firebase-core.js';
+import { db, auth, ensureFirebase, ensureAuthReady } from '../core/firebase-core.js';
 import { collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 import { isBookmarked } from './bookmark-service.js';
 import { doc as firestoreDoc, setDoc, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { isUserLoggedIn } from '../auth/auth-utils.js';
 
 // 전역 변수에서 sessionManager 가져오기
 const sessionManager = window.sessionManager;
@@ -477,6 +478,42 @@ function showMockResumeBanner(data) {
 
 /* ===== DOMContentLoaded 이벤트 (초기화 및 데이터 로드) ===== */
 document.addEventListener('DOMContentLoaded', async function () {
+  // 로그인 필수 — 비로그인 시 모의고사 차단
+  await ensureFirebase();
+  const _mockUser = await ensureAuthReady();
+  if (!_mockUser) {
+    // 블러 제거 — 안내 메시지는 선명하게 보여야 함
+    const restrictedEl = document.querySelector('.restricted-content');
+    if (restrictedEl) {
+      restrictedEl.classList.remove('content-blurred');
+      restrictedEl.style.filter = 'none';
+      restrictedEl.style.pointerEvents = 'none';
+    }
+    // 전체 main 영역을 로그인 안내로 대체
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;min-height:60vh;background:#fff;">
+          <div style="text-align:center;padding:60px 20px;">
+            <div style="width:64px;height:64px;margin:0 auto 20px;background:#f5f5f7;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <p style="font-size:20px;font-weight:700;color:#1d1d1f;margin-bottom:6px;">로그인이 필요합니다</p>
+            <p style="font-size:14px;color:#86868b;">모의고사를 위해 먼저 로그인해주세요.</p>
+          </div>
+        </div>`;
+    }
+    document.querySelectorAll('.nav-button, .option-button').forEach(btn => {
+      btn.disabled = true;
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.3';
+    });
+    if (typeof window.showLoginModal === 'function') {
+      setTimeout(() => window.showLoginModal(), 300);
+    }
+    return;
+  }
+
   // 이미 등록되었으면 무시
   if (keyboardEventsRegistered) {
     log('키보드 이벤트가 이미 등록되어 있습니다.', 'debug');
@@ -1320,6 +1357,12 @@ function updateSelectedOption() {
 }
 
 function selectOption(optionIndex) {
+  // 비로그인 차단
+  if (!isUserLoggedIn()) {
+    if (typeof window.showLoginModal === 'function') window.showLoginModal();
+    return;
+  }
+
   // 문제가 없는 경우 처리
   if (!questions || questions.length === 0 || !questions[currentQuestionIndex]) {
     return;
@@ -1386,6 +1429,12 @@ function selectOption(optionIndex) {
 }
 
 function checkAnswer() {
+  // 비로그인 차단
+  if (!isUserLoggedIn()) {
+    if (typeof window.showLoginModal === 'function') window.showLoginModal();
+    return;
+  }
+
   const selectedAnswer = userAnswers[questions[currentQuestionIndex].globalIndex];
   if (selectedAnswer === null) {
     alert('답을 선택해주세요.');
