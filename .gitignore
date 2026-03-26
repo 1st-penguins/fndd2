@@ -4,3 +4,4 @@ service-account-key.json
 functions/.env
 .claude/settings.local.json
 .firebase/hosting..cache
+scripts/gmail-to-telegram.gs

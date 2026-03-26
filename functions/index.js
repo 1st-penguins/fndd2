@@ -8,8 +8,8 @@ const db = admin.firestore();
 // ============================================
 // 📩 1:1 문의 텔레그램 알림
 // ============================================
-const TELEGRAM_BOT_TOKEN = "8766322797:AAHX08TXs0YamolCrAlOHfAMCtE1Dje10UA";
-const TELEGRAM_CHAT_ID = "-5261185105";
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "-5261185105";
 
 const CATEGORY_LABELS = {
   "payment": "결제/환불",
@@ -152,27 +152,21 @@ exports.telegramWebhook = functions.region("asia-northeast3").https.onRequest(as
 // ============================================
 exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (req, res) => {
   try {
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-    const dd = String(now.getDate()).padStart(2, "0");
+    // 한국 시간(KST, UTC+9) 기준으로 날짜 계산
+    const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const yyyy = now.getUTCFullYear();
+    const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(now.getUTCDate()).padStart(2, "0");
     const todayKey = `${yyyy}-${mm}-${dd}`;
 
-    // 오늘 방문자 수 (visits 컬렉션, dateKey 기준)
-    const visitsSnap = await db.collection("visits")
-      .where("dateKey", "==", todayKey)
-      .get();
+    // 오늘 방문자 수 (daily_visits 컬렉션 — 관리자 대시보드와 동일 소스)
+    const dailyDoc = await db.collection("daily_visits").doc(todayKey).get();
+    const users = dailyDoc.exists ? (dailyDoc.data().users || {}) : {};
+    const visitorCount = Object.keys(users).length;
 
-    // 고유 방문자 수 (visitorId 기준 중복 제거)
-    const uniqueVisitors = new Set();
-    visitsSnap.forEach(doc => {
-      const data = doc.data();
-      uniqueVisitors.add(data.visitorId || data.userId || doc.id);
-    });
-
-    // 오늘 문제풀이 수 (attempts 컬렉션)
-    const todayStart = new Date(yyyy, now.getMonth(), now.getDate());
-    const todayEnd = new Date(yyyy, now.getMonth(), now.getDate(), 23, 59, 59);
+    // 오늘 문제풀이 수 (attempts 컬렉션, KST 기준)
+    const todayStart = new Date(Date.UTC(yyyy, now.getUTCMonth(), now.getUTCDate()) - 9 * 60 * 60 * 1000);
+    const todayEnd = new Date(Date.UTC(yyyy, now.getUTCMonth(), now.getUTCDate(), 23, 59, 59) - 9 * 60 * 60 * 1000);
     const attemptsSnap = await db.collection("attempts")
       .where("timestamp", ">=", admin.firestore.Timestamp.fromDate(todayStart))
       .where("timestamp", "<=", admin.firestore.Timestamp.fromDate(todayEnd))
@@ -197,8 +191,7 @@ exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (
 
     res.json({
       date: todayKey,
-      visitors: uniqueVisitors.size,
-      pageViews: visitsSnap.size,
+      visitors: visitorCount,
       attempts: attemptsSnap.size,
       solvers: uniqueSolvers.size,
       pendingInquiries: pendingSnap.size,
