@@ -4,7 +4,7 @@
 - 건강운동관리사/스포츠지도사 자격증 기출문제 학습 플랫폼
 - Firebase Hosting + Firestore + Toss Payments
 - 프로젝트 ID: `first-penguins-new`
-- 배포: `firebase deploy --only hosting` (Firebase Hosting 사용)
+- 배포: `firebase deploy --only hosting` (Firebase Hosting 사용, Cloudflare Pages 아님!)
 
 ## 상점/강의 시스템 (shop-dev 브랜치)
 

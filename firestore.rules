@@ -223,6 +223,15 @@ service cloud.firestore {
     }
 
     // ============================================
+    // 💬 1:1 문의 (Inquiries)
+    // ============================================
+    match /inquiries/{inquiryId} {
+      allow read: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ============================================
     // ⚙️ 시스템 및 통계 (System & Stats)
     // ============================================
     // 문제는 누구나 읽기 가능 (클라이언트에서 문제 풀이를 위해 필요)

@@ -5,6 +5,210 @@ const fetch = require("node-fetch");
 admin.initializeApp();
 const db = admin.firestore();
 
+// ============================================
+// 📩 1:1 문의 텔레그램 알림
+// ============================================
+const TELEGRAM_BOT_TOKEN = "8766322797:AAHX08TXs0YamolCrAlOHfAMCtE1Dje10UA";
+const TELEGRAM_CHAT_ID = "-5261185105";
+
+const CATEGORY_LABELS = {
+  "payment": "결제/환불",
+  "lecture": "강의 문의",
+  "question-error": "문제 오류",
+  "suggestion": "건의사항",
+  "etc": "기타"
+};
+
+// 텔레그램 메시지 전송 헬퍼
+async function sendTelegram(text, replyToMessageId) {
+  const body = { chat_id: TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" };
+  if (replyToMessageId) body.reply_to_message_id = replyToMessageId;
+  const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return res.json();
+}
+
+// 새 문의 → 텔레그램 알림 (문의 ID 포함)
+exports.onNewInquiry = functions.region("asia-northeast3").firestore
+  .document("inquiries/{inquiryId}")
+  .onCreate(async (snap, context) => {
+    const data = snap.data();
+    const inquiryId = context.params.inquiryId;
+    const category = CATEGORY_LABELS[data.category] || data.category;
+    const content = data.content.length > 200 ? data.content.substring(0, 200) + "..." : data.content;
+    const text = `📩 *새 문의 접수*\n\n` +
+      `*[${category}]* ${data.title}\n` +
+      `작성자: ${data.userName || data.userEmail}\n\n` +
+      `${content}\n\n` +
+      `💬 이 메시지에 답장하면 자동으로 답변이 등록됩니다.\n` +
+      `ID: ${inquiryId}`;
+
+    try {
+      const result = await sendTelegram(text);
+      // 봇 메시지 ID를 Firestore에 저장 (답장 매칭용)
+      if (result.ok && result.result) {
+        await snap.ref.update({ telegramMessageId: result.result.message_id });
+      }
+      if (!result.ok) console.error("텔레그램 전송 실패:", result);
+    } catch (err) {
+      console.error("텔레그램 알림 오류:", err);
+    }
+  });
+
+// Firestore에 답변 저장 헬퍼
+async function saveReply(docRef, docData, replyText, replierName, messageId) {
+  await docRef.update({
+    adminReply: replyText,
+    adminReplyAt: admin.firestore.FieldValue.serverTimestamp(),
+    adminEmail: replierName,
+    status: "answered",
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  await sendTelegram(`✅ 답변이 등록되었습니다. (${docData.title})`, messageId);
+}
+
+// 텔레그램 웹훅 — 관리자 답변 감지 → Firestore에 답변 저장
+exports.telegramWebhook = functions.region("asia-northeast3").https.onRequest(async (req, res) => {
+  if (req.method !== "POST") { res.status(200).send("OK"); return; }
+
+  const message = req.body.message;
+  if (!message || !message.text) { res.status(200).send("OK"); return; }
+
+  const text = message.text;
+  const replierName = `${message.from.first_name || ""} ${message.from.last_name || ""}`.trim();
+
+  try {
+    // 방법 1: "(답변) 내용" → 가장 최근 대기중 문의에 답변
+    const answerMatch = text.match(/^\(답변\)\s*(.+)/s);
+    if (answerMatch) {
+      const replyText = answerMatch[1].trim();
+      if (!replyText) { res.status(200).send("OK"); return; }
+
+      const snapshot = await db.collection("inquiries")
+        .where("status", "==", "pending")
+        .orderBy("createdAt", "desc")
+        .limit(1)
+        .get();
+
+      if (snapshot.empty) {
+        await sendTelegram("⚠️ 대기중인 문의가 없습니다.", message.message_id);
+        res.status(200).send("OK");
+        return;
+      }
+
+      const doc = snapshot.docs[0];
+      await saveReply(doc.ref, doc.data(), replyText, replierName, message.message_id);
+      res.status(200).send("OK");
+      return;
+    }
+
+    // 방법 2: 봇 메시지에 답장 → 해당 문의에 답변
+    if (message.reply_to_message && message.reply_to_message.from?.is_bot) {
+      const originalText = message.reply_to_message.text || "";
+
+      // 원본 메시지에서 문의 ID 추출
+      const idMatch = originalText.match(/ID:\s*(.+?)$/m);
+      let docRef, docSnap;
+
+      if (idMatch) {
+        docRef = db.collection("inquiries").doc(idMatch[1]);
+        docSnap = await docRef.get();
+      }
+
+      // ID로 못 찾으면 telegramMessageId로 검색
+      if (!docSnap || !docSnap.exists) {
+        const originalMsgId = message.reply_to_message.message_id;
+        const snapshot = await db.collection("inquiries")
+          .where("telegramMessageId", "==", originalMsgId)
+          .limit(1)
+          .get();
+
+        if (snapshot.empty) {
+          await sendTelegram("⚠️ 문의를 찾을 수 없습니다.", message.message_id);
+          res.status(200).send("OK");
+          return;
+        }
+        docRef = snapshot.docs[0].ref;
+        docSnap = snapshot.docs[0];
+      }
+
+      await saveReply(docRef, docSnap.data ? docSnap.data() : docSnap, text, replierName, message.message_id);
+      res.status(200).send("OK");
+      return;
+    }
+  } catch (err) {
+    console.error("답변 저장 오류:", err);
+    await sendTelegram("❌ 답변 저장에 실패했습니다.", message.message_id);
+  }
+
+  res.status(200).send("OK");
+});
+
+// ============================================
+// 📊 일일 사이트 통계 API (Apps Script에서 호출)
+// ============================================
+exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (req, res) => {
+  try {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const todayKey = `${yyyy}-${mm}-${dd}`;
+
+    // 오늘 방문자 수 (visits 컬렉션, dateKey 기준)
+    const visitsSnap = await db.collection("visits")
+      .where("dateKey", "==", todayKey)
+      .get();
+
+    // 고유 방문자 수 (visitorId 기준 중복 제거)
+    const uniqueVisitors = new Set();
+    visitsSnap.forEach(doc => {
+      const data = doc.data();
+      uniqueVisitors.add(data.visitorId || data.userId || doc.id);
+    });
+
+    // 오늘 문제풀이 수 (attempts 컬렉션)
+    const todayStart = new Date(yyyy, now.getMonth(), now.getDate());
+    const todayEnd = new Date(yyyy, now.getMonth(), now.getDate(), 23, 59, 59);
+    const attemptsSnap = await db.collection("attempts")
+      .where("timestamp", ">=", admin.firestore.Timestamp.fromDate(todayStart))
+      .where("timestamp", "<=", admin.firestore.Timestamp.fromDate(todayEnd))
+      .get();
+
+    // 오늘 문제풀이 고유 사용자 수
+    const uniqueSolvers = new Set();
+    attemptsSnap.forEach(doc => {
+      const data = doc.data();
+      if (data.userId) uniqueSolvers.add(data.userId);
+    });
+
+    // 미답변 문의 수
+    const pendingSnap = await db.collection("inquiries")
+      .where("status", "==", "pending")
+      .get();
+
+    // 전체 회원 수
+    const usersResult = await admin.auth().listUsers(1);
+    // listUsers는 페이지네이션이라 전체 수를 빠르게 못 가져옴
+    // 대신 attempts의 고유 userId로 활성 사용자 추정
+
+    res.json({
+      date: todayKey,
+      visitors: uniqueVisitors.size,
+      pageViews: visitsSnap.size,
+      attempts: attemptsSnap.size,
+      solvers: uniqueSolvers.size,
+      pendingInquiries: pendingSnap.size,
+    });
+  } catch (err) {
+    console.error("일일 통계 오류:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /**
  * Toss Payments 결제 확인 Cloud Function
  *

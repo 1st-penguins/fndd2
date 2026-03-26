@@ -64,6 +64,9 @@
   </div>
   <div class="fp-header__mobile-menu" id="mobile-menu">
     <a href="#" class="fp-header__mobile-link" id="mobile-login-btn">로그인</a>
+    <a href="../mypage.html" class="fp-header__mobile-link" id="mobile-mypage" style="display:none">마이페이지</a>
+    <a href="../notices.html" class="fp-header__mobile-link" id="mobile-notices" style="display:none">공지사항</a>
+    <a href="#" class="fp-header__mobile-link" id="mobile-logout-btn" style="display:none">로그아웃</a>
   </div>
 
   <!-- Page Title -->
@@ -308,9 +311,17 @@
             headerBtn.textContent = name;
             headerBtn.href = '../mypage.html';
             headerBtn.onclick = null;
-            mobileBtn.textContent = '마이페이지';
-            mobileBtn.href = '../mypage.html';
-            mobileBtn.onclick = null;
+            mobileBtn.style.display = 'none';
+            document.getElementById('mobile-mypage').style.display = '';
+            document.getElementById('mobile-notices').style.display = '';
+            var logoutBtn = document.getElementById('mobile-logout-btn');
+            logoutBtn.style.display = '';
+            logoutBtn.onclick = function(e) {
+              e.preventDefault();
+              if (typeof window.handleLogout === 'function') window.handleLogout();
+              else if (typeof window.logout === 'function') window.logout();
+              else auth.signOut().then(function() { location.reload(); });
+            };
           }
         });
       } catch (e) { console.error(e); }

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>문의 관리 | 퍼스트펭귄</title>
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/apple-header.css">
+  <script type="module" src="../js/core/firebase-core.js"></script>
+  <script type="module" src="../js/auth/auth-core.js"></script>
+  <script type="module" src="../js/auth/auth-utils.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f4f6f9;
+      color: #212529;
+      min-height: 100vh;
+    }
+
+    #toast {
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      background: #212529; color: white;
+      padding: 12px 20px; border-radius: 8px;
+      font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
+    #toast.success { background: #2b8a3e; }
+    #toast.error { background: #c92a2a; }
+
+    .top-bar {
+      background: #fff;
+      border-bottom: 1px solid #e9ecef;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .top-bar h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1D2F4E;
+    }
+    .top-bar a {
+      color: #868e96;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 57px);
+    }
+
+    /* 좌측 — 문의 목록 */
+    .panel-list {
+      background: white;
+      border-right: 1px solid #e9ecef;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 57px);
+      overflow: hidden;
+    }
+
+    .panel-list__filters {
+      padding: 16px;
+      border-bottom: 1px solid #e9ecef;
+      display: flex;
+      gap: 8px;
+    }
+
+    .panel-list__filters select,
+    .panel-list__filters input {
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .panel-list__filters select { width: 120px; }
+    .panel-list__filters input { flex: 1; }
+
+    .panel-list__items {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .inq-card {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f1f3f5;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .inq-card:hover { background: #f8f9fa; }
+    .inq-card--selected { background: #edf2ff; border-left: 3px solid #1D2F4E; }
+
+    .inq-card__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .inq-card__cat {
+      font-size: 12px;
+      font-weight: 600;
+      color: #5FB2C9;
+    }
+    .inq-card__badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .b-pending { background: #fff3bf; color: #e67700; }
+    .b-answered { background: #d3f9d8; color: #2b8a3e; }
+    .b-closed { background: #e9ecef; color: #868e96; }
+
+    .inq-card__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .inq-card__meta {
+      font-size: 12px;
+      color: #adb5bd;
+    }
+
+    .panel-list__count {
+      padding: 12px 16px;
+      border-top: 1px solid #e9ecef;
+      font-size: 13px;
+      color: #868e96;
+      text-align: center;
+    }
+
+    /* 우측 — 상세 */
+    .panel-detail {
+      padding: 32px;
+      overflow-y: auto;
+      height: calc(100vh - 57px);
+    }
+
+    .detail-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #adb5bd;
+      font-size: 15px;
+    }
+
+    .detail-header {
+      margin-bottom: 24px;
+    }
+    .detail-header__title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #212529;
+      margin-bottom: 8px;
+    }
+    .detail-header__meta {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      color: #868e96;
+      flex-wrap: wrap;
+    }
+    .detail-header__meta strong { color: #495057; }
+
+    .detail-content {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #212529;
+      white-space: pre-wrap;
+      margin-bottom: 24px;
+    }
+
+    .detail-reply {
+      background: #edf2ff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .detail-reply__label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1D2F4E;
+      margin-bottom: 8px;
+    }
+    .detail-reply__text {
+      font-size: 14px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+    .detail-reply__meta {
+      font-size: 12px;
+      color: #868e96;
+      margin-top: 10px;
+    }
+
+    .reply-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .reply-form textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 14px;
+      border: 1px solid #dee2e6;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+    }
+    .reply-form textarea:focus { outline: none; border-color: #5FB2C9; }
+
+    .reply-form__actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn--primary { background: #1D2F4E; color: #fff; }
+    .btn--primary:hover { background: #2a4068; }
+    .btn--danger { background: #fff; color: #c92a2a; border: 1px solid #ffc9c9; }
+    .btn--danger:hover { background: #fff5f5; }
+    .btn--secondary { background: #e9ecef; color: #495057; }
+    .btn--secondary:hover { background: #dee2e6; }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel-detail { display: none; }
+      .panel-detail--active { display: block; }
+      .panel-list--hidden { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toast"></div>
+
+  <div class="top-bar">
+    <h1>문의 관리</h1>
+    <a href="dashboard.html">&larr; 대시보드</a>
+  </div>
+
+  <div class="layout">
+    <div class="panel-list" id="panel-list">
+      <div class="panel-list__filters">
+        <select id="filter-status">
+          <option value="">전체</option>
+          <option value="pending" selected>대기중</option>
+          <option value="answered">답변완료</option>
+          <option value="closed">종료</option>
+        </select>
+        <input type="text" id="filter-search" placeholder="검색...">
+      </div>
+      <div class="panel-list__items" id="inquiry-list"></div>
+      <div class="panel-list__count" id="inquiry-count"></div>
+    </div>
+
+    <div class="panel-detail" id="panel-detail">
+      <div class="detail-empty" id="detail-empty">좌측에서 문의를 선택하세요</div>
+      <div id="detail-content" style="display:none"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ensureFirebase } from '../js/core/firebase-core.js';
+    import { isAdmin } from '../js/auth/auth-utils.js';
+    import { getAllInquiries, replyToInquiry, updateInquiryStatus, deleteInquiry } from '../js/data/inquiry-repository.js';
+
+    const CATEGORIES = {
+      payment: '결제/환불', lecture: '강의 문의',
+      'question-error': '문제 오류', suggestion: '건의사항', etc: '기타'
+    };
+
+    let inquiries = [];
+    let selectedId = null;
+
+    function toast(msg, type = 'success') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `show ${type}`;
+      setTimeout(() => el.className = '', 2500);
+    }
+
+    function formatDate(d) {
+      if (!d) return '';
+      const date = d instanceof Date ? d : d.toDate ? d.toDate() : new Date(d);
+      return `${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function escapeHtml(s) {
+      if (!s) return '';
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    async function loadInquiries() {
+      const status = document.getElementById('filter-status').value || null;
+      try {
+        inquiries = await getAllInquiries(status, 100);
+        renderList();
+      } catch (err) {
+        console.error(err);
+        toast('목록 로드 실패', 'error');
+      }
+    }
+
+    function renderList() {
+      const search = document.getElementById('filter-search').value.toLowerCase();
+      const filtered = search
+        ? inquiries.filter(i => i.title?.toLowerCase().includes(search) || i.userName?.toLowerCase().includes(search) || i.userEmail?.toLowerCase().includes(search))
+        : inquiries;
+
+      const listEl = document.getElementById('inquiry-list');
+      const countEl = document.getElementById('inquiry-count');
+
+      if (!filtered.length) {
+        listEl.innerHTML = '<div style="padding:40px;text-align:center;color:#adb5bd">문의가 없습니다</div>';
+        countEl.textContent = '0건';
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(inq => {
+        const badgeClass = inq.status === 'pending' ? 'b-pending' : inq.status === 'answered' ? 'b-answered' : 'b-closed';
+        const badgeLabel = inq.status === 'pending' ? '대기중' : inq.status === 'answered' ? '답변완료' : '종료';
+        return `
+          <div class="inq-card ${inq.id === selectedId ? 'inq-card--selected' : ''}" data-id="${inq.id}">
+            <div class="inq-card__top">
+              <span class="inq-card__cat">${CATEGORIES[inq.category] || inq.category}</span>
+              <span class="inq-card__badge ${badgeClass}">${badgeLabel}</span>
+            </div>
+            <div class="inq-card__title">${escapeHtml(inq.title)}</div>
+            <div class="inq-card__meta">${inq.userName || inq.userEmail} · ${formatDate(inq.createdAt)}</div>
+          </div>
+        `;
+      }).join('');
+
+      countEl.textContent = `${filtered.length}건`;
+
+      listEl.querySelectorAll('.inq-card').forEach(card => {
+        card.addEventListener('click', () => selectInquiry(card.dataset.id));
+      });
+    }
+
+    function selectInquiry(id) {
+      selectedId = id;
+      const inq = inquiries.find(i => i.id === id);
+      if (!inq) return;
+
+      document.getElementById('detail-empty').style.display = 'none';
+      const el = document.getElementById('detail-content');
+      el.style.display = 'block';
+
+      let replySection = '';
+      if (inq.adminReply) {
+        replySection = `
+          <div class="detail-reply">
+            <div class="detail-reply__label">관리자 답변</div>
+            <div class="detail-reply__text">${escapeHtml(inq.adminReply)}</div>
+            <div class="detail-reply__meta">${inq.adminEmail || ''} · ${formatDate(inq.adminReplyAt)}</div>
+          </div>
+        `;
+      }
+
+      el.innerHTML = `
+        <div class="detail-header">
+          <div class="detail-header__title">${escapeHtml(inq.title)}</div>
+          <div class="detail-header__meta">
+            <span><strong>카테고리</strong> ${CATEGORIES[inq.category] || inq.category}</span>
+            <span><strong>작성자</strong> ${escapeHtml(inq.userName)} (${escapeHtml(inq.userEmail)})</span>
+            <span><strong>작성일</strong> ${formatDate(inq.createdAt)}</span>
+          </div>
+        </div>
+        <div class="detail-content">${escapeHtml(inq.content)}</div>
+        ${replySection}
+        <div class="reply-form">
+          <textarea id="reply-text" placeholder="답변을 입력하세요...">${inq.adminReply || ''}</textarea>
+          <div class="reply-form__actions">
+            <button class="btn btn--danger" id="btn-delete">삭제</button>
+            ${inq.status !== 'closed' ? '<button class="btn btn--secondary" id="btn-close">종료</button>' : ''}
+            <button class="btn btn--primary" id="btn-reply">${inq.adminReply ? '답변 수정' : '답변 등록'}</button>
+          </div>
+        </div>
+      `;
+
+      el.querySelector('#btn-reply').addEventListener('click', async () => {
+        const text = el.querySelector('#reply-text').value.trim();
+        if (!text) { toast('답변 내용을 입력하세요', 'error'); return; }
+        try {
+          await replyToInquiry(id, text);
+          toast('답변이 등록되었습니다.');
+          await loadInquiries();
+          selectInquiry(id);
+        } catch (err) { toast('답변 등록 실패', 'error'); }
+      });
+
+      el.querySelector('#btn-delete')?.addEventListener('click', async () => {
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+        try {
+          await deleteInquiry(id);
+          toast('삭제되었습니다.');
+          selectedId = null;
+          el.style.display = 'none';
+          document.getElementById('detail-empty').style.display = 'flex';
+          await loadInquiries();
+        } catch (err) { toast('삭제 실패', 'error'); }
+      });
+
+      el.querySelector('#btn-close')?.addEventListener('click', async () => {
+        try {
+          await updateInquiryStatus(id, 'closed');
+          toast('문의가 종료되었습니다.');
+          await loadInquiries();
+          selectInquiry(id);
+        } catch (err) { toast('상태 변경 실패', 'error'); }
+      });
+
+      // 목록 선택 표시 업데이트
+      document.querySelectorAll('.inq-card').forEach(c => {
+        c.classList.toggle('inq-card--selected', c.dataset.id === id);
+      });
+    }
+
+    // 초기화
+    window.addEventListener('loginStateChanged', async (e) => {
+      if (!e.detail?.isAdmin) {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#868e96">관리자 권한이 필요합니다.</div>';
+        return;
+      }
+      await loadInquiries();
+    });
+
+    document.getElementById('filter-status').addEventListener('change', loadInquiries);
+    document.getElementById('filter-search').addEventListener('input', renderList);
+  </script>
+</body>
+</html>

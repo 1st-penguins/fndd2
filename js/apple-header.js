@@ -75,6 +75,7 @@
             <a href="${prefix}admin/notices.html" class="header__menu-auth-link header__menu-auth-link--admin">공지 관리</a>
             <a href="${prefix}admin/user-lookup.html" class="header__menu-auth-link header__menu-auth-link--admin">회원 조회</a>
             <a href="${prefix}admin/coupons.html" class="header__menu-auth-link header__menu-auth-link--admin">쿠폰 관리</a>
+            <a href="${prefix}admin/inquiries.html" class="header__menu-auth-link header__menu-auth-link--admin">문의 관리</a>
           `;
         }
 
@@ -150,4 +151,10 @@
 
   // 즉시 한 번 시도
   trySync();
+
+  // 1:1 문의 패널 스크립트 동적 로드
+  const inquiryScript = document.createElement('script');
+  inquiryScript.type = 'module';
+  inquiryScript.src = prefix + 'js/inquiry/inquiry-panel.js';
+  document.body.appendChild(inquiryScript);
 })();
