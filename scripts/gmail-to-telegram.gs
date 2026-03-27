@@ -8,39 +8,31 @@ const LABEL_NAME = "텔레그램전송완료";
 const DAILY_STATS_URL = "https://asia-northeast3-first-penguins-new.cloudfunctions.net/dailyStats";
 
 function checkLittlyOrders() {
-  // 이미 처리한 메시지 ID 목록 (PropertiesService로 중복 방지)
-  const props = PropertiesService.getScriptProperties();
-  const sentRaw = props.getProperty("sentMessageIds") || "[]";
-  const sentIds = JSON.parse(sentRaw);
-  const sentSet = {};
-  sentIds.forEach(function(id) { sentSet[id] = true; });
+  // "텔레그램전송완료" 라벨이 없는 메일만 검색 → 처리 후 라벨 부착
+  var label = GmailApp.getUserLabelByName(LABEL_NAME);
+  if (!label) {
+    label = GmailApp.createLabel(LABEL_NAME);
+  }
 
-  const threads = GmailApp.search('from:noreply@litt.ly subject:"신규 주문이 접수되었습니다"', 0, 20);
+  var threads = GmailApp.search('from:noreply@litt.ly subject:"신규 주문이 접수되었습니다" -label:' + LABEL_NAME, 0, 20);
 
   if (threads.length === 0) return;
 
-  const newIds = [];
-
   threads.forEach(function(thread) {
-    const messages = thread.getMessages();
+    var messages = thread.getMessages();
     messages.forEach(function(msg) {
-      const msgId = msg.getId();
+      var body = msg.getPlainBody();
 
-      // 이미 텔레그램 발송한 메시지는 스킵
-      if (sentSet[msgId]) return;
+      var buyerRaw = extractField(body, "주문자");
+      var parts = buyerRaw.split("/").map(function(s) { return s.trim(); });
+      var buyerName = parts[0] || "-";
+      var buyerPhone = parts[1] || "-";
+      var buyerEmail = parts[2] || "-";
+      var product = extractField(body, "구매상품");
+      var amount = extractField(body, "총 결제금액");
+      var orderDate = extractField(body, "주문일시");
 
-      const body = msg.getPlainBody();
-
-      const buyerRaw = extractField(body, "주문자");
-      const parts = buyerRaw.split("/").map(function(s) { return s.trim(); });
-      const buyerName = parts[0] || "-";
-      const buyerPhone = parts[1] || "-";
-      const buyerEmail = parts[2] || "-";
-      const product = extractField(body, "구매상품");
-      const amount = extractField(body, "총 결제금액");
-      const orderDate = extractField(body, "주문일시");
-
-      const text = "🛒 신규 주문\n\n" +
+      var text = "🛒 신규 주문\n\n" +
         "구매자 : " + buyerName + "\n" +
         "연락처 : " + buyerPhone + "\n" +
         "아이디 : " + buyerEmail + "\n" +
@@ -49,17 +41,11 @@ function checkLittlyOrders() {
         "주문일시 : " + orderDate;
 
       sendTelegram(text);
-      newIds.push(msgId);
-      sentSet[msgId] = true;
     });
-  });
 
-  // 새로 처리한 ID 추가 후 저장 (최근 200개만 유지)
-  if (newIds.length > 0) {
-    const allIds = sentIds.concat(newIds);
-    const trimmed = allIds.slice(-200);
-    props.setProperty("sentMessageIds", JSON.stringify(trimmed));
-  }
+    // 스레드 단위로 라벨 부착 (처리 완료 표시)
+    thread.addLabel(label);
+  });
 }
 
 // ============================================
