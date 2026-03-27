@@ -23,7 +23,7 @@
   <script type="module" src="js/auth/auth-core.js"></script>
 
   <!-- 헤더 스크립트 -->
-  <script src="js/apple-header.js"></script>
+  <script type="module" src="js/apple-header.js"></script>
 
   <style>
     .play-container {
@@ -68,6 +68,23 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
       border: none;
+      z-index: 1;
+    }
+    .play-video {
+      position: relative;
+    }
+    #video-watermark {
+      position: absolute;
+      z-index: 2;
+      color: white;
+      opacity: 0.18;
+      font-size: 16px;
+      font-weight: 700;
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      transition: top 2s ease-in-out, left 2s ease-in-out, opacity 1.5s ease-in-out;
     }
 
     /* 강의 정보 */
@@ -289,6 +306,7 @@
         <div class="play-info">
           <h1 class="play-info__title" id="play-title">강의 제목</h1>
           <p class="play-info__episode" id="play-episode-info"></p>
+          <p id="play-expires" style="display:none;font-size:13px;color:#868e96;margin-bottom:12px;">📅</p>
           <div class="play-progress">
             <div class="play-progress__label">
               <span>진도율</span>
@@ -357,6 +375,7 @@
     let sessionToken = null;
     let sessionCheckInterval = null;
     let progressMap = {}; // 에피소드별 진도율 캐시
+    let purchaseExpiresAt = null; // 이용기한
 
     const { auth, db } = await ensureFirebase();
 
@@ -380,6 +399,7 @@
             showExpired();
             return;
           }
+          if (purchaseData.expiresAt) purchaseExpiresAt = purchaseData.expiresAt.toDate();
           purchased = true;
         }
 
@@ -399,6 +419,7 @@
                 if (bpData.expiresAt && bpData.expiresAt.toDate() < new Date()) {
                   continue; // 만료된 패키지는 건너뛰기
                 }
+                if (bpData.expiresAt) purchaseExpiresAt = bpData.expiresAt.toDate();
                 purchased = true;
                 break;
               }
@@ -496,6 +517,15 @@
       document.getElementById('play-back-link').href = `product-detail.html?id=${productId}`;
       document.getElementById('play-ep-title').textContent = `커리큘럼 (${episodes.length}강)`;
 
+      // 이용기한 표시
+      if (purchaseExpiresAt) {
+        const expiresEl = document.getElementById('play-expires');
+        if (expiresEl) {
+          expiresEl.textContent = '이용기한: ' + purchaseExpiresAt.toLocaleDateString('ko-KR') + '까지';
+          expiresEl.style.display = 'block';
+        }
+      }
+
       // 진도율 로드
       await loadProgressMap();
 
@@ -572,7 +602,6 @@
       const iframe = document.createElement('iframe');
       iframe.src = `https://player.vimeo.com/video/${ep.vimeoId}`;
       iframe.allow = 'autoplay; fullscreen; picture-in-picture';
-      iframe.allowFullscreen = true;
       iframe.id = 'vimeo-player';
       container.appendChild(iframe);
 
@@ -643,7 +672,7 @@
       document.getElementById('play-denied').style.display = 'block';
       document.querySelector('.play-denied__icon').textContent = '⏰';
       document.querySelector('.play-denied__title').textContent = '이용 기간이 만료되었습니다';
-      document.querySelector('.play-denied__text').textContent = '구매일로부터 6개월이 경과하여 시청이 불가합니다. 재구매 후 이용해주세요.';
+      document.querySelector('.play-denied__text').textContent = '구매일로부터 6개월(180일)이 경과하여 시청이 불가합니다. 재구매 후 이용해주세요.';
       if (productId) {
         document.getElementById('play-denied-btn').href = `product-detail.html?id=${productId}`;
         document.getElementById('play-denied-btn').textContent = '재구매하기';
@@ -713,19 +742,30 @@
       const wrapper = document.querySelector('.play-video__wrapper');
       if (!wrapper) return;
 
+      const videoBox = document.querySelector('.play-video');
+      if (!videoBox) return;
+
       const wm = document.createElement('div');
       wm.id = 'video-watermark';
       wm.textContent = user.email || '';
-      wm.style.cssText = 'position:absolute;z-index:10;color:white;opacity:0.15;font-size:14px;font-weight:600;pointer-events:none;user-select:none;letter-spacing:1px;text-shadow:0 0 4px rgba(0,0,0,0.3);';
-      wrapper.style.position = 'relative';
-      wrapper.appendChild(wm);
+      videoBox.appendChild(wm);
 
       function moveWatermark() {
-        wm.style.top = (10 + Math.random() * 70) + '%';
-        wm.style.left = (5 + Math.random() * 60) + '%';
+        // fade out
+        wm.style.opacity = '0';
+        setTimeout(() => {
+          wm.style.top = (10 + Math.random() * 70) + '%';
+          wm.style.left = (5 + Math.random() * 60) + '%';
+          // fade in
+          wm.style.opacity = '0.18';
+        }, 1500);
       }
-      moveWatermark();
-      setInterval(moveWatermark, 10000);
+      // 초기 위치 (트랜지션 없이)
+      wm.style.transition = 'none';
+      wm.style.top = (10 + Math.random() * 70) + '%';
+      wm.style.left = (5 + Math.random() * 60) + '%';
+      requestAnimationFrame(() => { wm.style.transition = ''; });
+      setInterval(moveWatermark, 15000);
     }
 
     // ─── 6. 이어보기 ───

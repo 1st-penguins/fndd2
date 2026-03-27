@@ -411,7 +411,7 @@
         let refundItems = '';
         if (product.type === 'video') {
           refundItems = `
-            <li>이용기간: 구매일로부터 6개월</li>
+            <li>이용기간: 구매일로부터 6개월(180일)</li>
             <li>1강이라도 재생한 경우 <strong>환불 불가</strong></li>
             <li>미재생 + 구매일로부터 7일 이내: 전액 환불</li>`;
         } else if (product.type === 'pdf' || product.type === 'ppt') {
@@ -444,7 +444,7 @@
             <div class="detail-meta">${metaHtml}</div>
             <div class="detail-price-box">
               <div class="detail-price-row">${priceRowHtml}</div>
-              ${product.type === 'video' ? '<div class="detail-price-note"><strong>인터넷 강의는 구매일로부터 6개월간 시청 가능합니다</strong></div>' : ''}
+              ${product.type === 'video' ? '<div class="detail-price-note"><strong>인터넷 강의는 구매일로부터 6개월(180일)간 시청 가능합니다</strong></div>' : ''}
             </div>
             ${actionBtn}
           </div>

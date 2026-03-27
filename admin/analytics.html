@@ -1306,7 +1306,7 @@
       allPurchases.filter(p => p.status !== 'refunded').forEach(p => {
         if (!p.userId) return;
         if (!userLTV[p.userId]) userLTV[p.userId] = { total: 0, count: 0, userName: p.userName, userEmail: p.userEmail, products: [], firstPurchase: null, lastPurchase: null };
-        const amt = p.finalAmount || p.purchaseAmount || 0;
+        const amt = p.finalAmount ?? p.purchaseAmount ?? 0;
         userLTV[p.userId].total += amt;
         userLTV[p.userId].count++;
         userLTV[p.userId].products.push(p.productId);

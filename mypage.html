@@ -445,17 +445,6 @@
     const { auth, db } = await ensureFirebase();
     const user = await ensureAuthReady();
 
-    if (!user) {
-      document.getElementById('mypage-loading').style.display = 'none';
-      document.getElementById('mypage-login').style.display = 'block';
-      // 비로그인 시 로그인 모달 즉시 표시
-      if (typeof window.showLoginModal === 'function') {
-        setTimeout(() => window.showLoginModal(), 300);
-      }
-    } else {
-      await loadMypage(user);
-    }
-
     const PRODUCT_NAMES = {
       'video_anatomy': '기능해부학 정규강의', 'video_injury': '운동상해 정규강의',
       'video_physio': '운동생리학 정규강의', 'video_load': '운동부하검사 정규강의',
@@ -466,6 +455,16 @@
       'pdf_patho': '병태생리학 요약본', 'pdf_psycho': '스포츠심리학 요약본',
       'pdf_prescript': '운동처방론 요약본', 'pdf_health': '건강체력평가 요약본'
     };
+
+    if (!user) {
+      document.getElementById('mypage-loading').style.display = 'none';
+      document.getElementById('mypage-login').style.display = 'block';
+      if (typeof window.showLoginModal === 'function') {
+        setTimeout(() => window.showLoginModal(), 300);
+      }
+    } else {
+      await loadMypage(user);
+    }
 
     async function loadMypage(user) {
       try {
@@ -549,9 +548,15 @@
             const totalEp = episodeCounts[p.productId] || 0;
             const completedEp = progList.filter(pr => pr.progress >= 90).length;
             const percent = totalEp > 0 ? Math.round((completedEp / totalEp) * 100) : 0;
+            const expiresDate = p.expiresAt ? new Date(p.expiresAt.toDate()).toLocaleDateString('ko-KR') : null;
+            const isExpired = p.expiresAt && p.expiresAt.toDate() < new Date();
+            const expiresHtml = expiresDate
+              ? `<div class="purchase-meta" style="color:${isExpired ? '#e03131' : '#868e96'};">${isExpired ? '⏰ 이용기간 만료' : '📅 이용기한: ' + expiresDate + '까지'}</div>`
+              : '';
             progressHtml = `
               <div class="purchase-meta">${completedEp}/${totalEp}강 완료 (${percent}%)</div>
-              <div class="purchase-progress-bar"><div class="purchase-progress-fill" style="width:${percent}%"></div></div>`;
+              <div class="purchase-progress-bar"><div class="purchase-progress-fill" style="width:${percent}%"></div></div>
+              ${expiresHtml}`;
             actionHref = `lecture-play.html?id=${p.productId}`;
           } else {
             progressHtml = `<div class="purchase-meta">구매일: ${date}</div>`;
@@ -589,7 +594,7 @@
         for (const p of purchases) {
           const name = PRODUCT_NAMES[p.productId] || p.productId;
           const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
-          const amount = (p.finalAmount || p.purchaseAmount || 0).toLocaleString() + '원';
+          const amount = (p.finalAmount ?? p.purchaseAmount ?? 0).toLocaleString() + '원';
           const status = p.status === 'completed' ? '결제완료' : p.status;
           html += `<tr><td>${name}</td><td>${date}</td><td>${amount}</td><td><span class="payment-status">${status}</span></td></tr>`;
         }

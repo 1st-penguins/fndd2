@@ -280,7 +280,7 @@
         <div class="notice-section__title">안내사항</div>
         <ul class="notice-section__list">
           <li>결제 후 즉시 이용이 가능합니다</li>
-          <li><strong>인터넷 강의는 구매일로부터 6개월간 시청 가능합니다</strong></li>
+          <li><strong>인터넷 강의는 구매일로부터 6개월(180일)간 시청 가능합니다</strong></li>
           <li>한 번에 <strong>1개 기기</strong>에서만 시청 가능합니다</li>
           <li>강의는 <strong>본인만</strong> 이용 가능하며, 계정 공유는 불가합니다</li>
           <li>영상의 다운로드, 녹화, 캡처 등 무단 복제는 금지됩니다</li>
@@ -326,8 +326,9 @@
   </footer>
 
   <script type="module">
-    import { auth, ensureAuthReady } from './js/core/firebase-core.js';
+    import { auth, db, ensureAuthReady } from './js/core/firebase-core.js';
     import { validateCoupon, applyCoupon } from './js/payment/coupon-manager.js';
+    import { doc, setDoc, getDoc, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
     // 비로그인 시 결제 페이지 접근 차단
     const _purchaseUser = await ensureAuthReady();
@@ -429,6 +430,60 @@
 
       try {
         const orderId = `product_${productId}_${Date.now()}_${user.uid.substring(0, 6)}`;
+
+        // 쿠폰으로 0원이 된 경우 — Toss 결제 없이 직접 구매 처리
+        if (currentPrice === 0 && appliedCoupon) {
+          const btn = document.getElementById('paymentButton');
+          btn.disabled = true;
+          btn.textContent = '처리 중...';
+
+          const purchaseId = `${user.uid}_${productId}`;
+
+          // 중복 구매 체크
+          const existingDoc = await getDoc(doc(db, 'purchases', purchaseId));
+          if (existingDoc.exists() && existingDoc.data().status === 'completed') {
+            alert('이미 구매한 상품입니다.');
+            window.location.href = `product-detail.html?id=${productId}`;
+            return;
+          }
+
+          // 구매 기록 저장
+          const expiresAt = productType === 'video'
+            ? Timestamp.fromDate(new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000))
+            : null;
+
+          await setDoc(doc(db, 'purchases', purchaseId), {
+            userId: user.uid,
+            userName: user.displayName || user.email || null,
+            userEmail: user.email || null,
+            productId: productId,
+            productType: productType,
+            orderId: orderId,
+            paymentKey: null,
+            purchaseAmount: originalPrice,
+            discountAmount: originalPrice,
+            finalAmount: 0,
+            couponId: appliedCoupon.id,
+            paymentMethod: '쿠폰 전액할인',
+            purchasedAt: serverTimestamp(),
+            status: 'completed',
+            expiresAt: expiresAt,
+            tossTransactionKey: null,
+          });
+
+          // 쿠폰 사용 처리 (완료 대기 후 이동)
+          try {
+            await applyCoupon(appliedCoupon.id, user.uid, orderId, productId, originalPrice);
+          } catch (e) {
+            console.error('쿠폰 사용 처리 실패:', e);
+          }
+
+          // 성공 페이지로 이동
+          window.location.replace(`lecture-success-free.html?productId=${productId}&type=${productType}`);
+          return;
+        }
+
+        // 일반 유료 결제 — Toss Payments
         const couponParam = appliedCoupon ? `&couponId=${appliedCoupon.id}&discount=${originalPrice - currentPrice}` : '';
 
         await tossPayments.requestPayment('카드', {
@@ -443,6 +498,9 @@
       } catch (error) {
         console.error('결제 오류:', error);
         alert('결제 중 오류가 발생했습니다.');
+        const btn = document.getElementById('paymentButton');
+        btn.disabled = false;
+        btn.textContent = '결제하기';
       }
     });
   </script>

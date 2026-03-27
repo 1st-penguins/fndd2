@@ -5,10 +5,9 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>결제 실패 | 퍼스트펭귄</title>
-  <link rel="canonical" href="https://the1stpeng.com/lecture-fail.html" />
+  <title>구매 완료 | 퍼스트펭귄</title>
   <meta name="robots" content="noindex">
-  <meta name="description" content="결제 처리 중 문제가 발생했습니다. 다시 시도해주세요.">
+  <meta name="description" content="쿠폰 결제가 완료되었습니다. 바로 이용할 수 있습니다.">
 
   <link rel="stylesheet" href="css/design-tokens.css" />
   <link rel="stylesheet" href="css/base.css" />
@@ -16,22 +15,20 @@
   <link rel="stylesheet" href="css/apple-footer.css" />
   <link rel="stylesheet" href="css/layout.css" />
 
-  <!-- Firebase -->
   <script type="module" src="js/core/firebase-core.js"></script>
   <script type="module" src="js/auth/auth-core.js"></script>
   <script type="module" src="js/auth/auth-init.js"></script>
 
-  <!-- 헤더 스크립트 -->
   <script type="module" src="js/apple-header.js"></script>
 
   <style>
-    .fail-container {
+    .success-container {
       max-width: 520px;
       margin: 100px auto 60px;
       padding: 0 16px;
     }
 
-    .fail-card {
+    .success-card {
       background: white;
       border-radius: 16px;
       padding: 48px 36px;
@@ -39,36 +36,36 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     }
 
-    .fail-icon {
+    .success-icon {
       width: 80px;
       height: 80px;
-      background: #ffebee;
+      background: #e8f5e9;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 24px;
       font-size: 40px;
-      color: #f44336;
     }
 
-    .fail-card h1 {
+    .success-card h1 {
       color: var(--penguin-navy);
       font-size: 22px;
       margin-bottom: 12px;
     }
 
-    .fail-message {
+    .success-message {
       color: #666;
       font-size: 15px;
       line-height: 1.8;
       margin-bottom: 32px;
     }
 
-    .fail-actions {
+    .success-actions {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      margin-top: 8px;
     }
 
     .btn-action {
@@ -106,9 +103,9 @@
     }
 
     @media (max-width: 480px) {
-      .fail-container { margin: 80px auto 40px; }
-      .fail-card { padding: 36px 20px; }
-      .fail-card h1 { font-size: 19px; }
+      .success-container { margin: 80px auto 40px; }
+      .success-card { padding: 36px 20px; }
+      .success-card h1 { font-size: 19px; }
     }
   </style>
 </head>
@@ -140,21 +137,20 @@
     <div class="header__menu-auth" id="menu-auth"></div>
   </div>
 
-  <main class="fail-container">
-    <div class="fail-card">
-      <div class="fail-icon">!</div>
-      <h1>결제에 실패했습니다</h1>
-      <div class="fail-message">
-        결제 처리 중 문제가 발생했습니다.<br>
-        다시 시도해주세요.
+  <main class="success-container">
+    <div class="success-card">
+      <div class="success-icon">&#10003;</div>
+      <h1>구매가 완료되었습니다!</h1>
+      <div class="success-message" id="successMessage">
+        쿠폰이 적용되어 무료로 이용하실 수 있습니다.
       </div>
 
-      <div class="fail-actions">
-        <button class="btn-action btn-action--primary" onclick="history.back()">
-          다시 시도하기
+      <div class="success-actions">
+        <button class="btn-action btn-action--primary" id="mainActionButton" onclick="goToLecture()">
+          이용하기
         </button>
         <button class="btn-action btn-action--secondary" onclick="window.location.href='index.html#lecture-tab'">
-          강의 목록으로 돌아가기
+          목록으로 돌아가기
         </button>
       </div>
     </div>
@@ -186,5 +182,30 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('productId');
+    const productType = urlParams.get('type') || 'pdf';
+
+    const messageEl = document.getElementById('successMessage');
+    const buttonEl = document.getElementById('mainActionButton');
+
+    if (productType === 'pdf') {
+      messageEl.innerHTML = '쿠폰이 적용되어 무료로 PDF를 이용하실 수 있습니다.';
+      buttonEl.textContent = 'PDF 다운로드';
+    } else {
+      messageEl.innerHTML = '쿠폰이 적용되어 무료로 강의를 수강하실 수 있습니다.';
+      buttonEl.textContent = '강의 수강하기';
+    }
+
+    window.goToLecture = function() {
+      if (productType === 'pdf') {
+        window.location.href = 'pdf-download.html?id=' + productId;
+      } else {
+        window.location.href = 'lecture-play.html?id=' + productId;
+      }
+    };
+  </script>
 </body>
 </html>

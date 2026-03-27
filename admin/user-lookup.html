@@ -318,7 +318,7 @@
       const correctCount = attempts.filter(a => a.isCorrect).length;
       const accuracy = totalAttempts > 0 ? Math.round(correctCount / totalAttempts * 100) : 0;
       const totalPurchases = purchases.filter(p => p.status !== 'refunded').length;
-      const totalSpent = purchases.filter(p => p.status !== 'refunded').reduce((s, p) => s + (p.finalAmount || p.purchaseAmount || 0), 0);
+      const totalSpent = purchases.filter(p => p.status !== 'refunded').reduce((s, p) => s + (p.finalAmount ?? p.purchaseAmount ?? 0), 0);
       const initial = (userName || userEmail || '?')[0].toUpperCase();
 
       const firstActivity = attempts.length > 0 ? attempts[attempts.length - 1].timestamp : null;
@@ -359,7 +359,7 @@
       let html = '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>상품</th><th>금액</th><th>상태</th><th>구매일</th><th>경과</th><th>이용현황</th><th>환불 판정</th></tr></thead><tbody>';
 
       for (const p of purchases) {
-        const amt = (p.finalAmount || p.purchaseAmount || 0).toLocaleString() + '원';
+        const amt = (p.finalAmount ?? p.purchaseAmount ?? 0).toLocaleString() + '원';
         const purchasedAt = p.purchasedAt?.toDate ? p.purchasedAt.toDate() : p.purchasedAt ? new Date(p.purchasedAt) : null;
         const dateStr = purchasedAt ? purchasedAt.toLocaleDateString('ko-KR') : '-';
         const daysSince = purchasedAt ? Math.floor((Date.now() - purchasedAt.getTime()) / (1000 * 60 * 60 * 24)) : null;

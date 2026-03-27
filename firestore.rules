@@ -108,7 +108,12 @@ service cloud.firestore {
     // 쿠폰
     match /coupons/{couponId} {
       allow read: if isLoggedIn();
-      allow write: if isAdmin();
+      // 일반 사용자: usedCount 증가만 허용
+      allow update: if isLoggedIn() &&
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(['usedCount']) &&
+        request.resource.data.usedCount == resource.data.usedCount + 1;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin();
     }
 
     // 쿠폰 사용 내역

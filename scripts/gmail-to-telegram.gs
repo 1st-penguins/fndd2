@@ -8,18 +8,27 @@ const LABEL_NAME = "텔레그램전송완료";
 const DAILY_STATS_URL = "https://asia-northeast3-first-penguins-new.cloudfunctions.net/dailyStats";
 
 function checkLittlyOrders() {
-  let label = GmailApp.getUserLabelByName(LABEL_NAME);
-  if (!label) {
-    label = GmailApp.createLabel(LABEL_NAME);
-  }
+  // 이미 처리한 메시지 ID 목록 (PropertiesService로 중복 방지)
+  const props = PropertiesService.getScriptProperties();
+  const sentRaw = props.getProperty("sentMessageIds") || "[]";
+  const sentIds = JSON.parse(sentRaw);
+  const sentSet = {};
+  sentIds.forEach(function(id) { sentSet[id] = true; });
 
-  const threads = GmailApp.search('from:noreply@litt.ly subject:"신규 주문이 접수되었습니다" -label:' + LABEL_NAME, 0, 10);
+  const threads = GmailApp.search('from:noreply@litt.ly subject:"신규 주문이 접수되었습니다"', 0, 20);
 
   if (threads.length === 0) return;
+
+  const newIds = [];
 
   threads.forEach(function(thread) {
     const messages = thread.getMessages();
     messages.forEach(function(msg) {
+      const msgId = msg.getId();
+
+      // 이미 텔레그램 발송한 메시지는 스킵
+      if (sentSet[msgId]) return;
+
       const body = msg.getPlainBody();
 
       const buyerRaw = extractField(body, "주문자");
@@ -40,10 +49,17 @@ function checkLittlyOrders() {
         "주문일시 : " + orderDate;
 
       sendTelegram(text);
+      newIds.push(msgId);
+      sentSet[msgId] = true;
     });
-
-    thread.addLabel(label);
   });
+
+  // 새로 처리한 ID 추가 후 저장 (최근 200개만 유지)
+  if (newIds.length > 0) {
+    const allIds = sentIds.concat(newIds);
+    const trimmed = allIds.slice(-200);
+    props.setProperty("sentMessageIds", JSON.stringify(trimmed));
+  }
 }
 
 // ============================================
