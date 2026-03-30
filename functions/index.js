@@ -32,7 +32,9 @@ async function sendTelegram(text, replyToMessageId) {
 }
 
 // 새 문의 → 텔레그램 알림 (문의 ID 포함)
-exports.onNewInquiry = functions.region("asia-northeast3").firestore
+exports.onNewInquiry = functions.region("asia-northeast3")
+  .runWith({ secrets: ["TELEGRAM_BOT_TOKEN"] })
+  .firestore
   .document("inquiries/{inquiryId}")
   .onCreate(async (snap, context) => {
     const data = snap.data();
@@ -71,7 +73,9 @@ async function saveReply(docRef, docData, replyText, replierName, messageId) {
 }
 
 // 텔레그램 웹훅 — 관리자 답변 감지 → Firestore에 답변 저장
-exports.telegramWebhook = functions.region("asia-northeast3").https.onRequest(async (req, res) => {
+exports.telegramWebhook = functions.region("asia-northeast3")
+  .runWith({ secrets: ["TELEGRAM_BOT_TOKEN"] })
+  .https.onRequest(async (req, res) => {
   if (req.method !== "POST") { res.status(200).send("OK"); return; }
 
   const message = req.body.message;
