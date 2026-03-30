@@ -330,6 +330,8 @@
       await loadCouponReport();
       // 환불 이력
       renderRefundHistory();
+      // 자격증별 통계
+      renderCertStats(document.getElementById('certPeriod').value);
     }
 
     // ─── 7일 차트 ───
@@ -774,71 +776,52 @@
 
     // ─── 자격증별 이용 통계 ───
     const CERT_MAP = {
-      'health-manager': { name: '건강운동관리사', color: '#1D2F4E', paths: ['/cft', '/exam-new/', '/subjects/', '/years/'] },
-      'sports-1': { name: '1급 스포츠지도사', color: '#7C3AED', paths: ['/si1', '/exam-new-sports1/', '/subjects-sports1/', '/years-sports1/'] },
-      'sports-2': { name: '2급 스포츠지도사', color: '#059669', paths: ['/si2', '/exam-new-sports/', '/subjects-sports/', '/years-sports/'] },
+      'health-manager': { name: '건강운동관리사', color: '#1D2F4E' },
+      'sports-instructor-1': { name: '1급 스포츠지도사', color: '#7C3AED' },
+      'sports-instructor': { name: '2급 스포츠지도사', color: '#059669' },
     };
-
-    function detectCert(source) {
-      if (!source) return null;
-      // sports1을 먼저 매칭 (sports보다 길이가 길으므로)
-      if (CERT_MAP['sports-1'].paths.some(p => source.includes(p))) return 'sports-1';
-      if (CERT_MAP['sports-2'].paths.some(p => source.includes(p))) return 'sports-2';
-      if (CERT_MAP['health-manager'].paths.some(p => source.includes(p))) return 'health-manager';
-      return null;
-    }
-
-    let certAttemptsCache = null;
-    async function loadCertAttempts() {
-      if (certAttemptsCache) return certAttemptsCache;
-      const snap = await getDocs(collection(db, 'attempts'));
-      const list = [];
-      snap.forEach(d => { const dd = d.data(); list.push({ source: dd.source, userId: dd.userId, timestamp: dd.timestamp, isCorrect: dd.isCorrect }); });
-      certAttemptsCache = list;
-      return list;
-    }
 
     async function renderCertStats(period) {
       const el = document.getElementById('certStats');
       el.innerHTML = '<div class="loading">로딩 중...</div>';
-      const attempts = await loadCertAttempts();
 
       const now = new Date();
-      const todayStr = now.toDateString();
-      const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-      const filtered = attempts.filter(a => {
-        if (period === 'all') return true;
-        const t = a.timestamp?.toDate?.();
-        if (!t) return false;
-        if (period === 'today') return t.toDateString() === todayStr;
-        if (period === 'week') return t >= weekAgo;
-        if (period === 'month') return t >= monthStart;
-        return true;
-      });
-
-      const stats = {};
-      for (const key of Object.keys(CERT_MAP)) {
-        stats[key] = { attempts: 0, users: new Set(), correct: 0 };
+      const dates = [];
+      if (period === 'today') {
+        dates.push(formatDateKey(now));
+      } else if (period === 'week') {
+        for (let i = 0; i < 7; i++) { const d = new Date(now); d.setDate(now.getDate() - i); dates.push(formatDateKey(d)); }
+      } else if (period === 'month') {
+        for (let i = 0; i < 30; i++) { const d = new Date(now); d.setDate(now.getDate() - i); dates.push(formatDateKey(d)); }
+      } else {
+        for (let i = 0; i < 365; i++) { const d = new Date(now); d.setDate(now.getDate() - i); dates.push(formatDateKey(d)); }
       }
 
-      filtered.forEach(a => {
-        const cert = detectCert(a.source);
-        if (cert && stats[cert]) {
-          stats[cert].attempts++;
-          if (a.userId) stats[cert].users.add(a.userId);
-          if (a.isCorrect) stats[cert].correct++;
+      function formatDateKey(d) {
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      }
+
+      // certDailyUsers 문서 읽기 (기간별 1~365개)
+      const userSets = {};
+      for (const key of Object.keys(CERT_MAP)) { userSets[key] = new Set(); }
+
+      const promises = dates.map(dateKey => getDoc(doc(db, 'certDailyUsers', dateKey)));
+      const docs = await Promise.all(promises);
+
+      docs.forEach(snap => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        for (const certKey of Object.keys(CERT_MAP)) {
+          if (data[certKey]) {
+            Object.keys(data[certKey]).forEach(uid => userSets[certKey].add(uid));
+          }
         }
       });
 
       el.innerHTML = `<div class="cert-grid">${Object.entries(CERT_MAP).map(([key, info]) => {
-        const s = stats[key];
-        const rate = s.attempts > 0 ? Math.round(s.correct / s.attempts * 100) : 0;
         return `<div class="cert-item" style="background:${info.color}">
           <div class="cert-name">${info.name}</div>
-          <div class="cert-main">${s.users.size}명</div>
-          <div class="cert-sub">문제풀이 ${s.attempts.toLocaleString()}건<br>정답률 ${rate}%</div>
+          <div class="cert-main">${userSets[key].size}명</div>
         </div>`;
       }).join('')}</div>`;
     }
@@ -846,7 +829,6 @@
     document.getElementById('certPeriod').addEventListener('change', (e) => renderCertStats(e.target.value));
 
     await load();
-    renderCertStats('week');
   </script>
 <script src="../js/apple-header.js"></script>
 </body>

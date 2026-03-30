@@ -206,6 +206,30 @@ exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (
   }
 });
 
+// ============================================
+// 📊 자격증별 일일 이용자 집계
+// ============================================
+exports.onNewAttempt = functions.region("asia-northeast3").firestore
+  .document("attempts/{attemptId}")
+  .onCreate(async (snap) => {
+    const data = snap.data();
+    const certType = data.certificateType;
+    const userId = data.userId;
+    if (!certType || !userId) return;
+
+    // KST 기준 날짜
+    const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const dateKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
+
+    const docRef = db.collection("certDailyUsers").doc(dateKey);
+    try {
+      await docRef.update({ [`${certType}.${userId}`]: true });
+    } catch (e) {
+      // 문서가 없으면 생성
+      await docRef.set({ [certType]: { [userId]: true } });
+    }
+  });
+
 /**
  * Toss Payments 결제 확인 Cloud Function
  *
