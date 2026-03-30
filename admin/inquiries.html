@@ -255,6 +255,17 @@
       .panel-detail { display: none; }
       .panel-detail--active { display: block; }
       .panel-list--hidden { display: none; }
+      .detail-back { display: inline-block; }
+    }
+    .detail-back {
+      display: none;
+      margin-bottom: 16px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      color: #868e96;
+      cursor: pointer;
+      font-family: inherit;
     }
   </style>
 </head>
@@ -282,6 +293,7 @@
     </div>
 
     <div class="panel-detail" id="panel-detail">
+      <button class="detail-back" id="btn-back">&larr; 목록으로</button>
       <div class="detail-empty" id="detail-empty">좌측에서 문의를 선택하세요</div>
       <div id="detail-content" style="display:none"></div>
     </div>
@@ -368,6 +380,17 @@
       });
     }
 
+    function showDetail() {
+      document.getElementById('panel-detail').classList.add('panel-detail--active');
+      document.getElementById('panel-list').classList.add('panel-list--hidden');
+    }
+    function showList() {
+      document.getElementById('panel-detail').classList.remove('panel-detail--active');
+      document.getElementById('panel-list').classList.remove('panel-list--hidden');
+    }
+
+    document.getElementById('btn-back').addEventListener('click', showList);
+
     function selectInquiry(id) {
       selectedId = id;
       const inq = inquiries.find(i => i.id === id);
@@ -376,6 +399,9 @@
       document.getElementById('detail-empty').style.display = 'none';
       const el = document.getElementById('detail-content');
       el.style.display = 'block';
+
+      // 모바일: 상세 패널 표시
+      showDetail();
 
       let replySection = '';
       if (inq.adminReply) {
@@ -428,6 +454,7 @@
           selectedId = null;
           el.style.display = 'none';
           document.getElementById('detail-empty').style.display = 'flex';
+          showList();
           await loadInquiries();
         } catch (err) { toast('삭제 실패', 'error'); }
       });
