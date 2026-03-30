@@ -252,6 +252,12 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // 자격증별 일일 이용자 집계
+    match /certDailyUsers/{dateKey} {
+      allow read: if isAdmin();
+      allow write: if false; // Cloud Function에서만 기록
+    }
+
     // 오늘의 방문자 집계 (daily_visits/{YYYY-MM-DD})
     match /daily_visits/{dateKey} {
       // 로그인한 사용자는 본인 uid 키만 추가/수정 가능
