@@ -87,7 +87,12 @@
     .cal-day .cal-count{font-size:9px;color:#339af0;margin-top:1px}
     .cal-day.selected .cal-count{color:#a5d8ff}
     .cal-day.has-visitors{font-weight:600}
-    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.cal-wrap{flex-direction:column}.cal-left{flex:unset}}
+    .cert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .cert-item{border-radius:12px;padding:20px;text-align:center;color:#fff}
+    .cert-item .cert-name{font-size:13px;font-weight:600;margin-bottom:10px;opacity:.9}
+    .cert-item .cert-main{font-size:28px;font-weight:800;margin-bottom:4px}
+    .cert-item .cert-sub{font-size:12px;opacity:.8;line-height:1.6}
+    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.cal-wrap{flex-direction:column}.cal-left{flex:unset}.cert-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body class="admin-page">
@@ -152,6 +157,10 @@
       <div class="card"><h3>최근 7일 매출 추이</h3><div id="chartArea" class="mini-chart"></div></div>
       <div class="card"><h3>상품별 매출 순위</h3><div id="productRanking" class="psg"></div></div>
       <div class="card"><h3>최근 구매 (10건)</h3><div id="recentList"></div></div>
+      <div class="card" id="certStatsCard">
+        <h3>자격증별 이용 통계 <select id="certPeriod" style="font-size:12px;padding:4px 8px;border:1px solid #dee2e6;border-radius:6px;font-family:inherit;"><option value="today">오늘</option><option value="week" selected>최근 7일</option><option value="month">이번 달</option><option value="all">전체</option></select></h3>
+        <div id="certStats" class="loading">로딩 중...</div>
+      </div>
       <div class="card">
         <h3>접속자 조회</h3>
         <div class="cal-wrap">
@@ -763,7 +772,81 @@
       a.click();
     };
 
+    // ─── 자격증별 이용 통계 ───
+    const CERT_MAP = {
+      'health-manager': { name: '건강운동관리사', color: '#1D2F4E', paths: ['/cft', '/exam-new/', '/subjects/', '/years/'] },
+      'sports-1': { name: '1급 스포츠지도사', color: '#7C3AED', paths: ['/si1', '/exam-new-sports1/', '/subjects-sports1/', '/years-sports1/'] },
+      'sports-2': { name: '2급 스포츠지도사', color: '#059669', paths: ['/si2', '/exam-new-sports/', '/subjects-sports/', '/years-sports/'] },
+    };
+
+    function detectCert(source) {
+      if (!source) return null;
+      // sports1을 먼저 매칭 (sports보다 길이가 길으므로)
+      if (CERT_MAP['sports-1'].paths.some(p => source.includes(p))) return 'sports-1';
+      if (CERT_MAP['sports-2'].paths.some(p => source.includes(p))) return 'sports-2';
+      if (CERT_MAP['health-manager'].paths.some(p => source.includes(p))) return 'health-manager';
+      return null;
+    }
+
+    let certAttemptsCache = null;
+    async function loadCertAttempts() {
+      if (certAttemptsCache) return certAttemptsCache;
+      const snap = await getDocs(collection(db, 'attempts'));
+      const list = [];
+      snap.forEach(d => { const dd = d.data(); list.push({ source: dd.source, userId: dd.userId, timestamp: dd.timestamp, isCorrect: dd.isCorrect }); });
+      certAttemptsCache = list;
+      return list;
+    }
+
+    async function renderCertStats(period) {
+      const el = document.getElementById('certStats');
+      el.innerHTML = '<div class="loading">로딩 중...</div>';
+      const attempts = await loadCertAttempts();
+
+      const now = new Date();
+      const todayStr = now.toDateString();
+      const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const filtered = attempts.filter(a => {
+        if (period === 'all') return true;
+        const t = a.timestamp?.toDate?.();
+        if (!t) return false;
+        if (period === 'today') return t.toDateString() === todayStr;
+        if (period === 'week') return t >= weekAgo;
+        if (period === 'month') return t >= monthStart;
+        return true;
+      });
+
+      const stats = {};
+      for (const key of Object.keys(CERT_MAP)) {
+        stats[key] = { attempts: 0, users: new Set(), correct: 0 };
+      }
+
+      filtered.forEach(a => {
+        const cert = detectCert(a.source);
+        if (cert && stats[cert]) {
+          stats[cert].attempts++;
+          if (a.userId) stats[cert].users.add(a.userId);
+          if (a.isCorrect) stats[cert].correct++;
+        }
+      });
+
+      el.innerHTML = `<div class="cert-grid">${Object.entries(CERT_MAP).map(([key, info]) => {
+        const s = stats[key];
+        const rate = s.attempts > 0 ? Math.round(s.correct / s.attempts * 100) : 0;
+        return `<div class="cert-item" style="background:${info.color}">
+          <div class="cert-name">${info.name}</div>
+          <div class="cert-main">${s.users.size}명</div>
+          <div class="cert-sub">문제풀이 ${s.attempts.toLocaleString()}건<br>정답률 ${rate}%</div>
+        </div>`;
+      }).join('')}</div>`;
+    }
+
+    document.getElementById('certPeriod').addEventListener('change', (e) => renderCertStats(e.target.value));
+
     await load();
+    renderCertStats('week');
   </script>
 <script src="../js/apple-header.js"></script>
 </body>
