@@ -207,8 +207,34 @@ exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (
 });
 
 // ============================================
-// 📊 자격증별 일일 이용자 집계
+// 📊 자격증별 일일 이용자 집계 + 문제별 통계 증분 업데이트
 // ============================================
+
+const ADMIN_EMAILS = [
+  'kspo0324@gmail.com',
+  'mingdy7283@gmail.com',
+  'sungsoo702@gmail.com',
+  'pyogobear@gmail.com'
+];
+
+function extractCorrectAnswerIndex(attempt) {
+  const candidates = [
+    attempt?.correctAnswer,
+    attempt?.firstAttemptCorrectAnswer,
+    attempt?.questionData?.correctAnswer,
+    attempt?.questionData?.correctOption,
+    attempt?.questionData?.correct
+  ];
+  for (const raw of candidates) {
+    if (raw === undefined || raw === null || raw === '') continue;
+    const value = Number(raw);
+    if (!Number.isFinite(value)) continue;
+    if (value >= 0 && value <= 3) return Math.trunc(value);
+    if (value >= 1 && value <= 4) return Math.trunc(value) - 1;
+  }
+  return null;
+}
+
 exports.onNewAttempt = functions.region("asia-northeast3").firestore
   .document("attempts/{attemptId}")
   .onCreate(async (snap) => {
@@ -221,13 +247,149 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
     const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
     const dateKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
 
+    // 1) certDailyUsers 업데이트
     const docRef = db.collection("certDailyUsers").doc(dateKey);
     try {
       await docRef.update({ [`${certType}.${userId}`]: true });
     } catch (e) {
-      // 문서가 없으면 생성
       await docRef.set({ [certType]: { [userId]: true } });
     }
+
+    // 2) questionStats 증분 업데이트 (관리자 데이터 제외)
+    if (ADMIN_EMAILS.includes(data.userEmail)) return;
+
+    const qData = data.questionData;
+    if (!qData) return;
+
+    const sessionId = data.sessionId;
+    if (!sessionId) return; // sessionId 없는 레거시 데이터는 마이그레이션에서 처리됨
+
+    // 세션 완주 확인: 같은 sessionId의 attempt 수 조회
+    const isMockExam = qData.isFromMockExam === true;
+    const requiredCount = isMockExam ? 80 : 20;
+
+    const sessionSnap = await db.collection("attempts")
+      .where("sessionId", "==", sessionId)
+      .select()  // 문서 내용 없이 카운트만
+      .get();
+
+    if (sessionSnap.size < requiredCount) return; // 미완주 세션 → 스킵
+
+    // 세션이 방금 완주됨 (정확히 requiredCount에 도달한 시점)
+    // → 이 세션의 모든 attempt를 과목+연도 단위로 묶어서 집계
+    if (sessionSnap.size === requiredCount) {
+      const sessionAttempts = await db.collection("attempts")
+        .where("sessionId", "==", sessionId)
+        .get();
+
+      // 같은 문서(과목+연도)에 대한 업데이트를 미리 모아서 1회만 쓰기
+      const docUpdates = {}; // docKey → payload 객체
+
+      sessionAttempts.forEach(attemptDoc => {
+        const attempt = attemptDoc.data();
+        if (ADMIN_EMAILS.includes(attempt.userEmail)) return;
+
+        const aQData = attempt.questionData;
+        if (!aQData) return;
+
+        const aYear = String(aQData.year || attempt.year);
+        let aSubject = String(aQData.subject || attempt.subject);
+        try { aSubject = decodeURIComponent(aSubject); } catch(e) {}
+        const aNumber = String(aQData.number || attempt.number);
+        const aCertType = attempt.certificateType || 'health-manager';
+        if (!aYear || !aSubject || !aNumber) return;
+
+        const docKey = `${aCertType}_${aYear}_${aSubject}`;
+
+        if (!docUpdates[docKey]) {
+          docUpdates[docKey] = {
+            certificateType: aCertType,
+            year: aYear,
+            subject: aSubject,
+            lastUpdatedAt: admin.firestore.FieldValue.serverTimestamp()
+          };
+        }
+
+        const aIsCorrect = attempt.firstAttemptIsCorrect !== undefined
+          ? attempt.firstAttemptIsCorrect : attempt.isCorrect;
+        const aUserAnswer = attempt.firstAttemptAnswer !== undefined
+          ? attempt.firstAttemptAnswer : attempt.userAnswer;
+        const aAnswerIndex = Number(aUserAnswer);
+        const aCorrectIndex = extractCorrectAnswerIndex(attempt);
+
+        const p = docUpdates[docKey];
+
+        // 문제별 필드 (questions.{number}.xxx)
+        const qPrefix = `questions.${aNumber}`;
+        p[`${qPrefix}.total`] = admin.firestore.FieldValue.increment(
+          (p[`${qPrefix}.total`]?._operand || 0) + 1 ? 0 : 0 // 아래에서 직접 처리
+        );
+
+        // increment를 누적하기 위해 카운터 방식 사용
+        // 이미 같은 문제에 대한 increment가 있으면 합산
+        if (!p._counters) p._counters = {};
+        if (!p._counters[aNumber]) {
+          p._counters[aNumber] = {
+            total: 0, correct: 0,
+            answers: { '0': 0, '1': 0, '2': 0, '3': 0 },
+            totalTimeSpent: 0, viewedExplanationCount: 0,
+            correctAnswerIndex: null
+          };
+        }
+
+        const c = p._counters[aNumber];
+        c.total++;
+        if (aIsCorrect) c.correct++;
+
+        if (Number.isInteger(aAnswerIndex) && aAnswerIndex >= 0 && aAnswerIndex <= 3) {
+          c.answers[String(aAnswerIndex)]++;
+        }
+
+        if (Number.isInteger(aCorrectIndex) && aCorrectIndex >= 0 && aCorrectIndex <= 3) {
+          c.correctAnswerIndex = aCorrectIndex;
+        }
+
+        if (typeof attempt.timeSpent === 'number' && attempt.timeSpent > 0) {
+          c.totalTimeSpent += attempt.timeSpent;
+        }
+        if (attempt.viewedExplanation === true) {
+          c.viewedExplanationCount++;
+        }
+      });
+
+      // 카운터를 FieldValue.increment로 변환 후 배치 쓰기
+      const batch = db.batch();
+
+      Object.entries(docUpdates).forEach(([docKey, payload]) => {
+        const counters = payload._counters || {};
+        delete payload._counters;
+        // 임시 increment 필드 제거
+        Object.keys(payload).forEach(k => {
+          if (k.startsWith('questions.')) delete payload[k];
+        });
+
+        Object.entries(counters).forEach(([num, c]) => {
+          const qp = `questions.${num}`;
+          payload[`${qp}.total`] = admin.firestore.FieldValue.increment(c.total);
+          payload[`${qp}.correct`] = admin.firestore.FieldValue.increment(c.correct);
+          payload[`${qp}.answers.0`] = admin.firestore.FieldValue.increment(c.answers['0']);
+          payload[`${qp}.answers.1`] = admin.firestore.FieldValue.increment(c.answers['1']);
+          payload[`${qp}.answers.2`] = admin.firestore.FieldValue.increment(c.answers['2']);
+          payload[`${qp}.answers.3`] = admin.firestore.FieldValue.increment(c.answers['3']);
+          payload[`${qp}.totalTimeSpent`] = admin.firestore.FieldValue.increment(c.totalTimeSpent);
+          payload[`${qp}.viewedExplanationCount`] = admin.firestore.FieldValue.increment(c.viewedExplanationCount);
+          if (Number.isInteger(c.correctAnswerIndex)) {
+            payload[`${qp}.correctAnswerIndex`] = c.correctAnswerIndex;
+          }
+        });
+
+        const qRef = db.collection("questionStats").doc(docKey);
+        batch.set(qRef, payload, { merge: true });
+      });
+
+      await batch.commit();
+    }
+    // sessionSnap.size > requiredCount → 이미 집계됨, 스킵
   });
 
 /**

@@ -4986,15 +4986,66 @@ async function loadQuestionStatistics(year, subject, setType, container, certTyp
       return;
     }
 
-    // 전체 데이터 조회 경고
+    // ✅ questionStats 컬렉션에서 사전 집계된 데이터 조회
+    const certTypeFullKey = certType || 'health-manager';
+    let qsConstraints = [where('certificateType', '==', certTypeFullKey)];
+
+    if (year && year !== 'all') {
+      qsConstraints.push(where('year', '==', String(year)));
+    }
+    if (subject && subject !== 'all') {
+      qsConstraints.push(where('subject', '==', String(subject)));
+    }
+
+    const qsQuery = query(collection(db, 'questionStats'), ...qsConstraints);
+    const qsSnapshot = await getDocs(qsQuery);
+
+    if (qsSnapshot.size > 0) {
+      // 사전 집계 데이터 사용 (과목+연도당 1문서, questions 맵에서 문제별 추출)
+      const questionStats = {};
+      qsSnapshot.forEach(d => {
+        const docData = d.data();
+        const questions = docData.questions || {};
+        Object.entries(questions).forEach(([num, q]) => {
+          const key = `${docData.year}_${docData.subject}_${num}`;
+          questionStats[key] = {
+            year: docData.year,
+            subject: docData.subject,
+            number: Number(num),
+            total: q.total || 0,
+            correct: q.correct || 0,
+            answers: q.answers || { '0': 0, '1': 0, '2': 0, '3': 0 },
+            correctAnswerIndex: q.correctAnswerIndex ?? null,
+            totalTimeSpent: q.totalTimeSpent || 0,
+            viewedExplanationCount: q.viewedExplanationCount || 0
+          };
+        });
+      });
+
+      const totalAttempts = Object.values(questionStats).reduce((s, q) => s + q.total, 0);
+      const statsData = {
+        questionStats,
+        attempts: [],
+        totalQuestions: Object.keys(questionStats).length,
+        totalAttempts
+      };
+
+      console.log(`✅ questionStats에서 ${qsSnapshot.size}개 문서 로드 (사전 집계)`);
+      StatsCache.set(cacheKey, statsData);
+      renderQuestionStatsHTML(statsData, container);
+      return;
+    }
+
+    // ⚠️ Fallback: questionStats가 비어있으면 기존 방식으로 전체 조회
+    console.warn('⚠️ questionStats 비어있음 — 기존 방식으로 전체 조회');
+
     if (year === 'all' && subject === 'all') {
-      console.warn('⚠️ 전체 데이터 조회 - Firebase 읽기 비용이 많이 발생할 수 있습니다!');
       container.innerHTML = `
         <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ff9800;">
           <h3 style="color: #ff9800; margin-top: 0;">⚠️ 주의</h3>
           <p style="margin-bottom: 10px;">전체 데이터를 조회하면 많은 Firebase 읽기 비용이 발생합니다.</p>
           <p style="margin-bottom: 10px;"><strong>권장:</strong> 연도 또는 과목을 선택해주세요.</p>
-          <button onclick="document.getElementById('year-filter').value='2025'; document.getElementById('load-admin-stats').click();" 
+          <button onclick="document.getElementById('year-filter').value='2025'; document.getElementById('load-admin-stats').click();"
                   style="padding: 10px 20px; background: var(--penguin-navy); color: white; border: none; border-radius: 6px; cursor: pointer;">
             2025년 데이터만 보기
           </button>
@@ -5003,32 +5054,19 @@ async function loadQuestionStatistics(year, subject, setType, container, certTyp
       return;
     }
 
-    // Firestore 쿼리 최적화
-    let attemptsQuery = collection(db, 'attempts');
-
-    // ⚠️ 임시: 마이그레이션 전까지는 전체 읽기
-    // TODO: 마이그레이션 후 where 쿼리 활성화
-    console.log('⚠️ 전체 데이터 읽기 (마이그레이션 후 최적화됩니다)');
-
-    const snapshot = await getDocs(attemptsQuery);
-
+    const snapshot = await getDocs(collection(db, 'attempts'));
     let attempts = [];
     snapshot.forEach(doc => {
       attempts.push({ id: doc.id, ...doc.data() });
     });
 
-    // 자격증 타입 필터링
-    const certTypeFullKey = certType || 'health-manager';
     const certSubjects = new Set(getAllSubjects(certTypeFullKey));
     attempts = attempts.filter(a => {
-      // certificateType 필드가 있으면 직접 비교
       if (a.certificateType) return a.certificateType === certTypeFullKey;
-      // 없으면 과목명으로 판별
       const subj = a.questionData?.subject || a.subject || '';
       return certSubjects.has(subj);
     });
 
-    // 클라이언트 사이드 필터링 (Firestore 복합 인덱스 없이)
     if (year && year !== 'all') {
       attempts = attempts.filter(a => a.questionData?.year === year);
     }
@@ -5036,30 +5074,15 @@ async function loadQuestionStatistics(year, subject, setType, container, certTyp
       attempts = attempts.filter(a => a.questionData?.subject === subject);
     }
 
-    // ✅ 관리자 데이터 필터링
     const includeAdminData = document.getElementById('include-admin-data')?.checked;
     if (!includeAdminData) {
-      const beforeCount = attempts.length;
       attempts = attempts.filter(a => !ADMIN_EMAILS.includes(a.userEmail));
-      console.log(`✅ 관리자 데이터 제외됨 (${beforeCount - attempts.length}개 제외)`);
-    } else {
-      console.log('✅ 관리자 데이터 포함');
     }
 
-    // V4-D2: 완주 세션만 집계 (일반 20문제 / 모의고사 80문제 기준)
-    const beforeCompleted = attempts.length;
     attempts = filterCompletedAttempts(attempts);
-    console.log(`✅ 완주 세션 필터: ${beforeCompleted}개 → ${attempts.length}개`);
 
-    // 관리자 통계는 항상 일반 + 모의고사 통합 집계
-    console.log('✅ 전체 세트 (일반 + 모의고사 통합)');
-
-    console.log(`📊 Firebase reads: ${snapshot.size}개 (필터링 후: ${attempts.length}개)`)
-
-    // 문제별 통계 계산
     const questionStats = calculateQuestionStats(attempts);
 
-    // 캐시 저장
     const statsData = {
       questionStats,
       attempts,
@@ -5068,7 +5091,6 @@ async function loadQuestionStatistics(year, subject, setType, container, certTyp
     };
     StatsCache.set(cacheKey, statsData);
 
-    // HTML 렌더링
     renderQuestionStatsHTML(statsData, container);
 
   } catch (error) {
@@ -5119,7 +5141,9 @@ async function loadQuestionStatistics(year, subject, setType, container, certTyp
 function renderQuestionStatsHTML(data, container) {
   const { questionStats, attempts, totalQuestions, totalAttempts } = data;
 
-  const totalUsers = new Set(attempts.map(a => a.userId)).size;
+  const totalUsers = attempts.length > 0
+    ? new Set(attempts.map(a => a.userId)).size
+    : null;
 
   const avgAccuracy = totalQuestions > 0 ? Object.values(questionStats).reduce((sum, stat) => {
     return sum + (stat.correct / stat.total * 100);
@@ -5148,7 +5172,7 @@ function renderQuestionStatsHTML(data, container) {
           <div style="color: #666; margin-top: 8px; font-size: 14px;">분석된 문제 수</div>
         </div>
         <div style="text-align: center; padding: 20px; background: #e8f5e9; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: bold; color: #4caf50;">${totalUsers}</div>
+          <div style="font-size: 32px; font-weight: bold; color: #4caf50;">${totalUsers !== null ? totalUsers : '—'}</div>
           <div style="color: #666; margin-top: 8px; font-size: 14px;">참여 사용자 수</div>
         </div>
         <div style="text-align: center; padding: 20px; background: #fff3e0; border-radius: 8px;">

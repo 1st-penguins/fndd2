@@ -112,6 +112,52 @@
                 }
             ]
         }
+        ,{
+            "collectionGroup": "questionStats",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "certificateType",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "year",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "questionStats",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "certificateType",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "subject",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "questionStats",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "certificateType",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "year",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "subject",
+                    "order": "ASCENDING"
+                }
+            ]
+        }
     ],
     "fieldOverrides": []
 }

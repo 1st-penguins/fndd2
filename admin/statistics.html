@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>문제별 통계 | 관리자 | 퍼스트펭귄</title>
   <link rel="canonical" href="https://the1stpeng.com/admin/statistics.html" />
-  
+
   <link rel="stylesheet" href="../css/design-tokens.css" />
   <link rel="stylesheet" href="../css/base.css" />
   <link rel="stylesheet" href="../css/apple-header.css">
@@ -16,181 +16,637 @@
   <link rel="stylesheet" href="../css/components.css" />
 
   <script src="../js/logger.js"></script>
-  
+
   <!-- Firebase -->
   <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-  
+
   <script type="module" src="../js/core/firebase-core.js"></script>
   <script type="module" src="../js/auth/auth-core.js"></script>
   <script type="module" src="../js/auth/auth-utils.js"></script>
-  
-  <!-- Chart.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
   <!-- SheetJS (xlsx 다운로드용) -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-  
+
   <style>
+    :root {
+      --stat-bg: #f5f5f7;
+      --stat-card: rgba(255,255,255,0.8);
+      --stat-card-hover: rgba(255,255,255,0.95);
+      --stat-border: rgba(0,0,0,0.06);
+      --stat-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --stat-shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
+      --stat-radius: 16px;
+      --stat-green: #34c759;
+      --stat-orange: #ff9500;
+      --stat-red: #ff3b30;
+      --stat-blue: #007aff;
+      --stat-navy: #1d1d1f;
+      --stat-gray: #86868b;
+      --stat-light-gray: #f5f5f7;
+    }
+
     .admin-container {
       max-width: 1400px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-    
-    .page-header {
-      margin-bottom: 30px;
-    }
-    
-    .page-header h1 {
-      color: var(--penguin-navy);
-      margin-bottom: 10px;
-    }
-    
-    .filter-section {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    
-    .filter-group label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--penguin-navy);
-    }
-    
-    .filter-group select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 15px;
-    }
-    
-    .stats-card {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .stats-card h2 {
-      color: var(--penguin-navy);
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid var(--penguin-skyblue);
-    }
-    
-    .question-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px;
+      margin: 0 auto;
+      padding: 32px 24px;
     }
 
-    .question-item {
-      background: #fff;
-      padding: 12px 14px;
-      border-radius: 8px;
-      border-left: 4px solid #e0e0e0;
-    }
-
-    .question-item.hard { border-left-color: #f44336; }
-    .question-item.medium { border-left-color: #ff9800; }
-    .question-item.easy { border-left-color: #4caf50; }
-
-    .question-title {
+    /* 페이지 헤더 */
+    .page-title {
+      font-size: 34px;
       font-weight: 700;
-      color: var(--penguin-navy);
-      margin-bottom: 8px;
-      font-size: 13px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .answer-distribution {
-      margin-top: 0;
-      padding-top: 15px;
-      border-top: 1px solid #e0e0e0;
-    }
-    
-    .answer-bar {
-      margin-bottom: 10px;
-    }
-    
-    .answer-label {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 2px;
-      font-size: 11px;
-    }
-
-    .bar-container {
-      background: #e0e0e0;
-      height: 6px;
-      border-radius: 3px;
-      overflow: hidden;
+      color: var(--stat-navy);
+      letter-spacing: -0.5px;
       margin-bottom: 4px;
     }
 
-    .bar-fill {
-      height: 100%;
-      background: var(--penguin-skyblue);
+    .page-subtitle {
+      font-size: 15px;
+      color: var(--stat-gray);
+      margin-bottom: 32px;
     }
-    
-    .badge-easy {
-      background: #4caf50;
+
+    /* 필터 바 */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      background: var(--stat-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--stat-border);
+      border-radius: 14px;
+      margin-bottom: 24px;
     }
-    
-    .badge-medium {
-      background: #ff9800;
+
+    .filter-bar select {
+      padding: 8px 32px 8px 12px;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      background: white;
+      font-size: 14px;
+      color: var(--stat-navy);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386868b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 0.2s;
     }
-    
-    .badge-hard {
-      background: #f44336;
+
+    .filter-bar select:focus {
+      outline: none;
+      border-color: var(--stat-blue);
+      box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
     }
-    
-    .btn {
-      padding: 12px 24px;
+
+    .filter-bar .divider {
+      width: 1px;
+      height: 24px;
+      background: rgba(0,0,0,0.1);
+    }
+
+    .btn-load {
+      padding: 8px 20px;
+      background: var(--stat-blue);
+      color: white;
       border: none;
       border-radius: 8px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-      font-size: 15px;
+      transition: all 0.2s;
     }
-    
-    .btn-primary {
-      background: var(--penguin-navy);
+
+    .btn-load:hover { background: #0062cc; }
+    .btn-load:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-xlsx {
+      padding: 8px 16px;
+      background: #f5f5f7;
+      color: var(--stat-navy);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+    }
+
+    .btn-xlsx:hover { background: #e8e8ed; }
+
+    .filter-toggles {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--stat-gray);
+      margin-left: auto;
+    }
+
+    .filter-toggles label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .filter-toggles input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--stat-blue);
+    }
+
+    /* 요약 카드 */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .summary-hero {
+      background: linear-gradient(135deg, #1d2f4e 0%, #2d4a7a 100%);
+      border-radius: var(--stat-radius);
+      padding: 28px;
       color: white;
-      box-shadow: 0 4px 12px rgba(29, 47, 78, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    
-    .btn-primary:hover {
-      background: var(--penguin-skyblue);
+
+    .summary-hero .label {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+
+    .summary-hero .title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .summary-hero .score {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .summary-hero .score small {
+      font-size: 18px;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    .summary-hero .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 8px;
+      width: fit-content;
+    }
+
+    .summary-mini {
+      background: var(--stat-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--stat-border);
+      border-radius: var(--stat-radius);
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .summary-mini .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--stat-navy);
+      letter-spacing: -0.5px;
+    }
+
+    .summary-mini .desc {
+      font-size: 12px;
+      color: var(--stat-gray);
+      margin-top: 4px;
+    }
+
+    .summary-mini.danger .value { color: var(--stat-red); }
+
+    /* 문제 카드 그리드 */
+    .cards-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .cards-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--stat-navy);
+    }
+
+    .cards-header .count {
+      font-size: 14px;
+      color: var(--stat-gray);
+    }
+
+    .subject-section {
+      margin-bottom: 32px;
+    }
+
+    .subject-label {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--stat-navy);
+      margin-bottom: 12px;
+      padding-left: 4px;
+    }
+
+    .question-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .q-card {
+      background: var(--stat-card);
+      border: 1px solid var(--stat-border);
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .q-card:hover {
+      background: var(--stat-card-hover);
+      box-shadow: var(--stat-shadow-hover);
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(95, 178, 201, 0.3);
     }
-    
-    @media (max-width: 768px) {
-      .filter-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .question-stats-grid {
-        grid-template-columns: 1fr;
-      }
+
+    .q-card.expanded {
+      background: white;
+      box-shadow: var(--stat-shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .q-card .q-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .q-card .q-num {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--stat-navy);
+    }
+
+    .q-card .q-rate {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .q-card .q-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--stat-gray);
+    }
+
+    .q-card .q-answer {
+      font-weight: 600;
+    }
+
+    .q-dist-inline {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .q-dist-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .q-dist-num {
+      width: 22px;
+      font-size: 11px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .q-dist-val {
+      width: 30px;
+      font-size: 11px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .q-card .difficulty-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* 확장 영역 */
+    .q-expanded-content {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .q-card.expanded .q-expanded-content {
+      display: block;
+    }
+
+    .q-dist-track {
+      flex: 1;
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .q-dist-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    .q-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .q-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .q-info-label { color: var(--stat-gray); }
+    .q-info-value { font-weight: 600; color: var(--stat-navy); }
+
+    .q-view-btn {
+      margin-top: auto;
+      padding: 10px 20px;
+      background: var(--stat-blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-align: center;
+    }
+
+    .q-view-btn:hover { background: #0062cc; }
+
+    /* 문제 모달 */
+    .q-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .q-modal-overlay.active { display: flex; }
+
+    .q-modal {
+      background: white;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      position: relative;
+    }
+
+    .q-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f5f5f7;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--stat-gray);
+      transition: background 0.2s;
+    }
+
+    .q-modal-close:hover { background: #e8e8ed; }
+
+    .q-modal h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--stat-navy);
+      margin-bottom: 8px;
+    }
+
+    .q-modal .q-modal-meta {
+      font-size: 13px;
+      color: var(--stat-gray);
+      margin-bottom: 20px;
+    }
+
+    .q-modal .q-modal-body {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #333;
+    }
+
+    .q-modal .q-modal-body .q-text {
+      margin-bottom: 16px;
+      padding: 16px;
+      background: #f9f9fb;
+      border-radius: 12px;
+      line-height: 1.7;
+    }
+
+    .q-modal .q-option {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: background 0.2s;
+    }
+
+    .q-modal .q-option.correct-option {
+      background: rgba(52,199,89,0.1);
+      border-color: var(--stat-green);
+      font-weight: 600;
+    }
+
+    .q-modal .q-modal-loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--stat-gray);
+    }
+
+    /* 빈 상태 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--stat-gray);
+    }
+
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state .msg { font-size: 16px; }
+
+    /* 뷰 토글 */
+    .view-toggle {
+      display: inline-flex;
+      background: rgba(0,0,0,0.04);
+      border-radius: 10px;
+      padding: 3px;
+      margin-bottom: 20px;
+    }
+
+    .view-btn {
+      padding: 7px 18px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--stat-gray);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-btn.active {
+      background: white;
+      color: var(--stat-navy);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    /* 테이블 뷰 */
+    .stat-table-wrap {
+      background: var(--stat-card);
+      border: 1px solid var(--stat-border);
+      border-radius: var(--stat-radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .stat-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .stat-table thead th {
+      background: var(--stat-navy);
+      color: white;
+      padding: 12px 14px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+
+    .stat-table tbody tr {
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .stat-table tbody tr:hover {
+      background: rgba(0,122,255,0.04);
+    }
+
+    .stat-table td {
+      padding: 10px 14px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .stat-table td:nth-child(2) {
+      text-align: left;
+    }
+
+    .stat-table .rate-cell {
+      font-weight: 700;
+    }
+
+    .stat-table .wrong-cell {
+      color: var(--stat-red);
+      font-size: 13px;
+    }
+
+    .stat-table .subject-header {
+      background: var(--stat-light-gray);
+      font-weight: 700;
+      color: var(--stat-navy);
+      font-size: 14px;
+    }
+
+    .stat-table .subject-header td {
+      text-align: left;
+      padding: 10px 14px;
+    }
+
+    /* 반응형 */
+    @media (max-width: 1200px) {
+      .question-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .summary-hero { grid-column: span 2; }
+      .question-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .filter-bar { flex-direction: column; align-items: stretch; }
+      .filter-bar .divider { display: none; }
+      .filter-toggles { margin-left: 0; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .question-grid { grid-template-columns: repeat(2, 1fr); }
+      .page-title { font-size: 28px; }
     }
   </style>
   <script type="module" src="../js/core/firebase-core.js"></script>
@@ -222,7 +678,6 @@
     <a href="../si1.html" class="header__mobile-link">1급 스포츠지도사</a>
     <a href="../si2.html" class="header__mobile-link">2급 스포츠지도사</a>
     <div class="header__menu-divider"></div>
-
     <div class="header__menu-auth" id="menu-auth"></div>
   </div>
   <nav class="admin-subnav">
@@ -235,107 +690,74 @@
   </nav>
 
   <main class="admin-container">
-    <div class="page-header">
-      <h1>📊 문제별 통계 분석</h1>
-      <p>모든 사용자의 문제별 정답률 및 답안 선택 분포를 확인할 수 있습니다.</p>
-    </div>
+    <div class="page-title">문제별 통계</div>
+    <div class="page-subtitle">사용자 정답률과 답안 분포를 분석합니다</div>
 
-    <!-- 필터 섹션 -->
-    <div class="filter-section">
-      <div class="filter-grid">
-        <div class="filter-group">
-          <label>자격증</label>
-          <select id="certFilter">
-            <option value="">전체</option>
-            <option value="health-manager" selected>건강운동관리사</option>
-            <option value="sports-instructor">생활스포츠지도사</option>
-          </select>
-        </div>
+    <!-- 필터 바 -->
+    <div class="filter-bar">
+      <select id="certFilter">
+        <option value="health-manager" selected>건강운동관리사</option>
+        <option value="sports-instructor">2급 스포츠지도사</option>
+        <option value="sports-instructor-1">1급 스포츠지도사</option>
+      </select>
+      <select id="yearFilter">
+        <option value="2025" selected>2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+        <option value="2021">2021</option>
+        <option value="2020">2020</option>
+        <option value="2019">2019</option>
+      </select>
+      <select id="subjectFilter">
+        <option value="">전체 과목</option>
+      </select>
+      <select id="sortFilter">
+        <option value="number">번호순</option>
+        <option value="difficulty">난이도순</option>
+      </select>
 
-        <div class="filter-group">
-          <label>연도</label>
-          <select id="yearFilter">
-            <option value="">전체</option>
-            <option value="2025" selected>2025년</option>
-            <option value="2024">2024년</option>
-            <option value="2023">2023년</option>
-            <option value="2022">2022년</option>
-            <option value="2021">2021년</option>
-            <option value="2020">2020년</option>
-            <option value="2019">2019년</option>
-          </select>
-        </div>
+      <div class="divider"></div>
 
-        <div class="filter-group">
-          <label>과목</label>
-          <select id="subjectFilter">
-            <option value="">전체</option>
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <label>난이도</label>
-          <select id="difficultyFilter">
-            <option value="">전체</option>
-            <option value="hard">어려움 (정답률 50% 미만)</option>
-            <option value="medium">보통 (정답률 50-79.9%)</option>
-            <option value="easy">쉬움 (정답률 80% 이상)</option>
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <label>문제 유형</label>
-          <select id="typeFilter">
-            <option value="regular" selected>일반 문제</option>
-            <option value="mockexam">모의고사</option>
-            <option value="">전체 (통합)</option>
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <label>정렬</label>
-          <select id="sortFilter">
-            <option value="number">문제 번호 순</option>
-            <option value="difficulty">난이도 순 (어려운 순)</option>
-          </select>
-        </div>
+      <button id="loadStatsBtn" class="btn-load" onclick="loadStatistics()">조회</button>
+      <button id="downloadXlsxBtn" class="btn-xlsx" onclick="downloadXlsx()">엑셀 다운로드</button>
 
-        <div class="filter-group" style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
-          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
-            <input type="checkbox" id="completedOnlyToggle" checked
-                   style="width:16px; height:16px; cursor:pointer;">
-            <span>완주 세션만 집계</span>
-          </label>
-          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
-            <input type="checkbox" id="lowAccuracyToggle" checked
-                   style="width:16px; height:16px; cursor:pointer;">
-            <span>정답률 30% 미만 세션 제외</span>
-          </label>
-          <span style="font-size:11px; color:#888;">오염 데이터(랜덤 클릭 등) 방지</span>
-        </div>
-      </div>
-
-      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        <button id="loadStatsBtn" class="btn btn-primary" onclick="loadStatistics()">통계 조회</button>
-        <button id="downloadXlsxBtn" class="btn" onclick="downloadXlsx()"
-                style="background:#217346; color:#fff; display:none;">
-          📥 엑셀 다운로드 (.xlsx)
-        </button>
+      <div class="filter-toggles">
+        <label><input type="checkbox" id="completedOnlyToggle" checked> 완주만</label>
+        <label><input type="checkbox" id="lowAccuracyToggle" checked> 오염 제외</label>
       </div>
     </div>
 
-    <!-- 요약 통계 -->
-    <div id="summaryStats" class="stats-card">
-      <h2>요약 통계</h2>
-      <div id="summaryContent">통계를 조회해주세요.</div>
+    <!-- 요약 -->
+    <div id="summarySection"></div>
+
+    <!-- 뷰 전환 -->
+    <div class="view-toggle" id="viewToggle" style="display:none;">
+      <button class="view-btn active" data-view="card" onclick="switchView('card')">카드</button>
+      <button class="view-btn" data-view="table" onclick="switchView('table')">테이블</button>
     </div>
 
-    <!-- 문제별 상세 통계 -->
-    <div id="questionStats" class="stats-card">
-      <h2>문제별 상세 통계</h2>
-      <div id="questionStatsContent">통계를 조회해주세요.</div>
+    <!-- 문제 카드 -->
+    <div id="cardsSection">
+      <div class="empty-state">
+        <div class="icon">📊</div>
+        <div class="msg">조회 버튼을 눌러 통계를 불러오세요</div>
+      </div>
     </div>
+
+    <!-- 테이블 뷰 -->
+    <div id="tableSection" style="display:none;"></div>
   </main>
+
+  <!-- 문제 모달 -->
+  <div class="q-modal-overlay" id="questionModal">
+    <div class="q-modal">
+      <button class="q-modal-close" onclick="closeModal()">&times;</button>
+      <div id="modalContent">
+        <div class="q-modal-loading">불러오는 중...</div>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer">
     <div class="footer__inner">
@@ -363,530 +785,434 @@
       </div>
     </div>
   </footer>
-<script src="../js/apple-header.js"></script>
+  <script src="../js/apple-header.js"></script>
 
   <script type="module">
     import { ensureFirebase, ensureAuthReady } from '../js/core/firebase-core.js';
     import { isAdmin } from '../js/auth/auth-utils.js';
     import {
-      collection,
-      query,
-      where,
-      getDocs
+      collection, query, where, getDocs
     } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-    // Firebase 초기화 대기 후 auth, db 참조
     const { auth, db } = await ensureFirebase();
-
-    // 관리자 권한 확인
     const user = await ensureAuthReady();
     if (!user || !isAdmin(user)) {
       alert('관리자만 접근할 수 있습니다.');
       window.location.href = '../index.html';
     }
 
-    // ─── 자격증별 과목 목록 ──────────────────────────────────────────────
-    const SUBJECTS_BY_CERT = {
-      'health-manager': [
-        '운동생리학', '건강체력평가', '운동처방론', '운동부하검사',
-        '운동상해', '기능해부학', '병태생리학', '스포츠심리학'
-      ],
-      'sports-instructor': [
-        '스포츠교육학', '스포츠사회학', '스포츠심리학', '스포츠윤리',
-        '운동생리학', '운동역학', '한국체육사',
-        '노인체육론', '유아체육론', '특수체육론'
-      ]
+    // 자격증별 과목
+    const SUBJECTS = {
+      'health-manager': ['운동생리학','건강체력평가','운동처방론','운동부하검사','운동상해','기능해부학','병태생리학','스포츠심리학'],
+      'sports-instructor': ['스포츠교육학','스포츠사회학','스포츠심리학','스포츠윤리','운동생리학','운동역학','한국체육사','노인체육론','유아체육론','특수체육론'],
+      'sports-instructor-1': ['운동상해','체육측정평가론','트레이닝론','스포츠영양학','건강교육론','장애인스포츠론']
+    };
+
+    // 데이터 경로 매핑
+    const CERT_FOLDERS = {
+      'health-manager': 'data',
+      'sports-instructor': 'data/sports',
+      'sports-instructor-1': 'data/sports1'
     };
 
     function updateSubjectOptions() {
-      const certFilter = document.getElementById('certFilter').value;
-      const subjectSelect = document.getElementById('subjectFilter');
-      const currentVal = subjectSelect.value;
-      subjectSelect.innerHTML = '<option value="">전체</option>';
-
-      let subjects = [];
-      if (certFilter && SUBJECTS_BY_CERT[certFilter]) {
-        subjects = SUBJECTS_BY_CERT[certFilter];
-      } else {
-        // 전체: 두 자격증 과목 합치기 (중복 제거)
-        const all = new Set([...SUBJECTS_BY_CERT['health-manager'], ...SUBJECTS_BY_CERT['sports-instructor']]);
-        subjects = [...all].sort();
-      }
-      subjects.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = s;
-        if (s === currentVal) opt.selected = true;
-        subjectSelect.appendChild(opt);
+      const cert = document.getElementById('certFilter').value;
+      const sel = document.getElementById('subjectFilter');
+      sel.innerHTML = '<option value="">전체 과목</option>';
+      (SUBJECTS[cert] || []).forEach(s => {
+        sel.innerHTML += `<option value="${s}">${s}</option>`;
       });
     }
 
     document.getElementById('certFilter').addEventListener('change', updateSubjectOptions);
     updateSubjectOptions();
-    
-    // ─── V4-A1: 완주 세션 필터 ────────────────────────────────────────────
-    // 일반문제: 세션당 attempts 수 >= 20, 모의고사: >= 80
-    // sessionId 없는 레거시 attempts는 필터 통과 (유지)
-    function filterCompletedAttempts(allAttempts) {
-      const groups = {};
-      allAttempts.forEach(a => {
-        if (!a.sessionId) return;
-        (groups[a.sessionId] = groups[a.sessionId] || []).push(a);
-      });
-      const completedIds = new Set();
-      Object.entries(groups).forEach(([sid, list]) => {
-        const isMock = list.some(a => a.questionData?.isFromMockExam === true);
-        if (list.length >= (isMock ? 80 : 20)) completedIds.add(sid);
-      });
-      return allAttempts.filter(a => !a.sessionId || completedIds.has(a.sessionId));
-    }
 
-    // ─── 세션 정답률 필터: 30% 미만 세션 제외 (오염 데이터 방지) ──────────
-    function filterLowAccuracySessions(allAttempts, minAccuracy = 0.3) {
-      const groups = {};
-      allAttempts.forEach(a => {
-        if (!a.sessionId) return;
-        (groups[a.sessionId] = groups[a.sessionId] || []).push(a);
-      });
-      const excludeIds = new Set();
-      Object.entries(groups).forEach(([sid, list]) => {
-        const correct = list.filter(a => a.isCorrect).length;
-        const accuracy = correct / list.length;
-        if (accuracy < minAccuracy) excludeIds.add(sid);
-      });
-      const excluded = excludeIds.size;
-      if (excluded > 0) console.log(`✅ 정답률 ${Math.round(minAccuracy * 100)}% 미만 세션 ${excluded}개 제외`);
-      return allAttempts.filter(a => !a.sessionId || !excludeIds.has(a.sessionId));
-    }
-
-    // ─── 최다 선택: 전체 중 가장 많이 고른 답 (전체 대비 %) ──────────
-    function getMostPicked(answers, total) {
-      let topIdx = -1;
-      let topCount = 0;
-      for (let i = 0; i < 4; i++) {
-        const cnt = answers[i] || 0;
-        if (cnt > topCount) { topCount = cnt; topIdx = i; }
-      }
-      const pct = total > 0 && topCount > 0 ? Math.round(topCount / total * 100) : 0;
-      return { idx: topIdx, count: topCount, pct };
-    }
-
-    // ─── 오답 1위: 정답 제외 가장 많이 고른 답 (전체 대비 %) ──────────
-    function getTopWrongPick(answers, correctAnswer, total) {
-      if (correctAnswer === undefined || correctAnswer === null) {
-        return { idx: -1, count: 0, pct: 0 };
-      }
-      let topIdx = -1;
-      let topCount = 0;
-      for (let i = 0; i < 4; i++) {
-        if (i === correctAnswer) continue;
-        const cnt = answers[i] || 0;
-        if (cnt > topCount) { topCount = cnt; topIdx = i; }
-      }
-      const pct = total > 0 && topCount > 0 ? Math.round(topCount / total * 100) : 0;
-      return { idx: topIdx, count: topCount, pct };
-    }
-
-    // ─── V4-C5: xlsx 다운로드 ────────────────────────────────────────────
-    let _lastTableRows = []; // 마지막 테이블 데이터 저장
+    // 엑셀 다운로드
+    let _lastData = [];
     window.downloadXlsx = function() {
-      if (!_lastTableRows.length) { alert('먼저 통계를 조회하세요.'); return; }
-      const header = ['문제번호', '과목', '연도', '정답', '최다선택', '최다선택(%)', '정답률(%)', '오답1위', '오답1위(%)', '응시수'];
-      const rows = _lastTableRows.map(r => [
+      if (!_lastData.length) return alert('먼저 통계를 조회하세요.');
+      const header = ['번호','과목','연도','정답','정답률(%)','오답1위','오답1위(%)','응시수'];
+      const rows = _lastData.map(r => [
         r.number, r.subject, r.year,
-        r.correctAnswer !== undefined && r.correctAnswer !== null ? (r.correctAnswer + 1) + '번' : '-',
-        r.mostPicked >= 0 ? (r.mostPicked + 1) + '번' : '-',
-        r.mostPickedPct,
+        r.correctAnswerIndex !== null ? (r.correctAnswerIndex + 1) + '번' : '-',
         r.accuracy,
-        r.topWrong >= 0 ? (r.topWrong + 1) + '번' : '-',
-        r.topWrongPct,
-        r.total
+        r.topWrongIdx >= 0 ? (r.topWrongIdx + 1) + '번' : '-',
+        r.topWrongPct, r.total
       ]);
       const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-      ws['!cols'] = [8, 12, 8, 8, 10, 12, 10, 10, 12, 8].map(w => ({ wch: w }));
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, '문제별통계');
-      const yearVal = document.getElementById('yearFilter').value || '전체';
-      const subVal  = document.getElementById('subjectFilter').value || '전과목';
-      XLSX.writeFile(wb, `${yearVal}_${subVal}_문제별통계.xlsx`);
+      XLSX.utils.book_append_sheet(wb, ws, '통계');
+      const y = document.getElementById('yearFilter').value || '전체';
+      const s = document.getElementById('subjectFilter').value || '전과목';
+      XLSX.writeFile(wb, `${y}_${s}_문제별통계.xlsx`);
     };
 
-    // 통계 조회
+    // 오답 1위
+    function getTopWrong(answers, correctIdx, total) {
+      if (correctIdx === null || correctIdx === undefined) return { idx: -1, pct: 0 };
+      let topIdx = -1, topCnt = 0;
+      for (let i = 0; i < 4; i++) {
+        if (i === correctIdx) continue;
+        const cnt = answers[String(i)] || 0;
+        if (cnt > topCnt) { topCnt = cnt; topIdx = i; }
+      }
+      return { idx: topIdx, pct: total > 0 ? Math.round(topCnt / total * 100) : 0 };
+    }
+
+    // 난이도 색상
+    function rateColor(pct) {
+      return pct < 50 ? 'var(--stat-red)' : pct >= 80 ? 'var(--stat-green)' : 'var(--stat-orange)';
+    }
+
+    // ── 통계 조회 (questionStats 우선) ──
     window.loadStatistics = async function() {
       const btn = document.getElementById('loadStatsBtn');
-      const originalText = btn.textContent;
+      const origText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '조회 중...';
+
       try {
         const certFilter = document.getElementById('certFilter').value;
         const yearFilter = document.getElementById('yearFilter').value;
         const subjectFilter = document.getElementById('subjectFilter').value;
-        const difficultyFilter = document.getElementById('difficultyFilter').value;
-        const typeFilter = document.getElementById('typeFilter').value;
+        const sortFilter = document.getElementById('sortFilter').value;
 
-        // 연도 또는 과목 필수 선택 강제
-        if (!yearFilter && !subjectFilter) {
-          alert('Firebase 비용 절감을 위해 연도 또는 과목을 반드시 선택해주세요.');
-          return;
-        }
+        // questionStats에서 조회
+        const constraints = [where('certificateType', '==', certFilter)];
+        if (yearFilter) constraints.push(where('year', '==', yearFilter));
+        if (subjectFilter) constraints.push(where('subject', '==', subjectFilter));
 
-        // 로딩 상태 표시
-        btn.disabled = true;
-        btn.textContent = '조회 중...';
-        btn.style.opacity = '0.7';
+        const qsQuery = query(collection(db, 'questionStats'), ...constraints);
+        const qsSnapshot = await getDocs(qsQuery);
 
-        // Firestore 서버 측 필터링 (읽기 비용 대폭 절감)
-        // certificateType은 복합 인덱스 없이 클라이언트 필터링
-        let q = collection(db, 'attempts');
-        const constraints = [];
-        if (yearFilter) {
-          constraints.push(where('questionData.year', '==', yearFilter));
-        }
-        if (subjectFilter) {
-          constraints.push(where('questionData.subject', '==', subjectFilter));
-        }
-        const finalQuery = constraints.length > 0 ? query(q, ...constraints) : q;
-        const snapshot = await getDocs(finalQuery);
+        // 문제별 데이터 추출
+        const allQuestions = [];
+        qsSnapshot.forEach(d => {
+          const doc = d.data();
+          const questions = doc.questions || {};
+          // 과목명 디코딩 (인코딩된 데이터 대응)
+          let subjectName = doc.subject;
+          try {
+            let decoded = decodeURIComponent(subjectName);
+            while (decoded !== subjectName) { subjectName = decoded; decoded = decodeURIComponent(subjectName); }
+          } catch(e) {}
 
-        console.log(`📊 Firebase reads: ${snapshot.size}개 문서 읽음`);
+          Object.entries(questions).forEach(([num, q]) => {
+            const total = q.total || 0;
+            if (total === 0) return;
+            const correct = q.correct || 0;
+            const answers = q.answers || {'0':0,'1':0,'2':0,'3':0};
+            const correctIdx = q.correctAnswerIndex ?? null;
+            const accuracy = Math.round(correct / total * 100);
+            const tw = getTopWrong(answers, correctIdx, total);
 
-        let attempts = [];
-        snapshot.forEach(doc => {
-          attempts.push({ id: doc.id, ...doc.data() });
+            allQuestions.push({
+              number: Number(num),
+              subject: subjectName,
+              year: doc.year,
+              total, correct, answers, accuracy,
+              correctAnswerIndex: correctIdx,
+              topWrongIdx: tw.idx,
+              topWrongPct: tw.pct,
+              totalTimeSpent: q.totalTimeSpent || 0,
+              viewedExplanationCount: q.viewedExplanationCount || 0
+            });
+          });
         });
 
-        // 자격증 유형 클라이언트 필터링
-        if (certFilter) {
-          attempts = attempts.filter(a => {
-            const ct = a.questionData?.certificateType;
-            // certificateType 없는 레거시 데이터는 건강운동관리사로 간주
-            return ct ? ct === certFilter : certFilter === 'health-manager';
-          });
-          console.log(`✅ 자격증 필터 (${certFilter}): ${attempts.length}개`);
-        }
-
-        // V4-A1: 완주 세션 필터 (토글 ON 시)
-        if (document.getElementById('completedOnlyToggle').checked) {
-          const before = attempts.length;
-          attempts = filterCompletedAttempts(attempts);
-          console.log(`✅ 완주 세션 필터: ${before}개 → ${attempts.length}개`);
-        }
-
-        // 세션 정답률 30% 미만 제외 (대충 클릭한 오염 데이터 방지)
-        if (document.getElementById('lowAccuracyToggle').checked) {
-          const before = attempts.length;
-          attempts = filterLowAccuracySessions(attempts);
-          console.log(`✅ 저정답률 세션 필터: ${before}개 → ${attempts.length}개`);
-        }
-        
-        // ✅ 문제 유형 필터링
-        if (typeFilter === 'regular') {
-          attempts = attempts.filter(a => !a.questionData?.isFromMockExam);
-          console.log('✅ 일반 문제만 필터링');
-        } else if (typeFilter === 'mockexam') {
-          attempts = attempts.filter(a => a.questionData?.isFromMockExam);
-          console.log('✅ 모의고사만 필터링');
-        }
-        
-        // 문제별 통계 계산
-        const questionStats = calculateQuestionStats(attempts);
-        
-        // 난이도 필터
-        if (difficultyFilter) {
-          const filtered = {};
-          Object.keys(questionStats).forEach(key => {
-            const stat = questionStats[key];
-            const accuracy = (stat.correct / stat.total * 100);
-            
-            if (difficultyFilter === 'hard' && accuracy < 50) {
-              filtered[key] = stat;
-            } else if (difficultyFilter === 'medium' && accuracy >= 50 && accuracy < 80) {
-              filtered[key] = stat;
-            } else if (difficultyFilter === 'easy' && accuracy >= 80) {
-              filtered[key] = stat;
-            }
-          });
-          renderQuestionStats(filtered);
+        // 정렬
+        if (sortFilter === 'difficulty') {
+          allQuestions.sort((a, b) => a.accuracy - b.accuracy);
         } else {
-          renderQuestionStats(questionStats);
+          const subjectOrder = SUBJECTS[certFilter] || [];
+          allQuestions.sort((a, b) => {
+            if (a.subject !== b.subject) {
+              const idxA = subjectOrder.indexOf(a.subject);
+              const idxB = subjectOrder.indexOf(b.subject);
+              return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+            }
+            return a.number - b.number;
+          });
         }
-        
-        // 요약 통계
-        renderSummary(attempts, questionStats);
-        
+
+        _lastData = allQuestions;
+
+        renderSummary(allQuestions, yearFilter, subjectFilter);
+        renderCards(allQuestions, certFilter);
+        renderTable(allQuestions, certFilter);
+
+        document.getElementById('viewToggle').style.display = allQuestions.length > 0 ? 'inline-flex' : 'none';
+        document.getElementById('downloadXlsxBtn').style.display = allQuestions.length > 0 ? 'inline-flex' : 'none';
+        console.log(`✅ questionStats에서 ${qsSnapshot.size}개 문서, ${allQuestions.length}개 문제 로드`);
+
       } catch (error) {
         console.error('통계 조회 오류:', error);
-        alert('통계를 불러오는 중 오류가 발생했습니다.\n\n' + error.message);
+        alert('통계를 불러오는 중 오류가 발생했습니다.\n' + error.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = originalText;
-        btn.style.opacity = '';
+        btn.textContent = origText;
       }
     };
-    
-    // 문제별 통계 계산
-    function calculateQuestionStats(attempts) {
-      const stats = {};
-      
-      attempts.forEach(attempt => {
-        const qData = attempt.questionData;
-        if (!qData) return;
-        
-        // ✅ 문제 유형 구분을 위한 키 생성
-        const type = qData.isFromMockExam ? 'mock' : 'regular';
-        const key = `${qData.year}_${qData.subject}_${qData.number}_${type}`;
-        
-        if (!stats[key]) {
-          stats[key] = {
-            year: qData.year,
-            subject: qData.subject,
-            number: qData.number,
-            isFromMockExam: qData.isFromMockExam || false,
-            total: 0,
-            correct: 0,
-            answers: { 0: 0, 1: 0, 2: 0, 3: 0 },
-            correctAnswer: undefined  // V4-C3: 아래서 채워짐
-          };
-        }
-        // correctAnswer 필드: attempt 또는 questionData에서 탐색 (0-based)
-        if (stats[key].correctAnswer === undefined) {
-          let ca;
-          if (attempt.correctAnswer !== undefined && attempt.correctAnswer !== null) {
-            ca = Number(attempt.correctAnswer);
-          } else if (qData.correctAnswer !== undefined && qData.correctAnswer !== null) {
-            ca = Number(qData.correctAnswer);
-          } else if (qData.correctOption !== undefined && qData.correctOption !== null) {
-            ca = Number(qData.correctOption);
-          } else if (qData.correct !== undefined && qData.correct !== null) {
-            ca = Number(qData.correct);
-          }
-          if (ca !== undefined && !isNaN(ca)) {
-            stats[key].correctAnswer = ca;
-          }
-        }
-        
-        stats[key].total++;
-        if (attempt.isCorrect) {
-          stats[key].correct++;
-        }
-        
-        // 답안 선택 집계
-        const userAnswer = attempt.userAnswer;
-        if (userAnswer !== undefined && userAnswer !== null) {
-          stats[key].answers[userAnswer]++;
-        }
-      });
-      
-      return stats;
-    }
-    
-    // 통계 렌더링
-    function renderQuestionStats(questionStats) {
-      const container = document.getElementById('questionStatsContent');
 
-      if (Object.keys(questionStats).length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666;">해당 조건의 데이터가 없습니다.</p>';
-        document.getElementById('downloadXlsxBtn').style.display = 'none';
+    // 요약 렌더링
+    function renderSummary(questions, year, subject) {
+      const container = document.getElementById('summarySection');
+      if (questions.length === 0) {
+        container.innerHTML = '';
         return;
       }
 
-      // 정렬 옵션
-      const sortFilter = document.getElementById('sortFilter').value;
+      const totalQ = questions.length;
+      const totalAttempts = questions.reduce((s, q) => s + q.total, 0);
+      const avgAcc = questions.reduce((s, q) => s + q.accuracy, 0) / totalQ;
+      const avgScore = (avgAcc / 100 * totalQ).toFixed(1);
+      const hardCount = questions.filter(q => q.accuracy < 50).length;
 
-      let sortedStats = Object.entries(questionStats);
+      let diffLabel, diffColor;
+      if (avgAcc >= 70) { diffLabel = '쉬움'; diffColor = 'var(--stat-green)'; }
+      else if (avgAcc >= 55) { diffLabel = '보통'; diffColor = 'var(--stat-orange)'; }
+      else { diffLabel = '어려움'; diffColor = 'var(--stat-red)'; }
 
-      if (sortFilter === 'difficulty') {
-        // 난이도 순 (어려운 문제 먼저)
-        sortedStats.sort((a, b) => {
-          const accA = a[1].correct / a[1].total;
-          const accB = b[1].correct / b[1].total;
-          return accA - accB;
-        });
-      } else {
-        // 문제 번호 순 (연도 최신 → 과목 가나다 → 번호 오름차순)
-        sortedStats.sort((a, b) => {
-          if (a[1].year !== b[1].year) return b[1].year.localeCompare(a[1].year);
-          if (a[1].subject !== b[1].subject) return a[1].subject.localeCompare(b[1].subject);
-          return Number(a[1].number) - Number(b[1].number);
-        });
-      }
-
-      // ── V4-C4: 컴팩트 테이블 (상단) ──────────────────────────────────
-      _lastTableRows = sortedStats.map(([, stat]) => {
-        const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
-        const mp = getMostPicked(stat.answers, stat.total);
-        const tw = getTopWrongPick(stat.answers, stat.correctAnswer, stat.total);
-        return { number: stat.number, subject: stat.subject, year: stat.year,
-                 correctAnswer: stat.correctAnswer, accuracy,
-                 mostPicked: mp.idx, mostPickedPct: mp.pct,
-                 topWrong: tw.idx, topWrongPct: tw.pct, total: stat.total };
-      });
-
-      const isAllTypes = document.getElementById('typeFilter').value === '';
-
-      function buildTableHTML(stats, title) {
-        const rows = stats.map(([, stat]) => {
-          const accuracy = stat.total > 0 ? Math.round(stat.correct / stat.total * 100) : 0;
-          const accColor = accuracy < 50 ? '#f44336' : accuracy >= 80 ? '#4caf50' : '#ff9800';
-          const tw = getTopWrongPick(stat.answers, stat.correctAnswer, stat.total);
-          const correctLabel = stat.correctAnswer !== undefined && stat.correctAnswer !== null
-            ? `${stat.correctAnswer + 1}번` : '-';
-          // 오답1위: 전체 대비 % (정답률과 합산하면 의미 있는 비교)
-          const twLabel = tw.idx >= 0 ? `${tw.idx + 1}번 (${tw.pct}%)` : '-';
-          return `<tr style="border-bottom:1px solid #eee;">
-            <td style="text-align:center;">${stat.number}</td>
-            <td>${stat.subject}</td>
-            <td style="text-align:center;">${stat.year}</td>
-            <td style="text-align:center; font-weight:700; color:#4caf50;">${correctLabel}</td>
-            <td style="text-align:center; font-weight:700; color:${accColor};">${accuracy}%</td>
-            <td style="text-align:center; color:#e65100;">${twLabel}</td>
-            <td style="text-align:center;">${stat.total}명</td>
-          </tr>`;
-        }).join('');
-        const titleHtml = title ? `<h3 style="margin:24px 0 12px; color:#1d2f4e; font-size:16px;">${title}</h3>` : '';
-        return `${titleHtml}
-          <div style="overflow-x:auto; margin-bottom:16px;">
-            <table style="width:100%; border-collapse:collapse; font-size:14px;">
-              <thead>
-                <tr style="background:#1d2f4e; color:#fff;">
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">번호</th>
-                  <th style="padding:10px 8px; text-align:left; white-space:nowrap;">과목</th>
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">연도</th>
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답</th>
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">정답률</th>
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">오답1위</th>
-                  <th style="padding:10px 8px; text-align:center; white-space:nowrap;">응시</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>`;
-      }
-
-      let tableHtml;
-      if (isAllTypes) {
-        const regularStats = sortedStats.filter(([, s]) => !s.isFromMockExam);
-        const mockStats = sortedStats.filter(([, s]) => s.isFromMockExam);
-        tableHtml = '';
-        if (regularStats.length > 0) {
-          tableHtml += buildTableHTML(regularStats, `📝 일반 문제 (${regularStats.length}개)`);
-        }
-        if (mockStats.length > 0) {
-          tableHtml += buildTableHTML(mockStats, `📋 모의고사 (${mockStats.length}개)`);
-        }
-      } else {
-        tableHtml = buildTableHTML(sortedStats, null);
-      }
-
-      tableHtml += `
-        <details style="margin-bottom:16px;">
-          <summary style="cursor:pointer; font-weight:600; color:#1d2f4e; padding:8px 0;">
-            ▶ 상세 분포 보기 (클릭하여 펼치기)
-          </summary>
-          <div id="detailCardsContainer"></div>
-        </details>`;
-
-      container.innerHTML = tableHtml;
-      document.getElementById('downloadXlsxBtn').style.display = 'inline-flex';
-
-      // 상세 카드: details 펼칠 때 lazy 렌더링
-      const detailsEl = container.querySelector('details');
-      const detailContainer = container.querySelector('#detailCardsContainer');
-      let cardsRendered = false;
-      detailsEl.addEventListener('toggle', () => {
-        if (detailsEl.open && !cardsRendered) {
-          cardsRendered = true;
-          let html = '<div class="question-stats-grid">';
-          sortedStats.forEach(([, stat]) => {
-            const accuracy = Math.round(stat.correct / stat.total * 100);
-            let difficulty = accuracy < 50 ? 'hard' : accuracy >= 80 ? 'easy' : 'medium';
-            const accColor = difficulty === 'hard' ? '#f44336' : difficulty === 'easy' ? '#4caf50' : '#ff9800';
-            html += `
-              <div class="question-item ${difficulty}">
-                <div class="question-title">
-                  <span>${stat.number}번</span>
-                  <span style="font-size:13px;font-weight:700;color:${accColor};">${accuracy}% <span style="font-size:11px;color:#999;font-weight:400;">(${stat.total}명)</span></span>
-                </div>
-                <div class="answer-distribution">
-                  ${[0, 1, 2, 3].map(i => {
-                    const count = stat.answers[i] || 0;
-                    const pct = stat.total > 0 ? (count / stat.total * 100).toFixed(0) : 0;
-                    const isCorrect = stat.correctAnswer !== undefined && stat.correctAnswer !== null && i === stat.correctAnswer;
-                    const barColor = isCorrect ? '#4caf50' : '#f44336';
-                    const labelStyle = isCorrect ? 'font-weight:700;color:#4caf50;' : 'color:#888;';
-                    return `<div>
-                      <div class="answer-label"><span style="${labelStyle}">${i + 1}번${isCorrect ? ' ✓' : ''}</span><span style="${labelStyle}">${pct}%</span></div>
-                      <div class="bar-container"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
-                    </div>`;
-                  }).join('')}
-                </div>
-              </div>`;
-          });
-          html += '</div>';
-          detailContainer.innerHTML = html;
-        }
-      });
-    }
-    
-    // 요약 통계
-    function renderSummary(attempts, questionStats) {
-      const container = document.getElementById('summaryContent');
-
-      const totalQuestions = Object.keys(questionStats).length;
-      const totalAttempts = attempts.length;
-      const totalUsers = new Set(attempts.map(a => a.userId)).size;
-
-      // 문제별 정답률 평균 = 응시자 평균 총점 비율
-      const avgAccuracy = totalQuestions > 0
-        ? Object.values(questionStats).reduce((sum, stat) => sum + (stat.correct / stat.total * 100), 0) / totalQuestions
-        : 0;
-
-      // 평균 점수 환산 (문제 수 기준)
-      const avgScore = (avgAccuracy / 100 * totalQuestions).toFixed(1);
-
-      const hardQuestions = Object.values(questionStats).filter(s => (s.correct / s.total * 100) < 50).length;
-
-      // 난이도 등급
-      let diffLabel, diffColor, diffBg;
-      if (avgAccuracy >= 70) { diffLabel = '쉬움'; diffColor = '#4caf50'; diffBg = '#e8f5e9'; }
-      else if (avgAccuracy >= 55) { diffLabel = '보통'; diffColor = '#ff9800'; diffBg = '#fff3e0'; }
-      else { diffLabel = '어려움'; diffColor = '#f44336'; diffBg = '#ffebee'; }
-
-      const yearVal = document.getElementById('yearFilter').value || '전체';
-      const subVal = document.getElementById('subjectFilter').value || '전과목';
+      const title = `${year || '전체'}년 ${subject || '전과목'}`;
 
       container.innerHTML = `
-        <div style="margin-bottom:20px; padding:20px; background:${diffBg}; border-radius:12px; border-left:5px solid ${diffColor};">
-          <div style="font-size:18px; font-weight:700; color:#1d2f4e; margin-bottom:8px;">
-            ${yearVal}년 ${subVal} 종합
+        <div class="summary-grid">
+          <div class="summary-hero">
+            <div class="label">종합 분석</div>
+            <div class="title">${title}</div>
+            <div class="score">${avgAcc.toFixed(1)}% <small>(${avgScore}/${totalQ}문제)</small></div>
+            <div class="badge" style="background:${diffColor};">${diffLabel}</div>
           </div>
-          <div style="font-size:28px; font-weight:800; color:${diffColor};">
-            평균 ${avgAccuracy.toFixed(1)}% (${avgScore}/${totalQuestions}문제)
-            <span style="font-size:16px; padding:4px 12px; border-radius:20px; background:${diffColor}; color:#fff; margin-left:8px; vertical-align:middle;">${diffLabel}</span>
+          <div class="summary-mini">
+            <div class="value">${totalQ}</div>
+            <div class="desc">분석 문제</div>
           </div>
-          <div style="color:#666; margin-top:8px; font-size:14px;">
-            응시자 ${totalUsers}명 평균 총점 기준
+          <div class="summary-mini">
+            <div class="value">${Math.round(totalAttempts / totalQ)}</div>
+            <div class="desc">평균 응시자</div>
           </div>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
-          <div style="text-align: center; padding: 16px; background: #f0f9ff; border-radius: 8px;">
-            <div style="font-size: 28px; font-weight: bold; color: var(--penguin-skyblue);">${totalQuestions}</div>
-            <div style="color: #666; margin-top: 6px; font-size:13px;">분석 문제 수</div>
+          <div class="summary-mini">
+            <div class="value">${totalAttempts.toLocaleString()}</div>
+            <div class="desc">총 풀이 수</div>
           </div>
-          <div style="text-align: center; padding: 16px; background: #f0f9ff; border-radius: 8px;">
-            <div style="font-size: 28px; font-weight: bold; color: var(--penguin-skyblue);">${totalUsers}</div>
-            <div style="color: #666; margin-top: 6px; font-size:13px;">참여 사용자</div>
-          </div>
-          <div style="text-align: center; padding: 16px; background: #f0f9ff; border-radius: 8px;">
-            <div style="font-size: 28px; font-weight: bold; color: var(--penguin-skyblue);">${totalAttempts.toLocaleString()}</div>
-            <div style="color: #666; margin-top: 6px; font-size:13px;">총 풀이 횟수</div>
-          </div>
-          <div style="text-align: center; padding: 16px; background: #ffebee; border-radius: 8px;">
-            <div style="font-size: 28px; font-weight: bold; color: #f44336;">${hardQuestions}</div>
-            <div style="color: #666; margin-top: 6px; font-size:13px;">고난도 (50%↓)</div>
+          <div class="summary-mini danger">
+            <div class="value">${hardCount}</div>
+            <div class="desc">고난도 (50% 미만)</div>
           </div>
         </div>
       `;
     }
+
+    // 카드 렌더링
+    function renderCards(questions, certType) {
+      const container = document.getElementById('cardsSection');
+
+      if (questions.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">📊</div><div class="msg">해당 조건의 데이터가 없습니다</div></div>';
+        return;
+      }
+
+      // 과목별 그룹핑
+      const groups = {};
+      questions.forEach(q => {
+        (groups[q.subject] = groups[q.subject] || []).push(q);
+      });
+
+      let html = '';
+      Object.entries(groups).sort(([a],[b]) => { const o = SUBJECTS[certType] || []; return (o.indexOf(a) === -1 ? 999 : o.indexOf(a)) - (o.indexOf(b) === -1 ? 999 : o.indexOf(b)); }).forEach(([subject, qs]) => {
+        html += `
+          <div class="subject-section">
+            <div class="subject-label">${subject} <span style="color:var(--stat-gray);font-weight:400;font-size:14px;">${qs.length}문제</span></div>
+            <div class="question-grid" id="grid-${CSS.escape(subject)}">
+        `;
+
+        qs.forEach(q => {
+          const color = rateColor(q.accuracy);
+          const correctLabel = q.correctAnswerIndex !== null ? `${q.correctAnswerIndex + 1}번` : '-';
+          const twLabel = q.topWrongIdx >= 0 ? `${q.topWrongIdx + 1}번(${q.topWrongPct}%)` : '-';
+          const dotColor = q.accuracy < 50 ? 'var(--stat-red)' : q.accuracy >= 80 ? 'var(--stat-green)' : 'var(--stat-orange)';
+          const avgTime = q.total > 0 ? Math.round(q.totalTimeSpent / q.total) : 0;
+
+          html += `
+            <div class="q-card" data-subject="${subject}" data-number="${q.number}" data-cert="${certType}" data-year="${q.year}"
+                 onclick="openQuestion('${certType}', '${q.year}', '${subject}', ${q.number})">
+              <div class="difficulty-dot" style="background:${dotColor};"></div>
+              <div class="q-top">
+                <span class="q-num">${q.number}번</span>
+                <span class="q-rate" style="color:${color};">${q.accuracy}%</span>
+              </div>
+              <div class="q-meta">
+                <span>정답 <span class="q-answer" style="color:var(--stat-green);">${correctLabel}</span></span>
+                <span>${q.total}명</span>
+              </div>
+
+              <div class="q-dist-inline">
+                ${[0,1,2,3].map(i => {
+                  const cnt = q.answers[String(i)] || 0;
+                  const pct = q.total > 0 ? Math.round(cnt / q.total * 100) : 0;
+                  const isCorrect = i === q.correctAnswerIndex;
+                  const fillColor = isCorrect ? 'var(--stat-green)' : (pct >= 20 ? 'var(--stat-red)' : 'rgba(0,0,0,0.1)');
+                  const labelColor = isCorrect ? 'var(--stat-green)' : (pct >= 20 ? 'var(--stat-red)' : 'var(--stat-gray)');
+                  const fontWeight = isCorrect || pct >= 20 ? '700' : '400';
+                  return `
+                    <div class="q-dist-row">
+                      <span class="q-dist-num" style="color:${labelColor};font-weight:${fontWeight};">${i+1}${isCorrect ? ' ✓' : ''}</span>
+                      <div class="q-dist-track"><div class="q-dist-fill" style="width:${pct}%;background:${fillColor};"></div></div>
+                      <span class="q-dist-val" style="color:${labelColor};font-weight:${fontWeight};">${pct}%</span>
+                    </div>`;
+                }).join('')}
+              </div>
+
+            </div>
+          `;
+        });
+
+        html += '</div></div>';
+      });
+
+      container.innerHTML = html;
+    }
+
+    // 테이블 렌더링
+    function renderTable(questions, certType) {
+      const container = document.getElementById('tableSection');
+      if (questions.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      // 과목별 그룹핑
+      const groups = {};
+      questions.forEach(q => {
+        (groups[q.subject] = groups[q.subject] || []).push(q);
+      });
+
+      let html = '<div class="stat-table-wrap"><table class="stat-table"><thead><tr>';
+      html += '<th>번호</th><th>과목</th><th>연도</th><th>정답</th><th>정답률</th><th>오답 1위</th><th>응시</th>';
+      html += '</tr></thead><tbody>';
+
+      Object.entries(groups).sort(([a],[b]) => { const o = SUBJECTS[certType] || []; return (o.indexOf(a) === -1 ? 999 : o.indexOf(a)) - (o.indexOf(b) === -1 ? 999 : o.indexOf(b)); }).forEach(([subject, qs]) => {
+        html += `<tr class="subject-header"><td colspan="7">${subject} (${qs.length}문제)</td></tr>`;
+
+        qs.forEach(q => {
+          const color = q.accuracy < 50 ? 'var(--stat-red)' : q.accuracy >= 80 ? 'var(--stat-green)' : 'var(--stat-orange)';
+          const correctLabel = q.correctAnswerIndex !== null ? `${q.correctAnswerIndex + 1}번` : '-';
+          const twLabel = q.topWrongIdx >= 0 ? `${q.topWrongIdx + 1}번 (${q.topWrongPct}%)` : '-';
+
+          html += `<tr onclick="openQuestion('${certType}', '${q.year}', '${subject}', ${q.number})">
+            <td style="font-weight:700;">${q.number}</td>
+            <td>${subject}</td>
+            <td>${q.year}</td>
+            <td style="font-weight:700;color:var(--stat-green);">${correctLabel}</td>
+            <td class="rate-cell" style="color:${color};">${q.accuracy}%</td>
+            <td class="wrong-cell">${twLabel}</td>
+            <td>${q.total}명</td>
+          </tr>`;
+        });
+      });
+
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    }
+
+    // 뷰 전환
+    window.switchView = function(view) {
+      const cardSection = document.getElementById('cardsSection');
+      const tableSection = document.getElementById('tableSection');
+      const btns = document.querySelectorAll('.view-btn');
+
+      btns.forEach(b => b.classList.toggle('active', b.dataset.view === view));
+
+      if (view === 'card') {
+        cardSection.style.display = '';
+        tableSection.style.display = 'none';
+      } else {
+        cardSection.style.display = 'none';
+        tableSection.style.display = '';
+      }
+    };
+
+    // 문제 모달
+    window.openQuestion = async function(certType, year, subject, number) {
+      const overlay = document.getElementById('questionModal');
+      const content = document.getElementById('modalContent');
+      overlay.classList.add('active');
+      content.innerHTML = '<div class="q-modal-loading">문제를 불러오는 중...</div>';
+
+      try {
+        const folder = CERT_FOLDERS[certType] || 'data';
+        const url = `../${folder}/${year}_${subject}.json`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('파일을 찾을 수 없습니다');
+        const data = await res.json();
+
+        const q = data.find(item => Number(item.id) === number);
+        if (!q) throw new Error('문제를 찾을 수 없습니다');
+
+        const certLabel = certType === 'health-manager' ? '건강운동관리사' : certType === 'sports-instructor' ? '2급 스포츠지도사' : '1급 스포츠지도사';
+        const correctIdx = Number(q.correctAnswer ?? q.answer ?? -1);
+
+        // 문제 영역
+        let questionHtml = '';
+        if (q.questionImage) {
+          questionHtml += `<img src="../${q.questionImage}" alt="문제 이미지" style="max-width:100%; border-radius:12px; margin-bottom:12px;">`;
+        }
+        if (q.questionText || q.question) {
+          const text = (q.questionText || q.question).replace(/\n/g, '<br>');
+          questionHtml += `<div class="q-text">${text}</div>`;
+        }
+        if (!questionHtml) {
+          questionHtml = '<div class="q-text">(이미지 문제)</div>';
+        }
+
+        // 선택지
+        let optionsHtml = '';
+        if (q.options && q.options.length > 0) {
+          optionsHtml = q.options.map((opt, i) => {
+            const isCorrect = i === correctIdx;
+            return `<div class="q-option ${isCorrect ? 'correct-option' : ''}">${i + 1}. ${opt}${isCorrect ? ' ✓' : ''}</div>`;
+          }).join('');
+        } else {
+          optionsHtml = `<div class="q-option correct-option">정답: ${correctIdx + 1}번</div>`;
+        }
+
+        // 해설
+        let explanationHtml = '';
+        if (q.explanation) {
+          explanationHtml = `
+            <div style="margin-top:20px; padding-top:16px; border-top:1px solid rgba(0,0,0,0.06);">
+              <div style="font-size:13px; font-weight:600; color:var(--stat-blue); margin-bottom:8px;">해설</div>
+              <div style="font-size:14px; line-height:1.8; color:#444;">${q.explanation}</div>
+            </div>`;
+        }
+
+        content.innerHTML = `
+          <h3>${subject} ${year}년 ${number}번</h3>
+          <div class="q-modal-meta">${certLabel}</div>
+          <div class="q-modal-body">
+            ${questionHtml}
+            ${optionsHtml}
+            ${explanationHtml}
+          </div>
+        `;
+      } catch (err) {
+        content.innerHTML = `<div class="q-modal-loading">문제를 불러올 수 없습니다<br><small style="color:var(--stat-gray);">${err.message}</small></div>`;
+      }
+    };
+
+    window.closeModal = function() {
+      document.getElementById('questionModal').classList.remove('active');
+    };
+
+    // ESC로 모달 닫기
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // 오버레이 클릭으로 닫기
+    document.getElementById('questionModal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeModal();
+    });
   </script>
 </body>
 </html>
-
