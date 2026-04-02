@@ -8,19 +8,30 @@ const LABEL_NAME = "텔레그램전송완료";
 const DAILY_STATS_URL = "https://asia-northeast3-first-penguins-new.cloudfunctions.net/dailyStats";
 
 function checkLittlyOrders() {
-  // "텔레그램전송완료" 라벨이 없는 메일만 검색 → 처리 후 라벨 부착
-  var label = GmailApp.getUserLabelByName(LABEL_NAME);
-  if (!label) {
-    label = GmailApp.createLabel(LABEL_NAME);
-  }
+  // 개별 메시지 ID 기반 중복 방지 (Gmail이 같은 제목 메일을 스레드로 묶으므로 스레드 라벨만으로는 불충분)
+  var props = PropertiesService.getScriptProperties();
+  var sentIdsJson = props.getProperty("sentMessageIds") || "[]";
+  var sentIds = JSON.parse(sentIdsJson);
+  var sentSet = {};
+  sentIds.forEach(function(id) { sentSet[id] = true; });
 
-  var threads = GmailApp.search('from:noreply@litt.ly subject:"신규 주문이 접수되었습니다" -label:' + LABEL_NAME, 0, 20);
+  // 최근 7일 메일만 검색 (전체 검색 방지)
+  var sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  var afterStr = Utilities.formatDate(sevenDaysAgo, "Asia/Seoul", "yyyy/MM/dd");
+
+  var threads = GmailApp.search('from:noreply@litt.ly subject:"신규 주문이 접수되었습니다" after:' + afterStr, 0, 20);
 
   if (threads.length === 0) return;
+
+  var newIds = [];
 
   threads.forEach(function(thread) {
     var messages = thread.getMessages();
     messages.forEach(function(msg) {
+      var msgId = msg.getId();
+      if (sentSet[msgId]) return; // 이미 발송한 메시지 → 건너뜀
+
       var body = msg.getPlainBody();
 
       var buyerRaw = extractField(body, "주문자");
@@ -41,11 +52,15 @@ function checkLittlyOrders() {
         "주문일시 : " + orderDate;
 
       sendTelegram(text);
+      newIds.push(msgId);
     });
-
-    // 스레드 단위로 라벨 부착 (처리 완료 표시)
-    thread.addLabel(label);
   });
+
+  // 처리된 메시지 ID 저장 (최근 500개만 유지하여 용량 관리)
+  if (newIds.length > 0) {
+    var allIds = sentIds.concat(newIds).slice(-500);
+    props.setProperty("sentMessageIds", JSON.stringify(allIds));
+  }
 }
 
 // ============================================
@@ -242,4 +257,27 @@ function testWeeklySummary() {
 
 function testMonthlySummary() {
   monthlySummary();
+}
+
+/**
+ * 기존 주문 메일의 ID를 모두 "발송완료"로 등록 (텔레그램 발송 없이)
+ * ★ 코드 적용 후 최초 1회만 실행할 것! 이후 삭제해도 됨
+ */
+function initSentIds() {
+  var sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 30);
+  var afterStr = Utilities.formatDate(sevenDaysAgo, "Asia/Seoul", "yyyy/MM/dd");
+
+  var threads = GmailApp.search('from:noreply@litt.ly subject:"신규 주문이 접수되었습니다" after:' + afterStr, 0, 50);
+
+  var ids = [];
+  threads.forEach(function(thread) {
+    thread.getMessages().forEach(function(msg) {
+      ids.push(msg.getId());
+    });
+  });
+
+  var props = PropertiesService.getScriptProperties();
+  props.setProperty("sentMessageIds", JSON.stringify(ids));
+  Logger.log("등록 완료: " + ids.length + "개 메시지 ID 저장됨");
 }
