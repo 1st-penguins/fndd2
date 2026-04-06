@@ -11,7 +11,8 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   sendPasswordResetEmail,
-  sendEmailVerification
+  sendEmailVerification,
+  applyActionCode
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 import { isInAppBrowser, handleExternalBrowserRedirect } from "../utils/browser-redirect.js";
@@ -59,6 +60,9 @@ export async function initAuth() {
         isAdmin
       };
     }
+
+    // Firebase 이메일 인증 링크 처리 (verifyEmail action URL)
+    handleEmailVerificationAction(authInstance);
 
     // redirect 로그인 복귀 결과 처리 (non-blocking — 초기화 지연 방지)
     getRedirectResult(authInstance).then(result => {
@@ -358,7 +362,20 @@ export async function handleEmailLogin(email, password) {
     return user;
   } catch (error) {
     console.error('로그인 오류:', error);
-    throw error;
+
+    // 사용자 친화적 에러 메시지
+    let message = '로그인 중 오류가 발생했습니다.';
+    if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+      message = '이메일 또는 비밀번호가 올바르지 않습니다. 회원가입 후 이용해주세요.';
+    } else if (error.code === 'auth/too-many-requests') {
+      message = '너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
+    } else if (error.code === 'auth/invalid-email') {
+      message = '올바른 이메일 형식이 아닙니다.';
+    } else if (error.message) {
+      message = error.message;
+    }
+
+    throw new Error(message);
   }
 }
 
@@ -472,6 +489,44 @@ export async function handleLogout() {
 }
 
 /**
+ * Firebase 이메일 인증 액션 URL 처리
+ * 사용자가 인증 메일의 링크를 클릭하면 ?mode=verifyEmail&oobCode=... 파라미터로 돌아옴
+ */
+async function handleEmailVerificationAction(authInstance) {
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode');
+  const oobCode = params.get('oobCode');
+
+  if (mode !== 'verifyEmail' || !oobCode) return;
+
+  try {
+    await applyActionCode(authInstance, oobCode);
+
+    // 현재 로그인된 사용자의 상태 갱신
+    if (authInstance.currentUser) {
+      await authInstance.currentUser.reload();
+      setLoggedIn(authInstance.currentUser);
+    }
+
+    // URL에서 파라미터 제거 (깔끔한 URL 유지)
+    const cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
+    window.history.replaceState({}, '', cleanUrl);
+
+    // 인증 배너 제거
+    const banner = document.getElementById('email-verification-banner');
+    if (banner) banner.remove();
+
+    // 성공 알림
+    alert('이메일 인증이 완료되었습니다!');
+  } catch (error) {
+    console.error('이메일 인증 처리 오류:', error);
+    if (error.code === 'auth/invalid-action-code') {
+      alert('인증 링크가 만료되었거나 이미 사용되었습니다. 인증 메일을 재발송해주세요.');
+    }
+  }
+}
+
+/**
  * 이메일 인증 배너 표시
  * @param {string} email - 사용자 이메일
  */
@@ -505,7 +560,8 @@ function showEmailVerificationBanner(email) {
   banner.innerHTML = `
     <div>
       <span>이메일 인증이 필요합니다. ${email}로 발송된 인증 링크를 확인해주세요.</span>
-      <button id="resend-verification-email" style="margin-left: 15px; background: #856404; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: 500;">인증 메일 재발송</button>
+      <button id="check-verification-status" style="margin-left: 15px; background: #28a745; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: 500;">인증 완료 확인</button>
+      <button id="resend-verification-email" style="margin-left: 8px; background: #856404; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: 500;">인증 메일 재발송</button>
       <button id="close-verification-banner" style="margin-left: 10px; background: transparent; border: none; cursor: pointer; font-size: 18px; line-height: 1;">&times;</button>
     </div>
   `;
@@ -513,10 +569,28 @@ function showEmailVerificationBanner(email) {
   // 문서에 배너 추가
   document.body.appendChild(banner);
 
+  // 인증 완료 확인 버튼 — user.reload()로 최신 상태 체크
+  document.getElementById('check-verification-status').addEventListener('click', async () => {
+    try {
+      const user = coreAuth.currentUser;
+      if (!user) return;
+      await user.reload();
+      if (user.emailVerified) {
+        setLoggedIn(user);
+        banner.remove();
+        alert('이메일 인증이 확인되었습니다!');
+      } else {
+        alert('아직 인증이 완료되지 않았습니다. 메일함의 인증 링크를 클릭해주세요.');
+      }
+    } catch (error) {
+      console.error('인증 상태 확인 오류:', error);
+    }
+  });
+
   // 재발송 버튼 이벤트
   document.getElementById('resend-verification-email').addEventListener('click', async () => {
     try {
-      await sendEmailVerification(auth.currentUser);
+      await sendEmailVerification(coreAuth.currentUser);
       alert('인증 이메일이 재발송되었습니다. 메일함을 확인해주세요.');
     } catch (error) {
       console.error('인증 이메일 재발송 오류:', error);

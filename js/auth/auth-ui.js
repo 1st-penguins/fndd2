@@ -186,6 +186,7 @@ function setupLoginModalEvents(modal) {
         await handleEmailLogin(email, password);
       } catch (error) {
         console.error('로그인 오류:', error);
+        Toast.error(error.message || '로그인 중 오류가 발생했습니다.');
       }
     });
   }

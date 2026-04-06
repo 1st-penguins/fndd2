@@ -15,8 +15,70 @@ class ToastSystem {
         } else {
             this.container = document.createElement('div');
             this.container.className = 'toast-container';
+            this.container.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 100000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                pointer-events: none;
+            `;
+            this._injectStyles();
             document.body.appendChild(this.container);
         }
+    }
+
+    _injectStyles() {
+        if (document.getElementById('toast-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'toast-styles';
+        style.textContent = `
+            .toast {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 14px 18px;
+                border-radius: 10px;
+                background: #fff;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                font-size: 14px;
+                pointer-events: auto;
+                opacity: 0;
+                transform: translateX(40px);
+                transition: opacity 0.3s, transform 0.3s;
+                max-width: 380px;
+                border-left: 4px solid #ccc;
+            }
+            .toast.show { opacity: 1; transform: translateX(0); }
+            .toast.hiding { opacity: 0; transform: translateX(40px); }
+            .toast-success { border-left-color: #28a745; }
+            .toast-error { border-left-color: #dc3545; }
+            .toast-info { border-left-color: #17a2b8; }
+            .toast-warning { border-left-color: #ffc107; }
+            .toast-icon { font-size: 20px; flex-shrink: 0; }
+            .toast-content { flex: 1; }
+            .toast-title { font-weight: 600; margin-bottom: 2px; }
+            .toast-message { color: #555; line-height: 1.4; }
+            .toast-close {
+                cursor: pointer;
+                color: #999;
+                font-size: 16px;
+                flex-shrink: 0;
+                padding: 0 4px;
+            }
+            .toast-close:hover { color: #333; }
+            @media (max-width: 480px) {
+                .toast-container {
+                    top: 10px !important;
+                    right: 10px !important;
+                    left: 10px !important;
+                }
+                .toast { max-width: 100%; }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     /**
