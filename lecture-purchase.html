@@ -493,7 +493,7 @@
           orderName: title,
           customerName: user.displayName || user.email,
           customerEmail: user.email,
-          successUrl: window.location.origin + `/lecture-success.html?productId=${productId}&type=${productType}${couponParam}`,
+          successUrl: window.location.origin + `/lecture-success.html?productId=${productId}&type=${productType}&orderName=${encodeURIComponent(title)}${couponParam}`,
           failUrl: window.location.origin + '/lecture-fail.html',
         });
       } catch (error) {

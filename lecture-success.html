@@ -110,6 +110,54 @@
       background: #e8e8e8;
     }
 
+    .order-details {
+      background: #f9f9fb;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0 8px;
+      text-align: left;
+    }
+
+    .order-details__title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #999;
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .order-details__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+
+    .order-details__label {
+      color: #888;
+    }
+
+    .order-details__value {
+      color: #333;
+      font-weight: 500;
+      text-align: right;
+      max-width: 60%;
+      word-break: break-all;
+    }
+
+    .order-details__divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 8px 0;
+    }
+
+    .order-details__value--amount {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--penguin-navy);
+    }
+
     @media (max-width: 480px) {
       .success-container { margin: 80px auto 40px; }
       .success-card { padding: 36px 20px; }
@@ -152,6 +200,27 @@
       <h1>결제가 완료되었습니다!</h1>
       <div class="success-message" id="successMessage">
         구매가 완료되었습니다.
+      </div>
+
+      <div id="orderDetails" class="order-details" style="display: none;">
+        <p class="order-details__title">주문 상세</p>
+        <div class="order-details__row">
+          <span class="order-details__label">주문번호</span>
+          <span class="order-details__value" id="orderIdDisplay">-</span>
+        </div>
+        <div class="order-details__row">
+          <span class="order-details__label">상품명</span>
+          <span class="order-details__value" id="orderProductDisplay">-</span>
+        </div>
+        <hr class="order-details__divider">
+        <div class="order-details__row">
+          <span class="order-details__label">결제금액</span>
+          <span class="order-details__value order-details__value--amount" id="orderAmountDisplay">-</span>
+        </div>
+        <div class="order-details__row">
+          <span class="order-details__label">결제일시</span>
+          <span class="order-details__value" id="orderDateDisplay">-</span>
+        </div>
       </div>
 
       <div id="loadingMessage">결제 정보 저장 중...</div>
@@ -248,6 +317,19 @@
           // 버튼 표시
           document.getElementById('loadingMessage').style.display = 'none';
           document.getElementById('actionButtons').style.display = 'flex';
+
+          // 주문 상세 표시
+          const detailsEl = document.getElementById('orderDetails');
+          detailsEl.style.display = 'block';
+          document.getElementById('orderIdDisplay').textContent = orderId;
+          document.getElementById('orderAmountDisplay').textContent = amount.toLocaleString() + '원';
+          const now = new Date();
+          document.getElementById('orderDateDisplay').textContent =
+            `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+          // 상품명 표시 (URL에서 orderName 가져오거나 productId 사용)
+          const orderName = urlParams.get('orderName') || productId;
+          document.getElementById('orderProductDisplay').textContent = decodeURIComponent(orderName);
 
           const messageEl = document.getElementById('successMessage');
           const buttonEl = document.getElementById('mainActionButton');

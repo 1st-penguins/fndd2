@@ -359,6 +359,38 @@ function init() {
   }
 }
 
+// 외부에서 주문번호 기반 문의 열기
+window.openInquiryWithOrder = function(productName, orderId) {
+  if (!panelEl) return;
+
+  // 패널 열기 + 폼 탭으로 전환
+  currentTab = 'form';
+  openPanel();
+
+  // 폼 렌더링 후 값 자동 채우기
+  setTimeout(() => {
+    const form = document.getElementById('inquiry-form');
+    if (!form) return;
+
+    const categorySelect = form.querySelector('[name="category"]');
+    const titleInput = form.querySelector('[name="title"]');
+    const contentTextarea = form.querySelector('[name="content"]');
+
+    if (categorySelect) categorySelect.value = 'payment';
+    if (titleInput) titleInput.value = `[결제문의] ${productName}`;
+    if (contentTextarea) {
+      contentTextarea.value = `주문번호: ${orderId}\n상품명: ${productName}\n\n문의 내용을 입력해주세요.`;
+      contentTextarea.focus();
+      contentTextarea.setSelectionRange(contentTextarea.value.length, contentTextarea.value.length);
+    }
+
+    // 탭 UI 동기화
+    panelEl.querySelectorAll('.inquiry-tab').forEach(t => {
+      t.classList.toggle('inquiry-tab--active', t.dataset.tab === 'form');
+    });
+  }, 200);
+};
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {

@@ -130,6 +130,151 @@
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
+    /* -- 내 강의실 (Lecture Room) -- */
+    .lecture-room {
+      background: linear-gradient(135deg, #1D2F4E 0%, #2B4A78 100%);
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-bottom: 40px;
+      animation: fadeInUp 0.6s ease-out 0.25s both;
+    }
+
+    .lecture-room__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .lecture-room__title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .lecture-room__badge {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    .lecture-room__list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .lecture-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+
+    .lecture-card:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .lecture-card__icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .lecture-card__icon svg {
+      width: 20px;
+      height: 20px;
+      color: #fff;
+    }
+
+    .lecture-card__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lecture-card__name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .lecture-card__meta {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .lecture-card__progress {
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .lecture-card__progress-fill {
+      height: 100%;
+      background: #5FB2C9;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .lecture-card__action {
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: #5FB2C9;
+      white-space: nowrap;
+    }
+
+    .lecture-card__expires {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 2px;
+    }
+
+    .lecture-card__expires--expired {
+      color: #ff6b6b;
+    }
+
+    .lecture-room__empty {
+      text-align: center;
+      padding: 24px;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 14px;
+    }
+
+    .lecture-room__empty a {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 8px 20px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-radius: 980px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .lecture-room__empty a:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
     /* -- Purchase List -- */
     .purchase-item {
       display: flex;
@@ -206,35 +351,102 @@
 
     .purchase-action:hover { opacity: 0.7; }
 
-    /* -- Payment Table -- */
-    .payment-table {
-      width: 100%;
-      border-collapse: collapse;
+    /* -- Payment Card -- */
+    .payment-card {
+      background: #f9f9fb;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 12px;
     }
 
-    .payment-table th {
-      text-align: left;
-      padding: 10px 0;
-      font-size: 13px;
-      color: #86868b;
+    .payment-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .payment-card__product {
+      font-size: 15px;
       font-weight: 600;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
-    .payment-table td {
-      padding: 12px 0;
-      font-size: 14px;
       color: #1d1d1f;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
     }
 
-    .payment-table tr:last-child td { border-bottom: none; }
-
-    .payment-status {
-      display: inline-block;
+    .payment-card__status {
       font-size: 12px;
       font-weight: 500;
       color: #34c759;
+      background: rgba(52, 199, 89, 0.08);
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+
+    .payment-card__details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+    }
+
+    .payment-card__row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .payment-card__label {
+      color: #86868b;
+    }
+
+    .payment-card__value {
+      color: #1d1d1f;
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .payment-card__value--amount {
+      font-weight: 700;
+    }
+
+    .payment-card__order-id {
+      font-size: 11px;
+      color: #aeaeb2;
+      font-family: var(--font-mono, monospace);
+      word-break: break-all;
+    }
+
+    .payment-card__footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .payment-card__inquiry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #86868b;
+      background: none;
+      border: 1px solid #e5e5ea;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+
+    .payment-card__inquiry-btn:hover {
+      color: #1d1d1f;
+      border-color: #1d1d1f;
+    }
+
+    @media (max-width: 480px) {
+      .payment-card__details {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* -- Empty State -- */
@@ -525,55 +737,80 @@
           </div>
         </div>`;
 
-      // 구매 상품
-      html += '<div class="mypage-section"><h2 class="section__title">내 강의 / 자료</h2>';
+      // 강의와 자료 분리
+      const videoPurchases = purchases.filter(p => p.productType === 'video');
+      const pdfPurchases = purchases.filter(p => p.productType !== 'video');
 
-      if (purchases.length === 0) {
-        html += `<div class="empty-state">
-          <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-          </svg>
-          <p>구매한 상품이 없습니다.</p>
+      // ── 내 강의실 (최상단, 눈에 띄는 영역) ──
+      html += '<div class="lecture-room">';
+      html += `<div class="lecture-room__header">
+        <span class="lecture-room__title">내 강의실</span>
+        ${videoPurchases.length > 0 ? `<span class="lecture-room__badge">${videoPurchases.length}개 강의</span>` : ''}
+      </div>`;
+
+      if (videoPurchases.length === 0) {
+        html += `<div class="lecture-room__empty">
+          <p>수강 중인 강의가 없습니다.</p>
+          <a href="index.html#lecture-tab">강의 둘러보기</a>
         </div>`;
       } else {
-        for (const p of purchases) {
+        html += '<div class="lecture-room__list">';
+        for (const p of videoPurchases) {
           const name = PRODUCT_NAMES[p.productId] || p.productId;
-          const icon = p.productType === 'video' ? videoIcon : pdfIcon;
-          const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
+          const progList = progressByProduct[p.productId] || [];
+          const totalEp = episodeCounts[p.productId] || 0;
+          const completedEp = progList.filter(pr => pr.progress >= 90).length;
+          const percent = totalEp > 0 ? Math.round((completedEp / totalEp) * 100) : 0;
+          const expiresDate = p.expiresAt ? new Date(p.expiresAt.toDate()).toLocaleDateString('ko-KR') : null;
+          const isExpired = p.expiresAt && p.expiresAt.toDate() < new Date();
 
-          let progressHtml = '';
-          let actionHref = '';
-
-          if (p.productType === 'video') {
-            const progList = progressByProduct[p.productId] || [];
-            const totalEp = episodeCounts[p.productId] || 0;
-            const completedEp = progList.filter(pr => pr.progress >= 90).length;
-            const percent = totalEp > 0 ? Math.round((completedEp / totalEp) * 100) : 0;
-            const expiresDate = p.expiresAt ? new Date(p.expiresAt.toDate()).toLocaleDateString('ko-KR') : null;
-            const isExpired = p.expiresAt && p.expiresAt.toDate() < new Date();
-            const expiresHtml = expiresDate
-              ? `<div class="purchase-meta" style="color:${isExpired ? '#e03131' : '#868e96'};">${isExpired ? '⏰ 이용기간 만료' : '📅 이용기한: ' + expiresDate + '까지'}</div>`
-              : '';
-            progressHtml = `
-              <div class="purchase-meta">${completedEp}/${totalEp}강 완료 (${percent}%)</div>
-              <div class="purchase-progress-bar"><div class="purchase-progress-fill" style="width:${percent}%"></div></div>
-              ${expiresHtml}`;
-            actionHref = `lecture-play.html?id=${p.productId}`;
-          } else {
-            progressHtml = `<div class="purchase-meta">구매일: ${date}</div>`;
-            actionHref = `pdf-download.html?id=${p.productId}`;
+          let expiresHtml = '';
+          if (expiresDate) {
+            expiresHtml = isExpired
+              ? '<p class="lecture-card__expires lecture-card__expires--expired">이용기간 만료</p>'
+              : `<p class="lecture-card__expires">${expiresDate}까지</p>`;
           }
 
-          const actionLabel = p.productType === 'video' ? '수강하기' : '다운로드';
+          html += `
+            <a href="lecture-play.html?id=${p.productId}" class="lecture-card">
+              <div class="lecture-card__icon">${videoIcon}</div>
+              <div class="lecture-card__info">
+                <div class="lecture-card__name">${name}</div>
+                <div class="lecture-card__meta">${completedEp}/${totalEp}강 완료 (${percent}%)</div>
+                <div class="lecture-card__progress"><div class="lecture-card__progress-fill" style="width:${percent}%"></div></div>
+                ${expiresHtml}
+              </div>
+              <span class="lecture-card__action">수강하기 →</span>
+            </a>`;
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+
+      // ── 내 자료 (PDF) ──
+      html += '<div class="mypage-section"><h2 class="section__title">내 자료</h2>';
+
+      if (pdfPurchases.length === 0) {
+        html += `<div class="empty-state">
+          <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <p>구매한 자료가 없습니다.</p>
+        </div>`;
+      } else {
+        for (const p of pdfPurchases) {
+          const name = PRODUCT_NAMES[p.productId] || p.productId;
+          const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
 
           html += `
             <div class="purchase-item">
-              <div class="purchase-icon-wrap">${icon}</div>
+              <div class="purchase-icon-wrap">${pdfIcon}</div>
               <div class="purchase-info">
                 <div class="purchase-title">${name}</div>
-                ${progressHtml}
+                <div class="purchase-meta">구매일: ${date}</div>
               </div>
-              <a href="${actionHref}" class="purchase-action">${actionLabel}</a>
+              <a href="pdf-download.html?id=${p.productId}" class="purchase-action">다운로드</a>
             </div>`;
         }
       }
@@ -590,16 +827,62 @@
           <p>결제 내역이 없습니다.</p>
         </div>`;
       } else {
-        html += `<div style="overflow-x:auto;"><table class="payment-table">
-          <thead><tr><th>상품명</th><th>결제일</th><th>금액</th><th>상태</th></tr></thead><tbody>`;
         for (const p of purchases) {
           const name = PRODUCT_NAMES[p.productId] || p.productId;
           const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
-          const amount = (p.finalAmount ?? p.purchaseAmount ?? 0).toLocaleString() + '원';
+          const finalAmount = (p.finalAmount ?? p.purchaseAmount ?? 0);
+          const amountStr = finalAmount.toLocaleString() + '원';
           const status = p.status === 'completed' ? '결제완료' : p.status;
-          html += `<tr><td>${name}</td><td>${date}</td><td>${amount}</td><td><span class="payment-status">${status}</span></td></tr>`;
+          const orderId = p.orderId || p.id || '-';
+          const typeLabel = p.productType === 'video' ? '강의' : '자료(PDF)';
+          const payMethod = p.paymentMethod || (finalAmount === 0 ? '쿠폰 전액 할인' : '카드결제');
+
+          // 쿠폰 할인 정보
+          let discountHtml = '';
+          if (p.discountAmount && p.discountAmount > 0) {
+            discountHtml = `
+              <div class="payment-card__row">
+                <span class="payment-card__label">쿠폰 할인</span>
+                <span class="payment-card__value" style="color:#e03131;">-${p.discountAmount.toLocaleString()}원</span>
+              </div>`;
+          }
+
+          html += `
+            <div class="payment-card">
+              <div class="payment-card__header">
+                <span class="payment-card__product">${name}</span>
+                <span class="payment-card__status">${status}</span>
+              </div>
+              <div class="payment-card__details">
+                <div class="payment-card__row">
+                  <span class="payment-card__label">구분</span>
+                  <span class="payment-card__value">${typeLabel}</span>
+                </div>
+                <div class="payment-card__row">
+                  <span class="payment-card__label">결제일</span>
+                  <span class="payment-card__value">${date}</span>
+                </div>
+                <div class="payment-card__row">
+                  <span class="payment-card__label">결제수단</span>
+                  <span class="payment-card__value">${payMethod}</span>
+                </div>
+                <div class="payment-card__row">
+                  <span class="payment-card__label">결제금액</span>
+                  <span class="payment-card__value payment-card__value--amount">${amountStr}</span>
+                </div>
+                ${discountHtml}
+              </div>
+              <div style="margin-top:10px;">
+                <span class="payment-card__label" style="font-size:11px;">주문번호</span>
+                <span class="payment-card__order-id">${orderId}</span>
+              </div>
+              <div class="payment-card__footer">
+                <button class="payment-card__inquiry-btn" onclick="openInquiryWithOrder('${name}', '${orderId}')">
+                  💬 이 주문 문의하기
+                </button>
+              </div>
+            </div>`;
         }
-        html += '</tbody></table></div>';
       }
       html += '</div>';
 
