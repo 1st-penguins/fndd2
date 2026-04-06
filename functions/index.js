@@ -398,7 +398,7 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
  * 클라이언트에서 paymentKey, orderId, amount를 받아
  * Toss API로 결제 승인 요청 후 Firestore에 구매 기록 저장
  */
-exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstances: 0 }).https.onCall(async (data, context) => {
+exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstances: 0, secrets: ["TOSS_SECRET_KEY"] }).https.onCall(async (data, context) => {
   // 1. 인증 확인
   if (!context.auth) {
     throw new functions.https.HttpsError("unauthenticated", "로그인이 필요합니다.");
@@ -492,7 +492,7 @@ exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstan
   }
 
   // 5. Toss Payments 결제 승인 API 호출
-  const secretKey = process.env.TOSS_SECRET_KEY;
+  const secretKey = (process.env.TOSS_SECRET_KEY || "").trim();
   if (!secretKey) {
     throw new functions.https.HttpsError("internal", "결제 시스템 설정 오류입니다. 관리자에게 문의하세요.");
   }

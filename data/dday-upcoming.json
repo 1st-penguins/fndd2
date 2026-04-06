@@ -1,0 +1,26 @@
+[
+  {
+    "certType": "health-manager",
+    "title": "필기시험 원서접수",
+    "type": "registration",
+    "startDate": "2026-05-07",
+    "endDate": "2026-05-11",
+    "order": 1
+  },
+  {
+    "certType": "sports-instructor-1",
+    "title": "필기시험",
+    "type": "written-exam",
+    "startDate": "2026-04-18",
+    "endDate": null,
+    "order": 2
+  },
+  {
+    "certType": "sports-instructor",
+    "title": "필기시험",
+    "type": "written-exam",
+    "startDate": "2026-04-18",
+    "endDate": null,
+    "order": 5
+  }
+]

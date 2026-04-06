@@ -1,6 +1,6 @@
 // pdf-tracker.js - PDF 다운로드 추적 시스템
 
-import { db, auth } from '../core/firebase-core.js';
+import { ensureFirebase } from '../core/firebase-core.js';
 import {
   collection,
   doc,
@@ -20,6 +20,7 @@ import {
  */
 export async function recordPdfDownload(pdfId) {
   try {
+    const { auth, db } = await ensureFirebase();
     const user = auth.currentUser;
     if (!user) {
       console.warn('로그인이 필요합니다.');
@@ -29,10 +30,10 @@ export async function recordPdfDownload(pdfId) {
     // 문서 ID: userId_pdfId
     const downloadId = `${user.uid}_${pdfId}`;
     const downloadRef = doc(db, 'pdfDownloads', downloadId);
-    
+
     // 기존 다운로드 기록 확인
     const existingDoc = await getDoc(downloadRef);
-    
+
     if (existingDoc.exists()) {
       // 재다운로드
       await setDoc(downloadRef, {
@@ -40,7 +41,7 @@ export async function recordPdfDownload(pdfId) {
         downloadCount: increment(1),
         lastDownloadedAt: serverTimestamp()
       }, { merge: true });
-      
+
       console.log(`📥 PDF 재다운로드: ${pdfId} (${existingDoc.data().downloadCount + 1}번째)`);
     } else {
       // 첫 다운로드
@@ -54,12 +55,12 @@ export async function recordPdfDownload(pdfId) {
         lastDownloadedAt: serverTimestamp(),
         downloadCount: 1
       });
-      
+
       console.log(`🎉 PDF 첫 다운로드: ${pdfId}`);
     }
-    
+
     return { success: true };
-    
+
   } catch (error) {
     console.error('PDF 다운로드 기록 오류:', error);
     return { success: false, error: error.message };
@@ -73,6 +74,7 @@ export async function recordPdfDownload(pdfId) {
  */
 export async function hasPdfDownloaded(pdfId) {
   try {
+    const { auth, db } = await ensureFirebase();
     const user = auth.currentUser;
     if (!user) {
       return false;
@@ -81,9 +83,9 @@ export async function hasPdfDownloaded(pdfId) {
     const downloadId = `${user.uid}_${pdfId}`;
     const downloadRef = doc(db, 'pdfDownloads', downloadId);
     const downloadDoc = await getDoc(downloadRef);
-    
+
     return downloadDoc.exists();
-    
+
   } catch (error) {
     console.error('PDF 다운로드 여부 확인 오류:', error);
     return false;
@@ -97,27 +99,26 @@ export async function hasPdfDownloaded(pdfId) {
  */
 export async function checkPdfRefundEligibility(pdfId) {
   try {
+    const { auth, db } = await ensureFirebase();
     const user = auth.currentUser;
     if (!user) {
       return { eligible: false, reason: 'not-logged-in' };
     }
 
     const hasDownloaded = await hasPdfDownloaded(pdfId);
-    
+
     if (!hasDownloaded) {
-      // 다운로드 안 함 = 전액 환불 가능
       return {
         eligible: true,
         refundRate: 100,
         reason: 'PDF 다운로드 전'
       };
     } else {
-      // 다운로드 완료 = 환불 불가
       const downloadId = `${user.uid}_${pdfId}`;
       const downloadRef = doc(db, 'pdfDownloads', downloadId);
       const downloadDoc = await getDoc(downloadRef);
       const downloadData = downloadDoc.data();
-      
+
       return {
         eligible: false,
         refundRate: 0,
@@ -126,7 +127,7 @@ export async function checkPdfRefundEligibility(pdfId) {
         downloadCount: downloadData.downloadCount
       };
     }
-    
+
   } catch (error) {
     console.error('PDF 환불 가능 여부 확인 오류:', error);
     return { eligible: false, reason: 'error', error: error.message };
@@ -139,6 +140,7 @@ export async function checkPdfRefundEligibility(pdfId) {
  */
 export async function getUserPdfDownloads() {
   try {
+    const { auth, db } = await ensureFirebase();
     const user = auth.currentUser;
     if (!user) {
       return [];
@@ -148,19 +150,19 @@ export async function getUserPdfDownloads() {
       collection(db, 'pdfDownloads'),
       where('userId', '==', user.uid)
     );
-    
+
     const downloadsSnap = await getDocs(downloadsQuery);
     const downloads = [];
-    
+
     downloadsSnap.forEach(doc => {
       downloads.push({
         id: doc.id,
         ...doc.data()
       });
     });
-    
+
     return downloads;
-    
+
   } catch (error) {
     console.error('PDF 다운로드 내역 조회 오류:', error);
     return [];
@@ -181,7 +183,7 @@ function getPdfName(pdfId) {
     'pdf_005': '운동처방론 요약정리본',
     'pdf_006': '건운사 스페셜테스트 압축본'
   };
-  
+
   return pdfNames[pdfId] || '알 수 없는 PDF';
 }
 
@@ -192,4 +194,3 @@ if (typeof window !== 'undefined') {
   window.checkPdfRefundEligibility = checkPdfRefundEligibility;
   window.getUserPdfDownloads = getUserPdfDownloads;
 }
-

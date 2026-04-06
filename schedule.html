@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>공지사항 — 퍼스트펭귄</title>
+  <title>시험 일정 — 퍼스트펭귄</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-  <link rel="canonical" href="https://the1stpeng.com/notices" />
-  <meta name="description" content="건강운동관리사·스포츠지도사 시험 관련 최신 공지사항, 이벤트, 무료 특강 소식을 확인하세요.">
+  <link rel="canonical" href="https://the1stpeng.com/schedule.html" />
+  <meta name="description" content="건강운동관리사·1급·2급 스포츠지도사 시험 접수, 필기, 실기, 합격 발표 일정을 한눈에 확인하세요.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="공지사항 | 퍼스트펭귄">
-  <meta property="og:description" content="건강운동관리사·스포츠지도사 시험 관련 최신 공지사항, 이벤트, 무료 특강 소식을 확인하세요.">
-  <meta property="og:url" content="https://the1stpeng.com/notices.html">
+  <meta property="og:title" content="시험 일정 | 퍼스트펭귄">
+  <meta property="og:description" content="건강운동관리사·1급·2급 스포츠지도사 시험 일정을 한눈에 확인하세요.">
+  <meta property="og:url" content="https://the1stpeng.com/schedule.html">
   <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1D2F4E">
@@ -28,10 +28,9 @@
   <script type="module" src="js/core/firebase-core.js"></script>
   <script type="module" src="js/auth/auth-core.js"></script>
   <script type="module" src="js/auth/auth-ui.js"></script>
-  <script type="module" src="js/notice/notice-ui.js"></script>
 
   <link rel="stylesheet" href="css/login.css">
-  <link rel="stylesheet" href="css/pages/notice.css">
+  <link rel="stylesheet" href="css/pages/schedule.css">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -74,56 +73,8 @@
     .page__desc {
       font-size: var(--text-base);
       color: var(--color-text-tertiary);
-      margin-bottom: 48px;
+      margin-bottom: 36px;
       animation: fadeInUp 0.6s ease-out 0.1s both;
-    }
-
-    /* ── Notice List ── */
-    .notice-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      animation: fadeInUp 0.6s ease-out 0.2s both;
-    }
-
-    /* ── Loading ── */
-    .notices-loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 64px 24px;
-      color: var(--color-text-quaternary);
-      font-size: var(--text-sm);
-    }
-
-    .loading-spinner {
-      border: 2px solid var(--color-separator);
-      border-top: 2px solid var(--color-text-tertiary);
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* ── Empty State ── */
-    .notices-empty {
-      text-align: center;
-      padding: 80px 24px;
-      color: var(--color-text-quaternary);
-      font-size: var(--text-sm);
-    }
-
-    /* ── Pagination ── */
-    #notice-pagination {
-      margin-top: 40px;
-      display: flex;
-      justify-content: center;
-      gap: 8px;
     }
 
     @media (max-width: 734px) {
@@ -166,7 +117,6 @@
       <span class="header__name">퍼스트펭귄</span>
     </a>
     <nav class="header__nav">
-      <a href="notices.html" class="header__nav-link header__nav-link--active">공지사항</a>
       <a href="cft.html" class="header__nav-link header__nav-link--cert">건강운동관리사</a>
       <a href="si1.html" class="header__nav-link header__nav-link--cert">1급 스포츠지도사</a>
       <a href="si2.html" class="header__nav-link header__nav-link--cert">2급 스포츠지도사</a>
@@ -191,19 +141,33 @@
 
   <!-- Content -->
   <main class="page">
-    <h1 class="page__title">공지사항</h1>
-    <p class="page__desc">퍼스트펭귄의 최신 소식과 업데이트</p>
+    <h1 class="page__title">시험 일정</h1>
+    <p class="page__desc">2026년 체육지도자 자격증 시험 일정</p>
 
-    <div id="notices-loading" class="notices-loading">
+    <a href="https://sqms.kspo.or.kr/main/main.kspo" target="_blank" rel="noopener" class="schedule-external">
+      체육지도자연수원 바로가기 <span>↗</span>
+    </a>
+
+    <!-- 필터 탭 -->
+    <div class="schedule-filter" style="animation: fadeInUp 0.6s ease-out 0.15s both;">
+      <button class="schedule-filter__btn schedule-filter__btn--active" data-cert="">전체</button>
+      <button class="schedule-filter__btn" data-cert="health-manager">건강운동관리사</button>
+      <button class="schedule-filter__btn" data-cert="sports-instructor-1">1급 스포츠지도사</button>
+      <button class="schedule-filter__btn" data-cert="sports-instructor">2급 스포츠지도사</button>
+    </div>
+
+    <!-- 로딩 -->
+    <div id="schedule-loading" class="schedule-loading">
       <div class="loading-spinner"></div>
       <span>불러오는 중...</span>
     </div>
 
-    <ul id="notice-list" class="notice-list" style="display: none;"></ul>
-    <div id="notice-pagination"></div>
+    <!-- 일정 목록 -->
+    <div id="schedule-list" style="animation: fadeInUp 0.6s ease-out 0.2s both;"></div>
 
-    <div id="notices-empty" class="notices-empty" style="display: none;">
-      등록된 공지사항이 없습니다.
+    <!-- 빈 상태 -->
+    <div id="schedule-empty" class="schedule-empty" style="display: none;">
+      등록된 시험 일정이 없습니다.
     </div>
   </main>
 
@@ -234,7 +198,13 @@
       </div>
     </div>
   </footer>
+
+  <!-- 시험 일정 초기화 -->
+  <script type="module">
+    import { initSchedulePage } from './js/schedule/schedule-ui.js';
+    initSchedulePage();
   </script>
-<script src="js/apple-header.js"></script>
+
+  <script src="js/apple-header.js"></script>
 </body>
 </html>

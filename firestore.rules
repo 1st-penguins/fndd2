@@ -271,6 +271,14 @@ service cloud.firestore {
     }
 
     // ============================================
+    // 📅 시험 일정 (Exam Schedules)
+    // ============================================
+    match /examSchedules/{scheduleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ============================================
     // 🚫 기본 차단 (Default Deny)
     // ============================================
     match /{document=**} {

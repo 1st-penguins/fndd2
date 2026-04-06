@@ -252,6 +252,7 @@
     <a href="cft.html" class="header__mobile-link">건강운동관리사</a>
     <a href="si1.html" class="header__mobile-link">1급 스포츠지도사</a>
     <a href="si2.html" class="header__mobile-link">2급 스포츠지도사</a>
+    <a href="schedule.html" class="header__mobile-link">시험일정</a>
     <div class="header__menu-divider"></div>
 
     <div class="header__menu-auth" id="menu-auth"></div>
@@ -332,10 +333,12 @@
 <script src="js/apple-header.js"></script>
 
   <script type="module">
-    import { auth, db } from './js/core/firebase-core.js';
+    import { ensureFirebase } from './js/core/firebase-core.js';
     import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
     import { isAdmin } from './js/auth/auth-utils.js';
-    
+
+    const { auth, db } = await ensureFirebase();
+
     // URL에서 상품 ID 가져오기
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
@@ -411,29 +414,37 @@
           try {
             // 버튼 비활성화 및 로딩 상태
             downloadBtn.disabled = true;
-            downloadBtn.textContent = '⏳ 다운로드 준비 중...';
-            
-            // Firebase Storage URL에서 파일 가져오기 (CORS 우회)
+            downloadBtn.textContent = '다운로드 준비 중...';
+
             console.log('📥 다운로드 시작:', product.title);
-            
-            // fetch로 blob 가져오기
+
             const response = await fetch(product.fileUrl);
-            
+
             if (!response.ok) {
               throw new Error('파일 다운로드 실패');
             }
-            
-            // 파일 크기가 크면 진행률 표시
+
             const contentLength = response.headers.get('content-length');
-            if (contentLength) {
-              const total = parseInt(contentLength, 10);
-              console.log(`파일 크기: ${(total / 1024 / 1024).toFixed(2)} MB`);
+            const total = contentLength ? parseInt(contentLength, 10) : 0;
+
+            let loaded = 0;
+            const reader = response.body.getReader();
+            const chunks = [];
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              loaded += value.length;
+              if (total > 0) {
+                const pct = Math.round((loaded / total) * 100);
+                downloadBtn.textContent = `다운로드 중... ${pct}%`;
+              } else {
+                downloadBtn.textContent = `다운로드 중... ${(loaded / 1024 / 1024).toFixed(1)}MB`;
+              }
             }
-            
-            downloadBtn.textContent = '⏳ 다운로드 중...';
-            
-            // blob으로 변환
-            const blob = await response.blob();
+
+            const blob = new Blob(chunks);
             
             // blob URL 생성
             const blobUrl = window.URL.createObjectURL(blob);

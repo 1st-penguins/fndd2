@@ -1,0 +1,340 @@
+/* ============================================
+   시험 일정 페이지 + D-Day 카운터 스타일
+   ============================================ */
+
+/* ── D-Day 카운터 (메인 페이지) ── */
+.dday {
+  padding: 80px 24px;
+  background: var(--color-bg-secondary);
+  text-align: center;
+}
+
+.dday__title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.dday__sub {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin-bottom: 36px;
+}
+
+.dday__cards {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  max-width: 720px;
+  margin: 0 auto 32px;
+}
+
+.dday__card {
+  flex: 1;
+  max-width: 220px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 16px;
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dday__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.dday__card--highlight {
+  border-width: 2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.dday__cert-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.dday__event-title {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.dday__count {
+  font-size: var(--text-4xl);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.dday__count--urgent {
+  color: var(--color-error);
+}
+
+.dday__count--today {
+  color: var(--color-error);
+  animation: pulse 1.5s infinite;
+}
+
+.dday__date {
+  font-size: 12px;
+  color: var(--color-text-quaternary);
+}
+
+.dday__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-accent);
+  transition: gap 0.2s;
+}
+
+.dday__link:hover {
+  gap: 8px;
+}
+
+.dday__empty {
+  font-size: var(--text-sm);
+  color: var(--color-text-quaternary);
+  padding: 40px 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* 모바일 */
+@media (max-width: 734px) {
+  .dday { padding: 60px 20px; }
+
+  .dday__cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dday__card {
+    max-width: 100%;
+    width: 100%;
+    padding: 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+  }
+
+  .dday__card-left {
+    flex-shrink: 0;
+  }
+
+  .dday__card-right {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .dday__cert-badge { margin-bottom: 0; }
+  .dday__count { font-size: var(--text-3xl); margin-bottom: 4px; }
+  .dday__event-title { margin-bottom: 4px; }
+}
+
+/* 외부 바로가기 */
+.schedule-external {
+  display: inline-block;
+  margin-bottom: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #aeaeb2;
+  transition: color 0.2s;
+}
+
+.schedule-external:hover {
+  color: #1D2F4E;
+}
+
+/* ── 시험 일정 페이지 ── */
+.schedule-filter {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.schedule-filter__btn {
+  padding: 8px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: transparent;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-sans);
+}
+
+.schedule-filter__btn:hover {
+  border-color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
+}
+
+.schedule-filter__btn--active {
+  background: var(--color-text-primary);
+  color: #fff;
+  border-color: var(--color-text-primary);
+}
+
+/* 반기 구분 */
+.schedule-divider {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  padding: 24px 0 12px;
+  border-bottom: 1px solid var(--color-separator);
+  margin-bottom: 16px;
+}
+
+/* 일정 카드 */
+.schedule-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-light);
+  margin-bottom: 12px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.schedule-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.schedule-card--past {
+  opacity: 0.5;
+}
+
+.schedule-card__indicator {
+  width: 4px;
+  min-height: 48px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.schedule-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.schedule-card__cert {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.schedule-card__type {
+  font-size: 12px;
+  color: var(--color-text-quaternary);
+}
+
+.schedule-card__title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+
+.schedule-card__date {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+.schedule-card__dday {
+  flex-shrink: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  padding: 8px 0;
+  min-width: 70px;
+  text-align: right;
+}
+
+.schedule-card__dday--urgent {
+  color: var(--color-error);
+}
+
+.schedule-card__dday--past {
+  color: var(--color-text-quaternary);
+}
+
+.schedule-card__desc {
+  font-size: 12px;
+  color: var(--color-text-quaternary);
+  margin-top: 4px;
+}
+
+/* 로딩 */
+.schedule-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: var(--color-text-quaternary);
+  font-size: var(--text-sm);
+}
+
+.schedule-loading .loading-spinner {
+  border: 2px solid var(--color-separator);
+  border-top: 2px solid var(--color-text-tertiary);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.schedule-empty {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--color-text-quaternary);
+  font-size: var(--text-sm);
+}
+
+/* 모바일 */
+@media (max-width: 734px) {
+  .schedule-filter { gap: 6px; }
+  .schedule-filter__btn { padding: 6px 14px; font-size: 13px; }
+  .schedule-card { padding: 16px; gap: 12px; }
+  .schedule-card__dday { font-size: var(--text-base); min-width: 60px; }
+}
+
+@media (max-width: 480px) {
+  .schedule-filter__btn { padding: 6px 12px; font-size: 12px; }
+}

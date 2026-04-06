@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="css/apple-header.css">
   <link rel="stylesheet" href="css/apple-footer.css">
   <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/pages/schedule.css">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -139,6 +140,119 @@
       letter-spacing: -0.5px;
     }
 
+    /* ── D-Day Countdown Section ── */
+    .countdown {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px;
+      background: #f5f5f7;
+    }
+
+    .countdown__sub {
+      font-size: var(--text-lg);
+      font-weight: 500;
+      color: #aeaeb2;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    .countdown__headline {
+      font-size: var(--text-5xl);
+      font-weight: 800;
+      color: #1d1d1f;
+      letter-spacing: -2px;
+      margin-bottom: 48px;
+    }
+
+    .countdown__cards {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 32px;
+      align-items: stretch;
+    }
+
+    .countdown__card {
+      flex: 1;
+      max-width: 280px;
+      padding: 28px 24px;
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .countdown__card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    .countdown__card--highlight {
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+    }
+
+    .countdown__cert {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      background: #1D2F4E;
+      padding: 4px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .countdown__card-top {
+      margin-bottom: 14px;
+    }
+
+    .countdown__title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #6e6e73;
+      margin-top: 10px;
+      margin-bottom: 14px;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    .countdown__count {
+      font-size: 34px;
+      font-weight: 800;
+      color: #1D2F4E;
+      letter-spacing: -1.5px;
+      margin-bottom: 6px;
+    }
+
+    .countdown__count--urgent { color: #e67e22; }
+    .countdown__count--today { color: #e74c3c; }
+
+    .countdown__date {
+      font-size: 13px;
+      color: #aeaeb2;
+      font-weight: 400;
+    }
+
+    .countdown__link {
+      font-size: 14px;
+      font-weight: 500;
+      color: #aeaeb2;
+      transition: color 0.2s;
+    }
+
+    .countdown__link:hover { color: #1D2F4E; }
+
     /* 스크롤 힌트 */
     .hero__scroll {
       display: flex;
@@ -157,6 +271,34 @@
     .hero__scroll:hover { color: #fff; }
 
     .hero__scroll-icon {
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      animation: bounce 2s infinite 1.5s;
+    }
+
+    /* 공용 섹션 스크롤 힌트 (밝은 배경용) */
+    .section-scroll {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: #aeaeb2;
+      font-size: var(--text-xs);
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s;
+      margin-top: 36px;
+    }
+
+    .section-scroll:hover { color: #1D2F4E; }
+
+    .section-scroll__icon {
       width: 22px;
       height: 22px;
       border: 1.5px solid currentColor;
@@ -291,7 +433,8 @@
     }
 
     .story__section {
-      min-height: 80vh;
+      min-height: 100vh;
+      min-height: 100svh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -650,6 +793,13 @@
       .hero__tagline { padding: 14px 24px; }
       .hero__tagline-main { font-size: var(--text-lg); }
 
+      .countdown { padding: 60px 20px; }
+      .countdown__headline { font-size: var(--text-3xl); margin-bottom: 36px; }
+      .countdown__sub { font-size: var(--text-base); }
+      .countdown__cards { flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+      .countdown__card { max-width: 100%; width: 100%; padding: 16px 18px; display: flex; align-items: center; gap: 14px; text-align: left; border-radius: 14px; }
+      .countdown__count { font-size: 24px; }
+
       .hero.bg-loaded {
         background:
           linear-gradient(135deg,
@@ -735,6 +885,7 @@
     <a href="cft.html" class="header__mobile-link">건강운동관리사</a>
     <a href="si1.html" class="header__mobile-link">1급 스포츠지도사</a>
     <a href="si2.html" class="header__mobile-link">2급 스포츠지도사</a>
+    <a href="schedule.html" class="header__mobile-link">시험일정</a>
     <div class="header__menu-divider"></div>
 
     <div class="header__menu-auth" id="menu-auth"></div>
@@ -767,6 +918,7 @@
   <section class="select" id="select">
     <p class="select__sub">공부도 운동처럼</p>
     <h2 class="select__headline">Frequency Intensity<br>Time Type</h2>
+
     <p class="select__desc">어떤 시험을 준비하고 있나요?</p>
 
     <div class="select__cards">
@@ -791,7 +943,55 @@
         <span class="exam-card__arrow">→</span>
       </a>
     </div>
+
+    <a href="#countdown" class="section-scroll">
+      <div class="section-scroll__icon">↓</div>
+    </a>
   </section>
+
+  <!-- D-Day Section -->
+  <section class="countdown" id="countdown">
+    <p class="countdown__sub">다가오는 시험 일정</p>
+    <h2 class="countdown__headline">D-Day</h2>
+    <div class="countdown__cards"></div>
+    <a href="schedule.html" class="countdown__link">전체 시험 일정 보기 →</a>
+
+    <a href="#story" class="section-scroll">
+      <div class="section-scroll__icon">↓</div>
+    </a>
+  </section>
+  <script>
+    (function() {
+      var NAMES = {'health-manager':'건강운동관리사','sports-instructor':'2급 스포츠지도사','sports-instructor-1':'1급 스포츠지도사'};
+      function dday(ds) {
+        var t = new Date(), d = new Date(ds + 'T00:00:00');
+        t.setHours(0,0,0,0); d.setHours(0,0,0,0);
+        var diff = Math.ceil((d - t) / 864e5);
+        if (diff > 0) return {text:'D-'+diff, days:diff, today:false};
+        if (diff === 0) return {text:'D-Day', days:0, today:true};
+        return {text:'D+'+Math.abs(diff), days:diff, today:false};
+      }
+      fetch('/data/dday-upcoming.json').then(function(r){return r.json()}).then(function(items) {
+        var box = document.querySelector('.countdown__cards');
+        if (!box || !items.length) return;
+        var closestI = 0, closestD = Infinity;
+        items.forEach(function(it, i) {
+          var d = dday(it.startDate);
+          if (d.days >= 0 && d.days < closestD) { closestD = d.days; closestI = i; }
+        });
+        box.innerHTML = items.map(function(it, i) {
+          var d = dday(it.startDate);
+          var cls = d.today ? 'countdown__count--today' : (d.days <= 30 && d.days > 0) ? 'countdown__count--urgent' : '';
+          var hl = i === closestI ? 'countdown__card--highlight' : '';
+          return '<a href="schedule.html?cert='+it.certType+'" class="countdown__card '+hl+'">'
+            +'<div class="countdown__card-top"><span class="countdown__cert">'+NAMES[it.certType]+'</span>'
+            +'<p class="countdown__title">'+it.title+'</p></div>'
+            +'<p class="countdown__count '+cls+'">'+d.text+'</p>'
+            +'<p class="countdown__date">'+it.startDate.replace(/-/g,'.')+'</p></a>';
+        }).join('');
+      }).catch(function(){});
+    })();
+  </script>
 
   <!-- Brand Story -->
   <section class="story" id="story">
@@ -913,12 +1113,8 @@
     <div class="story__ocean">
       <!-- 수심 0~100m -->
       <span class="story__depth" style="top:2%;color:rgba(134,134,139,0.6);">— 0m 수면</span>
-      <span class="story__depth" style="top:10%;color:rgba(255,255,255,0.3);">— 5m</span>
-      <span class="story__depth" style="top:18%;color:rgba(255,255,255,0.25);">— 10m</span>
-      <span class="story__depth" style="top:28%;color:rgba(255,255,255,0.2);">— 20m</span>
-      <span class="story__depth" style="top:38%;color:rgba(255,255,255,0.18);">— 30m</span>
-      <span class="story__depth" style="top:52%;color:rgba(255,255,255,0.15);">— 50m</span>
-      <span class="story__depth" style="top:68%;color:rgba(255,255,255,0.12);">— 70m</span>
+      <span class="story__depth" style="top:28%;color:rgba(255,255,255,0.25);">— 30m</span>
+      <span class="story__depth" style="top:55%;color:rgba(255,255,255,0.15);">— 70m</span>
       <span class="story__depth" style="top:85%;color:rgba(255,255,255,0.1);">— 100m</span>
 
       <!-- 거품 -->
@@ -997,6 +1193,7 @@
   </script>
 
   <!-- 로그인 모달 + 상태 관리 -->
+
   <script type="module">
     import { showLoginModal } from './js/auth/auth-ui.js';
     import { ensureFirebase } from './js/core/firebase-core.js';
