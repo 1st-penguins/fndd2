@@ -430,7 +430,11 @@
       }
 
       try {
-        const orderId = `product_${productId}_${Date.now()}_${user.uid.substring(0, 6)}`;
+        const now = new Date();
+        const dateStr = `${String(now.getFullYear()).slice(2)}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+        const timeStr = `${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+        const rand = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+        const orderId = `${dateStr}${timeStr}${rand}`;
 
         // 쿠폰으로 0원이 된 경우 — Toss 결제 없이 직접 구매 처리
         if (currentPrice === 0 && appliedCoupon) {
