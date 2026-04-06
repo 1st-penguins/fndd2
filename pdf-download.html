@@ -338,6 +338,8 @@
     import { isAdmin } from './js/auth/auth-utils.js';
     import { recordPdfDownload } from './js/payment/pdf-tracker.js';
 
+    const MAX_DOWNLOADS = 2;
+
     const { auth, db } = await ensureFirebase();
 
     // URL에서 상품 ID 가져오기
@@ -373,8 +375,31 @@
             showError('구매한 상품이 아닙니다.');
             return;
           }
+
+          // 이용기간 체크 (6개월)
+          const purchaseData = purchaseSnap.data();
+          if (purchaseData.expiresAt) {
+            const expiresDate = purchaseData.expiresAt.toDate();
+            if (new Date() > expiresDate) {
+              showError(`이용 기간��� 만료되었습니다. (만료일: ${expiresDate.toLocaleDateString('ko-KR')})`);
+              return;
+            }
+          }
+
+          // 다운로드 횟수 체크
+          const downloadRef = doc(db, 'pdfDownloads', `${user.uid}_${productId}`);
+          const downloadSnap = await getDoc(downloadRef);
+          const downloadCount = downloadSnap.exists() ? (downloadSnap.data().downloadCount || 0) : 0;
+
+          if (downloadCount >= MAX_DOWNLOADS) {
+            showError(`다운로드 횟수를 초과했습니다. (${MAX_DOWNLOADS}회 제한)\n\n추가 다운로드가 필요하시면 1:1 문의를 이용해주세요.`);
+            return;
+          }
+
+          // 남은 횟수 저장 (버튼 텍스트용)
+          window._remainingDownloads = MAX_DOWNLOADS - downloadCount;
         }
-        
+
         // 상품 정보 가져오기
         const productRef = doc(db, 'products', productId);
         const productSnap = await getDoc(productRef);
@@ -401,6 +426,11 @@
         // 다운로드 버튼 활성화
         document.getElementById('loading').style.display = 'none';
         document.getElementById('download-section').style.display = 'block';
+
+        // 남은 횟수 표시
+        if (window._remainingDownloads !== undefined) {
+          document.getElementById('download-btn').textContent = `다운로드 시작 (${window._remainingDownloads}/${MAX_DOWNLOADS}회 남음)`;
+        }
         
         // 다운로드 버튼 클릭 이벤트
         document.getElementById('download-btn').addEventListener('click', async () => {

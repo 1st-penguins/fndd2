@@ -548,9 +548,7 @@ exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstan
     paymentMethod: tossResponse.method || null,
     purchasedAt: admin.firestore.FieldValue.serverTimestamp(),
     status: "completed",
-    expiresAt: (productType || product.type) === "video"
-      ? admin.firestore.Timestamp.fromDate(new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000))
-      : null,
+    expiresAt: admin.firestore.Timestamp.fromDate(new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000)),
     tossTransactionKey: tossResponse.transactionKey || null,
   });
 
