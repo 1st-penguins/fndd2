@@ -576,3 +576,107 @@ exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstan
     amount: amount,
   };
 });
+
+// ============================================
+// 💳 Toss Payments 웹훅 — 결제 취소 자동 처리
+// ============================================
+exports.tossWebhook = functions.region("asia-northeast3").runWith({ minInstances: 0, secrets: ["TOSS_SECRET_KEY"] }).https.onRequest(async (req, res) => {
+  // POST만 허용
+  if (req.method !== "POST") {
+    return res.status(405).send("Method Not Allowed");
+  }
+
+  try {
+    const { eventType, data } = req.body;
+
+    console.log(`[Toss Webhook] eventType: ${eventType}`);
+
+    // 결제 상태 변경 이벤트만 처리
+    if (eventType !== "PAYMENT_STATUS_CHANGED") {
+      return res.status(200).json({ success: true, message: "이벤트 무시" });
+    }
+
+    const { paymentKey, orderId, status } = data || {};
+
+    if (!paymentKey || !orderId) {
+      console.warn("[Toss Webhook] paymentKey 또는 orderId 누락");
+      return res.status(400).json({ success: false, message: "필수 데이터 누락" });
+    }
+
+    // 취소 상태인 경우만 처리
+    if (status !== "CANCELED" && status !== "PARTIAL_CANCELED") {
+      console.log(`[Toss Webhook] 상태 ${status} — 처리 불필요`);
+      return res.status(200).json({ success: true, message: "취소 아닌 상태, 무시" });
+    }
+
+    // Toss API로 결제 정보 조회하여 검증
+    const secretKey = (process.env.TOSS_SECRET_KEY || "").trim();
+    if (!secretKey) {
+      console.error("[Toss Webhook] TOSS_SECRET_KEY 미설정");
+      return res.status(500).json({ success: false, message: "서버 설정 오류" });
+    }
+
+    const authHeader = "Basic " + Buffer.from(secretKey + ":").toString("base64");
+    const tossRes = await fetch(`https://api.tosspayments.com/v1/payments/${paymentKey}`, {
+      method: "GET",
+      headers: { "Authorization": authHeader },
+    });
+
+    if (!tossRes.ok) {
+      console.error("[Toss Webhook] Toss API 조회 실패:", await tossRes.text());
+      return res.status(500).json({ success: false, message: "Toss 결제 조회 실패" });
+    }
+
+    const payment = await tossRes.json();
+
+    // 실제로 취소된 건인지 재확인
+    if (payment.status !== "CANCELED" && payment.status !== "PARTIAL_CANCELED") {
+      console.log(`[Toss Webhook] Toss 실제 상태: ${payment.status} — 취소 아님`);
+      return res.status(200).json({ success: true, message: "취소 상태 아님" });
+    }
+
+    // Firestore에서 해당 orderId의 purchases 문서 찾기
+    const purchasesSnap = await db.collection("purchases")
+      .where("orderId", "==", orderId)
+      .where("status", "==", "completed")
+      .limit(1)
+      .get();
+
+    if (purchasesSnap.empty) {
+      console.warn(`[Toss Webhook] orderId ${orderId}에 해당하는 구매 없음`);
+      return res.status(200).json({ success: true, message: "해당 구매 없음" });
+    }
+
+    const purchaseDoc = purchasesSnap.docs[0];
+    const purchaseData = purchaseDoc.data();
+
+    // purchases 상태 변경
+    await purchaseDoc.ref.update({
+      status: "cancelled",
+      cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+      cancelReason: payment.cancels?.[0]?.cancelReason || "Toss 대시보드에서 취소",
+    });
+
+    console.log(`🚫 결제 취소 처리 완료: ${purchaseDoc.id} (orderId: ${orderId})`);
+
+    // 텔레그램 알림
+    const cancelMsg = `🚫 *결제 취소 알림*\n\n` +
+      `👤 ${purchaseData.userName || purchaseData.userEmail || "알 수 없음"}\n` +
+      `📦 ${purchaseData.productId}\n` +
+      `💰 ${purchaseData.finalAmount?.toLocaleString() || 0}원\n` +
+      `📝 사유: ${payment.cancels?.[0]?.cancelReason || "없음"}\n` +
+      `🔖 주문번호: ${orderId}`;
+
+    try {
+      await sendTelegram(cancelMsg);
+    } catch (e) {
+      console.warn("[Toss Webhook] 텔레그램 알림 실패:", e.message);
+    }
+
+    return res.status(200).json({ success: true, message: "취소 처리 완료" });
+
+  } catch (error) {
+    console.error("[Toss Webhook] 오류:", error);
+    return res.status(500).json({ success: false, message: "서버 오류" });
+  }
+});

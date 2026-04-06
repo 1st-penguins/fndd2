@@ -368,7 +368,7 @@
           const purchaseRef = doc(db, 'purchases', `${user.uid}_${productId}`);
           const purchaseSnap = await getDoc(purchaseRef);
           
-          if (!purchaseSnap.exists()) {
+          if (!purchaseSnap.exists() || purchaseSnap.data().status !== 'completed') {
             showError('구매한 상품이 아닙니다.');
             return;
           }
