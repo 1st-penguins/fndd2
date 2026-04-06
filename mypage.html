@@ -683,11 +683,15 @@
       try {
         const purchasesSnap = await getDocs(query(
           collection(db, 'purchases'),
-          where('userId', '==', user.uid),
-          where('status', '==', 'completed')
+          where('userId', '==', user.uid)
         ));
         const purchases = [];
-        purchasesSnap.forEach(d => purchases.push({ id: d.id, ...d.data() }));
+        purchasesSnap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'completed' || data.status === 'cancelled') {
+            purchases.push({ id: d.id, ...data });
+          }
+        });
 
         const progressSnap = await getDocs(query(
           collection(db, 'lectureProgress'),
@@ -737,9 +741,10 @@
           </div>
         </div>`;
 
-      // 강의와 자료 분리
-      const videoPurchases = purchases.filter(p => p.productType === 'video');
-      const pdfPurchases = purchases.filter(p => p.productType !== 'video');
+      // 강���와 자료 분리 (활성/취소 구분)
+      const videoPurchases = purchases.filter(p => p.productType === 'video' && p.status === 'completed');
+      const pdfPurchasesActive = purchases.filter(p => p.productType !== 'video' && p.status === 'completed');
+      const cancelledPurchases = purchases.filter(p => p.status === 'cancelled');
 
       // ── 내 강의실 (최상단, 눈에 띄는 영역) ──
       html += '<div class="lecture-room">';
@@ -790,7 +795,8 @@
       // ── 내 자료 (PDF) ──
       html += '<div class="mypage-section"><h2 class="section__title">내 자료</h2>';
 
-      if (pdfPurchases.length === 0) {
+      const cancelledPdfs = cancelledPurchases.filter(cp => cp.productType !== 'video');
+      if (pdfPurchasesActive.length === 0 && cancelledPdfs.length === 0) {
         html += `<div class="empty-state">
           <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -799,10 +805,9 @@
           <p>구매한 자료가 없습니다.</p>
         </div>`;
       } else {
-        for (const p of pdfPurchases) {
+        for (const p of pdfPurchasesActive) {
           const name = PRODUCT_NAMES[p.productId] || p.productId;
           const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
-
           html += `
             <div class="purchase-item">
               <div class="purchase-icon-wrap">${pdfIcon}</div>
@@ -811,6 +816,18 @@
                 <div class="purchase-meta">구매일: ${date}</div>
               </div>
               <a href="pdf-download.html?id=${p.productId}" class="purchase-action">다운로드</a>
+            </div>`;
+        }
+        for (const p of cancelledPdfs) {
+          const name = PRODUCT_NAMES[p.productId] || p.productId;
+          html += `
+            <div class="purchase-item" style="opacity:0.5;">
+              <div class="purchase-icon-wrap">${pdfIcon}</div>
+              <div class="purchase-info">
+                <div class="purchase-title">${name}</div>
+                <div class="purchase-meta" style="color:#e03131;">구매취소</div>
+              </div>
+              <span class="purchase-action" style="background:#e5e5ea;color:#86868b;cursor:default;">구매취소</span>
             </div>`;
         }
       }
@@ -832,7 +849,8 @@
           const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
           const finalAmount = (p.finalAmount ?? p.purchaseAmount ?? 0);
           const amountStr = finalAmount.toLocaleString() + '원';
-          const status = p.status === 'completed' ? '결제완료' : p.status;
+          const isCancelled = p.status === 'cancelled';
+          const status = p.status === 'completed' ? '결제완료' : (isCancelled ? '구매취소' : p.status);
           const orderId = p.orderId || p.id || '-';
           const typeLabel = p.productType === 'video' ? '강의' : '자료(PDF)';
           const payMethod = p.paymentMethod || (finalAmount === 0 ? '쿠폰 전액 할인' : '카드결제');
@@ -851,7 +869,7 @@
             <div class="payment-card">
               <div class="payment-card__header">
                 <span class="payment-card__product">${name}</span>
-                <span class="payment-card__status">${status}</span>
+                <span class="payment-card__status" style="${isCancelled ? 'background:rgba(224,49,49,0.08);color:#e03131;' : ''}">${status}</span>
               </div>
               <div class="payment-card__details">
                 <div class="payment-card__row">
