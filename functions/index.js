@@ -399,6 +399,11 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
  * Toss API로 결제 승인 요청 후 Firestore에 구매 기록 저장
  */
 exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstances: 0, secrets: ["TOSS_SECRET_KEY"] }).https.onCall(async (data, context) => {
+  // 0. 워밍업 요청 — 콜드 스타트 방지용, 즉시 반환
+  if (data.warmup) {
+    return { success: true, warmup: true };
+  }
+
   // 1. 인증 확인
   if (!context.auth) {
     throw new functions.https.HttpsError("unauthenticated", "로그인이 필요합니다.");
