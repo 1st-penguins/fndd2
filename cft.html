@@ -1251,6 +1251,7 @@
       font-size: 13px;
       color: #86868b;
       line-height: 1.4;
+      white-space: pre-line;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -1540,7 +1541,7 @@
         <div class="toggle__group">
           <button class="toggle__btn toggle__btn--active" data-view="subject">과목별</button>
           <button class="toggle__btn" data-view="year">연도별</button>
-          <a href="search-by-tags.html?cert=health-manager" class="toggle__btn" style="text-decoration:none;">태그검색</a>
+          <a href="search-by-tags.html?cert=health-manager" class="toggle__btn" style="text-decoration:none;">문제검색</a>
         </div>
       </div>
 
@@ -2186,8 +2187,8 @@
 
     // ── 강의 데이터 로드 ──
     const FILTER_MAP = { all: null, video: ['video'], bundle: ['bundle'], material: ['pdf', 'ppt'] };
-    let lectureProducts = null;
-    let lecturePurchases = [];
+    var lectureProducts = null;
+    var lecturePurchases = [];
 
     async function loadLectureData(typeFilter = 'all') {
       const grid = document.getElementById('lecture-grid');

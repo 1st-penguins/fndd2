@@ -514,6 +514,7 @@
   color: var(--deep-sea-gray, #6F7C8B);
   line-height: 1.6;
   margin-bottom: 14px;
+  white-space: pre-line;
 }
 
 /* 메타 정보 (강의수, 페이지수 등) */
@@ -643,6 +644,46 @@
   color: #495057;
   line-height: 1.8;
   white-space: pre-line;
+}
+
+/* 상세/커리큘럼 탭 */
+.detail-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.detail-tabs__btn {
+  flex: 1;
+  padding: 14px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #aeaeb2;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  font-family: var(--font-sans);
+}
+
+.detail-tabs__btn:hover {
+  color: #1d1d1f;
+}
+
+.detail-tabs__btn--active {
+  color: #1d1d1f;
+  border-bottom-color: #1d1d1f;
+}
+
+.detail-tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* 에피소드 목록 */

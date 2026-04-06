@@ -152,18 +152,21 @@
     }
 
     async function loadProductDetail() {
+      // 상품 정보: 정적 JSON에서 즉시 로드 (Firestore 대기 없음)
+      let product;
+      try {
+        const res = await fetch('/data/products.json?v=20260407c');
+        const allProducts = await res.json();
+        product = allProducts[productId];
+      } catch (e) {}
+
+      if (!product) {
+        showError();
+        return;
+      }
+
       const { auth, db } = await ensureFirebase();
       try {
-        // 상품 정보
-        const productRef = doc(db, 'products', productId);
-        const productSnap = await getDoc(productRef);
-
-        if (!productSnap.exists() || !productSnap.data().isActive) {
-          showError();
-          return;
-        }
-
-        const product = { id: productSnap.id, ...productSnap.data() };
 
         // 에피소드 (video/bundle 타입)
         let episodes = [];
@@ -261,9 +264,10 @@
       const badgeClass = `detail-badge--${product.type}`;
 
       // 썸네일
+      const thumbSrc = product.thumbnailUrl || product.thumbnail;
       let thumbHtml;
-      if (product.thumbnailUrl) {
-        thumbHtml = `<img src="${product.thumbnailUrl}" alt="${product.title}">`;
+      if (thumbSrc) {
+        thumbHtml = `<img src="${thumbSrc}" alt="${product.title}">`;
       } else {
         thumbHtml = `<div class="detail-thumb__placeholder">${typeLabel}</div>`;
       }
@@ -458,14 +462,27 @@
             <div class="detail-price-box">
               <div class="detail-price-row">${priceRowHtml}</div>
               ${(product.type === 'video' || product.type === 'bundle') ? '<div class="detail-price-note"><strong>구매일로부터 6개월(180일)간 이용 가능합니다</strong></div>' : ''}
+              ${product.type === 'video' ? '<p class="detail-price-note" style="margin-top:6px;font-size:12px;color:#aeaeb2;">본 강의에는 PDF 요약본이 포함되어 있지 않습니다. 요약본은 별도 구매 가능합니다.</p>' : ''}
             </div>
             ${actionBtn}
           </div>
         </div>
 
-        ${episodeSection}
-        ${bundleSection}
-        ${descSection}
+        ${(() => {
+          const tabCount = [descSection, episodeSection, bundleSection].filter(Boolean).length;
+          if (tabCount >= 2) {
+            return `
+            <div class="detail-tabs">
+              ${descSection ? '<button class="detail-tabs__btn detail-tabs__btn--active" data-tab="desc">상세설명</button>' : ''}
+              ${episodeSection ? '<button class="detail-tabs__btn" data-tab="curriculum">커리큘럼</button>' : ''}
+              ${bundleSection ? '<button class="detail-tabs__btn" data-tab="bundle">포함상품</button>' : ''}
+            </div>
+            <div class="detail-tab-content" id="tab-desc" ${descSection ? '' : 'style="display:none"'}>${descSection}</div>
+            <div class="detail-tab-content" id="tab-curriculum" style="${descSection ? 'display:none' : ''}">${episodeSection}</div>
+            <div class="detail-tab-content" id="tab-bundle" style="display:none">${bundleSection}</div>`;
+          }
+          return `${descSection}${episodeSection}${bundleSection}`;
+        })()}
         ${refundHtml}
       `;
 
@@ -475,6 +492,23 @@
       // 표시
       document.getElementById('detail-loading').style.display = 'none';
       contentEl.style.display = 'block';
+
+      // 탭 전환
+      contentEl.querySelectorAll('.detail-tabs__btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          contentEl.querySelectorAll('.detail-tabs__btn').forEach(b => b.classList.remove('detail-tabs__btn--active'));
+          btn.classList.add('detail-tabs__btn--active');
+          contentEl.querySelectorAll('.detail-tab-content').forEach(tc => tc.style.display = 'none');
+          const target = document.getElementById('tab-' + btn.dataset.tab);
+          if (target) target.style.display = 'block';
+        });
+      });
+
+      // descSection이 없으면 커리큘럼 탭을 기본 활성화
+      if (!document.getElementById('tab-desc')?.innerHTML.trim()) {
+        const firstBtn = contentEl.querySelector('.detail-tabs__btn');
+        if (firstBtn) firstBtn.click();
+      }
     }
 
     function showError() {

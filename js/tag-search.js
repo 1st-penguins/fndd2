@@ -54,6 +54,21 @@ const healthManagerSubjects = CERT_CONFIG['health-manager'].subjects;
 async function init() {
   console.log('태그 검색 초기화 시작');
 
+  // URL ?cert= 파라미터로 자격증 고정
+  const urlParams = new URLSearchParams(window.location.search);
+  const certParam = urlParams.get('cert');
+  if (certParam && CERT_CONFIG[certParam]) {
+    const certFilter = document.getElementById('certificate-filter');
+    certFilter.value = certParam;
+    // 자격증 필터 숨기기 (해당 자격증만 보여주므로 선택할 필요 없음)
+    const certGroup = certFilter.closest('.filter-group');
+    if (certGroup) certGroup.style.display = 'none';
+    // 페이지 타이틀에 자격증명 표시
+    const certLabel = CERT_CONFIG[certParam].label;
+    const headerTitle = document.querySelector('.tag-search-header h1');
+    if (headerTitle) headerTitle.textContent = `${certLabel} 문제 검색`;
+  }
+
   // 필터 옵션 설정
   setupFilters();
 

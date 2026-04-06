@@ -136,6 +136,47 @@
       padding: 24px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
+    .play-downloads {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-top: 16px;
+    }
+    .play-download-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: var(--font-sans);
+      text-decoration: none;
+      color: inherit;
+    }
+    .play-download-btn:hover {
+      background: #eeeef0;
+    }
+    .play-download-btn__icon {
+      font-size: 20px;
+    }
+    .play-download-btn__info {
+      flex: 1;
+    }
+    .play-download-btn__name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+    .play-download-btn__meta {
+      font-size: 12px;
+      color: #86868b;
+      margin-top: 2px;
+    }
     .play-episodes__title {
       font-size: 16px;
       font-weight: 700;
@@ -323,6 +364,12 @@
         <div class="play-episodes">
           <h3 class="play-episodes__title" id="play-ep-title">커리큘럼</h3>
           <ul class="play-ep-list" id="play-ep-list"></ul>
+        </div>
+
+        <!-- 부가 자료 다운로드 (상품별 조건부 표시) -->
+        <div class="play-downloads" id="play-downloads" style="display:none;">
+          <h3 class="play-episodes__title">자료 다운로드</h3>
+          <div id="play-downloads-list"></div>
         </div>
       </div>
     </div>
@@ -581,9 +628,60 @@
           }
         });
       });
+
+      // 부가 자료 다운로드 (구매자만, 상품별)
+      const PRODUCT_DOWNLOADS = {
+        'video_load': [
+          { name: '7~8강. 심전도 PDF 요약본', url: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2FECG-summary.pdf?alt=media&token=97266596-d732-4930-95b1-6147a40b2bc4', meta: 'PDF' }
+        ]
+      };
+      const downloads = PRODUCT_DOWNLOADS[productId];
+      const dlSection = document.getElementById('play-downloads');
+      if (downloads && !freeOnly) {
+        dlSection.style.display = 'block';
+        document.getElementById('play-downloads-list').innerHTML = downloads.map(d =>
+          `<button class="play-download-btn" onclick="downloadFile('${d.url}', '${d.fileName || d.name + '.pdf'}')">
+            <span class="play-download-btn__icon">📄</span>
+            <div class="play-download-btn__info">
+              <div class="play-download-btn__name">${d.name}</div>
+              <div class="play-download-btn__meta">${d.meta}</div>
+            </div>
+            <span style="color:#86868b;font-size:13px;">다운로드 ↓</span>
+          </button>`
+        ).join('');
+      }
     }
 
     // 에피소드 재생
+    window.downloadFile = async function downloadFile(url, fileName) {
+      try {
+        const btn = event.currentTarget;
+        const origText = btn.querySelector('span:last-child').textContent;
+        btn.querySelector('span:last-child').textContent = '준비 중...';
+        btn.disabled = true;
+
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+
+        btn.querySelector('span:last-child').textContent = '완료!';
+        setTimeout(() => {
+          btn.querySelector('span:last-child').textContent = origText;
+          btn.disabled = false;
+        }, 2000);
+      } catch (e) {
+        console.error('다운로드 오류:', e);
+        window.open(url, '_blank');
+      }
+    }
+
     function playEpisode(index) {
       const ep = episodes[index];
       if (!ep || !ep.vimeoId) return;
