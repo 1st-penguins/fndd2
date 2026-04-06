@@ -398,7 +398,7 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
  * 클라이언트에서 paymentKey, orderId, amount를 받아
  * Toss API로 결제 승인 요청 후 Firestore에 구매 기록 저장
  */
-exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstances: 0, secrets: ["TOSS_SECRET_KEY"] }).https.onCall(async (data, context) => {
+exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstances: 0, secrets: ["TOSS_SECRET_KEY", "TELEGRAM_BOT_TOKEN"] }).https.onCall(async (data, context) => {
   // 0. 워밍업 요청 — 콜드 스타트 방지용, 즉시 반환
   if (data.warmup) {
     return { success: true, warmup: true };
@@ -573,6 +573,22 @@ exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstan
   }
 
   console.log(`✅ 결제 완료: ${uid} → ${productId} (${amount}원)`);
+
+  // 텔레그램 구매 알림
+  const productName = product.title || product.name || productId;
+  const typeLabel = (productType || product.type) === 'video' ? '강의' : '자료(PDF)';
+  const userName = userRecord.displayName || userRecord.email || '알 수 없음';
+  const purchaseMsg = `💰 *홈페이지 새 구매!*\n\n` +
+    `👤 ${userName}\n` +
+    `📦 ${productName} (${typeLabel})\n` +
+    `💳 ${amount.toLocaleString()}원${discountAmount > 0 ? ` (할인 ${discountAmount.toLocaleString()}원)` : ''}\n` +
+    `🔖 주문번호: ${orderId}`;
+
+  try {
+    await sendTelegram(purchaseMsg);
+  } catch (e) {
+    console.warn("구매 텔레그램 알림 실패:", e.message);
+  }
 
   return {
     success: true,
