@@ -2251,6 +2251,22 @@
             ? `<img src="${p.thumbnailUrl}" alt="${p.title}">`
             : `<span class="lecture-card__thumb-icon">${(p.type === 'video' || p.type === 'bundle') ? '🎬' : '📄'}</span>`;
 
+          if (p.isComingSoon) {
+            return `
+            <div class="lecture-card" style="opacity:0.6;cursor:default;pointer-events:none;">
+              <div class="lecture-card__thumb">
+                ${thumb}
+                <span class="lecture-card__badge ${badgeClass}">${typeLabel}</span>
+                <span class="lecture-card__purchased" style="background:rgba(0,0,0,0.6);">준비중</span>
+              </div>
+              <div class="lecture-card__body">
+                <div class="lecture-card__title">${p.title}</div>
+                ${p.description ? `<div class="lecture-card__desc">${p.description}</div>` : ''}
+                <div class="lecture-card__price-row"><span class="lecture-card__price" style="color:#86868b;">준비중입니다</span></div>
+              </div>
+            </div>`;
+          }
+
           return `
             <a href="product-detail.html?id=${p.id}" class="lecture-card">
               <div class="lecture-card__thumb">
