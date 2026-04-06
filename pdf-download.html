@@ -336,6 +336,7 @@
     import { ensureFirebase } from './js/core/firebase-core.js';
     import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
     import { isAdmin } from './js/auth/auth-utils.js';
+    import { recordPdfDownload } from './js/payment/pdf-tracker.js';
 
     const { auth, db } = await ensureFirebase();
 
@@ -468,7 +469,10 @@
             }, 100);
             
             console.log('✅ 다운로드 완료:', fileName);
-            
+
+            // 다운로드 기록 저장
+            try { await recordPdfDownload(productId); } catch(e) { console.warn('다운로드 기록 실패:', e); }
+
             // 성공 메시지
             downloadBtn.textContent = '✅ 다운로드 완료!';
             setTimeout(() => {

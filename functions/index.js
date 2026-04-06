@@ -585,7 +585,7 @@ exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstan
 // ============================================
 // 💳 Toss Payments 웹훅 — 결제 취소 자동 처리
 // ============================================
-exports.tossWebhook = functions.region("asia-northeast3").runWith({ minInstances: 0, secrets: ["TOSS_SECRET_KEY"] }).https.onRequest(async (req, res) => {
+exports.tossWebhook = functions.region("asia-northeast3").runWith({ minInstances: 0, secrets: ["TOSS_SECRET_KEY", "TELEGRAM_BOT_TOKEN"] }).https.onRequest(async (req, res) => {
   // POST만 허용
   if (req.method !== "POST") {
     return res.status(405).send("Method Not Allowed");
