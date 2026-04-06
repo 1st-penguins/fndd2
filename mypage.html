@@ -355,21 +355,46 @@
     .payment-card {
       background: #f9f9fb;
       border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+      overflow: hidden;
     }
 
-    .payment-card__header {
+    .payment-card__summary {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+      gap: 12px;
+    }
+
+    .payment-card__summary:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .payment-card__summary-left {
+      flex: 1;
+      min-width: 0;
     }
 
     .payment-card__product {
       font-size: 15px;
       font-weight: 600;
       color: #1d1d1f;
+    }
+
+    .payment-card__date {
+      font-size: 12px;
+      color: #aeaeb2;
+      margin-top: 2px;
+    }
+
+    .payment-card__summary-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .payment-card__status {
@@ -381,10 +406,33 @@
       border-radius: 12px;
     }
 
+    .payment-card__chevron {
+      font-size: 12px;
+      color: #aeaeb2;
+      transition: transform 0.3s;
+    }
+
+    .payment-card--open .payment-card__chevron {
+      transform: rotate(180deg);
+    }
+
+    .payment-card__expand {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .payment-card--open .payment-card__expand {
+      max-height: 300px;
+    }
+
     .payment-card__details {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px 16px;
+      padding: 0 20px 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+      padding-top: 12px;
     }
 
     .payment-card__row {
@@ -417,9 +465,7 @@
     .payment-card__footer {
       display: flex;
       justify-content: flex-end;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(0, 0, 0, 0.04);
+      padding: 0 20px 16px;
     }
 
     .payment-card__inquiry-btn {
@@ -666,7 +712,8 @@
       'pdf_anatomy': '기능해부학 요약본', 'pdf_injury': '운동상해 요약본',
       'pdf_physio': '운동생리학 요약본', 'pdf_load': '운동부하검사 요약본',
       'pdf_patho': '병태생리학 요약본', 'pdf_psycho': '스포츠심리학 요약본',
-      'pdf_prescript': '운동처방론 요약본', 'pdf_health': '건강체력평가 요약본'
+      'pdf_prescript': '운동처방론 요약본', 'pdf_health': '건강체력평가 요약본',
+      'video_calc': '계산문제 특강'
     };
 
     if (!user) {
@@ -704,7 +751,7 @@
           progressByProduct[data.productId].push(data);
         });
 
-        const videoProductIds = purchases.filter(p => p.productType === 'video').map(p => p.productId);
+        const videoProductIds = purchases.filter(p => p.productType === 'video' || p.productType === 'bundle').map(p => p.productId);
         const episodeCounts = {};
         for (const pid of videoProductIds) {
           const epSnap = await getDocs(query(
@@ -742,8 +789,9 @@
         </div>`;
 
       // 강���와 자료 분리 (활성/취소 구분)
-      const videoPurchases = purchases.filter(p => p.productType === 'video' && p.status === 'completed');
-      const pdfPurchasesActive = purchases.filter(p => p.productType !== 'video' && p.status === 'completed');
+      const videoPurchases = purchases.filter(p => (p.productType === 'video' || p.productType === 'bundle') && p.status === 'completed');
+      const pdfPurchasesActive = purchases.filter(p => p.productType === 'pdf' && p.status === 'completed');
+      const bundlePurchases = purchases.filter(p => p.productType === 'bundle' && p.status === 'completed');
       const cancelledPurchases = purchases.filter(p => p.status === 'cancelled');
 
       // ── 내 강의실 (최상단, 눈에 띄는 영역) ──
@@ -756,7 +804,9 @@
       if (videoPurchases.length === 0) {
         html += `<div class="lecture-room__empty">
           <p>수강 중인 강의가 없습니다.</p>
-          <a href="index.html#lecture-tab">강의 둘러보기</a>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">
+            <a href="cft.html" style="color:#5FB2C9;font-size:14px;">건강운동관리사 강의 보기 →</a>
+          </div>
         </div>`;
       } else {
         html += '<div class="lecture-room__list">';
@@ -787,6 +837,19 @@
               </div>
               <span class="lecture-card__action">수강하기 →</span>
             </a>`;
+
+          // bundle이면 PDF 다운로드 링크 추가
+          if (p.productType === 'bundle') {
+            html += `
+            <a href="pdf-download.html?id=${p.productId}" class="lecture-card" style="border-top:1px solid rgba(255,255,255,0.08);border-radius:0 0 14px 14px;margin-top:-10px;">
+              <div class="lecture-card__icon">${pdfIcon}</div>
+              <div class="lecture-card__info">
+                <div class="lecture-card__name">${name} — PDF 자료</div>
+                <div class="lecture-card__meta">패키지 포함 자료</div>
+              </div>
+              <span class="lecture-card__action">다운로드 →</span>
+            </a>`;
+          }
         }
         html += '</div>';
       }
@@ -852,7 +915,7 @@
           const isCancelled = p.status === 'cancelled';
           const status = p.status === 'completed' ? '결제완료' : (isCancelled ? '구매취소' : p.status);
           const orderId = p.orderId || p.id || '-';
-          const typeLabel = p.productType === 'video' ? '강의' : '자료(PDF)';
+          const typeLabel = p.productType === 'video' ? '강의' : (p.productType === 'bundle' ? '강의+자료' : '자료(PDF)');
           const payMethod = p.paymentMethod || (finalAmount === 0 ? '쿠폰 전액 할인' : '카드결제');
 
           // 쿠폰 할인 정보
@@ -866,38 +929,42 @@
           }
 
           html += `
-            <div class="payment-card">
-              <div class="payment-card__header">
-                <span class="payment-card__product">${name}</span>
-                <span class="payment-card__status" style="${isCancelled ? 'background:rgba(224,49,49,0.08);color:#e03131;' : ''}">${status}</span>
+            <div class="payment-card" onclick="this.classList.toggle('payment-card--open')">
+              <div class="payment-card__summary">
+                <div class="payment-card__summary-left">
+                  <div class="payment-card__product">${name}</div>
+                  <div class="payment-card__date">${date}</div>
+                </div>
+                <div class="payment-card__summary-right">
+                  <span class="payment-card__status" style="${isCancelled ? 'background:rgba(224,49,49,0.08);color:#e03131;' : ''}">${status}</span>
+                  <span class="payment-card__chevron">▼</span>
+                </div>
               </div>
-              <div class="payment-card__details">
-                <div class="payment-card__row">
-                  <span class="payment-card__label">구분</span>
-                  <span class="payment-card__value">${typeLabel}</span>
+              <div class="payment-card__expand">
+                <div class="payment-card__details">
+                  <div class="payment-card__row">
+                    <span class="payment-card__label">구분</span>
+                    <span class="payment-card__value">${typeLabel}</span>
+                  </div>
+                  <div class="payment-card__row">
+                    <span class="payment-card__label">결제수단</span>
+                    <span class="payment-card__value">${payMethod}</span>
+                  </div>
+                  <div class="payment-card__row">
+                    <span class="payment-card__label">결제금액</span>
+                    <span class="payment-card__value payment-card__value--amount">${amountStr}</span>
+                  </div>
+                  ${discountHtml}
+                  <div class="payment-card__row">
+                    <span class="payment-card__label">주문번호</span>
+                    <span class="payment-card__order-id">${orderId}</span>
+                  </div>
                 </div>
-                <div class="payment-card__row">
-                  <span class="payment-card__label">결제일</span>
-                  <span class="payment-card__value">${date}</span>
+                <div class="payment-card__footer">
+                  <button class="payment-card__inquiry-btn" onclick="event.stopPropagation();openInquiryWithOrder('${name}', '${orderId}')">
+                    💬 이 주문 문의하기
+                  </button>
                 </div>
-                <div class="payment-card__row">
-                  <span class="payment-card__label">결제수단</span>
-                  <span class="payment-card__value">${payMethod}</span>
-                </div>
-                <div class="payment-card__row">
-                  <span class="payment-card__label">결제금액</span>
-                  <span class="payment-card__value payment-card__value--amount">${amountStr}</span>
-                </div>
-                ${discountHtml}
-              </div>
-              <div style="margin-top:10px;">
-                <span class="payment-card__label" style="font-size:11px;">주문번호</span>
-                <span class="payment-card__order-id">${orderId}</span>
-              </div>
-              <div class="payment-card__footer">
-                <button class="payment-card__inquiry-btn" onclick="openInquiryWithOrder('${name}', '${orderId}')">
-                  💬 이 주문 문의하기
-                </button>
               </div>
             </div>`;
         }

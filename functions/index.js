@@ -574,7 +574,8 @@ exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstan
 
   // 텔레그램 구매 알림
   const productName = product.title || product.name || productId;
-  const typeLabel = (productType || product.type) === 'video' ? '강의' : '자료(PDF)';
+  const pType = productType || product.type;
+  const typeLabel = pType === 'video' ? '강의' : (pType === 'bundle' ? '강의+자료' : '자료(PDF)');
   const userName = userRecord.displayName || userRecord.email || '알 수 없음';
   const purchaseMsg = `💰 *홈페이지 새 구매!*\n\n` +
     `👤 ${userName}\n` +

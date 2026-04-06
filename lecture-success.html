@@ -339,6 +339,9 @@
           } else if (productType === 'pdf') {
             messageEl.innerHTML = 'PDF 구매가 완료되었습니다.<br>이제 다운로드하실 수 있습니다.';
             buttonEl.textContent = 'PDF 다운로드';
+          } else if (productType === 'bundle') {
+            messageEl.innerHTML = '패키지 구매가 완료되었습니다.<br>강의 수강 + PDF 다운로드가 가능합니다.';
+            buttonEl.textContent = '강의 수강하기';
           } else {
             messageEl.innerHTML = '강의 구매가 완료되었습니다.<br>이제 강의를 수강하실 수 있습니다.';
             buttonEl.textContent = '강의 수강하기';
@@ -356,6 +359,8 @@
     window.goToLecture = function() {
       if (savedProductType === 'pdf') {
         window.location.href = `pdf-download.html?id=${savedProductId}`;
+      } else if (savedProductType === 'bundle') {
+        window.location.href = `lecture-play.html?id=${savedProductId}`;
       } else {
         window.location.href = `lecture-play.html?id=${savedProductId}`;
       }

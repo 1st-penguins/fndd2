@@ -465,9 +465,7 @@
           }
 
           // 구매 기록 저장
-          const expiresAt = productType === 'video'
-            ? Timestamp.fromDate(new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000))
-            : null;
+          const expiresAt = Timestamp.fromDate(new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000));
 
           await setDoc(doc(db, 'purchases', purchaseId), {
             userId: user.uid,
