@@ -14,7 +14,7 @@ const TYPE_LABELS = {
   video: '강의',
   pdf: '자료',
   ppt: '자료',
-  bundle: '패키지'
+  bundle: '특별강의'
 };
 
 // 타입 아이콘 매핑
@@ -22,15 +22,15 @@ const TYPE_ICONS = {
   video: '🎬',
   pdf: '📄',
   ppt: '📊',
-  bundle: '📦'
+  bundle: '🎬'
 };
 
 // 필터 → Firestore type 매핑
 const FILTER_TYPE_MAP = {
   all: null,
   video: ['video'],
-  material: ['pdf', 'ppt'],
-  bundle: ['bundle']
+  bundle: ['bundle'],
+  material: ['pdf', 'ppt']
 };
 
 // 캐시
@@ -140,11 +140,14 @@ function renderCard(product, purchased) {
 
   // 메타 정보
   let metaHtml = '';
-  if (product.type === 'video' && product.totalEpisodes) {
+  if ((product.type === 'video' || product.type === 'bundle') && product.totalEpisodes) {
     metaHtml += `<span class="shop-card__meta-item">📹 ${product.totalEpisodes}강</span>`;
   }
-  if (product.type === 'video' && product.totalDuration) {
+  if ((product.type === 'video' || product.type === 'bundle') && product.totalDuration) {
     metaHtml += `<span class="shop-card__meta-item">⏱ ${product.totalDuration}</span>`;
+  }
+  if (product.type === 'bundle' && product.fileUrl) {
+    metaHtml += `<span class="shop-card__meta-item">📄 PDF 자료 포함</span>`;
   }
   if ((product.type === 'pdf' || product.type === 'ppt') && product.pages) {
     metaHtml += `<span class="shop-card__meta-item">📄 ${product.pages}쪽</span>`;

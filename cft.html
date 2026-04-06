@@ -1869,7 +1869,8 @@
     <div class="tab-panel" data-panel="lecture">
       <div class="lecture-filters">
         <button class="lecture-filter active" data-filter="all">전체</button>
-        <button class="lecture-filter" data-filter="video">강의</button>
+        <button class="lecture-filter" data-filter="video">정규강의</button>
+        <button class="lecture-filter" data-filter="bundle">특별강의</button>
         <button class="lecture-filter" data-filter="material">자료</button>
       </div>
       <div id="lecture-grid" class="lecture-grid"></div>
@@ -2184,7 +2185,7 @@
     }
 
     // ── 강의 데이터 로드 ──
-    const FILTER_MAP = { all: null, video: ['video'], material: ['pdf', 'ppt'] };
+    const FILTER_MAP = { all: null, video: ['video'], bundle: ['bundle'], material: ['pdf', 'ppt'] };
     let lectureProducts = null;
     let lecturePurchases = [];
 
@@ -2228,12 +2229,13 @@
 
         grid.innerHTML = items.map(p => {
           const purchased = lecturePurchases.includes(p.id);
-          const typeLabel = p.type === 'video' ? '강의' : '자료';
+          const typeLabel = p.type === 'video' ? '정규강의' : (p.type === 'bundle' ? '특별강의' : '자료');
           const badgeClass = p.type === 'pdf' || p.type === 'ppt' ? 'lecture-card__badge--pdf' : '';
 
           let meta = '';
-          if (p.type === 'video' && p.totalEpisodes) meta += `${p.totalEpisodes}강`;
-          if (p.type === 'video' && p.totalDuration) meta += (meta ? ' · ' : '') + p.totalDuration;
+          if ((p.type === 'video' || p.type === 'bundle') && p.totalEpisodes) meta += `${p.totalEpisodes}강`;
+          if ((p.type === 'video' || p.type === 'bundle') && p.totalDuration) meta += (meta ? ' · ' : '') + p.totalDuration;
+          if (p.type === 'bundle' && p.fileUrl) meta += (meta ? ' · ' : '') + 'PDF 포함';
           if ((p.type === 'pdf' || p.type === 'ppt') && p.pages) meta += `${p.pages}쪽`;
 
           let priceHtml = '';
@@ -2247,7 +2249,7 @@
 
           const thumb = p.thumbnailUrl
             ? `<img src="${p.thumbnailUrl}" alt="${p.title}">`
-            : `<span class="lecture-card__thumb-icon">${p.type === 'video' ? '🎬' : '📄'}</span>`;
+            : `<span class="lecture-card__thumb-icon">${(p.type === 'video' || p.type === 'bundle') ? '🎬' : '📄'}</span>`;
 
           return `
             <a href="product-detail.html?id=${p.id}" class="lecture-card">
