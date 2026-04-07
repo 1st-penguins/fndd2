@@ -282,7 +282,31 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
         .where("sessionId", "==", sessionId)
         .get();
 
-      // 같은 문서(과목+연도)에 대한 업데이트를 미리 모아서 1회만 쓰기
+      // 1단계: 과목별 점수 사전 계산 (25% 미만 찍기 필터용)
+      const subjectScores = {}; // subjectKey → { correct, total }
+      sessionAttempts.forEach(attemptDoc => {
+        const attempt = attemptDoc.data();
+        if (ADMIN_EMAILS.includes(attempt.userEmail)) return;
+        const aQData = attempt.questionData;
+        if (!aQData) return;
+        let aSubject = String(aQData.subject || attempt.subject);
+        try { aSubject = decodeURIComponent(aSubject); } catch(e) {}
+        const aIsCorrect = attempt.firstAttemptIsCorrect !== undefined
+          ? attempt.firstAttemptIsCorrect : attempt.isCorrect;
+        if (!subjectScores[aSubject]) subjectScores[aSubject] = { correct: 0, total: 0 };
+        subjectScores[aSubject].total++;
+        if (aIsCorrect) subjectScores[aSubject].correct++;
+      });
+
+      // 25% 미만 과목 필터 (찍기 수준)
+      const lowScoreSubjects = new Set();
+      Object.entries(subjectScores).forEach(([subj, s]) => {
+        if (s.total > 0 && (s.correct / s.total) < 0.25) {
+          lowScoreSubjects.add(subj);
+        }
+      });
+
+      // 2단계: 유효한 과목만 집계
       const docUpdates = {}; // docKey → payload 객체
 
       sessionAttempts.forEach(attemptDoc => {
@@ -298,6 +322,9 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
         const aNumber = String(aQData.number || attempt.number);
         const aCertType = attempt.certificateType || 'health-manager';
         if (!aYear || !aSubject || !aNumber) return;
+
+        // 과목별 25% 미만 필터
+        if (lowScoreSubjects.has(aSubject)) return;
 
         const docKey = `${aCertType}_${aYear}_${aSubject}`;
 
@@ -319,25 +346,22 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
 
         const p = docUpdates[docKey];
 
-        // 문제별 필드 (questions.{number}.xxx)
-        const qPrefix = `questions.${aNumber}`;
-        p[`${qPrefix}.total`] = admin.firestore.FieldValue.increment(
-          (p[`${qPrefix}.total`]?._operand || 0) + 1 ? 0 : 0 // 아래에서 직접 처리
-        );
+        // quiz/mock 분리 카운터
+        const aIsMock = aQData.isFromMockExam === true;
+        const mode = aIsMock ? 'mock' : 'quiz';
 
-        // increment를 누적하기 위해 카운터 방식 사용
-        // 이미 같은 문제에 대한 increment가 있으면 합산
         if (!p._counters) p._counters = {};
-        if (!p._counters[aNumber]) {
-          p._counters[aNumber] = {
+        const counterKey = `${aNumber}_${mode}`;
+        if (!p._counters[counterKey]) {
+          p._counters[counterKey] = {
+            number: aNumber, mode,
             total: 0, correct: 0,
             answers: { '0': 0, '1': 0, '2': 0, '3': 0 },
-            totalTimeSpent: 0, viewedExplanationCount: 0,
             correctAnswerIndex: null
           };
         }
 
-        const c = p._counters[aNumber];
+        const c = p._counters[counterKey];
         c.total++;
         if (aIsCorrect) c.correct++;
 
@@ -347,13 +371,6 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
 
         if (Number.isInteger(aCorrectIndex) && aCorrectIndex >= 0 && aCorrectIndex <= 3) {
           c.correctAnswerIndex = aCorrectIndex;
-        }
-
-        if (typeof attempt.timeSpent === 'number' && attempt.timeSpent > 0) {
-          c.totalTimeSpent += attempt.timeSpent;
-        }
-        if (attempt.viewedExplanation === true) {
-          c.viewedExplanationCount++;
         }
       });
 
@@ -368,18 +385,16 @@ exports.onNewAttempt = functions.region("asia-northeast3").firestore
           if (k.startsWith('questions.')) delete payload[k];
         });
 
-        Object.entries(counters).forEach(([num, c]) => {
-          const qp = `questions.${num}`;
+        Object.entries(counters).forEach(([counterKey, c]) => {
+          const qp = `questions.${c.number}.${c.mode}`;
           payload[`${qp}.total`] = admin.firestore.FieldValue.increment(c.total);
           payload[`${qp}.correct`] = admin.firestore.FieldValue.increment(c.correct);
           payload[`${qp}.answers.0`] = admin.firestore.FieldValue.increment(c.answers['0']);
           payload[`${qp}.answers.1`] = admin.firestore.FieldValue.increment(c.answers['1']);
           payload[`${qp}.answers.2`] = admin.firestore.FieldValue.increment(c.answers['2']);
           payload[`${qp}.answers.3`] = admin.firestore.FieldValue.increment(c.answers['3']);
-          payload[`${qp}.totalTimeSpent`] = admin.firestore.FieldValue.increment(c.totalTimeSpent);
-          payload[`${qp}.viewedExplanationCount`] = admin.firestore.FieldValue.increment(c.viewedExplanationCount);
           if (Number.isInteger(c.correctAnswerIndex)) {
-            payload[`${qp}.correctAnswerIndex`] = c.correctAnswerIndex;
+            payload[`questions.${c.number}.correctAnswerIndex`] = c.correctAnswerIndex;
           }
         });
 

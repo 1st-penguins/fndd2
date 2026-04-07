@@ -5001,6 +5001,26 @@ async function loadQuestionStatistics(year, subject, setType, container, certTyp
     const qsSnapshot = await getDocs(qsQuery);
 
     if (qsSnapshot.size > 0) {
+      // 새 구조(quiz/mock 분리) → 합산 헬퍼
+      function mergeModeStat(q) {
+        if (q.quiz || q.mock) {
+          const quiz = q.quiz || { total: 0, correct: 0, answers: {'0':0,'1':0,'2':0,'3':0} };
+          const mock = q.mock || { total: 0, correct: 0, answers: {'0':0,'1':0,'2':0,'3':0} };
+          return {
+            total: (quiz.total || 0) + (mock.total || 0),
+            correct: (quiz.correct || 0) + (mock.correct || 0),
+            answers: {
+              '0': (quiz.answers?.['0'] || 0) + (mock.answers?.['0'] || 0),
+              '1': (quiz.answers?.['1'] || 0) + (mock.answers?.['1'] || 0),
+              '2': (quiz.answers?.['2'] || 0) + (mock.answers?.['2'] || 0),
+              '3': (quiz.answers?.['3'] || 0) + (mock.answers?.['3'] || 0)
+            }
+          };
+        }
+        // 레거시 구조
+        return { total: q.total || 0, correct: q.correct || 0, answers: q.answers || {'0':0,'1':0,'2':0,'3':0} };
+      }
+
       // 사전 집계 데이터 사용 (과목+연도당 1문서, questions 맵에서 문제별 추출)
       const questionStats = {};
       qsSnapshot.forEach(d => {
@@ -5008,16 +5028,15 @@ async function loadQuestionStatistics(year, subject, setType, container, certTyp
         const questions = docData.questions || {};
         Object.entries(questions).forEach(([num, q]) => {
           const key = `${docData.year}_${docData.subject}_${num}`;
+          const merged = mergeModeStat(q);
           questionStats[key] = {
             year: docData.year,
             subject: docData.subject,
             number: Number(num),
-            total: q.total || 0,
-            correct: q.correct || 0,
-            answers: q.answers || { '0': 0, '1': 0, '2': 0, '3': 0 },
-            correctAnswerIndex: q.correctAnswerIndex ?? null,
-            totalTimeSpent: q.totalTimeSpent || 0,
-            viewedExplanationCount: q.viewedExplanationCount || 0
+            total: merged.total,
+            correct: merged.correct,
+            answers: merged.answers,
+            correctAnswerIndex: q.correctAnswerIndex ?? null
           };
         });
       });
@@ -7743,6 +7762,9 @@ async function showQuestionPreview({ year, subject, number, userAnswer, correctA
     if (!q) throw new Error('문제 없음');
 
     let html = '';
+    if (q.commonImage) {
+      html += `<img class="qp-image" src="${q.commonImage}" alt="공통 이미지" />`;
+    }
     if (q.questionImage) {
       html += `<img class="qp-image" src="${q.questionImage}" alt="${number}번 문제" />`;
     }

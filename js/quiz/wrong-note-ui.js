@@ -409,6 +409,9 @@ function openDetailModal(item) {
   modalTitle.textContent = `${item.section || '기타'} - ${item.examName || '문제'} ${modalDisplayNum}번`;
 
   let questionHtml = '';
+  if (data.commonImage) {
+    questionHtml += `<img src="${data.commonImage}" alt="공통 이미지" style="max-width:100%; border-radius:8px; margin-bottom:8px;">`;
+  }
   if (data.questionImage) {
     questionHtml += `<img src="${data.questionImage}" alt="문제 이미지" style="max-width:100%; border-radius:8px; margin-bottom:8px;">`;
   }

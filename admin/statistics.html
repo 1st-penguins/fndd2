@@ -716,6 +716,11 @@
         <option value="number">번호순</option>
         <option value="difficulty">난이도순</option>
       </select>
+      <select id="modeFilter">
+        <option value="all" selected>전체</option>
+        <option value="quiz">일반 퀴즈만</option>
+        <option value="mock">모의고사만</option>
+      </select>
 
       <div class="divider"></div>
 
@@ -876,6 +881,7 @@
         const yearFilter = document.getElementById('yearFilter').value;
         const subjectFilter = document.getElementById('subjectFilter').value;
         const sortFilter = document.getElementById('sortFilter').value;
+        const modeFilter = document.getElementById('modeFilter').value;
 
         // questionStats에서 조회
         const constraints = [where('certificateType', '==', certFilter)];
@@ -884,6 +890,30 @@
 
         const qsQuery = query(collection(db, 'questionStats'), ...constraints);
         const qsSnapshot = await getDocs(qsQuery);
+
+        // 새 구조(quiz/mock 분리) → 선택된 모드에 맞게 합산하는 헬퍼
+        function extractModeData(q, mode) {
+          // 새 구조: q.quiz, q.mock 이 있는 경우
+          if (q.quiz || q.mock) {
+            const quiz = q.quiz || { total: 0, correct: 0, answers: {'0':0,'1':0,'2':0,'3':0} };
+            const mock = q.mock || { total: 0, correct: 0, answers: {'0':0,'1':0,'2':0,'3':0} };
+            if (mode === 'quiz') return quiz;
+            if (mode === 'mock') return mock;
+            // mode === 'all': 합산
+            return {
+              total: (quiz.total || 0) + (mock.total || 0),
+              correct: (quiz.correct || 0) + (mock.correct || 0),
+              answers: {
+                '0': (quiz.answers?.['0'] || 0) + (mock.answers?.['0'] || 0),
+                '1': (quiz.answers?.['1'] || 0) + (mock.answers?.['1'] || 0),
+                '2': (quiz.answers?.['2'] || 0) + (mock.answers?.['2'] || 0),
+                '3': (quiz.answers?.['3'] || 0) + (mock.answers?.['3'] || 0)
+              }
+            };
+          }
+          // 레거시 구조: q.total, q.correct, q.answers 직접
+          return { total: q.total || 0, correct: q.correct || 0, answers: q.answers || {'0':0,'1':0,'2':0,'3':0} };
+        }
 
         // 문제별 데이터 추출
         const allQuestions = [];
@@ -898,10 +928,11 @@
           } catch(e) {}
 
           Object.entries(questions).forEach(([num, q]) => {
-            const total = q.total || 0;
+            const data = extractModeData(q, modeFilter);
+            const total = data.total;
             if (total === 0) return;
-            const correct = q.correct || 0;
-            const answers = q.answers || {'0':0,'1':0,'2':0,'3':0};
+            const correct = data.correct;
+            const answers = data.answers;
             const correctIdx = q.correctAnswerIndex ?? null;
             const accuracy = Math.round(correct / total * 100);
             const tw = getTopWrong(answers, correctIdx, total);
@@ -913,9 +944,7 @@
               total, correct, answers, accuracy,
               correctAnswerIndex: correctIdx,
               topWrongIdx: tw.idx,
-              topWrongPct: tw.pct,
-              totalTimeSpent: q.totalTimeSpent || 0,
-              viewedExplanationCount: q.viewedExplanationCount || 0
+              topWrongPct: tw.pct
             });
           });
         });
@@ -1154,6 +1183,9 @@
 
         // 문제 영역
         let questionHtml = '';
+        if (q.commonImage) {
+          questionHtml += `<img src="../${q.commonImage}" alt="공통 이미지" style="max-width:100%; border-radius:12px; margin-bottom:12px;">`;
+        }
         if (q.questionImage) {
           questionHtml += `<img src="../${q.questionImage}" alt="문제 이미지" style="max-width:100%; border-radius:12px; margin-bottom:12px;">`;
         }

@@ -45,14 +45,20 @@ function openModal(question, certLabel, year, subject, num) {
 
   title.textContent = `[${certLabel}] ${year}년 ${subject} ${num}번`;
 
+  let questionInnerHtml = '';
+  if (question.commonImage) {
+    const commonSrc = question.commonImage.startsWith('/')
+      ? question.commonImage
+      : `../${question.commonImage}`;
+    questionInnerHtml += `<img src="${commonSrc}" alt="공통 이미지" style="max-width:100%; border-radius:8px; margin-bottom:8px;">`;
+  }
   if (question.questionImage) {
     const imgSrc = question.questionImage.startsWith('/')
       ? question.questionImage
       : `../${question.questionImage}`;
-    questionDiv.innerHTML = `<img src="${imgSrc}" alt="문제 이미지" style="max-width:100%; border-radius:8px;">`;
-  } else {
-    questionDiv.innerHTML = '<p>(문제 이미지 없음)</p>';
+    questionInnerHtml += `<img src="${imgSrc}" alt="문제 이미지" style="max-width:100%; border-radius:8px;">`;
   }
+  questionDiv.innerHTML = questionInnerHtml || '<p>(문제 이미지 없음)</p>';
 
   optionsDiv.innerHTML = '';
   explanationDiv.style.display = 'none';

@@ -297,6 +297,11 @@ export async function recordAttempt(questionData, userAnswer, isCorrect) {
         updateData.firstAttemptAnswer = userAnswer;
         updateData.firstAttemptIsCorrect = isCorrect;
         updateData.isFirstAttempt = true;
+      } else if (existingData.firstAttemptAnswer !== undefined && existingData.firstAttemptIsCorrect === false && isCorrect === true && existingData.firstAttemptAnswer === userAnswer) {
+        // Safety net: if firstAttemptIsCorrect was incorrectly saved as false
+        // (e.g., from selectOption's dummy save) but the same answer is actually correct,
+        // update it to the correct value
+        updateData.firstAttemptIsCorrect = true;
       }
 
       await updateDoc(existingAttemptRef, updateData);

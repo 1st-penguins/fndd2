@@ -39,8 +39,24 @@ function extractCorrectAnswerIndex(attempt) {
   return null;
 }
 
+async function deleteExistingStats() {
+  console.log('🗑️ 기존 questionStats 삭제 중...');
+  const snapshot = await db.collection('questionStats').get();
+  if (snapshot.empty) {
+    console.log('  (기존 데이터 없음)');
+    return;
+  }
+  for (let i = 0; i < snapshot.docs.length; i += 500) {
+    const batch = db.batch();
+    snapshot.docs.slice(i, i + 500).forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+  }
+  console.log(`  ✅ ${snapshot.size}개 문서 삭제 완료`);
+}
+
 async function migrate() {
-  console.log('📊 questionStats 마이그레이션 시작 (과목+연도 단위)...');
+  await deleteExistingStats();
+  console.log('\n📊 questionStats 마이그레이션 시작 (quiz/mock 분리, 과목+연도 단위)...');
 
   // 1. 전체 attempts 읽기
   const snapshot = await db.collection('attempts').get();
@@ -68,6 +84,29 @@ async function migrate() {
   const attempts = filteredAttempts.filter(a => !ADMIN_EMAILS.includes(a.userEmail));
   console.log(`✅ 필터링 후: ${attempts.length}개 (완주 세션 + 관리자 제외)`);
 
+  // 2.5. 세션+과목별 점수 계산 → 25% 미만 (찍기) 필터
+  const sessionSubjectScores = {}; // sessionId_subject → { correct, total }
+  attempts.forEach(a => {
+    if (!a.sessionId) return;
+    let subject = String(a.questionData?.subject || a.subject || '');
+    try { let d = decodeURIComponent(subject); while (d !== subject) { subject = d; d = decodeURIComponent(subject); } } catch(e) {}
+    const key = `${a.sessionId}_${subject}`;
+    if (!sessionSubjectScores[key]) sessionSubjectScores[key] = { correct: 0, total: 0 };
+    sessionSubjectScores[key].total++;
+    const isCorrect = a.firstAttemptIsCorrect !== undefined ? a.firstAttemptIsCorrect : a.isCorrect;
+    if (isCorrect) sessionSubjectScores[key].correct++;
+  });
+
+  const lowScoreKeys = new Set();
+  let lowScoreCount = 0;
+  Object.entries(sessionSubjectScores).forEach(([key, s]) => {
+    if (s.total > 0 && (s.correct / s.total) < 0.25) {
+      lowScoreKeys.add(key);
+      lowScoreCount += s.total;
+    }
+  });
+  console.log(`🚫 25% 미만(찍기) 필터: ${lowScoreKeys.size}개 세션-과목 제외 (${lowScoreCount}건)`);
+
   // 3. 과목+연도 단위로 집계
   // docs[docKey] = { certificateType, year, subject, questions: { "1": {...}, "2": {...} } }
   const docs = {};
@@ -75,6 +114,13 @@ async function migrate() {
   attempts.forEach(attempt => {
     const qData = attempt.questionData;
     if (!qData) return;
+
+    // 25% 미만 필터
+    if (attempt.sessionId) {
+      let subject = String(qData.subject || attempt.subject || '');
+      try { let d = decodeURIComponent(subject); while (d !== subject) { subject = d; d = decodeURIComponent(subject); } } catch(e) {}
+      if (lowScoreKeys.has(`${attempt.sessionId}_${subject}`)) return;
+    }
 
     const certType = attempt.certificateType || 'health-manager';
     const year = String(qData.year || attempt.year);
@@ -97,17 +143,17 @@ async function migrate() {
 
     if (!docs[docKey].questions[number]) {
       docs[docKey].questions[number] = {
-        total: 0,
-        correct: 0,
-        answers: { '0': 0, '1': 0, '2': 0, '3': 0 },
-        correctVotes: { '0': 0, '1': 0, '2': 0, '3': 0 },
         correctAnswerIndex: null,
-        totalTimeSpent: 0,
-        viewedExplanationCount: 0
+        quiz: { total: 0, correct: 0, answers: { '0': 0, '1': 0, '2': 0, '3': 0 } },
+        mock: { total: 0, correct: 0, answers: { '0': 0, '1': 0, '2': 0, '3': 0 } },
+        _correctVotes: { '0': 0, '1': 0, '2': 0, '3': 0 }
       };
     }
 
     const q = docs[docKey].questions[number];
+    const isMock = attempt.questionData?.isFromMockExam === true
+      || attempt.questionData?.type === 'mockexam';
+    const mode = isMock ? 'mock' : 'quiz';
 
     const isCorrect = attempt.firstAttemptIsCorrect !== undefined
       ? attempt.firstAttemptIsCorrect : attempt.isCorrect;
@@ -116,47 +162,37 @@ async function migrate() {
     const answerIndex = Number(userAnswer);
     const correctAnswerIndex = extractCorrectAnswerIndex(attempt);
 
-    q.total++;
-    if (isCorrect) q.correct++;
+    q[mode].total++;
+    if (isCorrect) q[mode].correct++;
 
     if (Number.isInteger(answerIndex) && answerIndex >= 0 && answerIndex <= 3) {
-      q.answers[String(answerIndex)]++;
-      if (isCorrect) q.correctVotes[String(answerIndex)]++;
+      q[mode].answers[String(answerIndex)]++;
+      if (isCorrect) q._correctVotes[String(answerIndex)]++;
     }
 
     if (Number.isInteger(correctAnswerIndex) && correctAnswerIndex >= 0 && correctAnswerIndex <= 3) {
       q.correctAnswerIndex = correctAnswerIndex;
     }
-
-    if (typeof attempt.timeSpent === 'number' && attempt.timeSpent > 0) {
-      q.totalTimeSpent += attempt.timeSpent;
-    }
-    if (attempt.viewedExplanation === true) {
-      q.viewedExplanationCount++;
-    }
   });
 
-  // 레거시 정답 추론
+  // 레거시 정답 추론 (correctAnswerIndex가 없는 경우)
   Object.values(docs).forEach(docData => {
     Object.values(docData.questions).forEach(q => {
-      if (Number.isInteger(q.correctAnswerIndex)) return;
+      if (Number.isInteger(q.correctAnswerIndex)) {
+        delete q._correctVotes;
+        return;
+      }
       let inferredIndex = null;
       let maxVotes = 0;
       [0, 1, 2, 3].forEach(idx => {
-        const votes = q.correctVotes[String(idx)] || 0;
+        const votes = q._correctVotes[String(idx)] || 0;
         if (votes > maxVotes) {
           maxVotes = votes;
           inferredIndex = idx;
         }
       });
       q.correctAnswerIndex = maxVotes > 0 ? inferredIndex : null;
-    });
-  });
-
-  // correctVotes 제거 (임시 데이터)
-  Object.values(docs).forEach(docData => {
-    Object.keys(docData.questions).forEach(num => {
-      delete docData.questions[num].correctVotes;
+      delete q._correctVotes;
     });
   });
 

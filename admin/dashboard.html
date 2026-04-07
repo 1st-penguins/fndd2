@@ -187,7 +187,7 @@
         <h3>전체 구매 내역 <button class="btn btn-csv" onclick="downloadCSV('purchases')">CSV 다운로드</button></h3>
         <div class="fr">
           <select id="fType"><option value="all">전체 유형</option><option value="video">동영상</option><option value="pdf">PDF</option></select>
-          <select id="fStatus"><option value="all">전체 상태</option><option value="completed">결제완료</option><option value="refunded">환불완료</option></select>
+          <select id="fStatus"><option value="all">전체 상태</option><option value="completed">결제완료</option><option value="refunded">환불완료</option><option value="cancelled">취소</option></select>
         </div>
         <div id="allList"></div>
       </div>
@@ -247,6 +247,9 @@
     const user = await ensureAuthReady();
     if (!user || !isAdmin(user)) { alert('관리자 권한이 필요합니다.'); window.location.href = '../index.html'; }
 
+    // 취소/환불 상태 통합 판별
+    function isCancelledOrRefunded(p) { return p.status === 'refunded' || p.status === 'cancelled'; }
+
     const PN = {
       'video_anatomy':'기능해부학 정규강의','video_injury':'운동상해 정규강의',
       'video_physio':'운동생리학 정규강의','video_load':'운동부하검사 정규강의',
@@ -255,7 +258,8 @@
       'pdf_anatomy':'기능해부학 요약본','pdf_injury':'운동상해 요약본',
       'pdf_physio':'운동생리학 요약본','pdf_load':'운동부하검사 요약본',
       'pdf_patho':'병태생리학 요약본','pdf_psycho':'스포츠심리학 요약본',
-      'pdf_prescript':'운동처방론 요약본','pdf_health':'건강체력평가 요약본'
+      'pdf_prescript':'운동처방론 요약본','pdf_health':'건강체력평가 요약본',
+      'video_calc':'계산문제 특별강의'
     };
 
     let ALL = []; // 전체 구매 데이터
@@ -293,7 +297,7 @@
       ALL.forEach(p => {
         const amt = p.finalAmount ?? p.purchaseAmount ?? 0;
         const d = p.purchasedAt?.toDate?.();
-        if (p.status === 'refunded') { refundTotal += amt; return; }
+        if (isCancelledOrRefunded(p)) { refundTotal += amt; return; }
         total += amt;
         salesCount++;
         if (d) {
@@ -318,7 +322,7 @@
       // 상품 매출 순위
       renderProductRanking(productRevenue);
       // 최근 구매
-      renderTable('recentList', ALL.filter(p => p.status !== 'refunded').slice(0, 10));
+      renderTable('recentList', ALL.filter(p => !isCancelledOrRefunded(p)).slice(0, 10));
       // 전체 구매
       renderTable('allList', ALL, true);
       // 접속자 캘린더
@@ -360,7 +364,7 @@
       const el = document.getElementById('productRanking');
       if (sorted.length === 0) { el.innerHTML = '<div class="empty"><span class="icon">📊</span><p>매출 데이터가 없습니다.</p></div>'; return; }
       el.innerHTML = sorted.map(([pid, amt]) =>
-        `<div class="psi"><div><div class="nm">${PN[pid] || pid}</div><div class="rv">${amt.toLocaleString()}원</div></div><span class="ct">${ALL.filter(p => p.productId === pid && p.status !== 'refunded').length}건</span></div>`
+        `<div class="psi"><div><div class="nm">${PN[pid] || pid}</div><div class="rv">${amt.toLocaleString()}원</div></div><span class="ct">${ALL.filter(p => p.productId === pid && !isCancelledOrRefunded(p)).length}건</span></div>`
       ).join('');
     }
 
@@ -373,7 +377,7 @@
       </tr></thead><tbody>
         ${data.map((p, i) => {
           const d = p.purchasedAt?.toDate?.();
-          const st = p.status === 'refunded' ? '<span class="badge b-refund">환불</span>' : '<span class="badge b-ok">완료</span>';
+          const st = isCancelledOrRefunded(p) ? `<span class="badge b-refund">${p.status === 'cancelled' ? '취소' : '환불'}</span>` : '<span class="badge b-ok">완료</span>';
           const amt = (p.finalAmount ?? p.purchaseAmount ?? 0);
           return `<tr class="${clickable ? 'clickable' : ''}" ${clickable ? `data-idx="${ALL.indexOf(p)}"` : ''}>
             <td>${d ? d.toLocaleString('ko-KR') : '-'}</td>
@@ -421,7 +425,7 @@
         ['쿠폰', p.couponId || '미사용'],
         ['최종 결제', `<strong>${(p.finalAmount ?? p.purchaseAmount ?? 0).toLocaleString()}원</strong>`],
         ['결제일시', d ? d.toLocaleString('ko-KR') : '-'],
-        ['상태', p.status === 'refunded' ? '<span class="badge b-refund">환불완료</span>' : '<span class="badge b-ok">결제완료</span>'],
+        ['상태', isCancelledOrRefunded(p) ? `<span class="badge b-refund">${p.status === 'cancelled' ? '취소' : '환불'}완료</span>` : '<span class="badge b-ok">결제완료</span>'],
       ];
       if (p.refundedAt) {
         rows.push(['환불일시', p.refundedAt.toDate().toLocaleString('ko-KR')]);
@@ -430,7 +434,7 @@
 
       let html = rows.map(([l, v]) => `<div class="detail-row"><span class="dl">${l}</span><span class="dv">${v}</span></div>`).join('');
 
-      if (p.status !== 'refunded') {
+      if (!isCancelledOrRefunded(p)) {
         html += `<div style="margin-top:20px;display:flex;gap:10px;">
           <a href="https://sellers.tosspayments.com" target="_blank" class="btn btn-s" style="text-decoration:none;text-align:center;flex:1;">Toss 판매자센터</a>
           <button class="btn btn-d" style="flex:1;" onclick="processRefund('${p._id}')">환불 완료 기록</button>
@@ -499,14 +503,14 @@
         const purchasedAt = p.purchasedAt?.toDate ? p.purchasedAt.toDate() : p.purchasedAt ? new Date(p.purchasedAt) : null;
         const daysSincePurchase = purchasedAt ? Math.floor((Date.now() - purchasedAt.getTime()) / (1000 * 60 * 60 * 24)) : null;
         const within7Days = daysSincePurchase !== null && daysSincePurchase <= 7;
-        if (p.status === 'refunded') { refSt = '환불완료'; refCls = 'color:#868e96;'; }
+        if (isCancelledOrRefunded(p)) { refSt = p.status === 'cancelled' ? '취소완료' : '환불완료'; refCls = 'color:#868e96;'; }
         else if (p.productType === 'pdf') { refSt = '다운로드 상품'; refCls = 'color:#868e96;'; }
         else if (watched > 0) { refSt = '재생됨 (환불 불가)'; refCls = 'color:#c92a2a;font-weight:700;'; }
         else if (!within7Days) { refSt = `미재생 (7일 초과, ${daysSincePurchase}일 경과)`; refCls = 'color:#c92a2a;font-weight:700;'; }
         else { refSt = `미재생 (${daysSincePurchase}일째, 전액 환불 가능)`; refCls = 'color:#2b8a3e;font-weight:700;'; }
         const progText = p.productType === 'pdf' ? '-' : epCount > 0 ? `${watched}/${epCount}강 (${maxProg}%)` : '미시청';
-        const stBadge = p.status === 'refunded' ? '<span class="badge b-refund">환불</span>' : '<span class="badge b-ok">완료</span>';
-        const refBtn = p.status !== 'refunded' ? `<button class="btn btn-d" style="font-size:11px;padding:4px 10px;" onclick="processRefund('${p._id}')">환불 기록</button>` : '-';
+        const stBadge = isCancelledOrRefunded(p) ? `<span class="badge b-refund">${p.status === 'cancelled' ? '취소' : '환불'}</span>` : '<span class="badge b-ok">완료</span>';
+        const refBtn = !isCancelledOrRefunded(p) ? `<button class="btn btn-d" style="font-size:11px;padding:4px 10px;" onclick="processRefund('${p._id}')">환불 기록</button>` : '-';
 
         html += `<tr><td style="font-size:11px;font-family:monospace;">${p.orderId || '-'}</td><td>${PN[p.productId] || p.productId}</td><td>${amt}</td><td>${stBadge}</td><td>${progText}</td><td style="${refCls}">${refSt}</td><td>${refBtn}</td></tr>`;
       }
@@ -516,7 +520,7 @@
 
     // 환불 이력
     function renderRefundHistory() {
-      const refunded = ALL.filter(p => p.status === 'refunded');
+      const refunded = ALL.filter(p => isCancelledOrRefunded(p));
       const el = document.getElementById('refundHistory');
       if (!refunded.length) { el.innerHTML = '<div class="empty"><span class="icon">📋</span><p>환불 이력이 없습니다.</p></div>'; return; }
       const totalRefund = refunded.reduce((s, p) => s + (p.finalAmount ?? p.purchaseAmount ?? 0), 0);
@@ -776,8 +780,9 @@
       } else if (type === 'refunds') {
         filename = `환불내역_${new Date().toISOString().slice(0,10)}.csv`;
         rows.push(['주문번호','환불일','구매자','이메일','상품','금액','사유']);
-        ALL.filter(p => p.status === 'refunded').forEach(p => {
-          rows.push([p.orderId||'',p.refundedAt?.toDate?.()?.toLocaleDateString('ko-KR')||'',p.userName||'',p.userEmail||'',PN[p.productId]||p.productId,p.finalAmount||p.purchaseAmount||0,p.refundReason||'']);
+        ALL.filter(p => isCancelledOrRefunded(p)).forEach(p => {
+          const cancelDate = (p.cancelledAt || p.refundedAt)?.toDate?.()?.toLocaleDateString('ko-KR') || '';
+          rows.push([p.orderId||'',cancelDate,p.userName||'',p.userEmail||'',PN[p.productId]||p.productId,p.finalAmount||p.purchaseAmount||0,p.cancelReason||p.refundReason||'']);
         });
       } else if (type === 'coupons') {
         filename = `쿠폰사용내역_${new Date().toISOString().slice(0,10)}.csv`;

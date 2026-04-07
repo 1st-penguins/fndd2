@@ -1396,10 +1396,18 @@ function selectOption(optionIndex) {
   }
 
   // ✅ Firebase에 답변 선택 기록 저장 (이어서 풀기 기능을 위해)
-  // 정답 확인 전이므로 isCorrect는 false로 저장 (나중에 checkAnswer에서 업데이트)
   if (typeof window.recordAttempt === 'function') {
     const questionsPerSubject = 20;
     const questionNumberInSubject = (globalIndex % questionsPerSubject) + 1;
+    // Calculate actual isCorrect
+    const correctAnswer = currentQuestion.correctAnswer;
+    let isCorrect = false;
+    if (Array.isArray(correctAnswer)) {
+      isCorrect = correctAnswer.length === 4 ? true : correctAnswer.includes(optionIndex);
+    } else {
+      isCorrect = (optionIndex === correctAnswer);
+    }
+
     const questionData = {
       year: year,
       hour: hour,
@@ -1409,11 +1417,13 @@ function selectOption(optionIndex) {
       subject: currentQuestion.subject || '모의고사',
       certificateType: getActiveCertificateType(),
       questionText: currentQuestion.question || '',
-      options: currentQuestion.options || []
+      options: currentQuestion.options || [],
+      correctAnswer: currentQuestion.correctAnswer,
+      isFromMockExam: true
     };
 
     // 비동기로 저장 (블로킹하지 않음)
-    window.recordAttempt(questionData, optionIndex, false)
+    window.recordAttempt(questionData, optionIndex, isCorrect)
       .then(result => {
         if (result && result.success) {
           log(`답변 선택 저장 완료: ${currentQuestion.subject} ${questionNumberInSubject}번`, 'debug');
@@ -1514,7 +1524,9 @@ function checkAnswer() {
       subject: currentQuestion.subject || '모의고사',
       certificateType: getActiveCertificateType(),
       questionText: currentQuestion.question || '',
-      options: currentQuestion.options || []
+      options: currentQuestion.options || [],
+      correctAnswer: currentQuestion.correctAnswer,
+      isFromMockExam: true
     };
 
     // 정답 확인 후 정답 여부 업데이트
