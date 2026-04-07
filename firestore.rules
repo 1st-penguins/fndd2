@@ -279,6 +279,14 @@ service cloud.firestore {
     }
 
     // ============================================
+    // 🗑️ 탈퇴 회원 기록 (Deleted Users)
+    // ============================================
+    match /deletedUsers/{docId} {
+      allow read: if isAdmin();
+      allow write: if false; // Cloud Function에서만 기록
+    }
+
+    // ============================================
     // 🚫 기본 차단 (Default Deny)
     // ============================================
     match /{document=**} {

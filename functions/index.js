@@ -598,6 +598,73 @@ exports.confirmPayment = functions.region("asia-northeast3").runWith({ minInstan
 });
 
 // ============================================
+// 🗑️ 회원 탈퇴 — Auth 삭제 + Firestore 정리
+// ============================================
+exports.deleteAccount = functions.region("asia-northeast3")
+  .runWith({ secrets: ["TELEGRAM_BOT_TOKEN"] })
+  .https.onCall(async (data, context) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError("unauthenticated", "로그인이 필요합니다.");
+    }
+
+    const uid = context.auth.uid;
+    const email = context.auth.token.email || "알 수 없음";
+    const displayName = context.auth.token.name || email;
+
+    // Firestore 관련 데이터 삭제 (userId 필드 기반 컬렉션)
+    const collectionsToClean = [
+      "wrong_answers", "bookmarks", "sessions", "quizSessions",
+      "attempts", "mockExamResults", "lectureProgress",
+      "pdfDownloads", "couponUsage", "inquiries"
+    ];
+
+    // 전부 병렬 실행
+    const deletedCounts = {};
+    await Promise.all([
+      ...collectionsToClean.map(async (col) => {
+        try {
+          const snap = await db.collection(col).where("userId", "==", uid).get();
+          if (!snap.empty) {
+            const batch = db.batch();
+            snap.docs.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            deletedCounts[col] = snap.size;
+          }
+        } catch (e) { console.warn(`[deleteAccount] ${col} 정리 실패:`, e.message); }
+      }),
+      ...["users", "userProgress", "userStatistics"].map(async (col) => {
+        try {
+          const ref = db.collection(col).doc(uid);
+          const snap = await ref.get();
+          if (snap.exists) { await ref.delete(); deletedCounts[col] = 1; }
+        } catch (e) { console.warn(`[deleteAccount] ${col}/${uid} 삭제 실패:`, e.message); }
+      })
+    ]);
+
+    // deletedUsers 기록 (탈퇴 집계용)
+    await db.collection("deletedUsers").add({
+      uid,
+      email,
+      displayName,
+      deletedAt: admin.firestore.FieldValue.serverTimestamp(),
+      deletedCounts,
+    });
+
+    // Firebase Auth 삭제
+    await admin.auth().deleteUser(uid);
+
+    // 텔레그램 알림
+    try {
+      const msg = `🗑️ *회원 탈퇴*\n\n👤 ${displayName}\n📧 ${email}\n📊 삭제: ${JSON.stringify(deletedCounts)}`;
+      await sendTelegram(msg);
+    } catch (e) {
+      console.warn("[deleteAccount] 텔레그램 알림 실패:", e.message);
+    }
+
+    return { success: true };
+  });
+
+// ============================================
 // 💳 Toss Payments 웹훅 — 결제 취소 자동 처리
 // ============================================
 exports.tossWebhook = functions.region("asia-northeast3").runWith({ minInstances: 0, secrets: ["TOSS_SECRET_KEY", "TELEGRAM_BOT_TOKEN"] }).https.onRequest(async (req, res) => {

@@ -141,6 +141,7 @@
       <div class="stat-box"><div class="label">총 판매</div><div class="value" id="sSales">-</div></div>
       <div class="stat-box"><div class="label">오늘 접속</div><div class="value" id="sVisitors">-</div></div>
       <div class="stat-box"><div class="label">누적 사용자</div><div class="value" id="sUsers">-</div></div>
+      <div class="stat-box"><div class="label">탈퇴 회원</div><div class="value" id="sDeleted">-</div><div class="sub" id="sDeletedSub"></div></div>
     </div>
 
     <!-- 탭 -->
@@ -326,6 +327,8 @@
       initCalendar();
       // 사용자
       await loadUsers();
+      // 탈퇴 회원
+      await loadDeletedUsers();
       // 쿠폰
       await loadCouponReport();
       // 환불 이력
@@ -630,6 +633,25 @@
           alert(`완료! 새로운 데이터 ${newCount}건 반영`); location.reload();
         } catch (err) { alert('오류: ' + err.message); console.error(err); }
       });
+    }
+
+    // ─── 탈퇴 회원 ───
+    async function loadDeletedUsers() {
+      try {
+        const snap = await getDocs(collection(db, 'deletedUsers'));
+        const total = snap.size;
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        let thisMonth = 0;
+        snap.forEach(d => {
+          const dt = d.data().deletedAt?.toDate?.();
+          if (dt && dt >= monthStart) thisMonth++;
+        });
+        document.getElementById('sDeleted').textContent = total + '명';
+        document.getElementById('sDeletedSub').textContent = thisMonth > 0 ? `이번 달 ${thisMonth}명` : '';
+      } catch (e) {
+        document.getElementById('sDeleted').textContent = '0명';
+      }
     }
 
     // ─── 접속자 + 캘린더 ───

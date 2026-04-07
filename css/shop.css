@@ -439,7 +439,7 @@
 .detail-top {
   display: grid;
   grid-template-columns: 1fr;
-  align-items: stretch;
+  align-items: start;
   gap: 28px;
   margin-bottom: 36px;
 }

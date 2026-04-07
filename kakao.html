@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카카오톡 오픈채팅 | 퍼스트펭귄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="canonical" href="https://the1stpeng.com/kakao.html">
+  <meta name="description" content="퍼스트펭귄 카카오톡 오픈채팅방에 참여하세요. 건강운동관리사, 스포츠지도사 수험생들과 함께 공부해요.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="카카오톡 오픈채팅 | 퍼스트펭귄">
+  <meta property="og:description" content="퍼스트펭귄 카카오톡 오픈채팅방에 참여하세요.">
+  <meta property="og:url" content="https://the1stpeng.com/kakao.html">
+  <meta property="og:image" content="https://the1stpeng.com/images/og-image.jpg">
+
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/apple-header.css">
+  <link rel="stylesheet" href="css/apple-footer.css">
+  <link rel="stylesheet" href="css/login.css">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: var(--font-sans);
+      background: #ffffff;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Hero ── */
+    .kakao-hero {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(48px + 80px) 24px 64px;
+      background: linear-gradient(135deg, #FAE100 0%, #FEE500 100%);
+      overflow: hidden;
+    }
+
+    .kakao-hero__icon {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .kakao-hero__title {
+      font-size: var(--text-4xl);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: #3C1E1E;
+      margin-bottom: 16px;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+
+    .kakao-hero__desc {
+      font-size: var(--text-lg);
+      font-weight: 500;
+      color: rgba(60, 30, 30, 0.7);
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    /* ── Select Section ── */
+    .kakao-select {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      background: #fff;
+    }
+
+    .kakao-select__sub {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text-tertiary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .kakao-select__headline {
+      font-size: var(--text-3xl);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--color-text-primary);
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .kakao-select__cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .kakao-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: var(--card-flat-bg);
+      border-radius: var(--card-flat-radius);
+      border: var(--card-border);
+      box-shadow: var(--card-shadow);
+      transition: var(--card-transition);
+      cursor: pointer;
+    }
+
+    .kakao-card:hover {
+      background: var(--card-bg-hover);
+      box-shadow: var(--card-shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .kakao-card:hover .kakao-card__name { color: #2B4A78; }
+    .kakao-card:hover .kakao-card__arrow { color: #2B4A78; transform: translateX(4px); }
+
+    .kakao-card__info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kakao-card__name {
+      font-size: var(--text-base);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+      transition: color 0.2s;
+    }
+
+    .kakao-card__detail {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--color-text-tertiary);
+    }
+
+    .kakao-card__arrow {
+      font-size: var(--text-base);
+      color: var(--color-text-quaternary);
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 734px) {
+      .kakao-hero__title { font-size: var(--text-2xl); }
+      .kakao-hero__desc { font-size: var(--text-base); }
+      .kakao-select__headline { font-size: var(--text-2xl); }
+      .kakao-card { padding: 18px 20px; }
+    }
+  </style>
+
+  <script type="module" src="js/core/firebase-core.js"></script>
+  <script type="module" src="js/auth/auth-core.js"></script>
+  <script type="module" src="js/auth/auth-ui.js"></script>
+</head>
+<body>
+  <header class="header" id="header">
+    <a href="index.html" class="header__brand">
+      <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
+      <span class="header__name">퍼스트펭귄</span>
+    </a>
+    <nav class="header__nav">
+      <a href="notices.html" class="header__nav-link">공지사항</a>
+      <a href="cft.html" class="header__nav-link header__nav-link--cert">건강운동관리사</a>
+      <a href="si1.html" class="header__nav-link header__nav-link--cert">1급 스포츠지도사</a>
+      <a href="si2.html" class="header__nav-link header__nav-link--cert">2급 스포츠지도사</a>
+    </nav>
+    <div class="header__right">
+      <a href="#" class="header__login" id="header-login-btn">로그인</a>
+      <button class="header__hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <div class="header__mobile-menu" id="mobile-menu">
+    <a href="notices.html" class="header__mobile-link">공지사항</a>
+    <a href="cft.html" class="header__mobile-link">건강운동관리사</a>
+    <a href="si1.html" class="header__mobile-link">1급 스포츠지도사</a>
+    <a href="si2.html" class="header__mobile-link">2급 스포츠지도사</a>
+    <a href="schedule.html" class="header__mobile-link">시험일정</a>
+    <a href="kakao.html" class="header__mobile-link">오픈채팅</a>
+    <div class="header__menu-divider"></div>
+    <div class="header__menu-auth" id="menu-auth"></div>
+  </div>
+
+  <!-- Hero -->
+  <section class="kakao-hero">
+    <svg class="kakao-hero__icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 15C28.46 15 11 28.64 11 45.36c0 10.82 7.2 20.32 18.04 25.65l-3.68 13.46c-.32 1.18.98 2.14 2.08 1.54l15.96-9.56C45.56 76.96 47.74 77.2 50 77.2c21.54 0 39-13.64 39-31.84S71.54 15 50 15z" fill="#3C1E1E"/>
+    </svg>
+    <h1 class="kakao-hero__title">카카오톡 오픈채팅</h1>
+    <p class="kakao-hero__desc">함께 공부하는 스터디방에 참여하세요</p>
+  </section>
+
+  <!-- Room Select -->
+  <section class="kakao-select">
+    <p class="kakao-select__sub">오픈채팅방</p>
+    <h2 class="kakao-select__headline">어떤 시험을 준비하고 있나요?</h2>
+
+    <div class="kakao-select__cards">
+      <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="kakao-card">
+        <div class="kakao-card__info">
+          <span class="kakao-card__name">건강운동관리사 스터디방</span>
+          <span class="kakao-card__detail">건운사 수험생 정보 공유 · 질문 · 응원</span>
+        </div>
+        <span class="kakao-card__arrow">→</span>
+      </a>
+      <a href="https://open.kakao.com/o/ptzXWpki" target="_blank" rel="noopener" class="kakao-card">
+        <div class="kakao-card__info">
+          <span class="kakao-card__name">생활체육지도사 2급 스터디방</span>
+          <span class="kakao-card__detail">생체 2급 수험생 정보 공유 · 질문 · 응원</span>
+        </div>
+        <span class="kakao-card__arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <nav class="footer__links">
+        <a href="cft.html" class="footer__link">건강운동관리사</a>
+        <a href="si1.html" class="footer__link">1급 스포츠지도사</a>
+        <a href="si2.html" class="footer__link">2급 스포츠지도사</a>
+        <span class="footer__divider"></span>
+        <a href="/about.html" class="footer__link">소개</a>
+        <a href="/terms.html" class="footer__link">이용약관</a>
+        <a href="/privacy-policy.html" class="footer__link">개인정보처리방침</a>
+        <a href="/company-info.html" class="footer__link">사업자정보</a>
+      </nav>
+      <p class="footer__meta">
+        퍼스트펭귄 | 대표: 강민지 | 사업자등록번호: 243-14-02752 | 통신판매업 신고번호: 제2025-서울강동-1597호<br>
+        주소: 서울특별시 강동구 양재대로 1300, 201동 1408호 | 전화번호: 010-9139-7328 | E-mail: the1stpeng@gmail.com
+      </p>
+      <div class="footer__bottom">
+        <span class="footer__copyright">&copy; 2025 퍼스트펭귄. All rights reserved.</span>
+        <div class="footer__sns">
+          <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="footer__sns-link">Instagram</a>
+          <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="footer__sns-link">YouTube</a>
+          <a href="kakao.html" class="footer__sns-link">KakaoTalk</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="js/apple-header.js"></script>
+</body>
+</html>

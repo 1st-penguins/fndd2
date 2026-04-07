@@ -592,6 +592,132 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* -- 회원탈퇴 -- */
+    .danger-zone {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .delete-account-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: none;
+      border: 1px solid #e5e5ea;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #86868b;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+
+    .delete-account-btn:hover {
+      border-color: #ff3b30;
+      color: #ff3b30;
+    }
+
+    /* -- 탈퇴 모달 -- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      animation: fadeInUp 0.3s ease-out;
+    }
+
+    .modal-box__icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      color: #ff3b30;
+    }
+
+    .modal-box__title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+    }
+
+    .modal-box__desc {
+      font-size: 14px;
+      color: #86868b;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .modal-box__confirm-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e5e5ea;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: var(--font-sans);
+      text-align: center;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .modal-box__confirm-input:focus {
+      border-color: #ff3b30;
+    }
+
+    .modal-box__actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-box__cancel {
+      flex: 1;
+      padding: 12px;
+      background: #f5f5f7;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #1d1d1f;
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+
+    .modal-box__delete {
+      flex: 1;
+      padding: 12px;
+      background: #ff3b30;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: opacity 0.2s;
+    }
+
+    .modal-box__delete:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
     @media (max-width: 734px) {
       .page { padding: 80px 20px 60px; }
       .page__title { font-size: var(--text-3xl, 28px); }
@@ -637,6 +763,7 @@
     <a href="si1.html" class="header__mobile-link">1급 스포츠지도사</a>
     <a href="si2.html" class="header__mobile-link">2급 스포츠지도사</a>
     <a href="schedule.html" class="header__mobile-link">시험일정</a>
+    <a href="kakao.html" class="header__mobile-link">오픈채팅</a>
     <div class="header__menu-divider"></div>
 
     <div class="header__menu-auth" id="menu-auth"></div>
@@ -667,6 +794,27 @@
     </div>
   </main>
 
+  <!-- 탈퇴 확인 모달 -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+      <svg class="modal-box__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+      </svg>
+      <div class="modal-box__title">정말 탈퇴하시겠습니까?</div>
+      <div class="modal-box__desc">
+        탈퇴하시면 모든 학습 데이터, 오답노트, 북마크가<br>영구적으로 삭제되며 <strong>복구할 수 없습니다.</strong><br><br>
+        확인을 위해 아래에 <strong>"탈퇴"</strong>를 입력해주세요.
+      </div>
+      <input type="text" class="modal-box__confirm-input" id="deleteConfirmInput" placeholder="탈퇴" autocomplete="off">
+      <div class="modal-box__actions">
+        <button class="modal-box__cancel" id="deleteCancelBtn">취소</button>
+        <button class="modal-box__delete" id="deleteConfirmBtn" disabled>탈퇴하기</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="footer">
     <div class="footer__inner">
@@ -689,7 +837,7 @@
         <div class="footer__sns">
           <a href="https://instagram.com/1st_penguins" target="_blank" rel="noopener" class="footer__sns-link">Instagram</a>
           <a href="https://www.youtube.com/@the1stpeng" target="_blank" rel="noopener" class="footer__sns-link">YouTube</a>
-          <a href="https://open.kakao.com/o/gYRh5kch" target="_blank" rel="noopener" class="footer__sns-link">KakaoTalk</a>
+          <a href="kakao.html" class="footer__sns-link">KakaoTalk</a>
         </div>
       </div>
     </div>
@@ -971,6 +1119,11 @@
       }
       html += '</div>';
 
+      html += `
+        <div class="danger-zone">
+          <button class="delete-account-btn" id="deleteAccountBtn">회원탈퇴</button>
+        </div>`;
+
       html += '<a href="index.html" class="back-link">홈으로 돌아가기</a>';
 
       document.getElementById('mypage-loading').style.display = 'none';
@@ -978,6 +1131,48 @@
       content.innerHTML = html;
       content.style.display = 'block';
     }
+    // ── 회원 탈퇴 ──
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'deleteAccountBtn') {
+        document.getElementById('deleteModal').classList.add('active');
+        document.getElementById('deleteConfirmInput').value = '';
+        document.getElementById('deleteConfirmBtn').disabled = true;
+      }
+    });
+
+    document.getElementById('deleteCancelBtn').addEventListener('click', () => {
+      document.getElementById('deleteModal').classList.remove('active');
+    });
+
+    document.getElementById('deleteModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+    });
+
+    document.getElementById('deleteConfirmInput').addEventListener('input', (e) => {
+      document.getElementById('deleteConfirmBtn').disabled = e.target.value.trim() !== '탈퇴';
+    });
+
+    document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('deleteConfirmBtn');
+      btn.disabled = true;
+      btn.textContent = '처리 중...';
+
+      try {
+        const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js');
+        const functions = getFunctions(undefined, 'asia-northeast3');
+        const deleteAccount = httpsCallable(functions, 'deleteAccount');
+        await deleteAccount();
+
+        document.getElementById('deleteModal').classList.remove('active');
+        alert('회원 탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('탈퇴 오류:', error);
+        alert('탈퇴 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+        btn.disabled = false;
+        btn.textContent = '탈퇴하기';
+      }
+    });
   </script>
   <script src="js/apple-header.js"></script>
 </body>

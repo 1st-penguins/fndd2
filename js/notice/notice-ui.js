@@ -605,7 +605,7 @@ export function addContactBox() {
         </div>
         <div class="contact-method">
           <img src="../images/KakaoTalk_logo.svg" alt="카카오톡" class="social-logo">
-          <span>카카오톡: <a href="https://open.kakao.com/o/gYRh5kch" target="_blank">건강운동관리사 준비방</a></span>
+          <span>카카오톡: <a href="/kakao.html">오픈채팅 참여하기</a></span>
         </div>
       </div>
     `;
