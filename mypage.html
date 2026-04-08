@@ -854,7 +854,10 @@
       'pdf_physio': '운동생리학 요약본', 'pdf_load': '운동부하검사 요약본',
       'pdf_patho': '병태생리학 요약본', 'pdf_psycho': '스포츠심리학 요약본',
       'pdf_prescript': '운동처방론 요약본', 'pdf_health': '건강체력평가 요약본',
-      'video_calc': '계산문제 특별강의'
+      'video_calc': '계산문제 특별강의',
+      'pdf_si2_package': '2급 스포츠지도사 7일 완성 합격패키지',
+      'video_si2_psycho_free': '스포츠심리학 무료강의',
+      'video_si2_history_free': '한국체육사 무료강의'
     };
 
     if (!user) {
@@ -931,7 +934,7 @@
 
       // 강���와 자료 분리 (활성/취소 구분)
       const videoPurchases = purchases.filter(p => (p.productType === 'video' || p.productType === 'bundle') && p.status === 'completed');
-      const pdfPurchasesActive = purchases.filter(p => p.productType === 'pdf' && p.status === 'completed');
+      const pdfPurchasesActive = purchases.filter(p => (p.productType === 'pdf' || p.productType === 'package') && p.status === 'completed');
       const bundlePurchases = purchases.filter(p => p.productType === 'bundle' && p.status === 'completed');
       const cancelledPurchases = purchases.filter(p => p.status === 'cancelled');
 
@@ -947,6 +950,7 @@
           <p>수강 중인 강의가 없습니다.</p>
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">
             <a href="cft.html#tab-lecture" style="color:#5FB2C9;font-size:14px;">건강운동관리사 강의 보기 →</a>
+            <a href="si2.html#tab-lecture" style="color:#059669;font-size:14px;">2급 스포츠지도사 강의 보기 →</a>
           </div>
         </div>`;
       } else {
@@ -977,26 +981,7 @@
                 ${expiresHtml}
               </div>
               <span class="lecture-card__action">수강하기 →</span>
-            </a>
-            <a href="product-detail.html?id=${p.productId}#tab-reviews" class="lecture-card" style="border-top:1px solid rgba(255,255,255,0.08);border-radius:0 0 14px 14px;margin-top:-10px;padding:10px 16px;">
-              <div class="lecture-card__info" style="flex:1;">
-                <div class="lecture-card__meta" style="color:rgba(255,255,255,0.6);font-size:12px;">강의가 도움이 되셨나요?</div>
-              </div>
-              <span class="lecture-card__action" style="font-size:12px;">후기 작성 →</span>
             </a>`;
-
-          // bundle이면 PDF 다운로드 링크 추가
-          if (p.productType === 'bundle') {
-            html += `
-            <a href="pdf-download.html?id=${p.productId}" class="lecture-card" style="border-top:1px solid rgba(255,255,255,0.08);border-radius:0 0 14px 14px;margin-top:-10px;">
-              <div class="lecture-card__icon">${pdfIcon}</div>
-              <div class="lecture-card__info">
-                <div class="lecture-card__name">${name} — PDF 자료</div>
-                <div class="lecture-card__meta">패키지 포함 자료</div>
-              </div>
-              <span class="lecture-card__action">다운로드 →</span>
-            </a>`;
-          }
         }
         html += '</div>';
       }
@@ -1005,8 +990,11 @@
       // ── 내 자료 (PDF) ──
       html += '<div class="mypage-section"><h2 class="section__title">내 자료</h2>';
 
+      // bundle(영상+PDF) 상품의 PDF 자료도 내 자료에 표시
+      const bundlePdfPurchases = purchases.filter(p => p.productType === 'bundle' && p.status === 'completed');
+      const allPdfItems = [...pdfPurchasesActive, ...bundlePdfPurchases];
       const cancelledPdfs = cancelledPurchases.filter(cp => cp.productType !== 'video');
-      if (pdfPurchasesActive.length === 0 && cancelledPdfs.length === 0) {
+      if (allPdfItems.length === 0 && cancelledPdfs.length === 0) {
         html += `<div class="empty-state">
           <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -1015,7 +1003,7 @@
           <p>구매한 자료가 없습니다.</p>
         </div>`;
       } else {
-        for (const p of pdfPurchasesActive) {
+        for (const p of allPdfItems) {
           const name = PRODUCT_NAMES[p.productId] || p.productId;
           const date = p.purchasedAt ? new Date(p.purchasedAt.toDate()).toLocaleDateString('ko-KR') : '-';
           html += `
@@ -1062,7 +1050,7 @@
           const isCancelled = p.status === 'cancelled';
           const status = p.status === 'completed' ? '결제완료' : (isCancelled ? '구매취소' : p.status);
           const orderId = p.orderId || p.id || '-';
-          const typeLabel = p.productType === 'video' ? '강의' : (p.productType === 'bundle' ? '강의+자료' : '자료(PDF)');
+          const typeLabel = p.productType === 'video' ? '강의' : (p.productType === 'bundle' ? '강의+자료' : (p.productType === 'package' ? '패키지' : '자료(PDF)'));
           const payMethod = p.paymentMethod || (finalAmount === 0 ? '쿠폰 전액 할인' : '카드결제');
 
           // 쿠폰 할인 정보

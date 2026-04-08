@@ -12,200 +12,58 @@ const db = admin.firestore();
 // 상품 데이터
 // ──────────────────────────────────────
 const products = [
-  // === 정규강의 (video) ===
-  {
-    id: 'health-anatomy-lecture',
-    title: '건강운동관리사 기능해부학 정규강의',
-    description: '기능해부학 전 범위 정규강의',
-    type: 'video',
-    category: 'health',
-    price: 150000,
-    originalPrice: 150000,
-    totalEpisodes: 7,
-    totalDuration: '약 6시간 20분',
-    isActive: true,
-    sortOrder: 10
-  },
-  {
-    id: 'health-injury-lecture',
-    title: '건강운동관리사 운동상해 정규강의',
-    description: '운동상해 전 범위 정규강의',
-    type: 'video',
-    category: 'health',
-    price: 150000,
-    originalPrice: 150000,
-    totalEpisodes: 9,
-    totalDuration: '약 6시간 36분',
-    isActive: true,
-    sortOrder: 20
-  },
-  {
-    id: 'health-physiology-lecture',
-    title: '건강운동관리사 운동생리학 정규강의',
-    description: '운동생리학 전 범위 정규강의',
-    type: 'video',
-    category: 'health',
-    price: 150000,
-    originalPrice: 150000,
-    totalEpisodes: 11,
-    totalDuration: '약 9시간 16분',
-    isActive: true,
-    sortOrder: 30
-  },
-  {
-    id: 'health-stress-test-lecture',
-    title: '건강운동관리사 운동부하검사 정규강의',
-    description: '운동부하검사 전 범위 정규강의 (심전도 제외)',
-    type: 'video',
-    category: 'health',
-    price: 150000,
-    originalPrice: 150000,
-    totalEpisodes: 6,
-    totalDuration: '약 5시간 41분',
-    isActive: true,
-    sortOrder: 40
-  },
-  {
-    id: 'health-ecg-lecture',
-    title: '건강운동관리사를 위한 심전도',
-    description: '심전도 판독 집중 강의',
-    type: 'video',
-    category: 'health',
-    price: 50000,
-    originalPrice: 50000,
-    totalEpisodes: 2,
-    totalDuration: '약 2시간 43분',
-    isActive: true,
-    sortOrder: 45
-  },
-  {
-    id: 'health-pathology-lecture',
-    title: '건강운동관리사 병태생리학 정규강의',
-    description: '병태생리학 전 범위 정규강의',
-    type: 'video',
-    category: 'health',
-    price: 150000,
-    originalPrice: 150000,
-    totalEpisodes: 7,
-    totalDuration: '약 5시간 57분',
-    isActive: true,
-    sortOrder: 50
-  },
-  {
-    id: 'health-prescription-lecture',
-    title: '건강운동관리사 운동처방론 정규강의',
-    description: '운동처방론 전 범위 정규강의',
-    type: 'video',
-    category: 'health',
-    price: 100000,
-    originalPrice: 100000,
-    totalEpisodes: 5,
-    totalDuration: '약 4시간 59분',
-    isActive: true,
-    sortOrder: 60
-  },
-  {
-    id: 'health-fitness-eval-lecture',
-    title: '건강운동관리사 건강체력평가 정규강의',
-    description: '건강체력평가 전 범위 정규강의',
-    type: 'video',
-    category: 'health',
-    price: 150000,
-    originalPrice: 150000,
-    totalEpisodes: 5,
-    totalDuration: '약 5시간 33분',
-    isActive: true,
-    sortOrder: 70
-  },
+  // 건강운동관리사 상품은 Firestore에 video_*, pdf_* ID로 등록 완료
+  // seed 재실행 시 중복 방지를 위해 여기에 포함하지 않음
 
-  // === 요약본 (pdf) ===
+  // === 2급 스포츠지도사 ===
   {
-    id: 'health-anatomy-summary',
-    title: '건강운동관리사 기능해부학 요약본',
-    description: '기능해부학 핵심 요약 자료',
-    type: 'pdf',
-    category: 'health',
-    price: 80000,
-    originalPrice: 80000,
-    isActive: true,
-    sortOrder: 15
-  },
-  {
-    id: 'health-injury-summary',
-    title: '건강운동관리사 운동상해 요약본',
-    description: '운동상해 핵심 요약 자료',
-    type: 'pdf',
-    category: 'health',
+    id: 'pdf_si2_package',
+    title: '2급 생활스포츠지도사 7일 완성 합격패키지',
+    description: '스포츠사회학·스포츠윤리·스포츠심리학·한국체육사·스포츠교육학 요약본 5종 세트',
+    type: 'package',
+    category: 'sports',
     price: 50000,
     originalPrice: 50000,
+    thumbnailUrl: '/images/products/si-7days-bundle.jpg',
     isActive: true,
-    sortOrder: 25
+    sortOrder: 100,
+    bundleFiles: [
+      { key: 'si2-social', name: '스포츠사회학 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-social-summary.pdf?alt=media', fileSize: '32.8MB' },
+      { key: 'si2-ethics', name: '스포츠윤리 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-ethics-summary.pdf?alt=media', fileSize: '11.2MB' },
+      { key: 'si2-psycho', name: '스포츠심리학 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-psycho-summary.pdf?alt=media', fileSize: '56.7MB' },
+      { key: 'si2-history', name: '한국체육사 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-history-summary.pdf?alt=media', fileSize: '43.1MB' },
+      { key: 'si2-education', name: '스포츠교육학 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-education-summary.pdf?alt=media', fileSize: '10.9MB' }
+    ]
   },
   {
-    id: 'health-physiology-summary',
-    title: '건강운동관리사 운동생리학 요약본',
-    description: '운동생리학 핵심 요약 자료',
-    type: 'pdf',
-    category: 'health',
-    price: 50000,
-    originalPrice: 50000,
+    id: 'video_si2_psycho_free',
+    title: '2급 스포츠지도사 스포츠심리학 무료강의',
+    description: '스포츠심리학 전 범위 무료 강의',
+    type: 'video',
+    category: 'sports',
+    price: 0,
+    originalPrice: null,
+    thumbnailUrl: 'https://img.youtube.com/vi/6dnkwEAiQFc/hqdefault.jpg',
+    youtubeId: '6dnkwEAiQFc',
+    isFree: true,
+    totalEpisodes: 1,
     isActive: true,
-    sortOrder: 35
+    sortOrder: 101
   },
   {
-    id: 'health-stress-test-summary',
-    title: '건강운동관리사 운동부하검사 요약본',
-    description: '운동부하검사 핵심 요약 자료',
-    type: 'pdf',
-    category: 'health',
-    price: 50000,
-    originalPrice: 50000,
+    id: 'video_si2_history_free',
+    title: '2급 스포츠지도사 한국체육사 무료강의',
+    description: '한국체육사 전 범위 무료 강의',
+    type: 'video',
+    category: 'sports',
+    price: 0,
+    originalPrice: null,
+    thumbnailUrl: 'https://img.youtube.com/vi/4AFuYvElqH4/hqdefault.jpg',
+    youtubeId: '4AFuYvElqH4',
+    isFree: true,
+    totalEpisodes: 1,
     isActive: true,
-    sortOrder: 46
-  },
-  {
-    id: 'health-pathology-summary',
-    title: '건강운동관리사 병태생리학 요약본',
-    description: '병태생리학 핵심 요약 자료',
-    type: 'pdf',
-    category: 'health',
-    price: 50000,
-    originalPrice: 50000,
-    isActive: true,
-    sortOrder: 55
-  },
-  {
-    id: 'health-sports-psych-summary',
-    title: '건강운동관리사 스포츠심리학 요약본',
-    description: '스포츠심리학 핵심 요약 자료',
-    type: 'pdf',
-    category: 'health',
-    price: 50000,
-    originalPrice: 50000,
-    isActive: true,
-    sortOrder: 56
-  },
-  {
-    id: 'health-prescription-summary',
-    title: '건강운동관리사 운동처방론 요약본',
-    description: '운동처방론 핵심 요약 자료',
-    type: 'pdf',
-    category: 'health',
-    price: 50000,
-    originalPrice: 50000,
-    isActive: true,
-    sortOrder: 65
-  },
-  {
-    id: 'health-fitness-eval-summary',
-    title: '건강운동관리사 건강체력평가 요약본',
-    description: '건강체력평가 핵심 요약 자료',
-    type: 'pdf',
-    category: 'health',
-    price: 50000,
-    originalPrice: 50000,
-    isActive: true,
-    sortOrder: 75
+    sortOrder: 102
   }
 ];
 
@@ -280,6 +138,10 @@ const episodes = [
   { productId: 'health-fitness-eval-lecture', episode: 3, title: '체력검사와 평가', vimeoId: '1174293851', duration: '104:42', sortOrder: 3, isFree: false },
   { productId: 'health-fitness-eval-lecture', episode: 4, title: '통계', vimeoId: '1174283754', duration: '103:58', sortOrder: 4, isFree: false },
   { productId: 'health-fitness-eval-lecture', episode: 5, title: '국민체력100', vimeoId: '1174284539', duration: '44:15', sortOrder: 5, isFree: false },
+
+  // === 2급 스포츠지도사 ===
+  { productId: 'video_si2_psycho_free', episode: 1, title: '스포츠심리학 전 범위', youtubeId: '6dnkwEAiQFc', duration: '1:49:03', sortOrder: 1, isFree: true },
+  { productId: 'video_si2_history_free', episode: 1, title: '한국체육사 전 범위', youtubeId: '4AFuYvElqH4', duration: '1:08:56', sortOrder: 1, isFree: true },
 ];
 
 // ──────────────────────────────────────
@@ -301,7 +163,8 @@ async function seed() {
       ...ep,
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
-    console.log(`✅ EP: ${ep.productId} ${ep.episode}강 "${ep.title}" (vimeo:${ep.vimeoId})`);
+    const videoId = ep.vimeoId ? `vimeo:${ep.vimeoId}` : `youtube:${ep.youtubeId}`;
+    console.log(`✅ EP: ${ep.productId} ${ep.episode}강 "${ep.title}" (${videoId})`);
   }
 
   console.log(`\n━━━ 완료! 상품 ${products.length}개, 에피소드 ${episodes.length}개 ━━━`);

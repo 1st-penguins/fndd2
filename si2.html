@@ -1115,7 +1115,7 @@
     }
 
     .lecture-filter.active {
-      background: var(--penguin-navy, #1D2F4E);
+      background: #059669;
       color: #fff;
     }
 
@@ -1157,8 +1157,13 @@
 
     .lecture-card__thumb img {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: cover;
       display: block;
+    }
+
+    .lecture-card__thumb {
+      aspect-ratio: 3 / 2;
     }
 
     .lecture-card__thumb-icon {
@@ -1173,7 +1178,7 @@
       font-size: 11px;
       font-weight: 600;
       color: #fff;
-      background: var(--penguin-navy, #1D2F4E);
+      background: #059669;
       padding: 2px 8px;
       border-radius: 6px;
     }
@@ -1212,8 +1217,9 @@
       font-size: 13px;
       color: #86868b;
       line-height: 1.4;
+      white-space: pre-line;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -1235,7 +1241,7 @@
     .lecture-card__discount {
       font-size: 14px;
       font-weight: 700;
-      color: var(--penguin-navy, #1D2F4E);
+      color: #059669;
     }
 
     .lecture-card__price {
@@ -1489,6 +1495,7 @@
       <button class="tabs__item tabs__item--active" data-tab="quiz">문제풀기</button>
       <button class="tabs__item" data-tab="progress">학습현황</button>
       <button class="tabs__item" data-tab="analytics">학습분석</button>
+      <button class="tabs__item" data-tab="lecture">강의</button>
     </div>
   </nav>
 
@@ -1808,6 +1815,22 @@
       </div>
     </div>
 
+    <!-- ── 강의 탭 ── -->
+    <div class="tab-panel" data-panel="lecture">
+      <div class="lecture-filters">
+        <button class="lecture-filter active" data-filter="all">전체</button>
+        <button class="lecture-filter" data-filter="video">무료강의</button>
+        <button class="lecture-filter" data-filter="material">자료</button>
+      </div>
+      <div id="lecture-grid" class="lecture-grid"></div>
+      <div id="lecture-empty" class="lecture-empty" style="display:none;">
+        <p>등록된 상품이 없습니다</p>
+      </div>
+      <div id="lecture-loading" class="progress-loading">
+        <p class="progress-loading__text">상품을 불러오는 중...</p>
+      </div>
+    </div>
+
   </main>
 
   <!-- 오답노트 상세 모달 -->
@@ -1961,6 +1984,10 @@
         if (tab.dataset.tab === 'progress' && !window._progressLoaded) {
           loadProgressData();
         }
+        // 강의 탭 클릭 시 데이터 로드
+        if (tab.dataset.tab === 'lecture' && !window._lectureLoaded) {
+          loadLectureData();
+        }
       });
     });
 
@@ -1970,6 +1997,124 @@
       const target = document.querySelector(`.tabs__item[data-tab="${hashTab[1]}"]`);
       if (target) target.click();
     }
+
+    // ── 강의 탭 로직 ──
+    const FILTER_MAP = { all: null, video: ['video'], material: ['package', 'pdf', 'ppt'] };
+    var lectureProducts = null;
+    var lecturePurchases = [];
+
+    async function loadLectureData(typeFilter = 'all') {
+      const grid = document.getElementById('lecture-grid');
+      const empty = document.getElementById('lecture-empty');
+      const loading = document.getElementById('lecture-loading');
+
+      try {
+        if (!lectureProducts) {
+          const { ensureFirebase } = await import('./js/core/firebase-core.js');
+          const { db, auth } = await ensureFirebase();
+          const { collection, query, where, orderBy, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+          const q = query(collection(db, 'products'), where('isActive', '==', true), orderBy('sortOrder', 'asc'));
+          const snap = await getDocs(q);
+          lectureProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          // 구매 내역
+          const user = auth.currentUser;
+          if (user) {
+            const pq = query(collection(db, 'purchases'), where('userId', '==', user.uid), where('status', '==', 'completed'));
+            const pSnap = await getDocs(pq);
+            lecturePurchases = pSnap.docs.map(d => d.data().productId);
+          }
+        }
+
+        // 필터 (sports 카테고리)
+        let items = lectureProducts.filter(p => p.category === 'sports' || p.category === 'common');
+        const types = FILTER_MAP[typeFilter];
+        if (types) items = items.filter(p => types.includes(p.type));
+
+        if (loading) loading.style.display = 'none';
+
+        if (items.length === 0) {
+          grid.innerHTML = '';
+          if (empty) empty.style.display = 'block';
+          return;
+        }
+        if (empty) empty.style.display = 'none';
+
+        grid.innerHTML = items.map(p => {
+          const purchased = lecturePurchases.includes(p.id);
+          const typeLabel = p.type === 'video' ? (p.price === 0 || p.isFree ? '무료강의' : '정규강의') : (p.type === 'package' ? '패키지' : (p.type === 'bundle' ? '특별강의' : '자료'));
+          const badgeClass = p.type === 'pdf' || p.type === 'ppt' ? 'lecture-card__badge--pdf' : '';
+
+          let meta = '';
+          if ((p.type === 'video' || p.type === 'bundle') && p.totalEpisodes) meta += `${p.totalEpisodes}강`;
+          if ((p.type === 'video' || p.type === 'bundle') && p.totalDuration) meta += (meta ? ' · ' : '') + p.totalDuration;
+          if (p.type === 'bundle' && p.fileUrl) meta += (meta ? ' · ' : '') + 'PDF 포함';
+          if ((p.type === 'pdf' || p.type === 'ppt') && p.pages) meta += `${p.pages}쪽`;
+
+          let priceHtml = '';
+          const price = p.price === 0 ? '무료' : p.price.toLocaleString() + '원';
+          if (p.originalPrice && p.originalPrice > p.price) {
+            const disc = Math.round((1 - p.price / p.originalPrice) * 100);
+            priceHtml = `<span class="lecture-card__discount">${disc}%</span><span class="lecture-card__price">${price}</span><span class="lecture-card__original">${p.originalPrice.toLocaleString()}원</span>`;
+          } else {
+            priceHtml = `<span class="lecture-card__price">${price}</span>`;
+          }
+
+          const thumb = p.thumbnailUrl
+            ? `<img src="${p.thumbnailUrl}" alt="${p.title}">`
+            : `<span class="lecture-card__thumb-icon">${(p.type === 'video' || p.type === 'bundle') ? '🎬' : '📄'}</span>`;
+
+          if (p.isComingSoon) {
+            return `
+            <div class="lecture-card" style="opacity:0.6;cursor:default;pointer-events:none;">
+              <div class="lecture-card__thumb">
+                ${thumb}
+                <span class="lecture-card__badge ${badgeClass}">${typeLabel}</span>
+                <span class="lecture-card__purchased" style="background:rgba(0,0,0,0.6);">준비중</span>
+              </div>
+              <div class="lecture-card__body">
+                <div class="lecture-card__title">${p.title}</div>
+                ${p.description ? `<div class="lecture-card__desc">${p.description}</div>` : ''}
+                <div class="lecture-card__price-row"><span class="lecture-card__price" style="color:#86868b;">준비중입니다</span></div>
+              </div>
+            </div>`;
+          }
+
+          const cardTitle = p.title;
+          return `
+            <a href="product-detail.html?id=${p.id}" class="lecture-card">
+              <div class="lecture-card__thumb">
+                ${thumb}
+                <span class="lecture-card__badge ${badgeClass}">${typeLabel}</span>
+                ${purchased ? '<span class="lecture-card__purchased">구매완료</span>' : ''}
+              </div>
+              <div class="lecture-card__body">
+                <div class="lecture-card__title">${cardTitle}</div>
+                ${p.description ? `<div class="lecture-card__desc">${p.description}</div>` : ''}
+                ${meta ? `<div class="lecture-card__meta"><span>${meta}</span></div>` : ''}
+                <div class="lecture-card__price-row">${priceHtml}</div>
+              </div>
+            </a>`;
+        }).join('');
+
+        window._lectureLoaded = true;
+      } catch (err) {
+        console.error('강의 로드 실패:', err);
+        if (loading) loading.style.display = 'none';
+        grid.innerHTML = '<div class="lecture-empty"><p>상품을 불러오지 못했습니다</p></div>';
+      }
+    }
+
+    // 강의 필터 버튼
+    document.querySelectorAll('.lecture-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lecture-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        window._lectureLoaded = false;
+        loadLectureData(btn.dataset.filter);
+      });
+    });
 
     // 과목별/연도별 토글
     const toggleBtns = document.querySelectorAll('.toggle__btn');

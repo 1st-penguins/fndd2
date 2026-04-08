@@ -144,7 +144,7 @@
     async function loadProductDetail() {
       // 상품 정보와 Firebase 초기화를 동시에 시작
       const [productData, _] = await Promise.all([
-        fetch('/data/products.json?v=20260407c').then(r => r.json()).catch(() => null),
+        fetch('/data/products.json?v=20260409c').then(r => r.json()).catch(() => null),
         ensureAuthReady().catch(() => null)
       ]);
 
@@ -218,6 +218,7 @@
           }
           if (isAdmin(user)) purchased = true;
         }
+        if (product.isFree) purchased = true;
 
         // 구매자 진도율 로드
         let progressMap = {};
@@ -244,7 +245,7 @@
     }
 
     function renderDetail(product, episodes, bundleProducts, purchased, progressMap = {}, expired = false) {
-      const TYPE_LABELS = { video: '강의', pdf: '자료', ppt: '자료', bundle: '패키지' };
+      const TYPE_LABELS = { video: '강의', pdf: '자료', ppt: '자료', bundle: '패키지', package: '패키지' };
 
       const typeLabel = TYPE_LABELS[product.type] || product.type;
       const badgeClass = `detail-badge--${product.type}`;
@@ -299,6 +300,8 @@
           actionBtn = `
             <button class="detail-purchased-btn" onclick="location.href='lecture-play.html?id=${product.id}'" style="margin-bottom:8px;">강의 보기</button>
             <button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'" style="background:#f5f5f7;color:#1d1d1f;">PDF 다운로드</button>`;
+        } else if (product.type === 'package') {
+          actionBtn = `<button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'">PDF 다운로드</button>`;
         } else if (product.type === 'pdf' || product.type === 'ppt') {
           actionBtn = `<button class="detail-purchased-btn" onclick="location.href='pdf-download.html?id=${product.id}'">다운로드</button>`;
         } else {
@@ -396,7 +399,7 @@
         descSection = `
           <div class="detail-section">
             <h3 class="detail-section__title">상세 설명</h3>
-            <div class="detail-section__content">${product.detailDescription}</div>
+            <div class="detail-section__content">${product.detailDescription.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#059669;text-decoration:underline;">$1</a>')}</div>
           </div>
         `;
       }
@@ -416,6 +419,12 @@
             <li>강의 재생 또는 PDF 다운로드 중 하나라도 이용 시 <strong>환불 불가</strong></li>
             <li>미이용 + 구매일로부터 7일 이내: 전액 환불</li>
             <li>PDF 다운로드: 최대 2회</li>`;
+        } else if (product.type === 'package') {
+          refundItems = `
+            <li>이용기간: 구매일로부터 6개월(180일)</li>
+            <li>다운로드한 경우 <strong>환불 불가</strong></li>
+            <li>과목별 다운로드 횟수: 최대 2회</li>
+            <li>미다운로드 + 구매일로부터 7일 이내: 전액 환불</li>`;
         } else if (product.type === 'pdf' || product.type === 'ppt') {
           refundItems = `
             <li>이용기간: 구매일로부터 6개월(180일)</li>
@@ -443,12 +452,13 @@
         <div class="detail-top">
           <div class="detail-thumb">${thumbHtml}</div>
           <div class="detail-info">
-            <h1 class="detail-title">${product.title}</h1>
-            <p class="detail-desc">${product.description || ''}</p>
+            <h1 class="detail-title">${product.bundleFiles ? '2급 생활스포츠지도사<br>7일 완성 합격패키지' : product.title.replace(/^(\[.+?\])\s*/, '$1<br>')}</h1>
+            <p class="detail-desc">${product.bundleFiles ? '스포츠사회학·스포츠윤리·스포츠심리학·한국체육사·스포츠교육학<br>요약본 5종 세트' : (product.description || '')}</p>
             <div class="detail-meta">${metaHtml}</div>
             <div class="detail-price-box">
               <div class="detail-price-row">${priceRowHtml}</div>
-              ${(product.type === 'video' || product.type === 'bundle') ? '<div class="detail-price-note"><strong>구매일로부터 6개월(180일)간 이용 가능합니다</strong></div>' : ''}
+              ${product.type === 'package' && product.price > 0 ? '<div class="detail-price-note"><strong>구매일로부터 6개월간 과목별 최대 2회 다운로드 가능합니다</strong></div>' : ''}
+              ${(product.type === 'video' || product.type === 'bundle') && product.price > 0 ? '<div class="detail-price-note"><strong>구매일로부터 6개월(180일)간 이용 가능합니다</strong></div>' : ''}
               ${product.type === 'video' ? '<p class="detail-price-note" style="margin-top:6px;font-size:12px;color:#aeaeb2;">본 강의에는 PDF 요약본이 포함되어 있지 않습니다. 요약본은 별도 구매 가능합니다.</p>' : ''}
             </div>
             ${actionBtn}

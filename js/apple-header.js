@@ -2,6 +2,10 @@
  * Apple-style Header — 햄버거 메뉴 + 로그인 상태 + 관리자 메뉴
  */
 (function () {
+  // Auth 확인 전까지 텍스트 숨기기
+  const _initLoginBtn = document.getElementById('header-login-btn');
+  if (_initLoginBtn) _initLoginBtn.textContent = '';
+
   const hamburger = document.getElementById('hamburger');
   const menu = document.getElementById('mobile-menu');
 
@@ -39,6 +43,7 @@
 
     // 헤더 로그인 pill 버튼
     if (loginBtn) {
+      loginBtn.classList.add('auth-ready');
       if (isLoggedIn) {
         loginBtn.textContent = userName;
         loginBtn.href = prefix + 'mypage.html';

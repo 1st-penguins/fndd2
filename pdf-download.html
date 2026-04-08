@@ -8,23 +8,26 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1D2F4E">
-  
+
   <!-- CSS -->
   <link rel="stylesheet" href="css/design-tokens.css" />
   <link rel="stylesheet" href="css/apple-header.css">
   <link rel="stylesheet" href="css/login.css" />
   <link rel="stylesheet" href="css/apple-footer.css" />
-  
+
+  <!-- pdf-lib (워터마크) -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
   <!-- Firebase SDK -->
   <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-  
+
   <!-- 코어 모듈 -->
   <script type="module" src="js/core/firebase-core.js"></script>
   <script type="module" src="js/auth/auth-core.js"></script>
-  
-  
+
+
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -137,6 +140,10 @@
       opacity: 1;
     }
 
+    .download-btn.done {
+      background: #34c759;
+    }
+
     .back-btn {
       display: inline-block;
       margin-top: 24px;
@@ -218,9 +225,78 @@
       }
     }
 
+    /* ── 번들 파일 목록 ── */
+    .bundle-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 24px 0;
+      text-align: left;
+    }
+
+    .bundle-file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 12px;
+      padding: 16px 20px;
+      transition: box-shadow 0.2s;
+    }
+
+    .bundle-file-item:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .bundle-file-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bundle-file-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .bundle-file-meta {
+      font-size: 12px;
+      color: #86868b;
+    }
+
+    .bundle-download-btn {
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: #1d1d1f;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .bundle-download-btn:hover { opacity: 0.85; }
+    .bundle-download-btn:disabled { background: #aeaeb2; cursor: not-allowed; }
+    .bundle-download-btn.done { background: #34c759; }
+
     @media (max-width: 480px) {
       .download-title {
         font-size: var(--text-2xl, 24px);
+      }
+
+      .bundle-file-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .bundle-download-btn {
+        width: 100%;
+        text-align: center;
       }
     }
   </style>
@@ -258,14 +334,14 @@
         <h2>접근 권한 확인 중...</h2>
       </div>
     </div>
-    
+
     <div id="download-section" style="display: none;">
       <div class="download-card">
         <span class="admin-badge" id="admin-badge" style="display: none;">관리자</span>
         <div class="download-icon"></div>
         <h1 class="download-title" id="product-title">PDF 다운로드</h1>
         <p class="download-description" id="product-description">자료를 다운로드 받으세요</p>
-        
+
         <div class="download-info">
           <div class="info-item">
             <span class="info-label">파일 크기</span>
@@ -276,15 +352,23 @@
             <span class="info-value" id="pages">-</span>
           </div>
         </div>
-        
-        <button id="download-btn" class="download-btn">
-          다운로드 시작
-        </button>
-        
-        <a href="index.html#lecture-tab" target="_blank" rel="noopener noreferrer" class="back-btn">강의 목록으로</a>
+
+        <!-- 개별 상품용 다운로드 버튼 -->
+        <div id="single-download">
+          <button id="download-btn" class="download-btn">
+            다운로드 시작
+          </button>
+        </div>
+
+        <!-- 번들 상품용 파일 목록 -->
+        <div id="bundle-download" style="display:none;">
+          <div id="bundle-file-list" class="bundle-file-list"></div>
+        </div>
+
+        <a id="back-link" href="index.html#lecture-tab" class="back-btn">강의 목록으로</a>
       </div>
     </div>
-    
+
     <div id="error-section" style="display: none;">
       <div class="error-message">
         <div class="error-icon"></div>
@@ -292,7 +376,7 @@
         <p class="error-text" id="error-text">
           이 자료는 구매한 사용자만 다운로드할 수 있습니다.
         </p>
-        <a href="index.html#lecture-tab" target="_blank" rel="noopener noreferrer" class="back-btn" style="display: inline-block; margin-top: 24px;">강의 목록으로</a>
+        <a href="index.html#lecture-tab" class="back-btn" style="display: inline-block; margin-top: 24px;">강의 목록으로</a>
       </div>
     </div>
   </main>
@@ -327,23 +411,122 @@
 
   <script type="module">
     import { ensureFirebase } from './js/core/firebase-core.js';
-    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
     import { isAdmin } from './js/auth/auth-utils.js';
     import { recordPdfDownload } from './js/payment/pdf-tracker.js';
 
     const MAX_DOWNLOADS = 2;
+    const { PDFDocument, rgb, degrees } = PDFLib;
 
     const { auth, db } = await ensureFirebase();
 
-    // URL에서 상품 ID 가져오기
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
-    
-    if (!productId) {
-      showError('잘못된 접근입니다.');
+
+    if (!productId) showError('잘못된 접근입니다.');
+
+    // ── 워터마크 삽입 (대각선 반투명, opacity 7%) ──
+    async function addWatermark(pdfBytes, userEmail) {
+      const pdfDoc = await PDFDocument.load(pdfBytes);
+      const pages = pdfDoc.getPages();
+      const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+      for (const page of pages) {
+        const { width, height } = page.getSize();
+        const fontSize = 28;
+        const textWidth = font.widthOfTextAtSize(userEmail, fontSize);
+        page.drawText(userEmail, {
+          x: (width - textWidth * Math.cos(Math.PI / 6)) / 2,
+          y: height / 2 - fontSize,
+          size: fontSize,
+          font,
+          color: rgb(0.7, 0.7, 0.7),
+          opacity: 0.07,
+          rotate: degrees(35),
+        });
+      }
+      return await pdfDoc.save();
     }
-    
-    // 페이지 로드 시 다운로드 준비
+
+    // ── 파일 다운로드 (프로그레스 + 워터마크) ──
+    async function downloadFile(fileUrl, fileName, userEmail, btn) {
+      const originalText = btn.textContent;
+      try {
+        btn.disabled = true;
+        btn.textContent = '다운로드 준비 중...';
+
+        const response = await fetch(fileUrl);
+        if (!response.ok) throw new Error('파일 다운로드 실패');
+
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+        let loaded = 0;
+        const reader = response.body.getReader();
+        const chunks = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          loaded += value.length;
+          btn.textContent = total > 0
+            ? `다운로드 중... ${Math.round((loaded / total) * 100)}%`
+            : `다운로드 중... ${(loaded / 1024 / 1024).toFixed(1)}MB`;
+        }
+
+        let blob;
+        const isPdf = !fileName.endsWith('.zip');
+
+        if (isPdf && userEmail) {
+          btn.textContent = '워터마크 적용 중...';
+          const raw = new Blob(chunks);
+          const bytes = new Uint8Array(await raw.arrayBuffer());
+          const watermarked = await addWatermark(bytes, userEmail);
+          blob = new Blob([watermarked], { type: 'application/pdf' });
+        } else {
+          blob = new Blob(chunks);
+        }
+
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => { document.body.removeChild(link); window.URL.revokeObjectURL(blobUrl); }, 100);
+
+        btn.textContent = '다운로드 완료';
+        btn.classList.add('done');
+        btn.disabled = true;
+        return true;
+      } catch (error) {
+        console.error('다운로드 오류:', error);
+        alert(`다운로드 실패: ${error.message}`);
+        btn.textContent = originalText;
+        btn.disabled = false;
+        return false;
+      }
+    }
+
+    // ── 번들 파일별 다운로드 횟수 ──
+    async function getBundleDownloads(userId, prodId) {
+      const snap = await getDoc(doc(db, 'pdfDownloads', `${userId}_${prodId}`));
+      return snap.exists() ? (snap.data().fileDownloads || {}) : {};
+    }
+
+    async function recordBundleFileDownload(userId, prodId, fileKey) {
+      const ref = doc(db, 'pdfDownloads', `${userId}_${prodId}`);
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : { userId: userId, productId: prodId };
+      if (!data.fileDownloads) data.fileDownloads = {};
+      data.fileDownloads[fileKey] = (data.fileDownloads[fileKey] || 0) + 1;
+      data.lastDownload = new Date();
+      data.userId = userId;
+      await setDoc(ref, data, { merge: true });
+    }
+
+    // ── 메인 ──
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         showError('로그인이 필요합니다.');
@@ -354,174 +537,135 @@
         }
         return;
       }
-      
+
       try {
-        // 🔐 관리자 확인
         const userIsAdmin = isAdmin(user);
-        
+
         if (!userIsAdmin) {
-          // 일반 사용자: 구매 여부 확인
-          const purchaseRef = doc(db, 'purchases', `${user.uid}_${productId}`);
-          const purchaseSnap = await getDoc(purchaseRef);
-          
+          const purchaseSnap = await getDoc(doc(db, 'purchases', `${user.uid}_${productId}`));
           if (!purchaseSnap.exists() || purchaseSnap.data().status !== 'completed') {
             showError('구매한 상품이 아닙니다.');
             return;
           }
-
-          // 이용기간 체크 (6개월)
           const purchaseData = purchaseSnap.data();
           if (purchaseData.expiresAt) {
             const expiresDate = purchaseData.expiresAt.toDate();
             if (new Date() > expiresDate) {
-              showError(`이용 기간��� 만료되었습니다. (만료일: ${expiresDate.toLocaleDateString('ko-KR')})`);
+              showError(`이용 기간이 만료되었습니다. (만료일: ${expiresDate.toLocaleDateString('ko-KR')})`);
               return;
             }
           }
-
-          // 다운로드 횟수 체크
-          const downloadRef = doc(db, 'pdfDownloads', `${user.uid}_${productId}`);
-          const downloadSnap = await getDoc(downloadRef);
-          const downloadCount = downloadSnap.exists() ? (downloadSnap.data().downloadCount || 0) : 0;
-
-          if (downloadCount >= MAX_DOWNLOADS) {
-            showError(`다운로드 횟수를 초과했습니다. (${MAX_DOWNLOADS}회 제한)\n\n추가 다운로드가 필요하시면 1:1 문의를 이용해주세요.`);
-            return;
-          }
-
-          // 남은 횟수 저장 (버튼 텍스트용)
-          window._remainingDownloads = MAX_DOWNLOADS - downloadCount;
         }
 
-        // 상품 정보 가져오기
-        const productRef = doc(db, 'products', productId);
-        const productSnap = await getDoc(productRef);
-        
-        if (!productSnap.exists()) {
-          showError('상품을 찾을 수 없습니다.');
-          return;
-        }
-        
+        // 상품 정보
+        const productSnap = await getDoc(doc(db, 'products', productId));
+        if (!productSnap.exists()) { showError('상품을 찾을 수 없습니다.'); return; }
         const product = productSnap.data();
-        
-        // 정보 표시
-        document.getElementById('product-title').textContent = product.title;
-        document.getElementById('product-description').textContent = product.description;
-        document.getElementById('file-size').textContent = product.fileSize;
-        document.getElementById('pages').textContent = `${product.pages}쪽`;
-        
-        // 관리자 배지 표시
+
+        const titleEl = document.getElementById('product-title');
+        const descEl = document.getElementById('product-description');
+        if (product.bundleFiles && product.bundleFiles.length > 0) {
+          titleEl.innerHTML = '2급 생활스포츠지도사<br>7일 완성 합격패키지';
+          descEl.innerHTML = '스포츠사회학·스포츠윤리·스포츠심리학<br>한국체육사·스포츠교육학 요약본 5종 세트';
+        } else {
+          titleEl.innerHTML = product.title.replace(/^(\[.+?\])\s*/, '$1<br>');
+          descEl.innerHTML = (product.description || '').replace(/\n/g, '<br>');
+        }
+
+        // 뒤로가기 링크
+        const backLink = document.getElementById('back-link');
+        if (product.category === 'sports') backLink.href = 'si2.html#tab-lecture';
+        else if (product.category === 'sports1') backLink.href = 'si1.html#tab-lecture';
+        else backLink.href = 'cft.html#tab-lecture';
+
         if (userIsAdmin) {
           document.getElementById('admin-badge').style.display = 'inline-block';
-          console.log('🔑 관리자 접근:', user.email);
         }
-        
-        // 다운로드 버튼 활성화
+
+        const isBundle = product.bundleFiles && product.bundleFiles.length > 0;
+
+        if (isBundle) {
+          // ── 번들 상품 ──
+          document.getElementById('single-download').style.display = 'none';
+          document.getElementById('bundle-download').style.display = 'block';
+          document.getElementById('file-size').textContent = `${product.bundleFiles.length}개 파일`;
+          document.getElementById('pages').textContent = product.totalPages || '-';
+
+          const fileDownloads = userIsAdmin ? {} : await getBundleDownloads(user.uid, productId);
+          const listEl = document.getElementById('bundle-file-list');
+
+          listEl.innerHTML = product.bundleFiles.map((f, i) => {
+            const count = fileDownloads[f.key] || 0;
+            const remaining = MAX_DOWNLOADS - count;
+            const exhausted = !userIsAdmin && remaining <= 0;
+            return `
+              <div class="bundle-file-item">
+                <div class="bundle-file-info">
+                  <span class="bundle-file-name">${f.name}</span>
+                  <span class="bundle-file-meta">${f.fileSize || 'PDF'}${!userIsAdmin ? ` \u00b7 ${remaining}/${MAX_DOWNLOADS}회 남음` : ' \u00b7 관리자'}</span>
+                </div>
+                <button class="bundle-download-btn" data-index="${i}" ${exhausted ? 'disabled' : ''}>
+                  ${exhausted ? '횟수 초과' : '다운로드'}
+                </button>
+              </div>`;
+          }).join('');
+
+          listEl.querySelectorAll('.bundle-download-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const f = product.bundleFiles[parseInt(btn.dataset.index)];
+              if (!f.fileUrl) { alert('다운로드 URL이 설정되지 않았습니다.'); return; }
+
+              const ok = await downloadFile(f.fileUrl, `${f.name}.pdf`, user.email, btn);
+              if (ok && !userIsAdmin) {
+                await recordBundleFileDownload(user.uid, productId, f.key);
+                const updated = await getBundleDownloads(user.uid, productId);
+                const rem = MAX_DOWNLOADS - (updated[f.key] || 0);
+                btn.closest('.bundle-file-item').querySelector('.bundle-file-meta').textContent =
+                  `${f.fileSize || 'PDF'} \u00b7 ${rem}/${MAX_DOWNLOADS}회 남음`;
+                if (rem <= 0) { btn.disabled = true; btn.textContent = '횟수 초과'; }
+              }
+            });
+          });
+
+        } else {
+          // ── 개별 상품 ──
+          document.getElementById('file-size').textContent = product.fileSize || '-';
+          document.getElementById('pages').textContent = product.pages ? `${product.pages}쪽` : '-';
+
+          if (!userIsAdmin) {
+            const dlSnap = await getDoc(doc(db, 'pdfDownloads', `${user.uid}_${productId}`));
+            const dlCount = dlSnap.exists() ? (dlSnap.data().downloadCount || 0) : 0;
+            if (dlCount >= MAX_DOWNLOADS) {
+              showError(`다운로드 횟수를 초과했습니다. (${MAX_DOWNLOADS}회 제한)\n\n추가 다운로드가 필요하시면 1:1 문의를 이용해주세요.`);
+              return;
+            }
+            window._remainingDownloads = MAX_DOWNLOADS - dlCount;
+          }
+
+          const downloadBtn = document.getElementById('download-btn');
+          if (window._remainingDownloads !== undefined) {
+            downloadBtn.textContent = `다운로드 시작 (${window._remainingDownloads}/${MAX_DOWNLOADS}회 남음)`;
+          }
+
+          downloadBtn.addEventListener('click', async () => {
+            if (!product.fileUrl) { alert('다운로드 URL이 설정되지 않았습니다.'); return; }
+            const ext = product.fileUrl.includes('.zip') ? 'zip' : 'pdf';
+            const ok = await downloadFile(product.fileUrl, `${product.title}.${ext}`, user.email, downloadBtn);
+            if (ok) {
+              try { await recordPdfDownload(productId); } catch(e) { console.warn('기록 실패:', e); }
+            }
+          });
+        }
+
         document.getElementById('loading').style.display = 'none';
         document.getElementById('download-section').style.display = 'block';
 
-        // 남은 횟수 표시
-        if (window._remainingDownloads !== undefined) {
-          document.getElementById('download-btn').textContent = `다운로드 시작 (${window._remainingDownloads}/${MAX_DOWNLOADS}회 남음)`;
-        }
-        
-        // 다운로드 버튼 클릭 이벤트
-        document.getElementById('download-btn').addEventListener('click', async () => {
-          if (!product.fileUrl) {
-            alert('다운로드 URL이 설정되지 않았습니다.');
-            return;
-          }
-          
-          const downloadBtn = document.getElementById('download-btn');
-          const originalText = downloadBtn.textContent;
-          
-          try {
-            // 버튼 비활성화 및 로딩 상태
-            downloadBtn.disabled = true;
-            downloadBtn.textContent = '다운로드 준비 중...';
-
-            console.log('📥 다운로드 시작:', product.title);
-
-            const response = await fetch(product.fileUrl);
-
-            if (!response.ok) {
-              throw new Error('파일 다운로드 실패');
-            }
-
-            const contentLength = response.headers.get('content-length');
-            const total = contentLength ? parseInt(contentLength, 10) : 0;
-
-            let loaded = 0;
-            const reader = response.body.getReader();
-            const chunks = [];
-
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              chunks.push(value);
-              loaded += value.length;
-              if (total > 0) {
-                const pct = Math.round((loaded / total) * 100);
-                downloadBtn.textContent = `다운로드 중... ${pct}%`;
-              } else {
-                downloadBtn.textContent = `다운로드 중... ${(loaded / 1024 / 1024).toFixed(1)}MB`;
-              }
-            }
-
-            const blob = new Blob(chunks);
-            
-            // blob URL 생성
-            const blobUrl = window.URL.createObjectURL(blob);
-            
-            // 파일명 결정
-            const fileExtension = product.fileUrl.includes('.zip') ? 'zip' : 'pdf';
-            const fileName = `${product.title}.${fileExtension}`;
-            
-            // 다운로드 링크 생성 및 클릭
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = fileName;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            
-            // 정리
-            setTimeout(() => {
-              document.body.removeChild(link);
-              window.URL.revokeObjectURL(blobUrl);
-            }, 100);
-            
-            console.log('✅ 다운로드 완료:', fileName);
-
-            // 다운로드 기록 저장
-            try { await recordPdfDownload(productId); } catch(e) { console.warn('다운로드 기록 실패:', e); }
-
-            // 성공 메시지
-            downloadBtn.textContent = '✅ 다운로드 완료!';
-            setTimeout(() => {
-              downloadBtn.textContent = originalText;
-              downloadBtn.disabled = false;
-            }, 2000);
-            
-          } catch (error) {
-            console.error('❌ 다운로드 오류:', error);
-            alert(`다운로드 실패: ${error.message}\n\n직접 다운로드를 시도하려면 확인을 누르세요.`);
-            
-            // 실패 시 새 창으로 열기 (fallback)
-            window.open(product.fileUrl, '_blank');
-            
-            // 버튼 복구
-            downloadBtn.textContent = originalText;
-            downloadBtn.disabled = false;
-          }
-        });
-        
       } catch (error) {
         console.error('오류:', error);
         showError('오류가 발생했습니다: ' + error.message);
       }
     });
-    
+
     function showError(message) {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('download-section').style.display = 'none';

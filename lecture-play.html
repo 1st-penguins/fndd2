@@ -538,6 +538,8 @@
         // 에피소드 없는 경우 (단일 영상 — legacy 호환)
         if (product.vimeoId) {
           episodes = [{ episode: 1, title: product.title, vimeoId: product.vimeoId, duration: product.totalDuration || '' }];
+        } else if (product.youtubeId) {
+          episodes = [{ episode: 1, title: product.title, youtubeId: product.youtubeId, duration: product.totalDuration || '' }];
         } else {
           alert('재생할 강의가 없습니다.');
           window.location.href = 'index.html#lecture-tab';
@@ -606,6 +608,40 @@
           </li>
         `;
       }).join('');
+
+      // 유튜브 챕터 렌더링
+      const currentEp = episodes[currentEpIndex];
+      if (currentEp && currentEp.chapters && currentEp.chapters.length > 0) {
+        listEl.innerHTML += `<li style="padding:12px 16px;font-size:13px;font-weight:700;color:#1d1d1f;border-top:1px solid rgba(0,0,0,0.06);cursor:default;">챕터</li>`;
+        listEl.innerHTML += currentEp.chapters.map(ch => {
+          const mm = Math.floor(ch.time / 60);
+          const ss = String(ch.time % 60).padStart(2, '0');
+          const timeStr = mm >= 60 ? `${Math.floor(mm/60)}:${String(mm%60).padStart(2,'0')}:${ss}` : `${mm}:${ss}`;
+          return `<li class="play-ep-item play-chapter-item" data-time="${ch.time}" style="cursor:pointer;">
+            <div class="play-ep-item__num" style="font-size:12px;color:#5FB2C9;min-width:50px;">${timeStr}</div>
+            <div class="play-ep-item__info"><div class="play-ep-item__title" style="font-size:13px;">${ch.title}</div></div>
+          </li>`;
+        }).join('');
+
+        // 챕터 클릭 이벤트
+        listEl.querySelectorAll('.play-chapter-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const time = parseInt(item.dataset.time);
+            if (window._ytPlayer && window._ytPlayer.seekTo) {
+              window._ytPlayer.seekTo(time, true);
+            }
+          });
+        });
+      }
+
+      // 커리큘럼 마지막에 후기 작성 버튼
+      listEl.innerHTML += `
+        <li class="play-ep-item" style="justify-content:center;padding:14px;cursor:pointer;border-top:1px solid rgba(0,0,0,0.06);" onclick="location.href='product-detail.html?id=${productId}#tab-reviews'">
+          <span style="font-size:13px;text-align:center;line-height:1.6;">
+            <span style="color:#86868b;">강의가 도움이 되셨나요?</span><br>
+            <span style="font-weight:600;color:#5FB2C9;">후기 작성 →</span>
+          </span>
+        </li>`;
 
       // 클릭 이벤트
       listEl.querySelectorAll('.play-ep-item').forEach(item => {
@@ -678,7 +714,7 @@
 
     function playEpisode(index) {
       const ep = episodes[index];
-      if (!ep || !ep.vimeoId) return;
+      if (!ep || (!ep.vimeoId && !ep.youtubeId)) return;
 
       const container = document.getElementById('video-container');
       container.innerHTML = '';
@@ -691,7 +727,56 @@
       document.getElementById('play-progress-fill').style.width = '0%';
       document.getElementById('play-progress-text').textContent = '0%';
 
-      // Vimeo iframe
+      if (ep.youtubeId) {
+        // ── 유튜브 플레이어 (IFrame API) ──
+        const ytDiv = document.createElement('div');
+        ytDiv.id = 'yt-player-container';
+        ytDiv.style.cssText = 'width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;';
+        container.appendChild(ytDiv);
+
+        function initYTPlayer() {
+          if (window._ytPlayer) window._ytPlayer.destroy();
+          window._ytPlayer = new YT.Player('yt-player-container', {
+            videoId: ep.youtubeId,
+            playerVars: { rel: 0, modestbranding: 1 },
+            events: {
+              onStateChange: (event) => {
+                if (event.data === YT.PlayerState.ENDED && !window._reviewPromptShown) {
+                  window._reviewPromptShown = true;
+                  const banner = document.createElement('div');
+                  banner.id = 'review-prompt-banner';
+                  banner.innerHTML = `
+                    <div style="position:fixed;bottom:0;left:0;right:0;background:#059669;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;z-index:9999;box-shadow:0 -2px 12px rgba(0,0,0,0.15);">
+                      <span style="font-size:14px;">강의가 도움이 되셨나요? 후기를 남겨주세요!</span>
+                      <div style="display:flex;gap:8px;">
+                        <a href="product-detail.html?id=${productId}#tab-reviews" style="padding:8px 16px;background:rgba(255,255,255,0.2);color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">후기 작성</a>
+                        <button onclick="this.closest('#review-prompt-banner').remove()" style="padding:8px 12px;background:rgba(255,255,255,0.1);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;">닫기</button>
+                      </div>
+                    </div>`;
+                  document.body.appendChild(banner);
+                }
+              }
+            }
+          });
+        }
+
+        // YouTube IFrame API 로드
+        if (window.YT && window.YT.Player) {
+          initYTPlayer();
+        } else {
+          window.onYouTubeIframeAPIReady = initYTPlayer;
+          if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            document.head.appendChild(tag);
+          }
+        }
+
+        document.title = `${ep.episode}강 ${ep.title} | 퍼스트펭귄`;
+        return;
+      }
+
+      // ── Vimeo 플레이어 ──
       const iframe = document.createElement('iframe');
       iframe.src = `https://player.vimeo.com/video/${ep.vimeoId}`;
       iframe.allow = 'autoplay; fullscreen; picture-in-picture';

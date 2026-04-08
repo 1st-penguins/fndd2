@@ -2274,6 +2274,7 @@
             </div>`;
           }
 
+          const cardTitle = p.title;
           return `
             <a href="product-detail.html?id=${p.id}" class="lecture-card">
               <div class="lecture-card__thumb">
@@ -2282,7 +2283,7 @@
                 ${purchased ? '<span class="lecture-card__purchased">구매완료</span>' : ''}
               </div>
               <div class="lecture-card__body">
-                <div class="lecture-card__title">${p.title}</div>
+                <div class="lecture-card__title">${cardTitle}</div>
                 ${p.description ? `<div class="lecture-card__desc">${p.description}</div>` : ''}
                 ${meta ? `<div class="lecture-card__meta"><span>${meta}</span></div>` : ''}
                 <div class="lecture-card__price-row">${priceHtml}</div>

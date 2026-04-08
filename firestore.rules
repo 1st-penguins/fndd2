@@ -99,7 +99,7 @@ service cloud.firestore {
 
     // PDF 다운로드 기록
     match /pdfDownloads/{downloadId} {
-      allow read: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if isLoggedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
       allow delete: if isAdmin();
