@@ -220,6 +220,13 @@ service cloud.firestore {
       allow update: if isLoggedIn() && resource.data.userId == request.auth.uid;
       allow delete: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
+
+    // 상품 후기
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isLoggedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
     
     match /likes/{likeId} {
       allow read: if true;

@@ -55,18 +55,11 @@
   <script type="module" src="js/auth/auth-core.js"></script>
   <script type="module" src="js/auth/auth-ui.js"></script>
 </head>
-<body>
-  <header class="header" id="header">
+<body>  <header class="header" id="header">
     <a href="index.html" class="header__brand">
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
       <span class="header__name">퍼스트펭귄</span>
     </a>
-    <nav class="header__nav">
-      <a href="notices.html" class="header__nav-link">공지사항</a>
-      <a href="cft.html" class="header__nav-link header__nav-link--cert">건강운동관리사</a>
-      <a href="si1.html" class="header__nav-link header__nav-link--cert">1급 스포츠지도사</a>
-      <a href="si2.html" class="header__nav-link header__nav-link--cert">2급 스포츠지도사</a>
-    </nav>
     <div class="header__right">
       <a href="#" class="header__login" id="header-login-btn">로그인</a>
       <button class="header__hamburger" id="hamburger" aria-label="메뉴">
@@ -82,7 +75,6 @@
     <a href="schedule.html" class="header__mobile-link">시험일정</a>
     <a href="kakao.html" class="header__mobile-link">오픈채팅</a>
     <div class="header__menu-divider"></div>
-
     <div class="header__menu-auth" id="menu-auth"></div>
   </div>
 
@@ -146,20 +138,17 @@
     if (!productId) {
       showError();
     } else {
-      // Firebase 초기화 + 인증 상태 복원 완료 후 로드
-      ensureAuthReady().then(() => {
-        loadProductDetail();
-      });
+      loadProductDetail();
     }
 
     async function loadProductDetail() {
-      // 상품 정보: 정적 JSON에서 즉시 로드 (Firestore 대기 없음)
-      let product;
-      try {
-        const res = await fetch('/data/products.json?v=20260407c');
-        const allProducts = await res.json();
-        product = allProducts[productId];
-      } catch (e) {}
+      // 상품 정보와 Firebase 초기화를 동시에 시작
+      const [productData, _] = await Promise.all([
+        fetch('/data/products.json?v=20260407c').then(r => r.json()).catch(() => null),
+        ensureAuthReady().catch(() => null)
+      ]);
+
+      const product = productData ? productData[productId] : null;
 
       if (!product) {
         showError();
@@ -168,39 +157,42 @@
 
       const { auth, db } = await ensureFirebase();
       try {
+        const user = auth.currentUser;
 
-        // 에피소드 (video/bundle 타입)
-        let episodes = [];
-        if (product.type === 'video' || product.type === 'bundle') {
-          const epQuery = query(
-            collection(db, 'episodes'),
-            where('productId', '==', productId),
-            orderBy('sortOrder', 'asc')
-          );
-          const epSnap = await getDocs(epQuery);
-          episodes = epSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        }
+        // 병렬로 Firestore 쿼리 실행
+        const isVideoOrBundle = product.type === 'video' || product.type === 'bundle';
+
+        const [epSnap, purchaseSnap, bundleSnap] = await Promise.all([
+          // 에피소드
+          isVideoOrBundle
+            ? getDocs(query(collection(db, 'episodes'), where('productId', '==', productId), orderBy('sortOrder', 'asc')))
+            : Promise.resolve(null),
+          // 직접 구매 확인
+          user
+            ? getDoc(doc(db, 'purchases', `${user.uid}_${productId}`)).catch(() => null)
+            : Promise.resolve(null),
+          // 번들 상품 목록 (구매 확인 + 포함상품 표시용)
+          user
+            ? getDocs(query(collection(db, 'products'), where('type', '==', 'bundle'))).catch(() => null)
+            : Promise.resolve(null)
+        ]);
+
+        const episodes = epSnap ? epSnap.docs.map(d => ({ id: d.id, ...d.data() })) : [];
 
         // 패키지 포함 상품
         let bundleProducts = [];
         if (product.type === 'bundle' && product.includedProducts) {
-          for (const pid of product.includedProducts) {
-            const pSnap = await getDoc(doc(db, 'products', pid));
-            if (pSnap.exists()) {
-              bundleProducts.push({ id: pSnap.id, ...pSnap.data() });
-            }
-          }
+          const bundlePromises = product.includedProducts.map(pid => getDoc(doc(db, 'products', pid)));
+          const bundleSnaps = await Promise.all(bundlePromises);
+          bundleProducts = bundleSnaps.filter(s => s.exists()).map(s => ({ id: s.id, ...s.data() }));
         }
 
         // 구매 여부 확인
         let purchased = false;
         let expired = false;
-        const user = auth.currentUser;
         if (user) {
           try {
-            // 직접 구매
-            const purchaseSnap = await getDoc(doc(db, 'purchases', `${user.uid}_${productId}`));
-            if (purchaseSnap.exists() && purchaseSnap.data().status === 'completed') {
+            if (purchaseSnap && purchaseSnap.exists && purchaseSnap.exists() && purchaseSnap.data().status === 'completed') {
               const pData = purchaseSnap.data();
               if (pData.expiresAt && pData.expiresAt.toDate() < new Date()) {
                 expired = true;
@@ -209,13 +201,8 @@
               }
             }
             // 패키지로 구매
-            if (!purchased) {
-              const allProducts = await getDocs(query(
-                collection(db, 'products'),
-                where('type', '==', 'bundle'),
-                where('isActive', '==', true)
-              ));
-              for (const bd of allProducts.docs) {
+            if (!purchased && bundleSnap) {
+              for (const bd of bundleSnap.docs) {
                 const bData = bd.data();
                 if (bData.includedProducts && bData.includedProducts.includes(productId)) {
                   const bPurchase = await getDoc(doc(db, 'purchases', `${user.uid}_${bd.id}`));
@@ -229,7 +216,6 @@
           } catch (e) {
             console.warn('구매 확인 실패 (권한 없음):', e.message);
           }
-          // 관리자
           if (isAdmin(user)) purchased = true;
         }
 
@@ -237,12 +223,11 @@
         let progressMap = {};
         if (purchased && product.type === 'video' && user) {
           try {
-            const progQuery = query(
+            const progSnap = await getDocs(query(
               collection(db, 'lectureProgress'),
               where('userId', '==', user.uid),
               where('productId', '==', productId)
-            );
-            const progSnap = await getDocs(progQuery);
+            ));
             progSnap.forEach(d => {
               const data = d.data();
               progressMap[data.episode] = data;
@@ -453,7 +438,7 @@
       // 렌더
       const contentEl = document.getElementById('detail-content');
       contentEl.innerHTML = `
-        <a href="${product.category === 'sports' ? 'si2.html' : product.category === 'sports1' ? 'si1.html' : 'cft.html'}#tab-lecture" class="detail-back">← 강의 목록</a>
+        <a href="#" class="detail-back" onclick="event.preventDefault(); history.length > 1 ? history.back() : location.href='${product.category === 'sports' ? 'si2.html' : product.category === 'sports1' ? 'si1.html' : 'cft.html'}#tab-lecture'">← 뒤로가기</a>
 
         <div class="detail-top">
           <div class="detail-thumb">${thumbHtml}</div>
@@ -471,19 +456,22 @@
         </div>
 
         ${(() => {
-          const tabCount = [descSection, episodeSection, bundleSection].filter(Boolean).length;
+          const hasReviewTab = true;
+          const tabCount = [descSection, episodeSection, bundleSection].filter(Boolean).length + (hasReviewTab ? 1 : 0);
           if (tabCount >= 2) {
             return `
             <div class="detail-tabs">
               ${descSection ? '<button class="detail-tabs__btn detail-tabs__btn--active" data-tab="desc">상세설명</button>' : ''}
               ${episodeSection ? '<button class="detail-tabs__btn" data-tab="curriculum">커리큘럼</button>' : ''}
               ${bundleSection ? '<button class="detail-tabs__btn" data-tab="bundle">포함상품</button>' : ''}
+              ${hasReviewTab ? '<button class="detail-tabs__btn" data-tab="reviews">후기</button>' : ''}
             </div>
             <div class="detail-tab-content" id="tab-desc" ${descSection ? '' : 'style="display:none"'}>${descSection}</div>
             <div class="detail-tab-content" id="tab-curriculum" style="${descSection ? 'display:none' : ''}">${episodeSection}</div>
-            <div class="detail-tab-content" id="tab-bundle" style="display:none">${bundleSection}</div>`;
+            <div class="detail-tab-content" id="tab-bundle" style="display:none">${bundleSection}</div>
+            ${hasReviewTab ? '<div class="detail-tab-content" id="tab-reviews" style="display:none"><div id="review-section"></div></div>' : ''}`;
           }
-          return `${descSection}${episodeSection}${bundleSection}`;
+          return `${descSection}${episodeSection}${bundleSection}${hasReviewTab ? '<div id="review-section" style="margin-top:24px;"></div>' : ''}`;
         })()}
         ${refundHtml}
       `;
@@ -510,6 +498,26 @@
       if (!document.getElementById('tab-desc')?.innerHTML.trim()) {
         const firstBtn = contentEl.querySelector('.detail-tabs__btn');
         if (firstBtn) firstBtn.click();
+      }
+
+      // 후기 탭 로드
+      let reviewLoaded = false;
+      const reviewTab = contentEl.querySelector('.detail-tabs__btn[data-tab="reviews"]');
+      if (reviewTab) {
+        reviewTab.addEventListener('click', async () => {
+          if (reviewLoaded) return;
+          reviewLoaded = true;
+          const { initReviews } = await import('./js/data/review-ui.js');
+          await initReviews(productId, purchased);
+        });
+        // URL 해시로 후기 탭 자동 열기
+        if (location.hash === '#tab-reviews') {
+          reviewTab.click();
+        }
+      } else if (document.getElementById('review-section')) {
+        import('./js/data/review-ui.js').then(({ initReviews }) => {
+          initReviews(productId, purchased);
+        });
       }
     }
 

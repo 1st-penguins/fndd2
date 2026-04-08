@@ -744,12 +744,6 @@
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
       <span class="header__name">퍼스트펭귄</span>
     </a>
-    <nav class="header__nav">
-      <a href="notices.html" class="header__nav-link">공지사항</a>
-      <a href="cft.html" class="header__nav-link header__nav-link--cert">건강운동관리사</a>
-      <a href="si1.html" class="header__nav-link header__nav-link--cert">1급 스포츠지도사</a>
-      <a href="si2.html" class="header__nav-link header__nav-link--cert">2급 스포츠지도사</a>
-    </nav>
     <div class="header__right">
       <a href="#" class="header__login" id="header-login-btn">로그인</a>
       <button class="header__hamburger" id="hamburger" aria-label="메뉴">
@@ -765,7 +759,6 @@
     <a href="schedule.html" class="header__mobile-link">시험일정</a>
     <a href="kakao.html" class="header__mobile-link">오픈채팅</a>
     <div class="header__menu-divider"></div>
-
     <div class="header__menu-auth" id="menu-auth"></div>
   </div>
 
@@ -953,7 +946,7 @@
         html += `<div class="lecture-room__empty">
           <p>수강 중인 강의가 없습니다.</p>
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">
-            <a href="cft.html" style="color:#5FB2C9;font-size:14px;">건강운동관리사 강의 보기 →</a>
+            <a href="cft.html#tab-lecture" style="color:#5FB2C9;font-size:14px;">건강운동관리사 강의 보기 →</a>
           </div>
         </div>`;
       } else {
@@ -984,6 +977,12 @@
                 ${expiresHtml}
               </div>
               <span class="lecture-card__action">수강하기 →</span>
+            </a>
+            <a href="product-detail.html?id=${p.productId}#tab-reviews" class="lecture-card" style="border-top:1px solid rgba(255,255,255,0.08);border-radius:0 0 14px 14px;margin-top:-10px;padding:10px 16px;">
+              <div class="lecture-card__info" style="flex:1;">
+                <div class="lecture-card__meta" style="color:rgba(255,255,255,0.6);font-size:12px;">강의가 도움이 되셨나요?</div>
+              </div>
+              <span class="lecture-card__action" style="font-size:12px;">후기 작성 →</span>
             </a>`;
 
           // bundle이면 PDF 다운로드 링크 추가

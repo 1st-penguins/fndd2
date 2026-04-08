@@ -2697,3 +2697,71 @@
     height: 24px;
   }
 }
+
+/* ===== 정오표 탭 & 테이블 (학습분석 기록보기) ===== */
+.scorecard-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.scorecard-tabs .tab-button {
+  padding: 7px 14px;
+  background: #f5f5f7;
+  color: #86868b;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.scorecard-tabs .tab-button:hover {
+  background: #e8e8ed;
+  color: #1d1d1f;
+}
+.scorecard-tabs .tab-button.active {
+  background: #1d1d1f;
+  color: #fff;
+}
+.scorecard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.scorecard-table th {
+  background: #f5f5f7 !important;
+  border-bottom: 1px solid #e5e5e5 !important;
+  color: #86868b !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 10px 8px !important;
+  text-align: center !important;
+}
+.scorecard-table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+  color: #1d1d1f;
+}
+.scorecard-table tr:hover td {
+  background: #fafafa;
+}
+
+@media (max-width: 600px) {
+  .scorecard-tabs .tab-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .scorecard-table th,
+  .scorecard-table td {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+}

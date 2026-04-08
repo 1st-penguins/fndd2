@@ -60,6 +60,29 @@ exports.onNewInquiry = functions.region("asia-northeast3")
     }
   });
 
+// 새 리뷰 → 텔레그램 알림
+exports.onNewReview = functions.region("asia-northeast3")
+  .runWith({ secrets: ["TELEGRAM_BOT_TOKEN"] })
+  .firestore
+  .document("reviews/{reviewId}")
+  .onCreate(async (snap) => {
+    const data = snap.data();
+    const stars = "★".repeat(data.rating) + "☆".repeat(5 - data.rating);
+    const content = data.content.length > 100 ? data.content.substring(0, 100) + "..." : data.content;
+    const images = data.images && data.images.length ? `\n📷 사진 ${data.images.length}장` : "";
+    const text = `⭐ *새 후기 등록*\n\n` +
+      `📦 ${data.productId}\n` +
+      `${stars} (${data.rating}점)\n` +
+      `👤 ${data.authorRaw || data.author}\n\n` +
+      `${content}${images}`;
+
+    try {
+      await sendTelegram(text);
+    } catch (err) {
+      console.warn("리뷰 텔레그램 알림 실패:", err.message);
+    }
+  });
+
 // Firestore에 답변 저장 헬퍼
 async function saveReply(docRef, docData, replyText, replierName, messageId) {
   await docRef.update({

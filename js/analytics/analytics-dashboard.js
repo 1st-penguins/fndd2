@@ -7060,11 +7060,11 @@ function showMockExamScorecard(sessionId) {
         const thead = document.createElement('thead');
         thead.innerHTML = `
           <tr>
-            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #d0d9e6; background: #f0f5ff;">번호</th>
-            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #d0d9e6; background: #f0f5ff;">과목</th>
-            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #d0d9e6; background: #f0f5ff;">선택한 답</th>
-            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #d0d9e6; background: #f0f5ff;">정답</th>
-            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #d0d9e6; background: #f0f5ff;">결과</th>
+            <th>번호</th>
+            <th>과목</th>
+            <th>선택한 답</th>
+            <th>정답</th>
+            <th>결과</th>
           </tr>
         `;
         table.appendChild(thead);
@@ -7128,11 +7128,11 @@ function showMockExamScorecard(sessionId) {
           row.title = '클릭하면 해당 문제로 이동합니다.';
 
           row.innerHTML = `
-            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${displayNumber}</td>
-            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${attempt.questionData.subject}</td>
-            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${userAnswer}</td>
-            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${correctAnswer}</td>
-            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; font-weight: bold; color: ${isCorrect ? '#4CAF50' : '#F44336'};">
+            <td>${displayNumber}</td>
+            <td>${attempt.questionData.subject}</td>
+            <td>${userAnswer}</td>
+            <td>${correctAnswer}</td>
+            <td style="font-weight:600;color:${isCorrect ? '#34c759' : '#ff3b30'};">
               ${isCorrect ? '정답' : '오답'}
             </td>
           `;
@@ -7217,9 +7217,6 @@ function createScoreCardSummary(attempts) {
   const pointsPerQuestion = 5;
   const totalScore = correctAttempts * pointsPerQuestion;
 
-  // 채도를 낮춘 메인 색상
-  const mainColor = '#4b89dc'; // 기존 #1a73e8에서 채도를 낮춘 색상
-
   const subjectStats = {};
 
   attempts.forEach(attempt => {
@@ -7239,30 +7236,24 @@ function createScoreCardSummary(attempts) {
   });
 
   summaryDiv.innerHTML = `
-    <div class="scorecard-container" style="font-family: 'Arial', sans-serif; width: 100%; margin: 0 auto;">
-      <div style="border: 1px solid ${mainColor}; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-        <div style="margin-bottom: 8px; font-size: 13px; font-weight: 600; color: ${mainColor}; display: flex; justify-content: space-between; align-items: center;">
-          <span>총점</span>
-          <span style="font-size: 12px; color: #777;">${totalAttempts}문제 중 ${correctAttempts}문제 정답 (${accuracyPercent}%)</span>
+    <div style="width:100%;">
+      <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-size:13px;font-weight:600;color:#86868b;">총점</span>
+          <span style="font-size:12px;color:#aeaeb2;">${totalAttempts}문제 중 ${correctAttempts}문제 정답</span>
         </div>
-        <div style="display: flex; align-items: center;">
-          <div style="margin-right: 20px;">
-            <div style="font-size: 34px; font-weight: 700; color: ${mainColor}; line-height: 1;">${totalScore}점</div>
-          </div>
-          <div style="flex: 1;">
-            <div style="height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden;">
-              <div style="height: 100%; width: ${accuracyPercent}%; background: ${mainColor}; border-radius: 4px;"></div>
-            </div>
-          </div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px;">
+          <span style="font-size:36px;font-weight:700;color:#1d1d1f;line-height:1;">${totalScore}</span>
+          <span style="font-size:14px;color:#86868b;">점</span>
+          <span style="font-size:14px;color:#1d1d1f;font-weight:600;margin-left:auto;">${accuracyPercent}%</span>
+        </div>
+        <div style="height:6px;background:#e5e5e5;border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${accuracyPercent}%;background:#1d1d1f;border-radius:3px;transition:width 0.3s;"></div>
         </div>
       </div>
-      
-      <div style="border: 1px solid ${mainColor}; border-radius: 8px; padding: 12px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-        <div style="margin-bottom: 8px; font-size: 13px; font-weight: 600; color: ${mainColor};">과목별 점수</div>
-        
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-gap: 12px;">
-          ${createCompactSubjectGrid(subjectStats, pointsPerQuestion)}
-        </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+        ${createCompactSubjectGrid(subjectStats, pointsPerQuestion)}
       </div>
     </div>
   `;
@@ -7273,11 +7264,10 @@ function createScoreCardSummary(attempts) {
 function createCompactSubjectGrid(subjectStats, pointsPerQuestion = 5) {
   let html = '';
 
-  // 채도를 낮춘 점수 색상들
   const scoreColors = {
-    high: '#5cb85c',   // 녹색 (높은 점수)
-    medium: '#f0ad4e', // 노란색 (중간 점수)
-    low: '#d9534f'     // 빨간색 (낮은 점수)
+    high: '#1d1d1f',
+    medium: '#86868b',
+    low: '#ff3b30'
   };
 
   // 과목 순서 정의 (지정된 순서대로 표시)
@@ -7308,14 +7298,14 @@ function createCompactSubjectGrid(subjectStats, pointsPerQuestion = 5) {
 
     // 과목 카드 HTML 생성
     const subjectHtml = `
-      <div style="background: #f9f9f9; border-radius: 6px; padding: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
-        <div style="margin-bottom: 2px; font-size: 12px; color: #444;">${subject}</div>
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px;">
-          <div style="font-size: 24px; font-weight: 700; color: ${scoreColor};">${subjectScore}점</div>
-          <div style="color: #777; font-size: 11px;">(${stats.correct}/${stats.total})</div>
+      <div style="background:#f5f5f7;border-radius:10px;padding:12px;">
+        <div style="font-size:12px;color:#86868b;margin-bottom:4px;">${subject}</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+          <span style="font-size:20px;font-weight:700;color:${scoreColor};">${subjectScore}점</span>
+          <span style="font-size:11px;color:#aeaeb2;">${stats.correct}/${stats.total}</span>
         </div>
-        <div style="height: 6px; background: #e8e8e8; border-radius: 3px; overflow: hidden;">
-          <div style="height: 100%; width: ${subjectAccuracy}%; background-color: ${scoreColor}; border-radius: 3px;"></div>
+        <div style="height:4px;background:#e5e5e5;border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${subjectAccuracy}%;background:${scoreColor};border-radius:2px;"></div>
         </div>
       </div>
     `;
@@ -7354,68 +7344,49 @@ function addScorecardModalStyles() {
       .mockexam-scorecard-content {
         background-color: white;
         border-radius: 16px;
-        padding: 28px;
+        padding: 24px;
         width: 92%;
-        max-width: 950px;
+        max-width: 600px;
         max-height: 90vh;
         overflow-y: auto;
         position: relative;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+      .mockexam-scorecard-content h3 {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1d1d1f;
+        margin-bottom: 16px;
       }
       
       .scorecard-summary {
-        background-color: #f5f8ff;
         border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 28px;
-        border-left: 4px solid #4285F4;
+        margin-bottom: 20px;
       }
       
-      .scorecard-table th {
-        background-color: #f0f5ff;
-        padding: 12px 16px;
-        text-align: left;
-        border-bottom: 2px solid #d0d9e6;
-        font-weight: 600;
-      }
-      
-      .scorecard-table td {
-        padding: 12px 16px;
-        border-bottom: 1px solid #eaedf2;
-      }
-      
-      .scorecard-table .correct-row {
-        background-color: rgba(76, 175, 80, 0.05);
-      }
-      
-      .scorecard-table .incorrect-row {
-        background-color: rgba(244, 67, 54, 0.05);
-      }
-      
-      .scorecard-table .correct {
-        color: #2E7D32;
-        font-weight: 600;
-      }
-      
-      .scorecard-table .incorrect {
-        color: #C62828;
-        font-weight: 600;
-      }
-      
+      .scorecard-table .correct-row td { background: rgba(52,199,89,0.04); }
+      .scorecard-table .incorrect-row td { background: rgba(255,59,48,0.04); }
+
       .modal-close-button {
         position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 24px;
-        background: none;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+        background: #f5f5f7;
         border: none;
+        border-radius: 50%;
         cursor: pointer;
-        color: #666;
-        transition: color 0.3s;
+        color: #86868b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
       }
-      
       .modal-close-button:hover {
-        color: #333;
+        background: #e5e5e5;
+        color: #1d1d1f;
       }
       
       .overall-accuracy {

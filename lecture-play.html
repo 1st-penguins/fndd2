@@ -289,18 +289,11 @@
     }
   </style>
 </head>
-<body>
-  <header class="header" id="header">
+<body>  <header class="header" id="header">
     <a href="index.html" class="header__brand">
       <img src="/images/firstpenguin-logo3.png" alt="퍼스트펭귄" class="header__logo">
       <span class="header__name">퍼스트펭귄</span>
     </a>
-    <nav class="header__nav">
-      <a href="notices.html" class="header__nav-link">공지사항</a>
-      <a href="cft.html" class="header__nav-link header__nav-link--cert">건강운동관리사</a>
-      <a href="si1.html" class="header__nav-link header__nav-link--cert">1급 스포츠지도사</a>
-      <a href="si2.html" class="header__nav-link header__nav-link--cert">2급 스포츠지도사</a>
-    </nav>
     <div class="header__right">
       <a href="#" class="header__login" id="header-login-btn">로그인</a>
       <button class="header__hamburger" id="hamburger" aria-label="메뉴">
@@ -754,6 +747,28 @@
 
         // 로컬 캐시도 업데이트
         progressMap[ep.episode] = { ...progressMap[ep.episode], ...data };
+
+        // 마지막 강의 완료 시 후기 안내
+        if (percent >= 90 && !window._reviewPromptShown) {
+          const allCompleted = episodes.every(e => {
+            const p = progressMap[e.episode];
+            return p && p.progress >= 90;
+          });
+          if (allCompleted) {
+            window._reviewPromptShown = true;
+            const banner = document.createElement('div');
+            banner.id = 'review-prompt-banner';
+            banner.innerHTML = `
+              <div style="position:fixed;bottom:0;left:0;right:0;background:#1D2F4E;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;z-index:9999;box-shadow:0 -2px 12px rgba(0,0,0,0.15);">
+                <span style="font-size:14px;">모든 강의를 완료하셨습니다! 후기를 남겨주세요</span>
+                <div style="display:flex;gap:8px;">
+                  <a href="product-detail.html?id=${productId}#tab-reviews" style="padding:8px 16px;background:#5FB2C9;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">후기 작성</a>
+                  <button onclick="this.closest('#review-prompt-banner').remove()" style="padding:8px 12px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;">닫기</button>
+                </div>
+              </div>`;
+            document.body.appendChild(banner);
+          }
+        }
       } catch (error) {
         console.error('진도율 저장 오류:', error);
       }
