@@ -79,11 +79,6 @@
   text-decoration: none;
   transition: all 0.2s;
   white-space: nowrap;
-  opacity: 0;
-}
-
-.header__login.auth-ready {
-  opacity: 1;
 }
 
 .header__login:hover {

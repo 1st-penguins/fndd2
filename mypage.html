@@ -400,8 +400,8 @@
     .payment-card__status {
       font-size: 12px;
       font-weight: 500;
-      color: #34c759;
-      background: rgba(52, 199, 89, 0.08);
+      color: #1D2F4E;
+      background: rgba(29, 47, 78, 0.08);
       padding: 3px 10px;
       border-radius: 12px;
     }
@@ -590,6 +590,130 @@
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* -- 내 문의 내역 -- */
+    .inquiry-card {
+      background: #f9f9fb;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .inquiry-card__summary {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      cursor: pointer;
+      gap: 12px;
+      transition: background 0.15s;
+    }
+
+    .inquiry-card__summary:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .inquiry-card__badge {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .inquiry-card__badge--pending {
+      background: rgba(255, 149, 0, 0.1);
+      color: #ff9500;
+    }
+
+    .inquiry-card__badge--answered {
+      background: rgba(29, 47, 78, 0.08);
+      color: #1D2F4E;
+    }
+
+    .inquiry-card__badge--new {
+      background: rgba(255, 59, 48, 0.1);
+      color: #ff3b30;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .inquiry-card__title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d1d1f;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .inquiry-card__date {
+      font-size: 12px;
+      color: #aeaeb2;
+      white-space: nowrap;
+    }
+
+    .inquiry-card__chevron {
+      font-size: 10px;
+      color: #c7c7cc;
+      transition: transform 0.2s;
+    }
+
+    .inquiry-card--open .inquiry-card__chevron {
+      transform: rotate(180deg);
+    }
+
+    .inquiry-card__expand {
+      display: none;
+      padding: 0 16px 16px;
+    }
+
+    .inquiry-card--open .inquiry-card__expand {
+      display: block;
+    }
+
+    .inquiry-card__content {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #3a3a3c;
+      padding: 12px 0 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .inquiry-card__reply-wrap {
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .inquiry-card__reply-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #86868b;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .inquiry-card__reply {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #1d1d1f;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .inquiry-card__reply-date {
+      font-size: 11px;
+      color: #aeaeb2;
+      margin-top: 8px;
     }
 
     /* -- 회원탈퇴 -- */
@@ -1106,6 +1230,11 @@
       }
       html += '</div>';
 
+      // ── 내 문의 내역 ──
+      html += '<div class="mypage-section"><h2 class="section__title">내 문의 내역</h2>';
+      html += '<div id="my-inquiries-container"><div class="loading-state"><div class="loading-spinner"></div><span>문의 내역을 불러오는 중...</span></div></div>';
+      html += '</div>';
+
       html += `
         <div class="danger-zone">
           <button class="delete-account-btn" id="deleteAccountBtn">회원탈퇴</button>
@@ -1117,7 +1246,90 @@
       const content = document.getElementById('mypage-content');
       content.innerHTML = html;
       content.style.display = 'block';
+
+      // ── 내 문의 내역 로드 (비동기) ──
+      loadMyInquiries();
     }
+
+    async function loadMyInquiries() {
+      const container = document.getElementById('my-inquiries-container');
+      if (!container) return;
+
+      try {
+        const { getMyInquiries, markReplyAsRead } = await import('./js/data/inquiry-repository.js');
+        const inquiries = await getMyInquiries(30);
+
+        if (inquiries.length === 0) {
+          container.innerHTML = `<div class="empty-state">
+            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <p>문의 내역이 없습니다.</p>
+          </div>`;
+          return;
+        }
+
+        let listHtml = '';
+        for (const inq of inquiries) {
+          const date = inq.createdAt instanceof Date
+            ? inq.createdAt.toLocaleDateString('ko-KR')
+            : (inq.createdAt?.toDate ? inq.createdAt.toDate().toLocaleDateString('ko-KR') : '-');
+
+          const isAnswered = inq.status === 'answered' && inq.adminReply;
+          const isUnread = isAnswered && !inq.replyReadAt;
+
+          let badgeHtml;
+          if (isUnread) {
+            badgeHtml = '<span class="inquiry-card__badge inquiry-card__badge--new">NEW</span>';
+          } else if (isAnswered) {
+            badgeHtml = '<span class="inquiry-card__badge inquiry-card__badge--answered">답변완료</span>';
+          } else {
+            badgeHtml = '<span class="inquiry-card__badge inquiry-card__badge--pending">대기중</span>';
+          }
+
+          let replyHtml = '';
+          if (isAnswered) {
+            const replyDate = inq.adminReplyAt instanceof Date
+              ? inq.adminReplyAt.toLocaleDateString('ko-KR')
+              : (inq.adminReplyAt?.toDate ? inq.adminReplyAt.toDate().toLocaleDateString('ko-KR') : '');
+            replyHtml = `
+              <div class="inquiry-card__reply-wrap">
+                <div class="inquiry-card__reply-label">관리자 답변</div>
+                <div class="inquiry-card__reply">${inq.adminReply}</div>
+                <div class="inquiry-card__reply-date">${replyDate}</div>
+              </div>`;
+          }
+
+          const title = (inq.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const content = (inq.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+          listHtml += `
+            <div class="inquiry-card" data-inquiry-id="${inq.id}" data-unread="${isUnread}">
+              <div class="inquiry-card__summary" onclick="this.parentElement.classList.toggle('inquiry-card--open');if(this.parentElement.dataset.unread==='true'){this.parentElement.dataset.unread='false';markInquiryRead('${inq.id}');this.querySelector('.inquiry-card__badge--new')?.classList.replace('inquiry-card__badge--new','inquiry-card__badge--answered');const b=this.querySelector('.inquiry-card__badge');if(b)b.textContent='답변완료';}">
+                ${badgeHtml}
+                <span class="inquiry-card__title">${title}</span>
+                <span class="inquiry-card__date">${date}</span>
+                <span class="inquiry-card__chevron">▼</span>
+              </div>
+              <div class="inquiry-card__expand">
+                <div class="inquiry-card__content">${content}</div>
+                ${replyHtml}
+              </div>
+            </div>`;
+        }
+
+        container.innerHTML = listHtml;
+
+        // 읽음 처리 함수를 전역에 등록
+        window.markInquiryRead = async function(id) {
+          try { await markReplyAsRead(id); } catch (e) { console.warn('읽음 처리 실패:', e); }
+        };
+      } catch (e) {
+        console.error('문의 내역 로드 실패:', e);
+        container.innerHTML = '<div class="empty-state"><p>문의 내역을 불러올 수 없습니다.</p></div>';
+      }
+    }
+
     // ── 회원 탈퇴 ──
     document.addEventListener('click', (e) => {
       if (e.target.id === 'deleteAccountBtn') {

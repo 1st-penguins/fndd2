@@ -2535,41 +2535,7 @@
   <!-- 로그인 모달 + 상태 관리 -->
   <script type="module">
     import { showLoginModal } from './js/auth/auth-ui.js';
-    import { ensureFirebase } from './js/core/firebase-core.js';
-
-    let isLoggedIn = false;
-
-    document.getElementById('header-login-btn').addEventListener('click', (e) => {
-      e.preventDefault();
-      if (!isLoggedIn) showLoginModal();
-      else window.location.href = 'mypage.html';
-    });
-    document.getElementById('mobile-login-btn').addEventListener('click', (e) => {
-      e.preventDefault();
-      if (!isLoggedIn) showLoginModal();
-      else window.location.href = 'mypage.html';
-    });
-
-    (async () => {
-      try {
-        const { auth } = await ensureFirebase();
-        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
-        onAuthStateChanged(auth, (user) => {
-          const headerBtn = document.getElementById('header-login-btn');
-          const mobileBtn = document.getElementById('mobile-login-btn');
-          if (user) {
-            isLoggedIn = true;
-            const name = user.displayName || user.email?.split('@')[0] || '마이페이지';
-            headerBtn.textContent = name;
-            mobileBtn.textContent = '마이페이지';
-          } else {
-            isLoggedIn = false;
-            headerBtn.textContent = '로그인';
-            mobileBtn.textContent = '로그인';
-          }
-        });
-      } catch (e) { console.error(e); }
-    })();
+    window.showLoginModal = showLoginModal;
   </script>
 
 </body>

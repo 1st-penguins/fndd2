@@ -224,7 +224,7 @@ exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (
     allPurchases.forEach(doc => {
       const d = doc.data();
       if (d.paymentMethod === "리틀리 이전") return;
-      const amount = d.finalAmount || d.purchaseAmount || 0;
+      const amount = d.finalAmount != null ? d.finalAmount : (d.purchaseAmount || 0);
       if (amount <= 0) return;
       totalHomepageRevenue += amount;
 

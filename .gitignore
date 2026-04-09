@@ -5,3 +5,4 @@ functions/.env
 .claude/settings.local.json
 .firebase/hosting..cache
 scripts/gmail-to-telegram.gs
+리틀리 주문 - Sheet1.csv

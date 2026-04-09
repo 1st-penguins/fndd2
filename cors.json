@@ -1,0 +1,7 @@
+[
+  {
+    "origin": ["https://the1stpeng.com"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  }
+]

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="css/apple-header.css">
   <link rel="stylesheet" href="css/login.css">
   <link rel="stylesheet" href="css/apple-footer.css">
-  <link rel="stylesheet" href="css/shop.css">
+  <link rel="stylesheet" href="css/shop.css?v=20260409m">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -236,7 +236,7 @@
           } catch (e) { console.warn('진도율 조회 실패:', e); }
         }
 
-        renderDetail(product, episodes, bundleProducts, purchased, progressMap, expired);
+        await renderDetail(product, episodes, bundleProducts, purchased, progressMap, expired);
 
       } catch (error) {
         console.error('상품 상세 로드 오류:', error);
@@ -247,7 +247,7 @@
     // 상세 이미지 갤러리 매핑 (productId → 폴더명, 이미지 수)
     const GALLERY_MAP = {
       video_health:    { folder: '건강체력평가 정규강의', count: 7 },
-      video_calc:      { folder: '계산문제 특별강의', count: 7 },
+      video_calc:      { folder: '계산문제 특강', count: 8 },
       pdf_anatomy:     { folder: '기능해부학 요약본', count: 6 },
       video_anatomy:   { folder: '기능해부학 정규강의', count: 12 },
       pdf_patho:       { folder: '병태생리학 요약본', count: 5 },
@@ -263,7 +263,7 @@
       pdf_si2_package: { folder: '2급 생체 7일패키지', count: 10, ext: 'jpg' },
     };
 
-    function renderDetail(product, episodes, bundleProducts, purchased, progressMap = {}, expired = false) {
+    async function renderDetail(product, episodes, bundleProducts, purchased, progressMap = {}, expired = false) {
       const TYPE_LABELS = { video: '강의', pdf: '자료', ppt: '자료', bundle: '패키지', package: '패키지' };
 
       const typeLabel = TYPE_LABELS[product.type] || product.type;
@@ -273,12 +273,12 @@
       const gallery = GALLERY_MAP[productId];
       let galleryImages = [];
       if (gallery) {
-        const thumbSrc0 = product.thumbnailUrl || product.thumbnail;
-        if (thumbSrc0) galleryImages.push(thumbSrc0);
         const base = `/images/products/건강운동관리사 썸네일/${gallery.folder}`;
         const ext = gallery.ext || 'webp';
+        const thumbSrc0 = product.thumbnailUrl || product.thumbnail;
+        if (thumbSrc0) galleryImages.push(thumbSrc0);
         for (let i = 1; i <= gallery.count; i++) {
-          galleryImages.push(`${base}/${i}.${ext}`);
+          galleryImages.push(`${base}/${i}.${ext}?v=20260409b`);
         }
       }
 
@@ -287,13 +287,13 @@
       let thumbHtml;
       if (galleryImages.length > 0) {
         const thumbItems = galleryImages.map((src, i) =>
-          `<div class="gallery__thumb ${i === 0 ? 'gallery__thumb--active' : ''}" data-index="${i}"><img src="${src}" alt="${i + 1}" loading="lazy"></div>`
+          `<div class="gallery__thumb ${i === 0 ? 'gallery__thumb--active' : ''}" data-index="${i}"><img src="${src}" alt="${i + 1}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
         ).join('');
         thumbHtml = `
           <div class="gallery">
             <div class="gallery__main">
               <img id="gallery-bg-img" class="gallery__bg" src="${galleryImages[0]}" alt="" aria-hidden="true">
-              <img id="gallery-main-img" class="gallery__img" src="${galleryImages[0]}" alt="${product.title}">
+              <img id="gallery-main-img" class="gallery__img" src="${galleryImages[0]}" alt="${product.title}" onerror="if(this.src!=='${thumbSrc}')this.src='${thumbSrc}'">
               <button class="gallery__arrow gallery__arrow--prev" aria-label="이전">&#8249;</button>
               <button class="gallery__arrow gallery__arrow--next" aria-label="다음">&#8250;</button>
               <div class="gallery__counter"><span id="gallery-index">1</span> / ${galleryImages.length}</div>
@@ -446,7 +446,7 @@
         descSection = `
           <div class="detail-section">
             <h3 class="detail-section__title">상세 설명</h3>
-            <div class="detail-section__content">${product.detailDescription.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#059669;text-decoration:underline;">$1</a>')}</div>
+            <div class="detail-section__content">${product.detailDescription.replace(/\n/g, '<br>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#059669;text-decoration:underline;">$1</a>')}</div>
           </div>
         `;
       }

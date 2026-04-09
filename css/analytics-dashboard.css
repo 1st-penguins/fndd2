@@ -834,7 +834,6 @@
   align-items: center;
   padding: 22px 32px;
   background: linear-gradient(135deg, #1D2F4E 0%, #2a4570 100%);
-  border-radius: 24px 24px 0 0;
   flex-shrink: 0;
 }
 

@@ -428,9 +428,11 @@
    ============================================================ */
 
 .detail-container {
+  width: 100%;
   max-width: 960px;
   margin: 72px auto 60px;
   padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .detail-back {
@@ -456,16 +458,20 @@
   align-items: start;
   gap: 28px;
   margin-bottom: 36px;
+  min-width: 0;
 }
+
 
 .detail-thumb {
   width: 100%;
+  min-width: 100%;
+  min-height: 300px;
   border-radius: 16px;
   overflow: hidden;
   background: #f5f5f7;
 }
 
-.detail-thumb img {
+.detail-thumb > img {
   width: 100%;
   height: auto;
   display: block;
@@ -504,9 +510,10 @@
 }
 
 .gallery__img {
-  position: relative;
-  max-width: 100%;
-  max-height: 100%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   z-index: 1;
 }
@@ -971,7 +978,7 @@
 /* ===== 상세페이지 반응형 ===== */
 @media (min-width: 768px) {
   .detail-top {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 40px;
   }
 

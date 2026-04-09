@@ -2,9 +2,36 @@
  * Apple-style Header — 햄버거 메뉴 + 로그인 상태 + 관리자 메뉴
  */
 (function () {
-  // Auth 확인 전까지 텍스트 숨기기
+  // localStorage 캐시로 즉시 헤더 상태 반영 (깜빡임 방지)
   const _initLoginBtn = document.getElementById('header-login-btn');
-  if (_initLoginBtn) _initLoginBtn.textContent = '';
+  const _cachedLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+  const _cachedName = localStorage.getItem('userName');
+  if (_initLoginBtn && _cachedLoggedIn && _cachedName) {
+    _initLoginBtn.textContent = _cachedName;
+    const _p = window.location.pathname;
+    const _sub = _p.includes('/exam/') || _p.includes('/exam-new') || _p.includes('/admin/') ||
+      _p.includes('/notices/') || _p.includes('/subjects') || _p.includes('/years');
+    _initLoginBtn.href = (_sub ? '../' : '') + 'mypage.html';
+  }
+  if (_initLoginBtn) {
+    _initLoginBtn.addEventListener('click', function (e) {
+      // 로그인 상태면 마이페이지 이동 (updateHeaderAuth에서 href 교체됨)
+      if (_initLoginBtn.href && !_initLoginBtn.href.endsWith('#') && !_initLoginBtn.href.endsWith('login.html')) {
+        return; // 기본 href 동작 (mypage.html)
+      }
+      e.preventDefault();
+      if (typeof window.showLoginModal === 'function') {
+        window.showLoginModal();
+      } else {
+        // auth-ui.js가 아직 안 불러와졌으면 lazy import (페이지 depth에 따라 경로 결정)
+        const authPath = prefix + 'js/auth/auth-ui.js';
+        import(authPath).catch(() => {});
+        setTimeout(() => {
+          if (typeof window.showLoginModal === 'function') window.showLoginModal();
+        }, 500);
+      }
+    });
+  }
 
   const hamburger = document.getElementById('hamburger');
   const menu = document.getElementById('mobile-menu');
@@ -43,7 +70,6 @@
 
     // 헤더 로그인 pill 버튼
     if (loginBtn) {
-      loginBtn.classList.add('auth-ready');
       if (isLoggedIn) {
         loginBtn.textContent = userName;
         loginBtn.href = prefix + 'mypage.html';

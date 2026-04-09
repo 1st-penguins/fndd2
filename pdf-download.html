@@ -360,6 +360,22 @@
           </button>
         </div>
 
+        <!-- 11판/12판 동시 제공 상품용 -->
+        <div id="dual-download" style="display:none;">
+          <p style="font-size:13px; color:#6e6e73; margin-bottom:16px; line-height:1.6;">
+            정규 강의 수강 시 → <strong>11판 요약본</strong><br>
+            강의 완강 후 개정 대비 → <strong>12판 요약본</strong> (파란색 글씨 = 변경 내용)
+          </p>
+          <div style="display:flex; gap:10px; max-width:360px; margin:0 auto;">
+            <button id="download-btn-11th" class="download-btn" style="flex:1; margin-top:0;">
+              11판 다운로드
+            </button>
+            <button id="download-btn-12th" class="download-btn" style="flex:1; margin-top:0; background:#1D2F4E;">
+              12판 다운로드
+            </button>
+          </div>
+        </div>
+
         <!-- 번들 상품용 파일 목록 -->
         <div id="bundle-download" style="display:none;">
           <div id="bundle-file-list" class="bundle-file-list"></div>
@@ -647,14 +663,43 @@
             downloadBtn.textContent = `다운로드 시작 (${window._remainingDownloads}/${MAX_DOWNLOADS}회 남음)`;
           }
 
-          downloadBtn.addEventListener('click', async () => {
-            if (!product.fileUrl) { alert('다운로드 URL이 설정되지 않았습니다.'); return; }
-            const ext = product.fileUrl.includes('.zip') ? 'zip' : 'pdf';
-            const ok = await downloadFile(product.fileUrl, `${product.title}.${ext}`, user.email, downloadBtn);
-            if (ok) {
-              try { await recordPdfDownload(productId); } catch(e) { console.warn('기록 실패:', e); }
+          if (product.fileUrl12th) {
+            // 11판/12판 동시 제공
+            document.getElementById('single-download').style.display = 'none';
+            document.getElementById('dual-download').style.display = 'block';
+
+            const btn11 = document.getElementById('download-btn-11th');
+            const btn12 = document.getElementById('download-btn-12th');
+            const remaining = window._remainingDownloads;
+            if (remaining !== undefined) {
+              btn11.textContent = `11판 다운로드 (${remaining}/${MAX_DOWNLOADS}회)`;
+              btn12.textContent = `12판 다운로드 (${remaining}/${MAX_DOWNLOADS}회)`;
             }
-          });
+
+            btn11.addEventListener('click', async () => {
+              if (!product.fileUrl) { alert('다운로드 URL이 설정되지 않았습니다.'); return; }
+              const ok = await downloadFile(product.fileUrl, `${product.title} (11판).pdf`, user.email, btn11);
+              if (ok) {
+                try { await recordPdfDownload(productId); } catch(e) { console.warn('기록 실패:', e); }
+              }
+            });
+
+            btn12.addEventListener('click', async () => {
+              const ok = await downloadFile(product.fileUrl12th, `${product.title} (12판).pdf`, user.email, btn12);
+              if (ok) {
+                try { await recordPdfDownload(productId); } catch(e) { console.warn('기록 실패:', e); }
+              }
+            });
+          } else {
+            downloadBtn.addEventListener('click', async () => {
+              if (!product.fileUrl) { alert('다운로드 URL이 설정되지 않았습니다.'); return; }
+              const ext = product.fileUrl.includes('.zip') ? 'zip' : 'pdf';
+              const ok = await downloadFile(product.fileUrl, `${product.title}.${ext}`, user.email, downloadBtn);
+              if (ok) {
+                try { await recordPdfDownload(productId); } catch(e) { console.warn('기록 실패:', e); }
+              }
+            });
+          }
         }
 
         document.getElementById('loading').style.display = 'none';

@@ -77,7 +77,7 @@ export async function initAuth() {
     let prevAuthState = undefined;
 
     // 인증 상태 변경 감지
-    onAuthStateChanged(authInstance, (user) => {
+    onAuthStateChanged(authInstance, async (user) => {
       // auth 상태가 최소 1회 확정되었음을 전역 플래그로 기록
       if (typeof window !== 'undefined') {
         window.__authStateResolved = true;
