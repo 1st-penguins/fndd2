@@ -16,7 +16,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 import { isInAppBrowser, handleExternalBrowserRedirect } from "../utils/browser-redirect.js";
-import { auth as coreAuth, ensureFirebase } from "../core/firebase-core.js";
+import { auth as coreAuth, db as coreDb, ensureFirebase } from "../core/firebase-core.js";
 import {
   isAdmin,
   setLoggedIn,
@@ -89,6 +89,29 @@ export async function initAuth() {
       prevAuthState = isLoggedIn;
 
       if (user) {
+        // 탈퇴 후 24시간 이내 재가입 차단
+        try {
+          const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+          const snap = await getDocs(query(
+            collection(coreDb, 'deletedUsers'),
+            where('email', '==', user.email)
+          ));
+          if (!snap.empty) {
+            const latest = snap.docs
+              .map(d => d.data().deletedAt?.toDate())
+              .filter(Boolean)
+              .sort((a, b) => b - a)[0];
+            if (latest && (Date.now() - latest.getTime()) < 24 * 60 * 60 * 1000) {
+              const hours = Math.ceil((24 * 60 * 60 * 1000 - (Date.now() - latest.getTime())) / (60 * 60 * 1000));
+              alert(`탈퇴 후 24시간 이내에는 재가입할 수 없습니다.\n약 ${hours}시간 후에 다시 시도해주세요.`);
+              await signOut(authInstance);
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('[auth] 탈퇴 체크 실패:', e.message);
+        }
+
         // 로그인 상태 저장
         setLoggedIn(user);
 

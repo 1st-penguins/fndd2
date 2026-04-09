@@ -35,13 +35,17 @@
 - 상품 ID → 표시 이름 매핑
 - 새 상품 추가 시 여기에도 등록해야 마이페이지에서 이름이 제대로 나옴
 
-### 5. Firestore `episodes` 컬렉션 (영상 강의인 경우)
+### 5. `admin/dashboard.html` — `PN` 객체
+- 관리자 대시보드 상품 ID → 표시 이름 매핑
+- 새 상품 추가 시 여기에도 등록해야 대시보드에서 ID 대신 이름이 표시됨
+
+### 6. Firestore `episodes` 컬렉션 (영상 강의인 경우)
 - 에피소드 ID 패턴: `{productId}_ep{번호(2자리)}`
 - Vimeo: `vimeoId` 필드
 - YouTube: `youtubeId` 필드
 - 챕터: `chapters` 배열 `[{ time: 초, title: '제목' }]`
 
-### 6. Firebase Storage (PDF/자료인 경우)
+### 7. Firebase Storage (PDF/자료인 경우)
 - 경로: `products/파일명.pdf`
 - **업로드 후 반드시 다운로드 토큰 생성** (안 하면 403 에러)
 - URL 형식: `https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2F파일명.pdf?alt=media&token=xxx`

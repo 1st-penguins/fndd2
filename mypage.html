@@ -1146,9 +1146,13 @@
 
       try {
         const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js');
+        const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
         const functions = getFunctions(undefined, 'asia-northeast3');
         const deleteAccount = httpsCallable(functions, 'deleteAccount');
         await deleteAccount();
+
+        // 클라이언트 Auth 상태도 정리 (캐시 토큰 제거)
+        try { await signOut(getAuth()); } catch (_) {}
 
         document.getElementById('deleteModal').classList.remove('active');
         alert('회원 탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');

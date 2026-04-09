@@ -262,6 +262,20 @@
   gap: 3px;
 }
 
+/* 리뷰 별점 */
+.shop-card__review {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f59e0b;
+  margin-bottom: 8px;
+}
+
+.shop-card__review-count {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
 /* 가격 */
 .shop-card__footer {
   display: flex;

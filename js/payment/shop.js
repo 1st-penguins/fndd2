@@ -36,6 +36,7 @@ const FILTER_TYPE_MAP = {
 // 캐시
 let productsCache = null;
 let purchasesCache = null;
+let reviewStatsCache = null;
 
 /**
  * 상품 목록 로드 (Firestore)
@@ -108,6 +109,41 @@ async function loadPurchases() {
 }
 
 /**
+ * 상품별 리뷰 통계 로드 (평균 별점, 리뷰 수)
+ */
+async function loadReviewStats() {
+  if (reviewStatsCache) return reviewStatsCache;
+  if (!db) {
+    const firebase = await ensureFirebase();
+    db = firebase.db;
+  }
+
+  try {
+    const q = query(
+      collection(db, 'reviews'),
+      where('status', '==', 'active')
+    );
+    const snapshot = await getDocs(q);
+    const stats = {};
+    snapshot.docs.forEach(d => {
+      const { productId, rating } = d.data();
+      if (!stats[productId]) stats[productId] = { total: 0, count: 0 };
+      stats[productId].total += rating;
+      stats[productId].count++;
+    });
+    // 평균 계산
+    for (const pid of Object.keys(stats)) {
+      stats[pid].average = Math.round((stats[pid].total / stats[pid].count) * 10) / 10;
+    }
+    reviewStatsCache = stats;
+    return stats;
+  } catch (error) {
+    console.error('리뷰 통계 로드 오류:', error);
+    return {};
+  }
+}
+
+/**
  * 상품이 구매되었는지 확인
  */
 function isPurchased(productId, purchases) {
@@ -133,7 +169,7 @@ function calcDiscount(original, current) {
 /**
  * 상품 카드 HTML 생성
  */
-function renderCard(product, purchased) {
+function renderCard(product, purchased, reviewStat) {
   const typeLabel = TYPE_LABELS[product.type] || product.type;
   const typeIcon = TYPE_ICONS[product.type] || '📦';
   const badgeClass = `shop-card__badge--${product.type}`;
@@ -196,6 +232,7 @@ function renderCard(product, purchased) {
         <div class="shop-card__title">${product.title}</div>
         <div class="shop-card__desc">${product.description || ''}</div>
         ${metaHtml ? `<div class="shop-card__meta">${metaHtml}</div>` : ''}
+        ${reviewStat ? `<div class="shop-card__review">★ ${reviewStat.average} <span class="shop-card__review-count">(${reviewStat.count})</span></div>` : ''}
         <div class="shop-card__footer">${priceHtml}</div>
       </div>
     </a>
@@ -219,9 +256,10 @@ async function renderShop(category, typeFilter = 'all') {
   `;
   if (emptyEl) emptyEl.style.display = 'none';
 
-  const [products, purchases] = await Promise.all([
+  const [products, purchases, reviewStats] = await Promise.all([
     loadProducts(),
-    loadPurchases()
+    loadPurchases(),
+    loadReviewStats()
   ]);
 
   // 필터링: 카테고리
@@ -245,7 +283,7 @@ async function renderShop(category, typeFilter = 'all') {
 
   if (emptyEl) emptyEl.style.display = 'none';
   grid.innerHTML = filtered.map(p =>
-    renderCard(p, isPurchased(p.id, purchases))
+    renderCard(p, isPurchased(p.id, purchases), reviewStats[p.id])
   ).join('');
 }
 
@@ -255,6 +293,7 @@ async function renderShop(category, typeFilter = 'all') {
 function clearCache() {
   productsCache = null;
   purchasesCache = null;
+  reviewStatsCache = null;
 }
 
 /**

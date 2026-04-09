@@ -25,7 +25,7 @@ const CERT_CONFIG = {
     ]
   },
   'sports-instructor': {
-    label: '생활스포츠지도사',
+    label: '2급 스포츠지도사',
     dataDir: 'data/sports',
     years: ['2021', '2022', '2023', '2024', '2025'],
     subjects: [
