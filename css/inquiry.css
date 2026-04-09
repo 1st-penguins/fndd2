@@ -312,6 +312,22 @@
   color: #adb5bd;
 }
 
+/* 안읽은 답변 */
+.inquiry-item--unread {
+  border-color: #5FB2C9;
+  background: #f0f9ff;
+}
+
+.inquiry-item__new {
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  background: #e03131;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 4px;
+}
+
 /* 문의 상세 */
 .inquiry-detail {
   display: flex;

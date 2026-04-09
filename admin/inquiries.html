@@ -360,7 +360,8 @@
 
       listEl.innerHTML = filtered.map(inq => {
         const badgeClass = inq.status === 'pending' ? 'b-pending' : inq.status === 'answered' ? 'b-answered' : 'b-closed';
-        const badgeLabel = inq.status === 'pending' ? '대기중' : inq.status === 'answered' ? '답변완료' : '종료';
+        let badgeLabel = inq.status === 'pending' ? '대기중' : inq.status === 'answered' ? '답변완료' : '종료';
+        if (inq.status === 'answered' && inq.replyReadAt) badgeLabel = '확인완료';
         return `
           <div class="inq-card ${inq.id === selectedId ? 'inq-card--selected' : ''}" data-id="${inq.id}">
             <div class="inq-card__top">
@@ -405,9 +406,12 @@
 
       let replySection = '';
       if (inq.adminReply) {
+        const readStatus = inq.replyReadAt
+          ? `<span style="color:#2b8a3e;font-weight:600;">✓ 읽음 (${formatDate(inq.replyReadAt)})</span>`
+          : `<span style="color:#e67700;font-weight:600;">● 안읽음</span>`;
         replySection = `
           <div class="detail-reply">
-            <div class="detail-reply__label">관리자 답변</div>
+            <div class="detail-reply__label">관리자 답변 ${readStatus}</div>
             <div class="detail-reply__text">${escapeHtml(inq.adminReply)}</div>
             <div class="detail-reply__meta">${inq.adminEmail || ''} · ${formatDate(inq.adminReplyAt)}</div>
           </div>

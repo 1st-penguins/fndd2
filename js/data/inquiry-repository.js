@@ -110,7 +110,8 @@ export async function replyToInquiry(id, replyText) {
     adminReplyAt: serverTimestamp(),
     adminEmail: auth.currentUser?.email || '',
     status: 'answered',
-    updatedAt: serverTimestamp()
+    updatedAt: serverTimestamp(),
+    replyReadAt: null  // 답변 수정 시 읽음 상태 리셋
   });
 }
 
@@ -141,6 +142,21 @@ export async function deleteInquiry(id) {
   await deleteDoc(doc(db, INQUIRIES_COLLECTION, id));
 }
 
+/**
+ * 답변 읽음 처리 (사용자)
+ */
+export async function markReplyAsRead(id) {
+  const { auth, db } = await ensureFirebase();
+  const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+  const user = auth.currentUser;
+  if (!user) return;
+
+  await updateDoc(doc(db, INQUIRIES_COLLECTION, id), {
+    replyReadAt: serverTimestamp()
+  });
+}
+
 export default {
   createInquiry,
   getMyInquiries,
@@ -148,5 +164,6 @@ export default {
   getInquiryById,
   replyToInquiry,
   updateInquiryStatus,
-  deleteInquiry
+  deleteInquiry,
+  markReplyAsRead
 };

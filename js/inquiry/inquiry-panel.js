@@ -227,11 +227,13 @@ async function renderList(body) {
       ${inquiries.map(inq => {
         const status = STATUS_MAP[inq.status] || STATUS_MAP.pending;
         const cat = CATEGORIES.find(c => c.value === inq.category);
+        const unread = inq.adminReply && !inq.replyReadAt;
         return `
-          <div class="inquiry-item" data-id="${inq.id}">
+          <div class="inquiry-item ${unread ? 'inquiry-item--unread' : ''}" data-id="${inq.id}">
             <div class="inquiry-item__top">
               <span class="inquiry-item__category">${cat ? cat.label : inq.category}</span>
               <span class="inquiry-item__status ${status.class}">${status.label}</span>
+              ${unread ? '<span class="inquiry-item__new">NEW</span>' : ''}
             </div>
             <div class="inquiry-item__title">${escapeHtml(inq.title)}</div>
             <div class="inquiry-item__date">${formatDate(inq.createdAt)}</div>
@@ -252,7 +254,7 @@ async function renderList(body) {
   }
 }
 
-function renderDetail(body) {
+async function renderDetail(body) {
   const inq = currentDetail;
   const status = STATUS_MAP[inq.status] || STATUS_MAP.pending;
   const cat = CATEGORIES.find(c => c.value === inq.category);
@@ -266,6 +268,17 @@ function renderDetail(body) {
         <div class="inquiry-detail__reply-date">${formatDate(inq.adminReplyAt)}</div>
       </div>
     `;
+
+    // 답변 읽음 처리
+    if (!inq.replyReadAt) {
+      try {
+        const repo = await getRepo();
+        await repo.markReplyAsRead(inq.id);
+        inq.replyReadAt = new Date();
+      } catch (e) {
+        console.warn('읽음 처리 실패:', e.message);
+      }
+    }
   } else {
     replyHtml = '<div class="inquiry-detail__no-reply">아직 답변이 등록되지 않았습니다.</div>';
   }
