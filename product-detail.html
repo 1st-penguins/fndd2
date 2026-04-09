@@ -244,16 +244,63 @@
       }
     }
 
+    // 상세 이미지 갤러리 매핑 (productId → 폴더명, 이미지 수)
+    const GALLERY_MAP = {
+      video_health:    { folder: '건강체력평가 정규강의', count: 7 },
+      video_calc:      { folder: '계산문제 특별강의', count: 7 },
+      pdf_anatomy:     { folder: '기능해부학 요약본', count: 6 },
+      video_anatomy:   { folder: '기능해부학 정규강의', count: 12 },
+      pdf_patho:       { folder: '병태생리학 요약본', count: 5 },
+      video_patho:     { folder: '병태생리학 정규강의', count: 8 },
+      pdf_psycho:      { folder: '스포츠심리학 요약본', count: 6 },
+      video_ecg:       { folder: '심전도 특별강의', count: 8 },
+      video_load:      { folder: '운동부하검사 정규강의', count: 6 },
+      pdf_injury:      { folder: '운동상해 요약본', count: 4 },
+      video_injury:    { folder: '운동상해 정규강의', count: 7 },
+      pdf_physio:      { folder: '운동생리학 요약본', count: 5 },
+      video_physio:    { folder: '운동생리학 정규강의', count: 6 },
+      video_prescript: { folder: '운동처방론 정규강의', count: 5 },
+      pdf_si2_package: { folder: '2급 생체 7일패키지', count: 10, ext: 'jpg' },
+    };
+
     function renderDetail(product, episodes, bundleProducts, purchased, progressMap = {}, expired = false) {
       const TYPE_LABELS = { video: '강의', pdf: '자료', ppt: '자료', bundle: '패키지', package: '패키지' };
 
       const typeLabel = TYPE_LABELS[product.type] || product.type;
       const badgeClass = `detail-badge--${product.type}`;
 
-      // 썸네일
+      // 갤러리 이미지 생성 (0번 = 기존 카드 썸네일)
+      const gallery = GALLERY_MAP[productId];
+      let galleryImages = [];
+      if (gallery) {
+        const thumbSrc0 = product.thumbnailUrl || product.thumbnail;
+        if (thumbSrc0) galleryImages.push(thumbSrc0);
+        const base = `/images/products/건강운동관리사 썸네일/${gallery.folder}`;
+        const ext = gallery.ext || 'webp';
+        for (let i = 1; i <= gallery.count; i++) {
+          galleryImages.push(`${base}/${i}.${ext}`);
+        }
+      }
+
+      // 썸네일 / 갤러리
       const thumbSrc = product.thumbnailUrl || product.thumbnail;
       let thumbHtml;
-      if (thumbSrc) {
+      if (galleryImages.length > 0) {
+        const thumbItems = galleryImages.map((src, i) =>
+          `<div class="gallery__thumb ${i === 0 ? 'gallery__thumb--active' : ''}" data-index="${i}"><img src="${src}" alt="${i + 1}" loading="lazy"></div>`
+        ).join('');
+        thumbHtml = `
+          <div class="gallery">
+            <div class="gallery__main">
+              <img id="gallery-bg-img" class="gallery__bg" src="${galleryImages[0]}" alt="" aria-hidden="true">
+              <img id="gallery-main-img" class="gallery__img" src="${galleryImages[0]}" alt="${product.title}">
+              <button class="gallery__arrow gallery__arrow--prev" aria-label="이전">&#8249;</button>
+              <button class="gallery__arrow gallery__arrow--next" aria-label="다음">&#8250;</button>
+              <div class="gallery__counter"><span id="gallery-index">1</span> / ${galleryImages.length}</div>
+            </div>
+            <div class="gallery__thumbs">${thumbItems}</div>
+          </div>`;
+      } else if (thumbSrc) {
         thumbHtml = `<img src="${thumbSrc}" alt="${product.title}">`;
       } else {
         thumbHtml = `<div class="detail-thumb__placeholder">${typeLabel}</div>`;
@@ -492,6 +539,79 @@
       // 표시
       document.getElementById('detail-loading').style.display = 'none';
       contentEl.style.display = 'block';
+
+      // 갤러리 이벤트
+      if (galleryImages.length > 0) {
+        let currentIdx = 0;
+        const mainImg = document.getElementById('gallery-main-img');
+        const bgImg = document.getElementById('gallery-bg-img');
+        const indexEl = document.getElementById('gallery-index');
+        const thumbEls = contentEl.querySelectorAll('.gallery__thumb');
+        const thumbsContainer = contentEl.querySelector('.gallery__thumbs');
+
+        function goTo(idx) {
+          if (idx < 0) idx = galleryImages.length - 1;
+          if (idx >= galleryImages.length) idx = 0;
+          currentIdx = idx;
+          mainImg.src = galleryImages[idx];
+          bgImg.src = galleryImages[idx];
+          indexEl.textContent = idx + 1;
+          thumbEls.forEach((t, i) => t.classList.toggle('gallery__thumb--active', i === idx));
+          // 선택된 썸네일이 보이도록 스크롤
+          const activeThumb = thumbEls[idx];
+          if (activeThumb && thumbsContainer) {
+            activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        }
+
+        contentEl.querySelector('.gallery__arrow--prev')?.addEventListener('click', () => goTo(currentIdx - 1));
+        contentEl.querySelector('.gallery__arrow--next')?.addEventListener('click', () => goTo(currentIdx + 1));
+        thumbEls.forEach(t => t.addEventListener('click', () => goTo(parseInt(t.dataset.index))));
+
+        // 터치 스와이프
+        const galleryMain = contentEl.querySelector('.gallery__main');
+        let touchStartX = 0;
+        galleryMain.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+        galleryMain.addEventListener('touchend', (e) => {
+          const diff = touchStartX - e.changedTouches[0].clientX;
+          if (Math.abs(diff) > 40) goTo(currentIdx + (diff > 0 ? 1 : -1));
+        });
+
+        // 키보드
+        galleryMain.tabIndex = 0;
+        galleryMain.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowLeft') goTo(currentIdx - 1);
+          if (e.key === 'ArrowRight') goTo(currentIdx + 1);
+        });
+
+        // 썸네일 스트립: 마우스 휠로 가로 스크롤
+        thumbsContainer.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaY) > 0) {
+            e.preventDefault();
+            thumbsContainer.scrollLeft += e.deltaY;
+          }
+        }, { passive: false });
+
+        // 썸네일 스트립: PC 마우스 드래그
+        let isDragging = false, dragStartX = 0, scrollStart = 0;
+        thumbsContainer.addEventListener('mousedown', (e) => {
+          isDragging = true;
+          dragStartX = e.clientX;
+          scrollStart = thumbsContainer.scrollLeft;
+          thumbsContainer.style.cursor = 'grabbing';
+          e.preventDefault();
+        });
+        window.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          thumbsContainer.scrollLeft = scrollStart - (e.clientX - dragStartX);
+        });
+        window.addEventListener('mouseup', () => {
+          if (isDragging) {
+            isDragging = false;
+            thumbsContainer.style.cursor = '';
+          }
+        });
+      }
 
       // 탭 전환
       contentEl.querySelectorAll('.detail-tabs__btn').forEach(btn => {

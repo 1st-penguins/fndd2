@@ -457,6 +457,157 @@
   display: block;
 }
 
+/* ===== 상품 이미지 갤러리 ===== */
+.gallery {
+  width: 100%;
+  position: relative;
+  user-select: none;
+}
+
+.gallery__main {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f5f5f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(24px) brightness(1.05);
+  transform: scale(1.15);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gallery__img {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  z-index: 1;
+}
+
+.gallery__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #1d1d1f;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.gallery:hover .gallery__arrow,
+.gallery__arrow:focus-visible {
+  opacity: 1;
+}
+
+.gallery__arrow--prev { left: 10px; }
+.gallery__arrow--next { right: 10px; }
+.gallery__arrow:hover { background: #ffffff; }
+
+.gallery__counter {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.gallery__thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.gallery__thumbs::-webkit-scrollbar { display: none; }
+.gallery__thumbs { cursor: grab; }
+.gallery__thumbs:active { cursor: grabbing; }
+
+.gallery__thumb {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  opacity: 0.5;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+
+.gallery__thumb--active {
+  border-color: #1d1d1f;
+  opacity: 1;
+}
+
+.gallery__thumb:hover {
+  opacity: 0.85;
+}
+
+.gallery__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 모바일에서 화살표 항상 표시 */
+@media (max-width: 734px) {
+  .gallery__arrow {
+    opacity: 1;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .gallery__thumb {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+  }
+
+  .gallery__thumbs {
+    gap: 6px;
+    margin-top: 10px;
+  }
+}
+
 .detail-thumb__placeholder {
   width: 100%;
   height: 100%;

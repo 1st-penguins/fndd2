@@ -211,10 +211,42 @@ exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (
       .where("status", "==", "pending")
       .get();
 
-    // 전체 회원 수
-    const usersResult = await admin.auth().listUsers(1);
-    // listUsers는 페이지네이션이라 전체 수를 빠르게 못 가져옴
-    // 대신 attempts의 고유 userId로 활성 사용자 추정
+    // 매출 집계 — 홈페이지 (purchases 컬렉션, status=completed, 리틀리 이전 제외)
+    const allPurchases = await db.collection("purchases")
+      .where("status", "==", "completed")
+      .get();
+
+    let totalHomepageRevenue = 0;
+    let todayHomepageRevenue = 0;
+    let todayPurchaseCount = 0;
+    let todayPurchases = [];
+
+    allPurchases.forEach(doc => {
+      const d = doc.data();
+      if (d.paymentMethod === "리틀리 이전") return;
+      const amount = d.finalAmount || d.purchaseAmount || 0;
+      if (amount <= 0) return;
+      totalHomepageRevenue += amount;
+
+      // 오늘 구매 확인
+      if (d.purchasedAt) {
+        const purchaseDate = d.purchasedAt.toDate();
+        const pKST = new Date(purchaseDate.getTime() + 9 * 60 * 60 * 1000);
+        const pKey = `${pKST.getUTCFullYear()}-${String(pKST.getUTCMonth()+1).padStart(2,"0")}-${String(pKST.getUTCDate()).padStart(2,"0")}`;
+        if (pKey === todayKey) {
+          todayHomepageRevenue += amount;
+          todayPurchaseCount++;
+          todayPurchases.push({
+            name: d.userName || d.userEmail || "알 수 없음",
+            product: d.productId,
+            amount,
+          });
+        }
+      }
+    });
+
+    // 리틀리 누적 정산금 (고정값, 2026-04-09 기준)
+    const littlyTotalRevenue = 22287000;
 
     res.json({
       date: todayKey,
@@ -222,6 +254,14 @@ exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (
       attempts: attemptsSnap.size,
       solvers: uniqueSolvers.size,
       pendingInquiries: pendingSnap.size,
+      revenue: {
+        littlyTotal: littlyTotalRevenue,
+        homepageTotal: totalHomepageRevenue,
+        grandTotal: littlyTotalRevenue + totalHomepageRevenue,
+        todayHomepage: todayHomepageRevenue,
+        todayPurchaseCount,
+        todayPurchases,
+      },
     });
   } catch (err) {
     console.error("일일 통계 오류:", err);

@@ -71,24 +71,50 @@ function dailySummary() {
   var orders = getOrdersInRange(today, today);
   var dateStr = formatDate(today);
 
-  // 사이트 통계 가져오기
+  // 사이트 통계 + 매출 데이터 가져오기
   var statsText = "";
+  var revenueText = "";
+  var cumulativeText = "";
   try {
     var response = UrlFetchApp.fetch(DAILY_STATS_URL);
     var stats = JSON.parse(response.getContentText());
     statsText = "📊 사이트 현황\n" +
       "방문자 : " + stats.visitors + "명\n" +
-      "페이지뷰 : " + stats.pageViews + "회\n" +
       "문제풀이 : " + stats.attempts + "건 (" + stats.solvers + "명)\n" +
       "미답변 문의 : " + stats.pendingInquiries + "건\n\n";
+
+    // 홈페이지 매출 정보
+    if (stats.revenue) {
+      var r = stats.revenue;
+      revenueText = "🏠 홈페이지 오늘 매출\n";
+      if (r.todayPurchaseCount > 0) {
+        revenueText += "주문 " + r.todayPurchaseCount + "건 / " + numberFormat(r.todayHomepage) + "원\n";
+        r.todayPurchases.forEach(function(p, i) {
+          revenueText += (i+1) + ". " + p.product + " — " + numberFormat(p.amount) + "원 (" + p.name + ")\n";
+        });
+      } else {
+        revenueText += "주문 없음\n";
+      }
+      revenueText += "\n";
+
+      cumulativeText = "\n💰 누적 매출 총계\n" +
+        "리틀리 : " + numberFormat(r.littlyTotal) + "원\n" +
+        "홈페이지 : " + numberFormat(r.homepageTotal) + "원\n" +
+        "합계 : " + numberFormat(r.grandTotal) + "원\n";
+    }
   } catch (e) {
     statsText = "📊 사이트 통계를 불러올 수 없습니다.\n\n";
   }
 
+  // 리틀리 오늘 매출
+  var littlyText = "🛒 리틀리 오늘 매출\n";
+  littlyText += formatOrderSummary(orders);
+
   var text = "🧾 " + dateStr + " 일일 리포트\n\n";
   text += statsText;
-  text += "🛒 매출\n";
-  text += formatOrderSummary(orders);
+  text += revenueText;
+  text += littlyText;
+  text += cumulativeText;
 
   // 일요일이면 주간 정산도 같이 발송
   if (today.getDay() === 0) {
@@ -215,6 +241,10 @@ function formatProductBreakdown(orders) {
   });
 
   return text;
+}
+
+function numberFormat(n) {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function formatDate(date) {
