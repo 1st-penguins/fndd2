@@ -67,11 +67,19 @@ exports.onNewReview = functions.region("asia-northeast3")
   .document("reviews/{reviewId}")
   .onCreate(async (snap) => {
     const data = snap.data();
+    // 상품명 조회
+    let productName = data.productId;
+    try {
+      const productDoc = await db.collection("products").doc(data.productId).get();
+      if (productDoc.exists) {
+        productName = productDoc.data().title || productDoc.data().name || data.productId;
+      }
+    } catch (e) { /* fallback to productId */ }
     const stars = "★".repeat(data.rating) + "☆".repeat(5 - data.rating);
     const content = data.content.length > 100 ? data.content.substring(0, 100) + "..." : data.content;
     const images = data.images && data.images.length ? `\n📷 사진 ${data.images.length}장` : "";
     const text = `⭐ *새 후기 등록*\n\n` +
-      `📦 ${data.productId}\n` +
+      `📦 ${productName}\n` +
       `${stars} (${data.rating}점)\n` +
       `👤 ${data.authorRaw || data.author}\n\n` +
       `${content}${images}`;
@@ -824,10 +832,19 @@ exports.tossWebhook = functions.region("asia-northeast3").runWith({ minInstances
 
     console.log(`🚫 결제 취소 처리 완료: ${purchaseDoc.id} (orderId: ${orderId})`);
 
+    // 상품명 조회
+    let cancelProductName = purchaseData.productId;
+    try {
+      const prodDoc = await db.collection("products").doc(purchaseData.productId).get();
+      if (prodDoc.exists) {
+        cancelProductName = prodDoc.data().title || prodDoc.data().name || purchaseData.productId;
+      }
+    } catch (e) { /* fallback to productId */ }
+
     // 텔레그램 알림
     const cancelMsg = `🚫 *결제 취소 알림*\n\n` +
       `👤 ${purchaseData.userName || purchaseData.userEmail || "알 수 없음"}\n` +
-      `📦 ${purchaseData.productId}\n` +
+      `📦 ${cancelProductName}\n` +
       `💰 ${purchaseData.finalAmount?.toLocaleString() || 0}원\n` +
       `📝 사유: ${payment.cancels?.[0]?.cancelReason || "없음"}\n` +
       `🔖 주문번호: ${orderId}`;
