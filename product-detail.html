@@ -144,7 +144,7 @@
     async function loadProductDetail() {
       // 상품 정보와 Firebase 초기화를 동시에 시작
       const [productData, _] = await Promise.all([
-        fetch('/data/products.json?v=20260411b').then(r => r.json()).catch(() => null),
+        fetch('/data/products.json?v=20260411h').then(r => r.json()).catch(() => null),
         ensureAuthReady().catch(() => null)
       ]);
 

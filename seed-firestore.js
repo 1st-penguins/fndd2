@@ -29,7 +29,7 @@ const products = [
     sortOrder: 100,
     bundleFiles: [
       { key: 'si2-social', name: '스포츠사회학 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-social-summary.pdf?alt=media', fileSize: '32.8MB' },
-      { key: 'si2-ethics', name: '스포츠윤리 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-ethics-summary.pdf?alt=media', fileSize: '11.2MB' },
+      { key: 'si2-ethics', name: '스포츠윤리 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-ethics-summary.pdf?alt=media', fileSize: '31.5MB' },
       { key: 'si2-psycho', name: '스포츠심리학 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-psycho-summary.pdf?alt=media', fileSize: '56.7MB' },
       { key: 'si2-history', name: '한국체육사 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-history-summary.pdf?alt=media', fileSize: '43.1MB' },
       { key: 'si2-education', name: '스포츠교육학 요약본', fileUrl: 'https://firebasestorage.googleapis.com/v0/b/first-penguins-new.firebasestorage.app/o/products%2Fsi2-education-summary.pdf?alt=media', fileSize: '10.9MB' }
@@ -64,6 +64,21 @@ const products = [
     totalEpisodes: 1,
     isActive: true,
     sortOrder: 102
+  },
+  {
+    id: 'video_si2_social_free',
+    title: '2급 스포츠지도사 스포츠사회학 무료강의',
+    description: '스포츠사회학 전 범위 무료 강의',
+    type: 'video',
+    category: 'sports',
+    price: 0,
+    originalPrice: null,
+    thumbnailUrl: 'https://img.youtube.com/vi/yn_zusV9b2A/hqdefault.jpg',
+    youtubeId: 'yn_zusV9b2A',
+    isFree: true,
+    totalEpisodes: 1,
+    isActive: true,
+    sortOrder: 104
   },
   {
     id: 'video_si2_edu_free',
@@ -156,8 +171,36 @@ const episodes = [
   { productId: 'health-fitness-eval-lecture', episode: 5, title: '국민체력100', vimeoId: '1174284539', duration: '44:15', sortOrder: 5, isFree: false },
 
   // === 2급 스포츠지도사 ===
-  { productId: 'video_si2_psycho_free', episode: 1, title: '스포츠심리학 전 범위', youtubeId: '6dnkwEAiQFc', duration: '1:49:03', sortOrder: 1, isFree: true },
-  { productId: 'video_si2_history_free', episode: 1, title: '한국체육사 전 범위', youtubeId: '4AFuYvElqH4', duration: '1:08:56', sortOrder: 1, isFree: true },
+  { productId: 'video_si2_social_free', episode: 1, title: '스포츠사회학 전 범위', youtubeId: 'yn_zusV9b2A', duration: '28:54', sortOrder: 1, isFree: true, chapters: [
+    { time: 0,    title: '1 - 스포츠사회학의 이해와 주요 이론' },
+    { time: 235,  title: '2 - 스포츠의 특징·거트만·육성 정책 모형' },
+    { time: 352,  title: '3 - 스포츠와 정치·경제' },
+    { time: 540,  title: '4 - 스포츠와 교육·미디어' },
+    { time: 793,  title: '5 - 스포츠와 사회계층' },
+    { time: 1080, title: '6 - 스포츠와 사회화' },
+    { time: 1297, title: '7 - 스포츠와 일탈' },
+    { time: 1638, title: '8 - 미래사회의 스포츠' }
+  ]},
+  { productId: 'video_si2_psycho_free', episode: 1, title: '스포츠심리학 전 범위', youtubeId: '6dnkwEAiQFc', duration: '1:49:03', sortOrder: 1, isFree: true, chapters: [
+    { time: 0,    title: '1 - 스포츠심리학의 정의와 역사' },
+    { time: 189,  title: '2 - 운동 제어 이론 (폐쇄·개방회로·도식·다이나믹) ⭐' },
+    { time: 604,  title: '3 - 불변/가변 매개변수와 운동 학습 단계' },
+    { time: 2580, title: '4 - 정보 처리 단계' },
+    { time: 3900, title: '5 - 성격과 스포츠' },
+    { time: 5100, title: '6 - 동기 이론 (성취동기·귀인·자기효능감) ⭐' },
+    { time: 5700, title: '7 - 불안과 스트레스 ⭐' },
+    { time: 6369, title: '8 - 스포츠 심리 상담 기술과 윤리' }
+  ]},
+  { productId: 'video_si2_history_free', episode: 1, title: '한국체육사 전 범위', youtubeId: '4AFuYvElqH4', duration: '1:08:56', sortOrder: 1, isFree: true, chapters: [
+    { time: 0,    title: '1 - 체육사의 의미와 선사·부족국가' },
+    { time: 334,  title: '2 - 삼국 시대 (태학·경당·화랑도)' },
+    { time: 1048, title: '3 - 고려 시대의 체육' },
+    { time: 1498, title: '4 - 조선 시대 (무예도보통지·민속놀이)' },
+    { time: 2022, title: '5 - 개화기 (교육입국조서·YMCA) ⭐' },
+    { time: 2907, title: '6 - 일제 강점기 (조선체육회·일장기 말소) ⭐' },
+    { time: 3608, title: '7 - 광복 이후와 현대 체육 정책 ⭐' },
+    { time: 3983, title: '8 - 주요 올림픽 참가 기록' }
+  ]},
   { productId: 'video_si2_edu_free', episode: 1, title: '스포츠교육학 전 범위', youtubeId: '5fhmkuO879Y', duration: '35:48', sortOrder: 1, isFree: true, chapters: [
     { time: 56,   title: '1장 - 스포츠교육의 배경과 개념' },
     { time: 129,  title: '2장 - 스포츠교육의 참여자 이해론' },
