@@ -6,3 +6,5 @@ functions/.env
 .firebase/hosting..cache
 scripts/gmail-to-telegram.gs
 리틀리 주문 - Sheet1.csv
+mail-template-pending.txt
+temp_page5.txt
