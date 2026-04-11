@@ -64,6 +64,22 @@ const products = [
     totalEpisodes: 1,
     isActive: true,
     sortOrder: 102
+  },
+  {
+    id: 'video_si2_edu_free',
+    title: '2급 스포츠지도사 스포츠교육학 무료강의',
+    description: '스포츠교육학 전 범위 무료 강의',
+    type: 'video',
+    category: 'sports',
+    price: 0,
+    originalPrice: null,
+    thumbnailUrl: 'https://img.youtube.com/vi/5fhmkuO879Y/hqdefault.jpg',
+    youtubeId: '5fhmkuO879Y',
+    isFree: true,
+    totalEpisodes: 1,
+    totalDuration: '35분 48초',
+    isActive: true,
+    sortOrder: 103
   }
 ];
 
@@ -142,6 +158,14 @@ const episodes = [
   // === 2급 스포츠지도사 ===
   { productId: 'video_si2_psycho_free', episode: 1, title: '스포츠심리학 전 범위', youtubeId: '6dnkwEAiQFc', duration: '1:49:03', sortOrder: 1, isFree: true },
   { productId: 'video_si2_history_free', episode: 1, title: '한국체육사 전 범위', youtubeId: '4AFuYvElqH4', duration: '1:08:56', sortOrder: 1, isFree: true },
+  { productId: 'video_si2_edu_free', episode: 1, title: '스포츠교육학 전 범위', youtubeId: '5fhmkuO879Y', duration: '35:48', sortOrder: 1, isFree: true, chapters: [
+    { time: 56,   title: '1장 - 스포츠교육의 배경과 개념' },
+    { time: 129,  title: '2장 - 스포츠교육의 참여자 이해론' },
+    { time: 231,  title: '3장 - 스포츠교육의 프로그램론' },
+    { time: 616,  title: '4장 - 스포츠교육의 지도방법 (메츨러 8가지 수업모형) ⭐' },
+    { time: 1875, title: '5장 - 스포츠교육의 평가 ⭐' },
+    { time: 2091, title: '6장 - 스포츠교육자의 전문적 성장' }
+  ]},
 ];
 
 // ──────────────────────────────────────

@@ -623,15 +623,6 @@
           </li>`;
         }).join('');
 
-        // 챕터 클릭 이벤트
-        listEl.querySelectorAll('.play-chapter-item').forEach(item => {
-          item.addEventListener('click', () => {
-            const time = parseInt(item.dataset.time);
-            if (window._ytPlayer && window._ytPlayer.seekTo) {
-              window._ytPlayer.seekTo(time, true);
-            }
-          });
-        });
       }
 
       // 커리큘럼 마지막에 후기 작성 버튼
@@ -643,21 +634,41 @@
           </span>
         </li>`;
 
-      // 클릭 이벤트
-      listEl.querySelectorAll('.play-ep-item').forEach(item => {
-        item.addEventListener('click', () => {
-          if (item.dataset.locked === 'true') {
+      // 클릭 이벤트 — 이벤트 위임 (innerHTML += 로 DOM이 재생성되어도 살아남음)
+      if (!listEl.dataset.delegated) {
+        listEl.dataset.delegated = '1';
+        listEl.addEventListener('click', (e) => {
+          // 챕터 클릭 — YT.Player.seekTo()로 부드럽게 이동
+          const chapterItem = e.target.closest('.play-chapter-item');
+          if (chapterItem) {
+            e.preventDefault();
+            const time = parseInt(chapterItem.dataset.time);
+            if (window._ytPlayer && window._ytPlayerReady && window._ytPlayer.seekTo) {
+              window._ytPlayer.seekTo(time, true);
+              if (window._ytPlayer.playVideo) window._ytPlayer.playVideo();
+            } else {
+              // 플레이어 준비 전이면 onReady에서 처리하도록 예약
+              window._ytPendingSeek = time;
+            }
+            return;
+          }
+
+          // 일반 에피소드 클릭
+          const epItem = e.target.closest('.play-ep-item');
+          if (!epItem || epItem.classList.contains('play-chapter-item')) return;
+          if (epItem.dataset.locked === 'true') {
             alert('이 강의를 시청하려면 구매가 필요합니다.');
             return;
           }
-          const idx = parseInt(item.dataset.index);
+          const idx = parseInt(epItem.dataset.index);
+          if (isNaN(idx)) return;
           if (idx !== currentEpIndex) {
             currentEpIndex = idx;
             playEpisode(idx);
             renderEpisodeList(freeOnly);
           }
         });
-      });
+      }
 
       // 부가 자료 다운로드 (구매자만, 상품별)
       const PRODUCT_DOWNLOADS = {
@@ -736,10 +747,20 @@
 
         function initYTPlayer() {
           if (window._ytPlayer) window._ytPlayer.destroy();
+          window._ytPlayerReady = false;
           window._ytPlayer = new YT.Player('yt-player-container', {
             videoId: ep.youtubeId,
-            playerVars: { rel: 0, modestbranding: 1 },
+            playerVars: { rel: 0, modestbranding: 1, enablejsapi: 1, origin: window.location.origin },
+            host: 'https://www.youtube.com',
             events: {
+              onReady: () => {
+                window._ytPlayerReady = true;
+                if (window._ytPendingSeek != null) {
+                  window._ytPlayer.seekTo(window._ytPendingSeek, true);
+                  window._ytPlayer.playVideo();
+                  window._ytPendingSeek = null;
+                }
+              },
               onStateChange: (event) => {
                 if (event.data === YT.PlayerState.ENDED && !window._reviewPromptShown) {
                   window._reviewPromptShown = true;
