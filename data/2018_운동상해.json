@@ -1,0 +1,297 @@
+[
+  {
+    "id": 1,
+    "questionImage": "images/2018 운동상해/문제 (1).png",
+    "correctAnswer": 2,
+    "tags": [
+      "대전자",
+      "윤활주머니염",
+      "trochanteric bursitis",
+      "Q각",
+      "다리길이",
+      "여성달리기"
+    ],
+    "questionText": "큰돌기(대전자, greater trochanter)의 윤활주머니염(trochanteric bursitis)에 관한 내용으로 옳지 않은 것은?\n① 통증은 무릎까지 전이 될 수 있다.\n② Q-각 증가 또는 다리길이가 불일치 할 경우 발생빈도가 높다.\n③ 주로 엉덩관절 안쪽면에서 통증을 호소한다.\n④ 남자달리기 선수보다 여자달리기 선수에게 많이 발생한다.",
+    "explanation": "이 문제의 정답은 3번입니다. <br/> sol) <br/> ✅ 대전자 윤활주머니염(trochanteric bursitis) <br/> - 엉덩관절 '바깥쪽(외측, lateral)'의 대전자 부위 통증이 특징 <br/> - 장경인대와 대전자 사이 윤활주머니의 염증 <br/> - 통증은 외측 대퇴를 따라 무릎까지 방사되기도 함 <br/> - Q각 증가, 다리길이 차이, 엉덩이 외전근 약화가 위험인자 <br/> - 해부학적으로 여성에게서 발생빈도가 더 높음(골반이 넓어 Q각이 크기 때문) <br/> 💡 안쪽(내측)이 아닌 '바깥쪽'에서 통증이 나타나는 것이 특징이다<br/><br/> 📘 오답 분석 <br/>① 장경인대를 따라 무릎까지 통증이 방사될 수 있으므로 올바른 설명이다. <br/>② Q각 증가와 다리길이 불일치는 장경인대에 비정상적 긴장을 유발하여 윤활주머니염의 발생빈도를 높이므로 올바른 설명이다. <br/>④ 여성은 넓은 골반과 큰 Q각 때문에 장경인대 부하가 커져 여자 달리기 선수에서 더 많이 발생하므로 올바른 설명이다."
+  },
+  {
+    "id": 2,
+    "questionImage": "images/2018 운동상해/문제 (2).png",
+    "correctAnswer": 1,
+    "tags": [
+      "손목굴증후군",
+      "carpal tunnel",
+      "Phalen검사",
+      "Tinel검사",
+      "정중신경"
+    ],
+    "questionText": "손목굴증후군(carpal tunnel syndrome)과 관련된 이학적 검사로 바르게 묶인 것은?\n① 설커스(Sulcus) 검사 − 왓슨(Watson) 검사\n② 팰런(Phalen) 검사 − 티넬(Tinel) 검사\n③ 핀켈스타인(Finkelstein) 검사 − 알렌(Allen) 검사\n④ 예거슨(Yergason) 검사 − 밀그램(Millgram) 검사",
+    "explanation": "이 문제의 정답은 2번입니다. <br/> sol) <br/> ✅ 손목굴증후군(carpal tunnel syndrome) 검사 <br/> 📌 Phalen's test <br/> - 손목을 최대한 굴곡한 자세로 약 60초 유지 <br/> - 정중신경 분포 영역의 저림·통증이 나타나면 양성 <br/> 📌 Tinel's sign <br/> - 손목굴(carpal tunnel) 부위를 가볍게 두드릴 때 정중신경 지배 영역에 저림·통증이 유발되면 양성 <br/> 💡 Phalen과 Tinel이 손목굴증후군의 대표적 이학적 검사이다<br/><br/> 📘 오답 분석 <br/>① Sulcus 검사는 어깨 하방 불안정성 평가, Watson 검사는 손목 주상골-반월골 불안정성 평가로 손목굴증후군과 무관하다. <br/>③ Finkelstein 검사는 De Quervain's 건초염, Allen 검사는 손의 혈류(요골·척골 동맥) 평가로 손목굴증후군 검사가 아니다. <br/>④ Yergason 검사는 이두근 건 불안정성, Millgram 검사는 요추 추간판 병변 평가이므로 손목굴증후군과 무관하다."
+  },
+  {
+    "id": 3,
+    "questionImage": "images/2018 운동상해/문제 (3).png",
+    "correctAnswer": 0,
+    "tags": [
+      "MTSS",
+      "안쪽정강이피로증후군",
+      "과사용손상",
+      "회내",
+      "Ober검사"
+    ],
+    "questionText": "<보기> 중 안쪽정강이피로증후군(medial tibial stress syndrome)에 대한 설명으로 바르게 묶인 것은?\n\n<보기>\n㉠ 과사용 및 반복되는 스트레스로 발생\n㉡ 목말밑관절(거골하관절, subtalar joint)의 과도한 엎침(회내, pronation)이 손상의 위험인자\n㉢ 아킬레스건(Achilles tendon)을 촉진(palpation)하면 통증이 발생\n㉣ 오베르검사(Ober's test)를 이용해 진단\n\n① ㉠, ㉡\n② ㉢, ㉣\n③ ㉠, ㉡, ㉢\n④ ㉡, ㉢, ㉣",
+    "explanation": "이 문제의 정답은 1번입니다. <br/> sol) <br/> ✅ 안쪽정강이피로증후군(MTSS, medial tibial stress syndrome) <br/> - 일명 'shin splints' <br/> - 달리기·점프 등 반복적 충격으로 정강뼈 내측 뼈막에 염증이 발생 <br/> - 위험인자 : 과도한 발의 회내(pronation), 편평발, 훈련량 급증, 경직된 표면 <br/> - 증상 : 정강뼈 '내측 원위 1/3' 부위의 촉진 통증, 운동 시 증상 악화 <br/> - 진단 : 내측 정강뼈를 따라 3 cm 이상의 압통 <br/> 💡 아킬레스건과는 관계가 없으며, Ober's test는 장경인대 단축을 평가하는 검사로 MTSS 진단과 무관<br/><br/> 📘 오답 분석 <br/>② ㉢(아킬레스건 통증)과 ㉣(Ober 검사)은 모두 MTSS 진단과 무관하므로 묶음이 성립하지 않는다. <br/>③ ㉢(아킬레스건 통증)은 MTSS의 증상이 아니므로 포함될 수 없다. <br/>④ ㉢·㉣ 모두 MTSS와 무관하므로 묶음이 성립하지 않는다."
+  },
+  {
+    "id": 4,
+    "questionImage": "images/2018 운동상해/문제 (4).png",
+    "correctAnswer": 2,
+    "tags": [
+      "안쪽곁인대",
+      "MCL",
+      "앞십자인대",
+      "ACL",
+      "반달",
+      "meniscus",
+      "unhappy triad"
+    ],
+    "questionText": "<보기> 중 안쪽곁인대(내측측부인대, medial collateral ligament) 손상 발생 시 손상이 동반될 수 있는 부위로 바르게 묶인 것은?\n\n<보기>\n㉠ 앞십자인대(전방십자인대, anterior cruciate ligament)\n㉡ 가쪽곁인대(외측측부인대, lateral collateral ligament)\n㉢ 무릎힘줄(슬개건, patellar tendon)\n㉣ 반달(반월상연골, meniscus)\n\n① ㉠, ㉡\n② ㉡, ㉢\n③ ㉠, ㉣\n④ ㉡, ㉣",
+    "explanation": "이 문제의 정답은 3번입니다. <br/> sol) <br/> ✅ O'Donoghue's unhappy triad (슬관절 3대 손상) <br/> - 안쪽곁인대(MCL) 손상 <br/> - 앞십자인대(ACL) 손상 <br/> - 안쪽 반달(medial meniscus) 손상 <br/> 📌 발생 기전 : 무릎이 구부러진 상태에서 외반력(valgus force) + 경골 외회전이 가해질 때 발생 <br/> 📌 MCL은 안쪽 반달과 견고하게 연결되어 있어 MCL 손상 시 반달도 함께 찢어지기 쉽고, 동일한 외력으로 ACL까지 파열되는 경우가 많음 <br/> 💡 MCL + ACL + medial meniscus 의 세 가지를 묶음으로 기억<br/><br/> 📘 오답 분석 <br/>① 가쪽곁인대(LCL)는 MCL과 반대 방향에 위치하여 동일 외력으로 동반 손상되지 않는다. <br/>② 무릎힘줄(슬개건)은 MCL 손상의 전형적 동반 손상이 아니며, LCL도 같은 이유로 동반 손상이 아니다. <br/>④ 가쪽곁인대(LCL)는 MCL 손상의 동반 손상이 아니므로 묶음으로 부적절하다."
+  },
+  {
+    "id": 5,
+    "questionImage": "images/2018 운동상해/문제 (5).png",
+    "correctAnswer": 0,
+    "tags": [
+      "자신경",
+      "ulnar nerve",
+      "외반부하",
+      "cubitus valgus",
+      "팔꿈치",
+      "터널증후군"
+    ],
+    "questionText": "반복적인 팔꿈치 바깥굽음(외반, valgus) 부하가 가해지거나 밖굽이 팔꿈치(외반주, cubitus valgus)를 가졌을 경우 가장 손상받기 쉬운 것은?\n① 자신경(척골신경, ulnar nerve)\n② 정중신경(median nerve)\n③ 자동맥(척골동맥, ulnar artery)\n④ 노동맥(요골동맥, radial artery)",
+    "explanation": "이 문제의 정답은 1번입니다. <br/> sol) <br/> ✅ 외반 부하와 자신경 손상 <br/> - 자신경(ulnar nerve)은 팔꿈치 안쪽의 '팔꿈치굴(cubital tunnel)'을 통과 <br/> - 반복적인 외반 부하(던지기 동작 등)나 해부학적 외반주(cubitus valgus)가 있으면 자신경이 견인·압박되어 손상되기 쉬움 <br/> - 증상 : 4·5지의 저림, 손 내재근 약화, 악력 감소 <br/> - 대표 질환 : 투수의 '지연성 척골신경염', 팔꿈치 cubital tunnel syndrome <br/> 💡 팔꿈치 외반 스트레스 = 척골신경 손상을 떠올리자<br/><br/> 📘 오답 분석 <br/>② 정중신경은 팔꿈치 앞쪽 정중앙을 지나 외반 부하의 주된 영향을 받지 않는다. <br/>③ 자동맥(척골동맥)은 주로 손목 부위에서 손상되며 팔꿈치 외반 부하와의 관련성이 낮다. <br/>④ 노동맥(요골동맥) 역시 팔꿈치 외반 부하로 손상되는 대표적 구조가 아니다."
+  },
+  {
+    "id": 6,
+    "questionImage": "images/2018 운동상해/문제 (6).png",
+    "correctAnswer": 2,
+    "tags": [
+      "뇌신경",
+      "cranial nerve",
+      "부신경",
+      "설하신경",
+      "외전신경",
+      "청각신경"
+    ],
+    "questionText": "아이스하키 선수가 상대방 선수와 충돌로 쓰러져 신경학적 검사(neurological examination)를 실시하려고 한다. 검사해야 할 뇌신경(cranial nerve : CN) 중 뇌신경 번호, 신경, 기능이 바르게 묶인 것은?\n\n① CN VI / 갓돌림(외전, abducens) / 후각\n② CN VII / 속귀(전정와우, vestibulocochlear) / 듣기, 균형\n③ CN XI / 더부(부, accessory) / 삼키기, 목빗근(흉쇄유돌근, sternocleidomastoid) 신경지배\n④ CN XII / 혀밑(설하, hypoglossal) / 타액분비, 구역질 반사",
+    "explanation": "이 문제의 정답은 3번입니다. <br/> sol) <br/> ✅ 뇌신경(CN) 기능 정리 <br/> - CN I 후각(olfactory) : 후각 <br/> - CN II 시신경(optic) : 시각 <br/> - CN III 눈돌림(oculomotor) : 안구운동·동공 <br/> - CN IV 도르래(trochlear) : 상사근 <br/> - CN V 삼차(trigeminal) : 얼굴 감각, 저작 <br/> - CN VI 갓돌림(abducens) : '외직근' — 안구 외전 <br/> - CN VII 얼굴(facial) : 얼굴 표정근, 미각(앞 2/3) <br/> - CN VIII 속귀(vestibulocochlear) : 청각·균형 <br/> - CN IX 혀인두(glossopharyngeal) : 미각(뒤 1/3), 연하, 이하선 <br/> - CN X 미주(vagus) : 부교감, 성대, 연하 <br/> - CN XI 더부(accessory) : '목빗근·등세모근 운동 지배' <br/> - CN XII 혀밑(hypoglossal) : 혀 근육 운동 <br/> 💡 CN XI은 승모근과 흉쇄유돌근을 지배한다(옵션 ③이 올바른 짝)<br/><br/> 📘 오답 분석 <br/>① CN VI은 외전신경으로 안구 외전을 담당하며, 후각은 CN I의 기능이다. <br/>② CN VII은 안면신경으로 얼굴 표정근을 담당하며, 청각·균형은 CN VIII의 기능이다. <br/>④ CN XII는 혀의 운동을 담당하는 신경이며, 타액 분비·구역질 반사는 다른 신경들의 기능이다."
+  },
+  {
+    "id": 7,
+    "questionImage": "images/2018 운동상해/문제 (7).png",
+    "correctAnswer": 2,
+    "tags": [
+      "흉곽탈출증후군",
+      "TOS",
+      "팔신경얼기",
+      "빗장밑동맥",
+      "빗장밑정맥"
+    ],
+    "questionText": "<보기> 중 가슴문증후군(흉곽탈출증후군, thoracic outlet compression syndrome)의 발생과 관련된 것으로 바르게 묶인 것은?\n\n<보기>\n㉠ 팔신경얼기(상완신경총, brachial plexus)\n㉡ 견갑밑신경(견갑하신경, subscapular nerve)\n㉢ 빗장밑정맥(쇄골하정맥, subclavian vein)\n㉣ 빗장밑동맥(쇄골하동맥, subclavian artery)\n\n① ㉠, ㉡\n② ㉠, ㉡, ㉢\n③ ㉠, ㉢, ㉣\n④ ㉠, ㉡, ㉢, ㉣",
+    "explanation": "이 문제의 정답은 3번입니다. <br/> sol) <br/> ✅ 흉곽탈출증후군(TOS) <br/> - 빗장뼈·첫 갈비뼈·목갈비근(scalene) 사이의 흉곽 출구에서 신경·혈관이 압박받아 발생 <br/> - 압박 가능 구조 : <br/> &nbsp;&nbsp; 1) 팔신경얼기(brachial plexus) — 가장 흔함(신경성 TOS, ~95%) <br/> &nbsp;&nbsp; 2) 빗장밑동맥(subclavian artery) — 동맥성 TOS <br/> &nbsp;&nbsp; 3) 빗장밑정맥(subclavian vein) — 정맥성 TOS <br/> 💡 견갑밑신경(subscapular n.)은 견갑하근·대원근 지배로 TOS와 무관<br/><br/> 📘 오답 분석 <br/>① 견갑밑신경(㉡)은 TOS와 무관하며, 혈관 성분(㉢, ㉣)이 누락되어 부적절하다. <br/>② 견갑밑신경(㉡)은 TOS와 관련이 없으므로 포함되면 안 된다. <br/>④ 견갑밑신경(㉡)은 TOS와 무관하므로 이를 제외한 ㉠, ㉢, ㉣ 조합이 정답이다."
+  },
+  {
+    "id": 8,
+    "questionImage": "images/2018 운동상해/문제 (8).png",
+    "correctAnswer": 0,
+    "tags": [
+      "통증",
+      "Aδ섬유",
+      "C섬유",
+      "관문조절이론",
+      "VAS",
+      "통증전달"
+    ],
+    "questionText": "<보기> 중 통증에 관한 설명으로 바르게 묶인 것은?\n\n<보기>\n㉠ Aδ 신경섬유는 C 신경섬유보다 통증을 전달하는 속도가 빠르다.\n㉡ 관문조절이론(gate control theory)에 따르면 통증억제는 척수에서 일어난다.\n㉢ Aβ 신경섬유는 피부 통각수용기(nociceptor)로부터 시작된 통증을 빨리 전달한다.\n㉣ 통증의 형태를 알아보기 위해 시각적상사척도(visual analogue scale)를 측정한다.\n\n① ㉠, ㉡\n② ㉠, ㉢\n③ ㉡, ㉢\n④ ㉢, ㉣",
+    "explanation": "이 문제의 정답은 1번입니다. <br/> sol) <br/> ✅ 통증 전달 신경섬유 <br/> - Aδ 섬유 : 가느다란 수초섬유, 5~30 m/s, '빠른 예리한 통증' 전달 <br/> - C 섬유 : 무수초 섬유, 0.5~2 m/s, '둔한 지속적 통증' 전달 <br/> - Aβ 섬유 : 굵은 수초섬유, 촉각·압각·고유수용감각 전달 (통증 X) <br/> ✅ 관문조절이론(Gate control theory, Melzack & Wall) <br/> - 척수 후각에서 Aβ의 활성화가 통증 전달을 '억제' <br/> - TENS, 마사지, 냉찜질의 진통 원리 <br/> ✅ 시각적상사척도(VAS) <br/> - 통증의 '강도'를 0~10 cm 선 위에 표시해 측정(통증 형태가 아닌 강도) <br/> - 통증 형태·질적 특성 평가는 McGill Pain Questionnaire 사용<br/><br/> 📘 오답 분석 <br/>② ㉢(Aβ 섬유가 통증 전달)은 잘못이며, Aβ는 촉각 섬유이다. <br/>③ ㉡은 옳지만 ㉢이 잘못이므로 묶음으로 성립하지 않는다. <br/>④ ㉢과 ㉣ 모두 잘못된 설명으로 묶음이 성립하지 않는다."
+  },
+  {
+    "id": 9,
+    "questionImage": "images/2018 운동상해/문제 (9).png",
+    "correctAnswer": 3,
+    "tags": [
+      "열손상",
+      "열사병",
+      "근육경련",
+      "열실신",
+      "저나트륨혈증",
+      "피클주스"
+    ],
+    "questionText": "다음은 환경적 요인에 의한 질병 및 상해에 관한 표이다. A~D에 들어갈 내용으로 옳지 않은 것은?\n\n| 열손상 | 기준치 | 기전 | 증상 및 징후 | 처치 |\n| 열사병(heatstroke) | | A | | |\n| 근육경련(muscle cramp) | | | | B |\n| 열실신(heat syncope) | | | C | |\n| 저나트륨혈증(hyponatremia) | D | | | |\n\n① A − 인체 체온조절기능 상실\n② B − 피클주스(pickle juice) 섭취\n③ C − 어지러움, 기절, 체온상승, 정신혼란\n④ D − 혈중 나트륨 80 mmol/L 이하",
+    "explanation": "이 문제의 정답은 4번입니다. <br/> sol) <br/> ✅ 저나트륨혈증(hyponatremia) 진단 기준 <br/> - 혈중 나트륨 농도 < 135 mmol/L <br/> - 경증 : 130~134 mmol/L <br/> - 중등도 : 125~129 mmol/L <br/> - 중증 : < 125 mmol/L (신경학적 증상 동반) <br/> 💡 혈중 나트륨 80 mmol/L는 거의 치명적인 수준으로 일반적 진단 기준치로 제시될 수 없다. 저나트륨혈증 기준은 '135 mmol/L 미만'으로 암기<br/><br/> 📘 오답 분석 <br/>① 열사병(heatstroke)의 기전은 인체 체온조절 기능의 실패로 심부 체온이 급격히 상승하는 상태이므로 올바른 설명이다. <br/>② 근육경련 처치로 피클주스 섭취는 나트륨 공급과 반사적 신경 억제를 통해 경련 완화에 효과가 있다는 보고가 있어 인정되는 처치이다. <br/>③ 열실신은 말초혈관 확장과 혈액 저류에 의한 일시적 뇌관류 저하로 어지러움·기절 등이 나타나며, 체온이 일부 상승하고 정신혼란이 동반될 수 있어 제시된 증상에 부합한다."
+  },
+  {
+    "id": 10,
+    "questionImage": "images/2018 운동상해/문제 (10).png",
+    "correctAnswer": 1,
+    "tags": [
+      "만성발목불안정성",
+      "기능적부전",
+      "근력약화",
+      "신경근조절",
+      "기계적부전"
+    ],
+    "questionText": "<보기> 중 만성발목불안정성(chronic ankle instability)의 원인이 되는 기능적 부전(functional insufficiency)의 요소로 바르게 묶인 것은?\n\n<보기>\n㉠ 근력 약화(strength deficits)\n㉡ 윤활 변화(synovial changes)\n㉢ 관절운동형상학적 제한(arthrokinematic restriction)\n㉣ 신경근조절 장애(neuromuscular control impairments)\n\n① ㉠, ㉡\n② ㉠, ㉣\n③ ㉡, ㉢\n④ ㉢, ㉣",
+    "explanation": "이 문제의 정답은 2번입니다. <br/> sol) <br/> ✅ 만성 발목 불안정성(CAI)의 원인 분류 <br/> 📌 기계적 부전(mechanical insufficiency) <br/> - 인대 이완(laxity) <br/> - 관절운동형상학적 제한(arthrokinematic restriction) <br/> - 윤활 변화(synovial changes) <br/> - 퇴행성 변화 <br/> 📌 기능적 부전(functional insufficiency) <br/> - 근력 약화(특히 비골근) <br/> - 고유수용성 감각 저하 <br/> - 자세 조절 저하 <br/> - 신경근조절 장애(neuromuscular control impairment) <br/> 💡 기능적 부전 = 근력·감각·신경근조절 (근육/신경 문제), 기계적 부전 = 관절/인대 구조 문제<br/><br/> 📘 오답 분석 <br/>① ㉡(윤활 변화)은 기계적 부전에 해당한다. <br/>③ ㉡(윤활 변화)과 ㉢(관절운동형상학적 제한) 모두 기계적 부전 요소이다. <br/>④ ㉢(관절운동형상학적 제한)은 기계적 부전 요소이므로 기능적 부전 묶음에 포함될 수 없다."
+  },
+  {
+    "id": 11,
+    "questionImage": "images/2018 운동상해/문제 (11).png",
+    "correctAnswer": 3,
+    "tags": [
+      "번개",
+      "낙뢰",
+      "flash-to-bang",
+      "30/30규칙",
+      "대피방법"
+    ],
+    "questionText": "주변에 대피할 건물이 없는 야외에서 축구시합 중 번개와 천둥이 친다. 위험을 최소화하기 위한 대처방법과 플래시-투-뱅 방법(flash-to-bang method)에 대한 <보기>의 설명으로 바르게 묶인 것은?\n\n<보기>\n㉠ 차가 있다면 차 안으로 대피한다.\n㉡ 신체높이를 최소화 할 수 있도록 지면에 눕는다.\n㉢ 플래시-투-뱅 방법은 소리가 3 km 이동하는데 약 1초가 소요되는 것을 가정한다.\n㉣ 마지막 번개/천둥 이후 30분 동안 번개/천둥이 없다면 시합을 재개할 수 있다.\n\n① ㉠, ㉡\n② ㉡, ㉢\n③ ㉢, ㉣\n④ ㉠, ㉣",
+    "explanation": "이 문제의 정답은 4번입니다. <br/> sol) <br/> ✅ 번개 대처 지침 <br/> - 주변에 대피할 건물이 없다면 '단단한 지붕이 있는 금속 차량' 안으로 대피 (㉠ O) <br/> - 지면에 눕는 것은 오히려 전도 전류 노출 면적을 넓혀 위험 — '낙뢰 웅크림 자세(lightning crouch)'로 발을 모으고 앉아 머리·몸을 낮춤 (㉡ X) <br/> ✅ 30/30 규칙 <br/> - 번개를 본 후 30초 이내에 천둥 소리가 들리면 위험권 → 즉시 대피 <br/> - 마지막 번개/천둥 이후 30분 동안 추가 낙뢰가 없을 때 활동 재개 (㉣ O) <br/> ✅ Flash-to-bang 방법 <br/> - 번개 섬광과 천둥 소리 사이의 시간을 초로 측정 → 5초 = 약 1.6 km 거리 <br/> - 소리는 '1 km 이동에 약 3초' 소요 (공기 중 약 340 m/s) <br/> - '3 km에 1초'는 음속보다 훨씬 빠른 수치로 잘못된 설명 (㉢ X)<br/><br/> 📘 오답 분석 <br/>① ㉡(지면에 눕는다)은 잘못된 대처이므로 묶음에 포함될 수 없다. <br/>② ㉡과 ㉢ 모두 잘못된 설명이다. <br/>③ ㉢(3 km/1초)은 음속과 전혀 맞지 않는 잘못된 수치이다."
+  },
+  {
+    "id": 12,
+    "questionImage": "images/2018 운동상해/문제 (12).png",
+    "correctAnswer": 2,
+    "tags": [
+      "단추구멍변형",
+      "Boutonniere",
+      "central slip",
+      "PIP관절",
+      "DIP관절",
+      "수부손상"
+    ],
+    "questionText": "단추구멍변형(Boutonniere deformity)에 대한 설명으로 옳은 것은?\n① 상대방의 옷을 잡아당기는 동작에서 주로 발생하기 때문에 '저지 핑거(Jersey finger)'라고도 한다.\n② 손상되는 구조는 깊은손가락굽힘근(심지굴근, flexor digitorum profundus)이다.\n③ 먼쪽손가락뼈사이관절(원위지절간관절, distal interphalangeal joint)을 펼(신전, extension) 수 없게 된다.\n④ 몸쪽손가락뼈사이관절(근위지절간관절, proximal interphalangeal joint)을 굽힌(굴곡, flexion) 상태로 고정시킨다.",
+    "explanation": "이 문제의 정답은 3번입니다. <br/> sol) <br/> ✅ 단추구멍변형(Boutonniere deformity) <br/> - 손가락 신전건의 'central slip(중심가닥)' 파열로 발생 <br/> - 양쪽 lateral band가 손바닥 쪽으로 이동하여 PIP 관절 굽힘근처럼 작용 <br/> - 초기 : PIP 신전 제한 <br/> - 진행 : PIP 굽힘 고정 + DIP 과신전 <br/> - lateral band의 볼라 이동으로 정상적인 신전 기능이 파괴되어 먼쪽 지절간관절(DIP)의 능동적 신전 기능에도 장애가 발생할 수 있음 <br/> - 치료 : PIP 관절을 '신전 상태'로 약 6주간 splinting <br/> 💡 Jersey finger와 mallet finger 등 다른 수부 손상과 혼동하지 말 것<br/><br/> 📘 오답 분석 <br/>① 상대방 옷을 잡아당기는 동작에서 발생하는 것은 'Jersey finger'이며 이는 심지굴근(FDP) 파열로 DIP 굽힘 불가가 특징이다. Boutonniere와 다른 손상이다. <br/>② 손상되는 구조는 심지굴근(FDP)이 아니라 신전건의 central slip이다. <br/>④ Boutonniere 치료는 PIP 관절을 굽힘이 아닌 '신전' 상태로 고정하므로 잘못된 설명이다."
+  },
+  {
+    "id": 13,
+    "questionImage": "images/2018 운동상해/문제 (13).png",
+    "correctAnswer": 3,
+    "tags": [
+      "하지손상평가",
+      "젖힌무릎",
+      "장딴지근",
+      "도수근력검사",
+      "바깥굽이엉덩관절",
+      "발뒤꿈치번짐"
+    ],
+    "questionText": "하지 손상평가에 대한 방법 및 결과에 대한 내용으로 옳은 것은?\n① 젖힌무릎(전반슬, genu recurvatum)은 이마면(관상면, frontal plane)에서 평가된다.\n② 장딴지근(비복근, gastrocnemius) 도수근력검사(manual muscle test) 시 근육이 수축하지 않으면 3등급으로 판정한다.\n③ 바깥굽이엉덩관절(외반고, coxa valga)은 넙다리뼈(대퇴골, femur) 경사각(angle of inclination)이 105~125°일 때를 말한다.\n④ 발뒤꿈치 안/가쪽번짐(후족 내/외반, rearfoot in/eversion) 평가를 위해 각도기의 움직이는 팔(movable arm)을 발꿈치뼈(종골, calcaneus)의 중심에 위치시킨다.",
+    "explanation": "이 문제의 정답은 4번입니다. <br/> sol) <br/> ✅ 발뒤꿈치 내/외반 평가 <br/> - 각도기(goniometer)의 고정 팔(stationary arm) : 종아리 중앙선 <br/> - 움직이는 팔(movable arm) : 발꿈치뼈(종골)의 중심선 <br/> - 축(axis) : 아킬레스건과 종골이 만나는 지점 <br/> 💡 움직이는 팔을 '발꿈치뼈 중심'에 맞추는 것이 표준 측정법<br/><br/> 📘 오답 분석 <br/>① 젖힌무릎(genu recurvatum, 과신전 변형)은 이마면이 아니라 '시상면(sagittal plane)'에서 평가된다. <br/>② 장딴지근 도수근력검사에서 근육이 수축하지 않는 경우는 '0등급(Zero, 완전 마비)'이며, 3등급은 중력을 이기고 전 가동범위를 수행할 수 있는 단계이다. <br/>③ 바깥굽이엉덩관절(coxa valga)은 대퇴골 경사각이 '125°(정상) 이상으로 증가한 경우'를 말하며, 105~125°는 정상 범위에 해당한다."
+  },
+  {
+    "id": 14,
+    "questionImage": "images/2018 운동상해/문제 (14).png",
+    "correctAnswer": 1,
+    "tags": [
+      "압력",
+      "타박상",
+      "말초신경손상",
+      "물집",
+      "찢김골절",
+      "손상기전"
+    ],
+    "questionText": "<보기>의 손상 중 압력(compression)이 주요 원인인 것으로 바르게 묶인 것은?\n\n<보기>\n㉠ 발가락 물집(blisters)\n㉡ 허벅지 타박상(contusion)\n㉢ 어깨 말초신경손상(neuropraxia)\n㉣ 엉덩뼈 찢김골절(avulsion fracture)\n\n① ㉠, ㉡\n② ㉡, ㉢\n③ ㉢, ㉣\n④ ㉠, ㉣",
+    "explanation": "이 문제의 정답은 2번입니다. <br/> sol) <br/> ✅ 손상 기전 분류 <br/> 📌 압력(compression) : 직접적인 타격이나 눌림으로 발생 <br/> - 타박상(contusion) : 허벅지 등 근육 타박 <br/> - neuropraxia : 신경이 일시적으로 압박되어 감각·운동 기능 저하 <br/> 📌 마찰(friction) : 피부와 표면의 반복 마찰 <br/> - 물집(blister) <br/> 📌 견인·인장(tension) : 근육·인대가 뼈에서 떨어져 나가는 힘 <br/> - 찢김골절(avulsion fracture) <br/> 💡 ㉡(허벅지 타박상)과 ㉢(어깨 말초신경손상)은 모두 압력 손상<br/><br/> 📘 오답 분석 <br/>① ㉠(발가락 물집)은 마찰 손상이며 압력 손상이 아니다. <br/>③ ㉣(엉덩뼈 찢김골절)은 견인·인장 손상이며 압력 손상이 아니다. <br/>④ ㉠(물집)과 ㉣(찢김골절) 모두 압력 손상이 아니므로 묶음이 성립하지 않는다."
+  },
+  {
+    "id": 15,
+    "questionImage": "images/2018 운동상해/문제 (15).png",
+    "correctAnswer": 2,
+    "tags": [
+      "ROM",
+      "관절가동범위",
+      "end feel",
+      "능동적ROM",
+      "수동적ROM"
+    ],
+    "questionText": "관절가동범위(range of motion : ROM) 평가에 대한 <보기>의 설명으로 바르게 묶인 것은?\n\n<보기>\n㉠ 수동적(passive) ROM 평가 후 능동적(active) ROM을 평가한다.\n㉡ 팔꿈치 완전폄(완전신전, full extension)의 정상적인 관절 끝느낌은 부드러움(soft end feel)이다.\n㉢ 수동적 ROM 평가를 통해 관절 끝느낌(end feel)을 알 수 있다.\n㉣ 능동적 ROM은 수의적인 근수축에 의해 발생되는 움직임을 평가한다.\n\n① ㉠, ㉡\n② ㉡, ㉢\n③ ㉢, ㉣\n④ ㉠, ㉣",
+    "explanation": "이 문제의 정답은 3번입니다. <br/> sol) <br/> ✅ ROM 평가 원칙 <br/> - 평가 순서 : '능동적 ROM → 수동적 ROM' (안전을 위해 환자 스스로 움직이는 것부터 평가) <br/> - 능동적 ROM : 환자의 수의적 근수축에 의한 움직임 평가 (㉣ O) <br/> - 수동적 ROM : 검사자가 수동적으로 움직이며 관절 끝느낌(end feel)을 평가 (㉢ O) <br/> ✅ End feel(관절 끝느낌) <br/> - Hard end feel : 뼈와 뼈가 맞닿는 느낌 (예: '팔꿈치 완전 신전') <br/> - Firm end feel : 인대·관절낭에 의한 단단한 느낌 (예: 팔꿈치 완전 굴곡) <br/> - Soft end feel : 연부조직 압박에 의한 부드러운 느낌 (예: 무릎 완전 굴곡) <br/> 💡 팔꿈치 완전 신전의 정상 end feel은 'hard'이지 'soft'가 아니다<br/><br/> 📘 오답 분석 <br/>① ㉠은 평가 순서가 반대이다. 능동적 ROM을 먼저 평가한 후 수동적 ROM을 평가해야 안전하므로 잘못이다. <br/>② ㉡은 팔꿈치 완전 신전의 end feel을 'soft'라고 잘못 기술하였다. 실제로는 'hard end feel'이다. <br/>④ ㉠(평가 순서 반대)이 잘못되었으므로 묶음에 포함될 수 없다."
+  },
+  {
+    "id": 16,
+    "questionImage": "images/2018 운동상해/문제 (16).png",
+    "correctAnswer": 1,
+    "tags": [
+      "수중재활",
+      "비중",
+      "부력",
+      "체중부하",
+      "ASIS",
+      "수중장비"
+    ],
+    "questionText": "다음 표의 수중재활운동에 관한 각 항목의 설명 중 옳은 것으로 바르게 묶인 것은?\n\n| 항목 | 내용 |\n| 물의 물리적 특성 | ㉠ 비중(specific gravity)은 부력(buoyancy)이라고도 한다. |\n| | ㉡ 체중이 동일하다면 근육량이 많은 사람의 비중이 크다. |\n| 체중부하 | ㉢ 위앞엉덩뼈가시(상전장골극, ASIS)까지 침수 : 약 50% 체중부하 |\n| | ㉣ 일곱째목뼈(제7경추, C7)까지 침수 : 약 33% 체중부하 |\n| 수중장비 | ㉤ 장비는 수중운동 시 동작을 보조하는 역할을 하지만 부하로 작용하기도 한다. |\n\n① ㉠, ㉢\n② ㉡, ㉢, ㉤\n③ ㉠, ㉣\n④ ㉡, ㉣, ㉤",
+    "explanation": "이 문제의 정답은 2번입니다. <br/> sol) <br/> ✅ 물의 물리적 특성 <br/> - 비중(specific gravity) : 물 대비 물질의 밀도 비율 (부력과 다른 개념) <br/> - 부력(buoyancy) : 물에 잠긴 물체가 위로 뜨게 만드는 힘 (아르키메데스 원리) <br/> - 근육량이 많은 사람은 지방이 적어 비중이 '커서' 물에서 덜 뜸 (㉡ O) <br/> ✅ 수중 체중부하 <br/> - ASIS(전상장골극)까지 침수 : 약 50% 체중부하 (㉢ O) <br/> - 검상돌기까지 침수 : 약 33% 체중부하 <br/> - C7(목)까지 침수 : 약 8~10% 체중부하 (㉣ X - 33% 아님) <br/> ✅ 수중 장비 <br/> - 부력 장비는 동작을 보조하지만 반대 방향 움직임에서는 저항(부하)으로 작용 (㉤ O)<br/><br/> 📘 오답 분석 <br/>① ㉠(비중 = 부력)은 잘못된 설명이며, 비중과 부력은 다른 개념이다. <br/>③ ㉠과 ㉣ 모두 잘못된 설명이므로 묶음이 성립하지 않는다. <br/>④ ㉣(C7 침수 시 33% 체중부하)는 잘못된 수치이며, 실제는 약 8~10%이다."
+  },
+  {
+    "id": 17,
+    "questionImage": "images/2018 운동상해/문제 (17).png",
+    "correctAnswer": 3,
+    "tags": [
+      "신장좌상",
+      "kidney contusion",
+      "혈뇨",
+      "태권도",
+      "복부손상",
+      "costovertebral angle"
+    ],
+    "questionText": "<보기>에서 설명하고 있는 가슴 및 복부의 상해로 가장 옳은 것은?\n\n<보기>\n태권도 겨루기 선수인 김씨는 가슴보호대 없이 상대방과 겨루기 연습 중에 등 쪽 부위를 심하게 가격 당했다. 이후 김씨는 메스꺼움(nausea), 구토(vomit), 등근육의 경직, 혈뇨(hematuria)의 증상을 보였으며 통증은 뒤쪽의 갈비척추각(늑골척추각, costovertebral angle)에서 가장 많이 느꼈고 하복부에서 몸통주위로 방사통(referred pain)을 느꼈다.\n\n① 갈비선단증후군(rib tip syndrome)\n② 복장뼈골절(흉골골절, sternum fracture)\n③ 탈장(hernia)\n④ 신장좌상(kidney contusion)",
+    "explanation": "이 문제의 정답은 4번입니다. <br/> sol) <br/> ✅ 신장좌상(kidney contusion)의 임상 양상 <br/> - 기전 : 등·옆구리에 직접 타격을 받아 신장이 갈비뼈 또는 척추에 부딪혀 손상 <br/> - 증상 : <br/> &nbsp;&nbsp; 1) '혈뇨(hematuria)' — 가장 특징적 <br/> &nbsp;&nbsp; 2) 갈비척추각(costovertebral angle) 통증 <br/> &nbsp;&nbsp; 3) 메스꺼움, 구토 <br/> &nbsp;&nbsp; 4) 하복부·옆구리로의 방사통 <br/> &nbsp;&nbsp; 5) 등근육 경직·압통 <br/> - 처치 : 즉시 경기 중단, 의료진 진료, 심한 경우 입원 관찰 <br/> 💡 '등 타격 + 혈뇨 + CVA 통증' → 신장좌상의 전형적 triad<br/><br/> 📘 오답 분석 <br/>① 갈비선단증후군은 하부 갈비뼈 아래쪽의 국소 통증을 특징으로 하며, 혈뇨는 나타나지 않는다. <br/>② 복장뼈골절은 전흉부의 강한 타격으로 발생하며 혈뇨나 CVA 통증을 일으키지 않는다. <br/>③ 탈장은 서혜부·복벽의 장기가 약화된 복벽을 통해 돌출되는 질환으로 혈뇨·CVA 통증은 전형적 증상이 아니다."
+  },
+  {
+    "id": 18,
+    "questionImage": "images/2018 운동상해/문제 (18).png",
+    "correctAnswer": 2,
+    "tags": [
+      "말초신경손상",
+      "뼈되기근육염",
+      "손허리뼈골절",
+      "지연성근통",
+      "DOMS",
+      "mallet finger"
+    ],
+    "questionText": "<보기>는 손상의 설명이다. 옳지 않은 것으로 묶인 것은?\n\n<보기>\n㉠ 말초신경손상(neuropraxia) : 영구적으로 감각이나 움직임 기능이 상실되는 손상이다.\n㉡ 뼈되기근육염(골화근염, myositis ossificans) : 동일한 부분에 반복적인 타박상으로 인해 근육에 칼슘침전물이 생기는 손상이다.\n㉢ 손허리뼈(중수골, metacarpal bone)골절 : 베이스볼 핑거(baseball finger) 또는 바스켓볼 핑거(basketball finger)라고도 불린다.\n㉣ 지연성근통증(delayed onset muscle soreness) : 근섬유 미세조직의 파열로 일어나며 운동 중에 통증이 발생하는 특성을 가진 손상이다.\n\n① ㉠, ㉡\n② ㉢, ㉣\n③ ㉠, ㉢, ㉣\n④ ㉡, ㉢, ㉣",
+    "explanation": "이 문제의 정답은 3번입니다. <br/> sol) <br/> ✅ 손상 용어 정리 <br/> 📌 Neuropraxia (㉠ X) <br/> - 신경 손상의 가장 경미한 형태 (Seddon 분류 1등급) <br/> - '일시적' 감각·운동 기능 저하, 자연 회복 가능 <br/> - 영구적 상실은 neurotmesis(3등급) <br/> 📌 뼈되기근육염 (㉡ O) <br/> - 반복 타박으로 근육 내 이소성 골화 발생, 허벅지·상완이두근에서 흔함 <br/> 📌 Mallet finger (㉢ X) <br/> - 'baseball finger', 'basketball finger'라 불리는 것은 손허리뼈 골절이 아니라 'mallet finger'(말렛 핑거) — DIP 신전건 파열/견열 <br/> 📌 DOMS (㉣ X) <br/> - 근섬유 미세손상으로 발생하지만 '운동 후 24~72시간 후' 통증이 나타남 <br/> - '운동 중 통증'은 DOMS의 특징이 아니다 <br/> 👉🏻 옳지 않은 것 = ㉠, ㉢, ㉣<br/><br/> 📘 오답 분석 <br/>① ㉡(뼈되기근육염)은 올바른 설명이므로 '옳지 않은 것' 묶음에 포함될 수 없다. <br/>② ㉠(neuropraxia 영구 상실)도 잘못된 설명이므로 ②는 ㉠이 누락되어 부적절하다. <br/>④ ㉡(뼈되기근육염)은 올바른 설명이므로 '옳지 않은 것' 묶음에 포함될 수 없다."
+  },
+  {
+    "id": 19,
+    "questionImage": "images/2018 운동상해/문제 (19).png",
+    "correctAnswer": 3,
+    "tags": [
+      "후유증",
+      "징후",
+      "예후",
+      "증상",
+      "평가용어",
+      "sequela"
+    ],
+    "questionText": "평가와 진단에 관한 용어 설명으로 옳은 것은?\n① 후유증(sequela) : 상해(질병)의 원인\n② 징후(sign) : 대상자가 느끼는 주관적인 상태\n③ 예후(prognosis) : 상황에 대한 결정적이고 확실한 객관적 표시\n④ 증상(symptom) : 통증이나 현기증과 같은 상해(질병) 발생 후 나타나는 변화",
+    "explanation": "이 문제의 정답은 4번입니다. <br/> sol) <br/> ✅ 평가·진단 기본 용어 <br/> - 증상(symptom) : 환자가 주관적으로 느끼는 것 (통증, 현기증, 피로감 등) <br/> - 징후(sign) : 검사자가 객관적으로 관찰·측정한 것 (부종, 발적, 가동범위 제한 등) <br/> - 원인(etiology) : 상해·질병의 원인 <br/> - 후유증(sequela) : 상해·질병 후에 남는 병적 상태(결과) <br/> - 예후(prognosis) : 질병의 예상되는 경과와 회복 전망 <br/> - 진단(diagnosis) : 질병을 판별하는 과정 <br/> 💡 '증상 = 주관, 징후 = 객관'으로 기억<br/><br/> 📘 오답 분석 <br/>① 후유증은 상해·질병의 '원인'이 아니라 '결과'로 남는 병적 상태를 의미하므로 잘못이다. <br/>② 주관적인 상태는 '증상(symptom)'이며, 징후는 객관적으로 관찰 가능한 것을 의미한다. <br/>③ 예후는 '확실한 객관적 표시'가 아니라 '예상되는 경과·회복 전망'이며, 확실하고 결정적인 것은 아니다."
+  },
+  {
+    "id": 20,
+    "questionImage": "images/2018 운동상해/문제 (20).png",
+    "correctAnswer": 3,
+    "tags": [
+      "turf toe",
+      "엄지발가락",
+      "MTP관절",
+      "염좌",
+      "인조잔디",
+      "과신전"
+    ],
+    "questionText": "엄지발허리발가락관절(제1중족지관절, 1st metatarsophalangeal joint) 삠(염좌, sprain)에 대한 설명으로 옳지 않은 것은?\n① 잔디발가락(turf toe)으로 불려진다.\n② 천연잔디보다 인조잔디에서 빈번히 발생한다.\n③ 발허리발가락관절의 과다폄(과신전, hyperextension)에 의해 발생한다.\n④ 족저근막염(plantar fasciitis)으로 진행 된다.",
+    "explanation": "이 문제의 정답은 4번입니다. <br/> sol) <br/> ✅ Turf toe(잔디발가락) <br/> - 제1 중족지관절(1st MTP)의 족저측(volar) 인대·관절낭 손상 <br/> - 발가락의 강제적인 '과신전(hyperextension)'으로 발생 <br/> - 인조잔디(유연하고 고정력이 강함) 위에서 달리기·정지 동작 시 발생 빈도 증가 <br/> - 증상 : 제1 MTP 관절의 통증·부종, 체중부하 시 통증 악화 <br/> - 처치 : RICE, 테이핑, 단단한 신발 깔창 사용 <br/> 💡 족저근막염은 족저근막 염증으로 발뒤꿈치 통증이 특징이며, turf toe와는 다른 질환이자 진행 관계가 없다<br/><br/> 📘 오답 분석 <br/>① 제1 MTP 관절 염좌는 '잔디발가락(turf toe)'으로 불리는 전형적인 이름이므로 올바른 설명이다. <br/>② 인조잔디는 천연잔디보다 마찰력이 크고 반발력이 높아 발가락 과신전을 유발하기 쉬워 발생 빈도가 더 높다. <br/>③ 발가락의 과다폄(특히 족저굴곡된 상태에서 강제 신전)이 turf toe의 대표적 기전이므로 올바른 설명이다."
+  }
+]

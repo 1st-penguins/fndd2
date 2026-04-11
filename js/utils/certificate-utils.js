@@ -16,7 +16,7 @@ export const CERT_REGISTRY = {
       session1: ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사'],
       session2: ['운동상해', '기능해부학', '병태생리학', '스포츠심리학']
     },
-    years: [2019, 2020, 2021, 2022, 2023, 2024, 2025],
+    years: [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
     examDuration: 80,
     questionsPerSubject: 20,
     passCriteria: { perSubject: 40, total: 60 }

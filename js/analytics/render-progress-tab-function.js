@@ -14,7 +14,7 @@ const SPORTS1_CATEGORIES = {
 };
 const SPORTS1_SUBJECTS_ALL = [...SPORTS1_CATEGORIES['공통 필수'], ...SPORTS1_CATEGORIES['유형별 고유']];
 
-const HEALTH_YEARS = ['2025', '2024', '2023', '2022', '2021', '2020', '2019'];
+const HEALTH_YEARS = ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'];
 const HEALTH_CATEGORIES = {
   '1교시': ['운동생리학', '건강체력평가', '운동처방론', '운동부하검사'],
   '2교시': ['운동상해', '기능해부학', '병태생리학', '스포츠심리학'],
@@ -332,7 +332,7 @@ export function renderProgressTabStandalone(data) {
   });
 
   // ── HTML 렌더링 ───────────────────────────────────────────────────
-  const years = ['2025', '2024', '2023', '2022', '2021', '2020', '2019'];
+  const years = ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'];
 
   let yearsHtml = '';
   years.forEach(year => {

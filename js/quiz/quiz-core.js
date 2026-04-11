@@ -2310,7 +2310,7 @@ async function findLatestYear(subject) {
   // 확인할 년도 범위 (현재부터 과거)
   const currentYear = new Date().getFullYear();
   const years = [];
-  for (let year = currentYear; year >= 2019; year--) {
+  for (let year = currentYear; year >= 2018; year--) {
     years.push(year);
   }
 
