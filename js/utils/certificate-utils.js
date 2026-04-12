@@ -33,7 +33,7 @@ export const CERT_REGISTRY = {
       session1: ['스포츠사회학', '스포츠윤리', '스포츠심리학', '운동생리학'],
       session2: ['운동역학', '체육측정평가론', '한국체육사', '스포츠교육학']
     },
-    years: [2024, 2025],
+    years: [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
     examDuration: 80,
     questionsPerSubject: 20,
     passCriteria: { perSubject: 40, total: 60 }

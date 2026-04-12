@@ -200,6 +200,7 @@
     }
 
     .year-card {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -217,6 +218,26 @@
     }
 
     .year-card:hover .year-card__name { color: #2B4A78; }
+    .year-card .new-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ff3b30;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+      animation: newPulse 2s ease-in-out infinite;
+      z-index: 1;
+    }
+    @keyframes newPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
     .year-card:hover .year-card__arrow { color: #2B4A78; transform: translateX(4px); }
 
     .year-card__info {
@@ -236,6 +257,26 @@
     .year-card__meta {
       font-size: var(--text-xs);
       color: var(--color-text-tertiary);
+    }
+
+    .year-card .new-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ff3b30;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+      animation: newPulse 2s ease-in-out infinite;
+      z-index: 1;
+    }
+    @keyframes newPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
     }
 
     .year-card__arrow {
@@ -334,6 +375,7 @@
       }
 
       .year-card {
+      position: relative;
         padding: 18px 20px;
       }
 
@@ -405,6 +447,27 @@
         </div>
         <span class="year-card__arrow">&rarr;</span>
       </a>
+      <a href="../exam-new-sports/2020_운동생리학.html?prev=subject&subject=운동생리학" class="year-card" data-new-year data-new-year>
+        <div class="year-card__info">
+          <span class="year-card__name">2020년</span>
+          <span class="year-card__meta">기출문제 &middot; 20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2019_운동생리학.html?prev=subject&subject=운동생리학" class="year-card" data-new-year data-new-year>
+        <div class="year-card__info">
+          <span class="year-card__name">2019년</span>
+          <span class="year-card__meta">기출문제 &middot; 20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
+      <a href="../exam-new-sports/2018_운동생리학.html?prev=subject&subject=운동생리학" class="year-card" data-new-year data-new-year>
+        <div class="year-card__info">
+          <span class="year-card__name">2018년</span>
+          <span class="year-card__meta">기출문제 &middot; 20문항</span>
+        </div>
+        <span class="year-card__arrow">&rarr;</span>
+      </a>
     </div>
   </main>
 
@@ -442,5 +505,19 @@
   </script>
 
 <script src="/js/apple-header.js"></script>
+<script>
+(function() {
+  var EXPIRE = new Date("2026-04-19T00:00:00+09:00");
+  var KEY = "si2_new_badge_seen";
+  if (new Date() >= EXPIRE || localStorage.getItem(KEY)) return;
+  document.querySelectorAll("[data-new-year]").forEach(function(card) {
+    var badge = document.createElement("span");
+    badge.className = "new-badge";
+    badge.textContent = "NEW";
+    card.appendChild(badge);
+    card.addEventListener("click", function() { localStorage.setItem(KEY, "1"); });
+  });
+})();
+</script>
 </body>
 </html>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>2급 스포츠지도사 기출문제 — 퍼스트펭귄</title>
   <link rel="canonical" href="https://the1stpeng.com/si2.html">
-  <meta name="description" content="2급 생활스포츠지도사(생체) 기출문제를 무료로 풀어보세요. 2021~2025년 전 과목(스포츠교육학, 스포츠심리학, 스포츠사회학, 스포츠윤리, 한국체육사 등) 기출, 모의고사, 학습분석까지.">
+  <meta name="description" content="2급 생활스포츠지도사(생체) 기출문제를 무료로 풀어보세요. 2018~2025년 전 과목(스포츠교육학, 스포츠심리학, 스포츠사회학, 스포츠윤리, 한국체육사 등) 기출, 모의고사, 학습분석까지.">
   <meta name="keywords" content="생체,생활체육지도사,2급 스포츠지도사,생활스포츠지도사,생체 기출,생체 기출문제,스포츠교육학,스포츠심리학,스포츠사회학,스포츠윤리,한국체육사,운동생리학,운동역학,퍼스트펭귄,생체 무료,2급 생활스포츠지도사 기출">
   <meta property="og:type" content="website">
   <meta property="og:title" content="2급 스포츠지도사 기출문제 | 퍼스트펭귄">
@@ -42,7 +42,7 @@
     "@context": "https://schema.org",
     "@type": "Course",
     "name": "2급 스포츠지도사 기출문제",
-    "description": "2급 생활스포츠지도사(생체) 기출문제를 무료로 풀어보세요. 2021~2025년 전 과목 기출, 모의고사, 학습분석까지.",
+    "description": "2급 생활스포츠지도사(생체) 기출문제를 무료로 풀어보세요. 2018~2025년 전 과목 기출, 모의고사, 학습분석까지.",
     "provider": {
       "@type": "Organization",
       "name": "퍼스트펭귄",
@@ -228,6 +228,7 @@
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
       transition: all 0.2s ease;
       cursor: pointer;
+      position: relative;
     }
 
     .card:hover {
@@ -269,6 +270,26 @@
       color: #aeaeb2;
       transition: color 0.2s ease, transform 0.2s ease;
       flex-shrink: 0;
+    }
+
+    .card .new-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ff3b30;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+      animation: newPulse 2s ease-in-out infinite;
+      z-index: 1;
+    }
+    @keyframes newPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
     }
 
     /* ── Section Label (교시) ── */
@@ -1398,6 +1419,22 @@
       color: #86868b;
     }
 
+    .year-card .new-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ff3b30;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+      animation: newPulse 2s ease-in-out infinite;
+      z-index: 1;
+    }
+
     .year-card__arrow {
       font-size: 20px;
       color: #aeaeb2;
@@ -1671,6 +1708,27 @@
           </div>
           <span class="card__arrow">→</span>
         </a>
+        <a href="years-sports/year_2020.html" class="card" data-new-year>
+          <div class="card__info">
+            <span class="card__name">2020년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="years-sports/year_2019.html" class="card" data-new-year>
+          <div class="card__info">
+            <span class="card__name">2019년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
+        <a href="years-sports/year_2018.html" class="card" data-new-year>
+          <div class="card__info">
+            <span class="card__name">2018년</span>
+            <span class="card__meta">기출문제</span>
+          </div>
+          <span class="card__arrow">→</span>
+        </a>
       </div>
 
       </div><!-- /quiz-list-view -->
@@ -1741,6 +1799,9 @@
                     <option value="2023">2023</option>
                     <option value="2022">2022</option>
                     <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                    <option value="2019">2019</option>
+                    <option value="2018">2018</option>
                   </select>
                 </div>
                 <div class="filter-buttons-group">
@@ -1940,19 +2001,21 @@
   <script>
 
     // ── 과목 상세 뷰 (SPA 전환) ──
+    const YEARS_ALL = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018];
+    const YEARS_2021 = [2025, 2024, 2023, 2022, 2021];
     const SUBJECTS = {
-      '스포츠사회학': { en: 'Sociology of Sport' },
-      '스포츠교육학': { en: 'Sport Pedagogy' },
-      '스포츠심리학': { en: 'Sport Psychology' },
-      '한국체육사': { en: 'Korean Physical Education History' },
-      '운동생리학': { en: 'Exercise Physiology' },
-      '운동역학': { en: 'Biomechanics' },
-      '스포츠윤리': { en: 'Sport Ethics' },
-      '특수체육론': { en: 'Adapted Physical Education' },
-      '유아체육론': { en: 'Early Childhood PE' },
-      '노인체육론': { en: 'Geriatric PE' }
+      '스포츠사회학': { en: 'Sociology of Sport', years: YEARS_ALL },
+      '스포츠교육학': { en: 'Sport Pedagogy', years: YEARS_ALL },
+      '스포츠심리학': { en: 'Sport Psychology', years: YEARS_ALL },
+      '한국체육사': { en: 'Korean Physical Education History', years: YEARS_ALL },
+      '운동생리학': { en: 'Exercise Physiology', years: YEARS_ALL },
+      '운동역학': { en: 'Biomechanics', years: YEARS_ALL },
+      '스포츠윤리': { en: 'Sport Ethics', years: YEARS_ALL },
+      '특수체육론': { en: 'Adapted Physical Education', years: YEARS_2021 },
+      '유아체육론': { en: 'Early Childhood PE', years: YEARS_2021 },
+      '노인체육론': { en: 'Geriatric PE', years: YEARS_2021 }
     };
-    const YEARS = [2025, 2024, 2023, 2022, 2021];
+    const YEARS = YEARS_ALL;
 
     const listView = document.getElementById('quiz-list-view');
     const detailView = document.getElementById('subject-detail');
@@ -1976,15 +2039,24 @@
       // 연도 카드 생성
       detailTitle.textContent = name;
       detailMeta.textContent = `${info.en} · 20문항`;
-      detailGrid.innerHTML = YEARS.map((y, i) => `
-        <a href="exam-new-sports/${y}_${name}.html?prev=subject&subject=${name}" class="year-card">
+      const subjectYears = info.years || YEARS;
+      var _newYears = [2018, 2019, 2020];
+      var _showNew = new Date() < new Date('2026-04-19T00:00:00+09:00') && !localStorage.getItem('si2_new_badge_seen');
+      detailGrid.innerHTML = subjectYears.map((y, i) => `
+        <a href="exam-new-sports/${y}_${name}.html?prev=subject&subject=${name}" class="year-card" style="position:relative">
           <div class="year-card__info">
             <span class="year-card__name">${y}년</span>
             <span class="year-card__meta">${i === 0 ? '최신 기출문제' : '기출문제'} · 20문항</span>
           </div>
           <span class="year-card__arrow">→</span>
+          ${_showNew && _newYears.includes(y) ? '<span class="new-badge">NEW</span>' : ''}
         </a>
       `).join('');
+      if (_showNew) {
+        detailGrid.querySelectorAll('.year-card').forEach(function(c) {
+          c.addEventListener('click', function() { localStorage.setItem('si2_new_badge_seen', '1'); });
+        });
+      }
 
       // 전환 애니메이션
       listView.classList.add('hiding');
@@ -2353,5 +2425,21 @@
   </script>
 
 <script src="js/apple-header.js"></script>
+<script>
+(function() {
+  var EXPIRE = new Date('2026-04-19T00:00:00+09:00');
+  var KEY = 'si2_new_badge_seen';
+  if (new Date() >= EXPIRE || localStorage.getItem(KEY)) return;
+  document.querySelectorAll('[data-new-year]').forEach(function(card) {
+    var badge = document.createElement('span');
+    badge.className = 'new-badge';
+    badge.textContent = 'NEW';
+    card.appendChild(badge);
+    card.addEventListener('click', function() {
+      localStorage.setItem(KEY, '1');
+    });
+  });
+})();
+</script>
 </body>
 </html>

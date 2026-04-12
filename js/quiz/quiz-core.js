@@ -1708,8 +1708,9 @@ export async function submitQuiz() {
             let certificateType = 'health-manager';  // 기본값
 
             // URL로부터 파일 경로 확인 (sports 폴더면 sports-instructor)
-            if (window.location.pathname.includes('/exam-sports/') ||
-              window.location.pathname.includes('/data-sports/')) {
+            if (window.location.pathname.includes('/exam-new-sports1/')) {
+              certificateType = 'sports-instructor-1';
+            } else if (window.location.pathname.includes('/exam-new-sports/')) {
               certificateType = 'sports-instructor';
             } else if (localStorage.getItem('currentCertificateType')) {
               certificateType = localStorage.getItem('currentCertificateType');
