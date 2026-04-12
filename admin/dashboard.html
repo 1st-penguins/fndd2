@@ -31,6 +31,7 @@
     .tbl{width:100%;border-collapse:collapse}
     .tbl th{text-align:left;padding:10px 12px;font-size:12px;color:#868e96;font-weight:600;border-bottom:2px solid #f1f3f5;white-space:nowrap}
     .tbl td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f1f3f5}
+    .tbl td.sum{display:none}
     .tbl tbody tr:hover{background:#f8f9fa}
     .tbl tbody tr.clickable{cursor:pointer}
     .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
@@ -92,7 +93,26 @@
     .cert-item .cert-name{font-size:13px;font-weight:600;margin-bottom:10px;opacity:.9}
     .cert-item .cert-main{font-size:28px;font-weight:800;margin-bottom:4px}
     .cert-item .cert-sub{font-size:12px;opacity:.8;line-height:1.6}
-    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.cal-wrap{flex-direction:column}.cal-left{flex:unset}.cert-grid{grid-template-columns:1fr}}
+    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.cal-wrap{flex-direction:column}.cal-left{flex:unset;width:100%;max-width:100%}.cal-grid{gap:1px}.cal-day{padding:6px 0;font-size:11px;min-height:42px}.cert-grid{grid-template-columns:1fr}}
+    @media(max-width:640px){
+      .tbl.tbl-mobile thead{display:none}
+      .tbl.tbl-mobile,.tbl.tbl-mobile tbody,.tbl.tbl-mobile tr,.tbl.tbl-mobile td{display:block;width:100%}
+      .tbl.tbl-mobile tr{border:1px solid #f1f3f5;border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff;position:relative;cursor:pointer}
+      .tbl.tbl-mobile tr:hover{background:#f8f9fa}
+      .tbl.tbl-mobile td{border:none;padding:3px 0;font-size:13px;display:flex;justify-content:space-between;gap:10px}
+      .tbl.tbl-mobile td::before{content:attr(data-label);color:#868e96;font-size:12px;font-weight:600;flex-shrink:0}
+      .tbl.tbl-mobile td[data-label="상품명"],.tbl.tbl-mobile td[data-label="이메일"]{word-break:break-all;text-align:right}
+      /* 아코디언: 요약(.sum) 만 기본 표시, 펼치면 전체 */
+      .tbl.tbl-mobile tr.acc td:not(.sum){display:none}
+      .tbl.tbl-mobile tr.acc.open td:not(.sum){display:flex}
+      .tbl.tbl-mobile tr.acc td.sum{padding:2px 0;font-size:14px;font-weight:600;color:#212529}
+      .tbl.tbl-mobile tr.acc td.sum::before{content:none}
+      .tbl.tbl-mobile tr.acc::after{content:'›';position:absolute;right:14px;top:10px;font-size:18px;color:#adb5bd;transition:transform .15s}
+      .tbl.tbl-mobile tr.acc.open::after{transform:rotate(90deg)}
+      .tbl.tbl-mobile tr.acc.open{background:#f8f9fa}
+      .tbl.tbl-mobile tr.acc.open td:not(.sum){padding-top:6px;border-top:1px dashed #e9ecef;margin-top:4px}
+      .tbl.tbl-mobile tr.acc.open td:not(.sum) ~ td:not(.sum){border-top:none;margin-top:0}
+    }
   </style>
 </head>
 <body class="admin-page">
@@ -263,6 +283,7 @@
       'video_calc':'계산문제 특별강의',
       'pdf_si2_package':'2급 7일 완성 합격패키지',
       'video_si2_social_free':'스포츠사회학 무료강의',
+      'video_si2_ethics_free':'스포츠윤리 무료강의',
       'video_si2_psycho_free':'스포츠심리학 무료강의',
       'video_si2_history_free':'한국체육사 무료강의',
       'video_si2_edu_free':'스포츠교육학 무료강의'
@@ -304,6 +325,8 @@
         const amt = p.finalAmount ?? p.purchaseAmount ?? 0;
         const d = p.purchasedAt?.toDate?.();
         if (isCancelledOrRefunded(p)) { refundTotal += amt; return; }
+        if (p.paymentMethod === '리틀리 이전') return;
+        if (amt <= 0) return;
         total += amt;
         salesCount++;
         if (d) {
@@ -313,7 +336,7 @@
           const key = `${d.getMonth()+1}/${d.getDate()}`;
           daily[key] = (daily[key] || 0) + amt;
         }
-        if (amt > 0) productRevenue[p.productId] = (productRevenue[p.productId] || 0) + amt;
+        productRevenue[p.productId] = (productRevenue[p.productId] || 0) + amt;
       });
 
       document.getElementById('sRevenue').textContent = total.toLocaleString() + '원';
@@ -379,28 +402,39 @@
     function renderTable(containerId, data, clickable = false) {
       const el = document.getElementById(containerId);
       if (data.length === 0) { el.innerHTML = '<div class="empty"><span class="icon">📦</span><p>구매 내역이 없습니다.</p></div>'; return; }
-      el.innerHTML = `<div style="overflow-x:auto"><table class="tbl"><thead><tr>
+      el.innerHTML = `<div style="overflow-x:auto"><table class="tbl tbl-mobile"><thead><tr>
         <th>구매일시</th><th>구매자</th><th>상품명</th><th>결제수단</th><th>금액</th><th>상태</th>
       </tr></thead><tbody>
         ${data.map((p, i) => {
           const d = p.purchasedAt?.toDate?.();
           const st = isCancelledOrRefunded(p) ? `<span class="badge b-refund">${p.status === 'cancelled' ? '취소' : '환불'}</span>` : '<span class="badge b-ok">완료</span>';
           const amt = (p.finalAmount ?? p.purchaseAmount ?? 0);
-          return `<tr class="${clickable ? 'clickable' : ''}" ${clickable ? `data-idx="${ALL.indexOf(p)}"` : ''}>
-            <td>${d ? d.toLocaleString('ko-KR') : '-'}</td>
-            <td>${p.userName || p.userEmail || '-'}</td>
-            <td>${PN[p.productId] || p.productId}</td>
-            <td>${p.paymentMethod || '-'}</td>
-            <td>${amt.toLocaleString()}원</td>
-            <td>${st}</td>
+          const name = p.userName || p.userEmail || '-';
+          const prod = PN[p.productId] || p.productId;
+          const summary = `<span style="flex-shrink:0">${name}</span><span style="flex:1;text-align:center;color:#495057;font-weight:500;font-size:12px;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prod}</span><span style="flex-shrink:0;color:#495057;font-weight:600">${amt.toLocaleString()}원</span>`;
+          return `<tr class="acc ${clickable ? 'clickable' : ''}" ${clickable ? `data-idx="${ALL.indexOf(p)}"` : ''}>
+            <td class="sum">${summary}</td>
+            <td data-label="구매일시">${d ? d.toLocaleString('ko-KR') : '-'}</td>
+            <td data-label="구매자">${name}</td>
+            <td data-label="상품명">${prod}</td>
+            <td data-label="결제수단">${p.paymentMethod || '-'}</td>
+            <td data-label="금액">${amt.toLocaleString()}원</td>
+            <td data-label="상태">${st}</td>
           </tr>`;
         }).join('')}
       </tbody></table></div>`;
-      if (clickable) {
-        el.querySelectorAll('tr.clickable').forEach(tr => {
-          tr.addEventListener('click', () => openModal(parseInt(tr.dataset.idx)));
+      el.querySelectorAll('tr.acc').forEach(tr => {
+        tr.addEventListener('click', (e) => {
+          // 모바일: 아코디언 토글
+          if (window.matchMedia('(max-width:640px)').matches) {
+            e.stopPropagation();
+            tr.classList.toggle('open');
+            return;
+          }
+          // 데스크탑: 클릭 가능한 경우 모달
+          if (clickable) openModal(parseInt(tr.dataset.idx));
         });
-      }
+      });
     }
 
     // 필터
@@ -772,9 +806,18 @@
       const el = document.getElementById('visitorList');
       if (!visitors.length) { el.innerHTML = '<div class="empty" style="padding:20px"><span class="icon">👤</span><p>접속자 없음</p></div>'; return; }
       el.innerHTML = `<div style="margin-bottom:8px;font-size:13px;color:#495057;font-weight:600">${visitors.length}명</div>
-        <div style="overflow-x:auto;max-height:300px;overflow-y:auto"><table class="tbl"><thead><tr><th>이름</th><th>이메일</th><th>접속 시간</th></tr></thead><tbody>
-        ${visitors.map(v => `<tr><td>${v.name || '-'}</td><td>${v.email || '-'}</td><td>${v.time ? new Date(v.time).toLocaleTimeString('ko-KR') : '-'}</td></tr>`).join('')}
+        <div style="overflow-x:auto;max-height:300px;overflow-y:auto"><table class="tbl tbl-mobile"><thead><tr><th>이름</th><th>이메일</th><th>접속 시간</th></tr></thead><tbody>
+        ${visitors.map(v => {
+          const time = v.time ? new Date(v.time).toLocaleTimeString('ko-KR') : '-';
+          const name = v.name || '-';
+          return `<tr class="acc"><td class="sum"><span>${name}</span><span style="color:#868e96;font-weight:500;font-size:12px">${time}</span></td><td data-label="이름">${name}</td><td data-label="이메일">${v.email || '-'}</td><td data-label="시간">${time}</td></tr>`;
+        }).join('')}
       </tbody></table></div>`;
+      el.querySelectorAll('tr.acc').forEach(tr => {
+        tr.addEventListener('click', () => {
+          if (window.matchMedia('(max-width:640px)').matches) tr.classList.toggle('open');
+        });
+      });
     }
 
     // ─── CSV 내보내기 ───

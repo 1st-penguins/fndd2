@@ -95,6 +95,22 @@ const products = [
     totalDuration: '35분 48초',
     isActive: true,
     sortOrder: 103
+  },
+  {
+    id: 'video_si2_ethics_free',
+    title: '2급 스포츠지도사 스포츠윤리 무료강의',
+    description: '스포츠윤리 전 범위 무료 강의',
+    type: 'video',
+    category: 'sports',
+    price: 0,
+    originalPrice: null,
+    thumbnailUrl: 'https://img.youtube.com/vi/19ycVk5vKhA/hqdefault.jpg',
+    youtubeId: '19ycVk5vKhA',
+    isFree: true,
+    totalEpisodes: 1,
+    totalDuration: '29분 05초',
+    isActive: true,
+    sortOrder: 105
   }
 ];
 
@@ -171,6 +187,16 @@ const episodes = [
   { productId: 'health-fitness-eval-lecture', episode: 5, title: '국민체력100', vimeoId: '1174284539', duration: '44:15', sortOrder: 5, isFree: false },
 
   // === 2급 스포츠지도사 ===
+  { productId: 'video_si2_ethics_free', episode: 1, title: '스포츠윤리 전 범위', youtubeId: '19ycVk5vKhA', duration: '29:05', sortOrder: 1, isFree: true, chapters: [
+    { time: 0,    title: '1 - 서양 윤리 이론 (공리주의·칸트·덕·배려) ⭐' },
+    { time: 422,  title: '2 - 동양 윤리 사상 (공자·맹자 사단) ⭐' },
+    { time: 581,  title: '3 - 아곤·아레테와 규칙의 유형 ⭐' },
+    { time: 1000, title: '4 - 스포츠 속 불평등 (성차별·인종차별)' },
+    { time: 1197, title: '5 - 테일러의 생태 윤리' },
+    { time: 1273, title: '6 - 스포츠 폭력과 악의 평범성' },
+    { time: 1434, title: '7 - 도핑 (혈액·유전자)' },
+    { time: 1575, title: '8 - 학생선수 인권과 레스트 4구성요소' }
+  ]},
   { productId: 'video_si2_social_free', episode: 1, title: '스포츠사회학 전 범위', youtubeId: 'yn_zusV9b2A', duration: '28:54', sortOrder: 1, isFree: true, chapters: [
     { time: 0,    title: '1 - 스포츠사회학의 이해와 주요 이론' },
     { time: 235,  title: '2 - 스포츠의 특징·거트만·육성 정책 모형' },

@@ -446,5 +446,27 @@
     "totalEpisodes": 1,
     "totalDuration": "35분 48초",
     "isActive": true
+  },
+  "video_si2_ethics_free": {
+    "id": "video_si2_ethics_free",
+    "title": "[2급 스포츠지도사] 스포츠윤리 무료강의",
+    "description": "스포츠윤리 전 범위 무료 강의",
+    "detailDescription": "스포츠윤리,\n이름만 들으면 딱딱하게 느껴지지만\n결국 \"스포츠 안에서 무엇이 옳고 그른가\"를 다루는 과목입니다.\n\n윤리 이론, 동양 사상, 경쟁의 본질, 불평등, 폭력, 도핑…\n범위는 넓고 학자 이름은 많아\n독학으로 준비하면 개념이 뒤섞여 헷갈리기 쉽습니다.\n\n하지만 스포츠윤리는\n출제 포인트가 명확한 과목이기도 합니다.\n핵심 이론과 학자만 정확히 잡으면\n짧은 시간에 점수를 확실히 챙길 수 있습니다.\n\n그래서 퍼스트펭귄이 준비했습니다.\n건강운동관리사, 생체 1급, 생체 2급, CSCS 외 다수의 자격증을 보유한\n국민체육진흥공단 출신 건운사가 직접 알려주는\n스포츠윤리 핵심 무료 강의입니다.\n\n이 강의에서 다루는 내용\n- 1장. 스포츠윤리의 기초와 서양 윤리 이론 (공리주의·칸트·덕 윤리·배려 윤리) ⭐\n- 2장. 동양 윤리 사상 (공자의 인·예·서·정명, 맹자의 사단) ⭐\n- 3장. 아곤과 아레테, 규칙의 유형 (구성적·규제적) ⭐\n- 4장. 스포츠 속 불평등 (성차별·타이틀나인, 아파르트헤이트)\n- 5장. 테일러의 생태 윤리 (불침해·불간섭·성실·보상적 정의)\n- 6장. 스포츠 폭력과 악의 평범성 (한나 아렌트)\n- 7장. 도핑 (혈액 도핑·유전자 도핑과 공정성)\n- 8장. 학생선수 인권과 레스트의 도덕성 4구성요소\n\n⭐ 별표 표시된 부분(1·2·3장)에서 시험문제가 집중 출제됩니다.\n집중적으로 봐주시면 좋을 것 같습니다🐧\n\n이런 분들에게 추천합니다\n- 2급 생활스포츠지도사를 처음 준비하는 분\n- 스포츠윤리 독학이 막막한 분\n- 학자 이름과 이론이 뒤죽박죽 헷갈리는 분\n- 시험 전 빠르게 전체 흐름을 정리하고 싶은 분\n\n극강의 효율로 짧게 공부해서 합격까지 가보시죠🐧\n\n퍼스트펭귄은\n합격에 필요한 공부의 방향을 알려드립니다.\n\n스포츠윤리 공부,\n퍼스트펭귄 무료강의에서 시작하세요.\n\n🎬 퍼스트펭귄 유튜브 채널\nhttps://www.youtube.com/@the1stpeng\n더 많은 무료 강의와 학습 콘텐츠를 확인하세요.\n\n💬 2급 생활스포츠지도사 카카오톡 오픈채팅\nhttps://open.kakao.com/o/ptzXWpki\n수험생들과 함께 정보 공유하고 질문하세요.",
+    "price": 0,
+    "originalPrice": null,
+    "type": "video",
+    "category": "sports",
+    "thumbnail": null,
+    "thumbnailUrl": "https://img.youtube.com/vi/19ycVk5vKhA/hqdefault.jpg",
+    "sortOrder": 105,
+    "fileUrl": null,
+    "fileSize": null,
+    "pages": null,
+    "includedProducts": null,
+    "youtubeId": "19ycVk5vKhA",
+    "isFree": true,
+    "totalEpisodes": 1,
+    "totalDuration": "29분 05초",
+    "isActive": true
   }
 }

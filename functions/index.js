@@ -246,12 +246,32 @@ exports.dailyStats = functions.region("asia-northeast3").https.onRequest(async (
           todayPurchaseCount++;
           todayPurchases.push({
             name: d.userName || d.userEmail || "알 수 없음",
+            productId: d.productId,
             product: d.productId,
             amount,
           });
         }
       }
     });
+
+    // productId → 상품명 매핑 (products 컬렉션 조회)
+    const uniqueProductIds = [...new Set(todayPurchases.map(p => p.productId).filter(Boolean))];
+    if (uniqueProductIds.length > 0) {
+      const productDocs = await Promise.all(
+        uniqueProductIds.map(pid => db.collection("products").doc(pid).get())
+      );
+      const nameMap = {};
+      productDocs.forEach((snap, i) => {
+        if (snap.exists) {
+          const pd = snap.data();
+          nameMap[uniqueProductIds[i]] = pd.title || pd.name || uniqueProductIds[i];
+        }
+      });
+      todayPurchases = todayPurchases.map(p => ({
+        ...p,
+        product: nameMap[p.productId] || p.productId,
+      }));
+    }
 
     // 리틀리 누적 정산금 (고정값, 2026-04-09 기준)
     const littlyTotalRevenue = 22287000;
